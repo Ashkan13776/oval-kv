@@ -1,5 +1,4 @@
-wrote results/figures/pareto_math50_b2048.pdf/.png   21 arms
-memory model: L_REF=3745 tok, exact region 1024 tok, 85 paged pages, 256 B/token/tensor
+wrote results/figures/pareto_math50_b2048.pdf/.png   21 arms   (13 in the exact-key cluster)
 Pareto frontier (achievable arms only):
-  q4key         1445 KiB   70.75%
-  ours          1470 KiB   71.75%
+  q4key           1445 KiB   70.75%
+  ours            1470 KiB   71.75%

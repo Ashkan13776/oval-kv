@@ -187,110 +187,179 @@ def main():
     for p in sorted(achievable, key=lambda z: (z["mem"], -z["acc"])):
         if p["acc"] > best:
             front.append(p); best = p["acc"]
+    fset = {p["tag"] for p in front}
 
-    plt.rcParams.update({"font.size": 14})
-    fig, (axL, axR) = plt.subplots(
-        1, 2, figsize=(16.4, 8.8), gridspec_kw=dict(width_ratios=[1.0, 1.0]))
+    # The exact-key arms sit inside ~50 KiB of one another. No font size
+    # separates thirteen labels in that box, so the box is drawn once and the
+    # arms are named in the ranked panel instead of with thirteen leader lines.
+    CLUST_LO, CLUST_HI = 1860, 1935
+    pile = [p for p in pts.values() if CLUST_LO <= p["mem"] <= CLUST_HI]
+    loose = [p for p in pts.values() if p not in pile]
 
-    # ---------- left: the Pareto structure ----------
+    # RaaS is ~17 points below everything else and would otherwise compress the
+    # live range into the top fifth of the axis; break the axis instead.
+    BRK = 65.0
+    low = [p for p in pts.values() if p["acc"] < BRK]
+    hi_acc = [p["acc"] for p in pts.values() if p["acc"] >= BRK]
+
+    plt.rcParams.update({"font.size": 14, "font.family": "DejaVu Sans"})
+    fig = plt.figure(figsize=(17.0, 9.0))
+    gs = fig.add_gridspec(2, 2, width_ratios=[1.30, 1.0],
+                          height_ratios=[7.0, 1.0] if low else [1, 0.001],
+                          hspace=0.07, wspace=0.26,
+                          left=.055, right=.985, top=.885, bottom=.085)
+    axT = fig.add_subplot(gs[0, 0])
+    axB = fig.add_subplot(gs[1, 0], sharex=axT) if low else None
+    axR = fig.add_subplot(gs[:, 1])
+
     xs = [p["mem"] for p in pts.values()]
-    ys = [p["acc"] for p in pts.values()]
-    xlo, xhi = min(xs) - 210, max(xs) + 230
-    ylo, yhi = min(ys) - 2.5, max(ys) + 2.5
-    axL.set_xlim(xlo, xhi); axL.set_ylim(ylo, yhi)
+    xlo, xhi = min(xs) - 135, max(xs) + 145
+    axT.set_xlim(xlo, xhi)
+    axT.set_ylim(min(hi_acc) - 1.3, max(hi_acc) + 1.5)
+
+    # frontier
     if len(front) > 1:
-        axL.step([p["mem"] for p in front], [p["acc"] for p in front],
-                 where="post", color="#c2410c", lw=2.0, alpha=.45, zorder=2)
-    axL.scatter([p["mem"] for p in front], [p["acc"] for p in front],
-                s=470, facecolors="none", edgecolors="#c2410c", lw=2.3, zorder=8)
-    for p in pts.values():
-        c, mk, sz = STYLE[p["fam"]]
-        axL.scatter(p["mem"], p["acc"], s=sz, c=c, marker=mk, zorder=6,
-                    edgecolors="white", linewidths=1.0)
-    # label only what does NOT sit in the exact-key pile; the pile is named in
-    # full on the right, where there is room for it
-    # every arm that keeps the paged keys exact and is not ours: these all land
-    # within ~90 KiB of each other and cannot be labelled in place
-    pile = [p for p in pts.values() if p["exact"] and p["fam"] != "ours"]
-    # q4key and OVAL Retv.+Comp. are the two frontier points and sit ~20 KiB
-    # apart, so they need opposite sides rather than opposite vertical offsets
-    side = {"q4key": (-15, -9), "ours": (16, 9), "ours_sel": (0, 18),
-            "raas": (14, 0),
-            "tova": (14, 2), "h2o": (14, 0), "snapkv": (14, -2)}
-    for p in pts.values():
-        if p in pile:
-            continue
-        dx, dy = side.get(p["tag"], (0, 16))
-        axL.annotate(p["label"], (p["mem"], p["acc"]), textcoords="offset points",
-                     xytext=(dx, dy),
-                     ha="left" if dx > 0 else ("right" if dx < 0 else "center"),
-                     va="center", fontsize=14,
-                     fontweight="bold" if p["fam"] in ("ours", "ceil") else "normal",
-                     color=STYLE[p["fam"]][0])
+        axT.step([p["mem"] for p in front], [p["acc"] for p in front],
+                 where="post", color="#c2410c", lw=2.4, alpha=.40, zorder=2)
+    axT.scatter([p["mem"] for p in front if p["acc"] >= BRK],
+                [p["acc"] for p in front if p["acc"] >= BRK],
+                s=560, facecolors="none", edgecolors="#c2410c", lw=2.6, zorder=9)
+
+    def draw(ax, group):
+        for p in group:
+            c, mk, sz = STYLE[p["fam"]]
+            ax.scatter(p["mem"], p["acc"], s=sz * 1.5, c=c, marker=mk, zorder=7,
+                       edgecolors="white", linewidths=1.3)
+
+    draw(axT, [p for p in pts.values() if p["acc"] >= BRK])
+
+    # the exact-key cluster: one box, one caption
     if pile:
         px = [p["mem"] for p in pile]; py = [p["acc"] for p in pile]
-        axL.add_patch(mpatches.Rectangle(
-            (min(px) - 34, min(py) - .7), (max(px) - min(px)) + 68,
-            (max(py) - min(py)) + 1.4, fill=False, ec="#94a3b8", lw=1.1,
-            ls=(0, (4, 3)), zorder=7))
-        axL.annotate(f"{len(pile)} methods that keep the keys exact "
-                     f"\u2014 named at right",
-                     xy=(float(np.mean(px)), min(py) - .8), xytext=(0, -13),
-                     textcoords="offset points", ha="center", va="top",
-                     fontsize=13, color="#64748b")
-    axL.set_xlabel("KV memory retained   (KiB per KV head per layer)", fontsize=15.5)
-    axL.set_ylabel("avg@8 accuracy   (%)", fontsize=15.5)
-    axL.tick_params(labelsize=13.5)
-    axL.grid(alpha=.15, lw=.7)
-    for sp in ("top", "right"):
-        axL.spines[sp].set_visible(False)
-    axL.legend(handles=[
-        Line2D([], [], ls="", marker="D", ms=10, color="#c2410c", label="OVAL (ours)"),
-        Line2D([], [], ls="", marker="o", ms=8,  color="#334155", label="retrieval baseline"),
-        Line2D([], [], ls="", marker="v", ms=9,  color="#b45309",
-               label="eviction  (\u2020 no-evict upper bound)"),
-        Line2D([], [], ls="", marker="s", ms=8,  color="#0891b2", label="random control"),
-        Line2D([], [], ls="", marker="*", ms=16, color="#7c3aed", label="oracle ceiling"),
-        Line2D([], [], ls="", marker="P", ms=10, color="#111827", label="dense attention"),
-        Line2D([], [], ls="", marker="o", ms=15, mfc="none", mec="#c2410c", mew=2.2,
-               label="Pareto-optimal"),
-    ], loc="lower right", frameon=False, fontsize=12.5, labelspacing=.72,
-       borderpad=.8, handletextpad=.8)
+        axT.add_patch(mpatches.Rectangle(
+            (min(px) - 34, min(py) - .30), (max(px) - min(px)) + 68,
+            (max(py) - min(py)) + .60,
+            fill=False, ec="#94a3b8", lw=1.3, ls=(0, (5, 4)), zorder=5))
+        axT.annotate(f"{len(pile)} methods that store the keys exactly\n"
+                     f"(all named at right)",
+                     xy=(float(np.mean(px)), min(py) - .55),
+                     xytext=(0, -16), textcoords="offset points",
+                     ha="center", va="top", fontsize=13.5, color="#64748b",
+                     linespacing=1.4)
 
-    # ---------- right: every method, named, with its interval ----------
+    # label only the arms outside the box -- these are well separated
+    OFF = {"ours": (0, 26), "ours_sel": (0, 24), "q4key": (0, -26),
+           "tova": (16, 0), "h2o": (16, 0), "loki": (16, 0),
+           "expatt": (0, 22), "raas": (16, 0)}
+    for p in loose:
+        if p["acc"] < BRK:
+            continue
+        dx, dy = OFF.get(p["tag"], (0, 20))
+        axT.annotate(p["label"], (p["mem"], p["acc"]), textcoords="offset points",
+                     xytext=(dx, dy),
+                     ha="right" if dx < 0 else ("left" if dx > 0 else "center"),
+                     va="center", fontsize=14.5,
+                     fontweight="bold" if p["fam"] == "ours" else "normal",
+                     color=STYLE[p["fam"]][0])
+
+    axT.grid(alpha=.17, lw=.8)
+    axT.set_axisbelow(True)
+    for sp in ("top", "right"):
+        axT.spines[sp].set_visible(False)
+    axT.set_ylabel("avg@8 accuracy   (%)", fontsize=16.5, labelpad=9)
+
+    if axB is not None:
+        draw(axB, low)
+        axB.scatter([p["mem"] for p in front if p["acc"] < BRK],
+                    [p["acc"] for p in front if p["acc"] < BRK],
+                    s=560, facecolors="none", edgecolors="#c2410c", lw=2.6, zorder=9)
+        for p in low:
+            axB.annotate(p["label"], (p["mem"], p["acc"]), textcoords="offset points",
+                         xytext=(16, 0), ha="left", va="center", fontsize=14.5,
+                         color=STYLE[p["fam"]][0])
+        lo_acc = [p["acc"] for p in low]
+        axB.set_ylim(min(lo_acc) - 1.6, max(lo_acc) + 1.6)
+        axB.set_yticks([round(min(lo_acc))])
+        axB.grid(alpha=.17, lw=.8); axB.set_axisbelow(True)
+        for sp in ("top", "right"):
+            axB.spines[sp].set_visible(False)
+        axT.spines["bottom"].set_visible(False)
+        axT.tick_params(labelbottom=False, bottom=False)
+        # break marks
+        kw = dict(marker=[(-1, -.6), (1, .6)], markersize=11, lw=0,
+                  color="#475569", mec="#475569", mew=1.5, clip_on=False)
+        axT.plot([0], [0], transform=axT.transAxes, **kw)
+        axB.plot([0], [1], transform=axB.transAxes, **kw)
+        xax = axB
+    else:
+        xax = axT
+    xax.set_xlabel("KV memory retained   (KiB per KV head per layer)",
+                   fontsize=16.5, labelpad=9)
+    xax.tick_params(labelsize=14)
+    axT.tick_params(labelsize=14)
+
+    # ---------------- right: every arm, ranked, named ----------------
     order = sorted(pts.values(), key=lambda z: z["acc"])
     yy = np.arange(len(order))
+    xr_lo = min(p["acc"] for p in order) - 1.5
+    xr_hi = max(p["acc"] for p in order) + 1.0
+    axR.set_xlim(xr_lo, xr_hi)
     for y, p in zip(yy, order):
         c = STYLE[p["fam"]][0]
-        axR.plot([min(z["acc"] for z in order) - 1.2, p["acc"]], [y, y],
-                 color=c, lw=1.0, alpha=.18, zorder=1)
-        axR.scatter(p["acc"], y, s=STYLE[p["fam"]][2] * .9, c=c,
+        axR.plot([xr_lo, p["acc"]], [y, y], color=c, lw=1.2, alpha=.20, zorder=1)
+        axR.scatter(p["acc"], y, s=STYLE[p["fam"]][2] * 1.25, c=c,
                     marker=STYLE[p["fam"]][1], zorder=3,
-                    edgecolors="white", linewidths=.9)
+                    edgecolors="white", linewidths=1.0)
+        axR.annotate(f"{p['acc']:.2f}", (p["acc"], y), textcoords="offset points",
+                     xytext=(13, 0), ha="left", va="center", fontsize=12.5,
+                     color="#475569",
+                     fontweight="bold" if p["fam"] == "ours" else "normal")
     axR.set_yticks(yy)
-    axR.set_yticklabels([p["label"] for p in order], fontsize=14)
+    axR.set_yticklabels([p["label"] + ("  ★" if p["tag"] in fset else "")
+                         for p in order], fontsize=14.5)
     for t, p in zip(axR.get_yticklabels(), order):
         t.set_color(STYLE[p["fam"]][0])
-        if p["fam"] in ("ours", "ceil"):
+        if p["fam"] == "ours":
             t.set_fontweight("bold")
     axR.set_ylim(-.8, len(order) - .2)
-    axR.set_xlabel("avg@8 accuracy   (%)", fontsize=15.5)
-    axR.tick_params(axis="x", labelsize=13.5)
+    axR.set_xlabel("avg@8 accuracy   (%)", fontsize=16.5, labelpad=9)
+    axR.tick_params(axis="x", labelsize=14)
     axR.tick_params(axis="y", length=0)
-    axR.grid(axis="x", alpha=.15, lw=.7)
+    axR.grid(axis="x", alpha=.17, lw=.8); axR.set_axisbelow(True)
     for sp in ("top", "right", "left"):
         axR.spines[sp].set_visible(False)
 
-    fig.tight_layout(w_pad=2.2)
+    # ---------------- one legend strip across the top ----------------
+    handles = [
+        Line2D([], [], ls="", marker="D", ms=12, color="#c2410c",
+               mec="white", mew=1.2, label="OVAL (ours)"),
+        Line2D([], [], ls="", marker="o", ms=10, color="#334155",
+               mec="white", mew=1.2, label="retrieval baseline"),
+        Line2D([], [], ls="", marker="v", ms=11, color="#b45309",
+               mec="white", mew=1.2, label="eviction   († upper bound)"),
+        Line2D([], [], ls="", marker="s", ms=10, color="#0891b2",
+               mec="white", mew=1.2, label="random control"),
+        Line2D([], [], ls="", marker="*", ms=18, color="#7c3aed",
+               mec="white", mew=1.0, label="oracle ceiling"),
+        Line2D([], [], ls="", marker="P", ms=12, color="#111827",
+               mec="white", mew=1.2, label="dense attention"),
+        Line2D([], [], ls="", marker="o", ms=17, mfc="none", mec="#c2410c",
+               mew=2.4, label="Pareto-optimal  ★"),
+    ]
+    fig.legend(handles=handles, loc="upper center", bbox_to_anchor=(.5, .99),
+               ncol=7, frameon=False, fontsize=13.5,
+               columnspacing=1.5, handletextpad=.6)
+
     os.makedirs(os.path.dirname(f"{a.root}/{a.out}"), exist_ok=True)
     for ext in ("pdf", "png"):
-        fig.savefig(f"{a.root}/{a.out}.{ext}", dpi=200, bbox_inches="tight")
-    print(f"wrote {a.out}.pdf/.png   {len(pts)} arms")
-    print(f"memory model: L_REF={L_REF} tok, exact region {N_EXACT} tok, "
-          f"{N_PAGED} paged pages, {TOK} B/token/tensor")
+        fig.savefig(f"{a.root}/{a.out}.{ext}", dpi=200, bbox_inches="tight",
+                    facecolor="white")
+    print(f"wrote {a.out}.pdf/.png   {len(pts)} arms   "
+          f"({len(pile)} in the exact-key cluster)")
     print("Pareto frontier (achievable arms only):")
     for p in front:
-        print(f"  {p['tag']:<10}{p['mem']:8.0f} KiB{p['acc']:8.2f}%")
+        print(f"  {p['tag']:<12}{p['mem']:8.0f} KiB{p['acc']:8.2f}%")
+
 
 if __name__ == "__main__":
     main()
