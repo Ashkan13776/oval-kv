@@ -28,7 +28,7 @@ for E in "${ETAS:-0.0 0.5 0.75 1.0}"; do :; done
 ETAS="${ETAS:-0.0 0.5 0.75 1.0}"
 
 for E in $ETAS; do
-  OUT="eval/LongBench2/results/qwen-2.5-chat-14b-spec_ret-s128-r128-1.00-manual-p32-b1792-avgSM-oab_r8_eta${E}_q0-pQ2-llb0-pQcs0.8-skl1.jsonl"
+  OUT="eval/LongBench2/results/qwen-2.5-chat-14b-spec_ret-s128-r128-1.00-manual-p32-b1792-avgSM-oval_r8_eta${E}_q0-pQ2-llb0-pQcs0.8-skl1.jsonl"
   n=$([ -f "$OUT" ] && grep -c . "$OUT" || echo 0)
   if [ "$n" -ge 503 ]; then
     echo "=== LB2SWEEP eta=$E SKIP (already $n records)"

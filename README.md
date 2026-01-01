@@ -58,3 +58,54 @@ python analysis/plot_acc_vs_latency.py
 
 `analysis/all_tables.py` scores from the raw prediction files every time, so
 the tables cannot drift from a stale summary.
+
+## Results
+
+Accuracy tables: [`results/accuracy_tables.txt`](results/accuracy_tables.txt);
+machine-readable under `results/longbench2_accuracy/` and
+`results/longgenbench_accuracy/`. Raw generations (293 MB for LongGenBench) are
+not committed -- regenerate with `scripts/`, then `analysis/score_accuracy.py`.
+
+Settings are the FreeKV paper's: page size 32, B = 2048, S = W = 128 / tau = 0.8
+(LongBench v2, greedy, inputs truncated to 64K) and S = W = 512 / tau = 0.9
+(LongGenBench, temperature 0.95, top-p 0.95, 16K generation). Baseline columns
+are that paper's reported numbers, not our reruns.
+
+### LongBench v2 -- Overall (503 questions)
+
+| model | eta=0 | 0.25 | 0.5 | 0.75 | 1.0 | FullKV | FreeKV | best baseline |
+|---|---|---|---|---|---|---|---|---|
+| Llama-3.1-8B | 29.42 | 29.42 | 29.82 | 29.82 | 29.82 | 29.22 | 29.22 | 28.63 |
+| Qwen-2.5-7B | 27.63 | 28.03 | 27.63 | 28.03 | 28.03 | 27.44 | 26.84 | 27.63 |
+
+The gain concentrates in the **long** bucket: Llama 25.00-25.93 vs 23.15 dense;
+Qwen 25.93 at every eta vs 20.37 dense. The **medium** bucket is slightly weaker
+than dense on both, so this is a trade toward long contexts, not a uniform win.
+
+### LongGenBench -- CR x Acc (400 prompts, 16K generation)
+
+| model | eta=0 | 0.25 | 0.5 | 0.75 | 1.0 | FullKV | FreeKV |
+|---|---|---|---|---|---|---|---|
+| Llama-3.1-8B | 27.24 | 27.26 | 27.23 | 27.28 | 28.50 | 26.82 | 27.62 |
+| Qwen-2.5-7B | 32.38 | 31.91 | 31.86 | 31.57 | 32.28 | 31.09 | 32.81 |
+| Qwen-2.5-14B | 28.61 | 27.68 | 26.94 | 28.64 | 27.30 | 29.35 | 29.39 |
+
+### On eta
+
+`eta` is inert. Across five benchmark families -- InfiniteBench (66 cells),
+reasoning (36 cells), LongBench v2 (10), LongGenBench CR and CR x Acc (15 each)
+-- the spread over `eta` in {0, 0.25, 0.5, 0.75, 1} never exceeds ~2.9 points
+and shows no monotone trend. Since `eta = 0` is plain key PCA, the rank-`r`
+page basis is what carries the result; the output-aware tilt is not supported
+by any measurement here. We report it because it is the hypothesis we set out
+to test.
+
+### Scope
+
+OVAL replaces the page *digest* used for selection. The retrieved pages are
+attended with their **original** keys, so this buys retrieval quality, not
+cache compression -- in the accuracy harness the full KV stays resident and the
+bases are added on top. Using the rank-8 basis to *approximate* attention
+instead costs 20.1% relative error in the attention output (it captures 76% of
+centred-key energy), while the same basis retains 99.6% of true top-32
+attention mass for ranking: a good index, a poor codec.
