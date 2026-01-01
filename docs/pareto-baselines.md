@@ -248,3 +248,33 @@ RaaS evicts for real, so it is plotted at eviction memory with no dagger.
 Pyramid is not a competing scorer at all. It is a budget schedule that could
 be layered onto any arm in the table; it appears once, on Quest, and should be
 read as "Quest + PyramidKV allocation", not as an independent method.
+
+
+## The figure
+
+`analysis/plot_pareto.py` -> `results/figures/pareto_math50_b2048.{pdf,png}`.
+
+Scope: only arms that decide what to keep from a budget. Fixed-window arms
+(StreamingLLM, sliding window) and the PyramidKV schedule are excluded -- the
+windows make no selection at all, and a schedule is orthogonal and layerable
+onto any scorer here. Their results stay on disk and in `analysis/front.py`.
+
+Two panels, because no single panel can do both jobs. Fifteen arms keep the
+keys exact and therefore sit inside 110 KiB of each other; labelling them in
+place either overlaps or needs leader lines fanning across the plot (both were
+tried). So the left panel carries the Pareto structure with the pile boxed and
+left unlabelled, and the right panel names every arm against its paired
+interval.
+
+**The frontier is a single point: 4-bit quantised keys, 1155 KiB, 72.75%.**
+It has the lowest memory of any achievable arm and the highest accuracy, so it
+dominates everything plotted, OVAL included (1182 KiB, 71.75%). Scalar
+quantisation of the keys beats a rank-8 basis on both axes at this budget.
+That is the honest reading and the figure is built to show it rather than
+bury it.
+
+It should be read against the tie band: 21 of 23 arms, both oracles among
+them, are statistically indistinguishable from FreeKV, so "q4key dominates"
+means it has the best point estimate in a cluster where almost nothing
+separates -- not that it is reliably better. The separable findings remain the
+arms below the band.

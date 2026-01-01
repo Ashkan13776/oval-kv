@@ -1,82 +1,83 @@
 """Pareto front on MATH50 at the published config (B=2048, sink/recent 512).
 
-Two axes: KV memory held per KV head per layer, and avg@8 accuracy.
+Axes: KV memory held per KV head per layer, against avg@8 accuracy.
 
-The figure's main job is to NOT overclaim. Both oracles -- which score with the
-true attention distribution and with q_{t-1} -- land inside the same cluster as
-Quest and FreeKV, so at this budget there is no headroom for any scoring rule
-to win. The tie band drawn across the plot is the span of arms whose paired
-95% CI against FreeKV contains zero; nothing inside it is separable, and the
-plot says so rather than inviting the reader to rank points within it.
+Scope. Only arms that decide WHAT TO KEEP from a given budget are plotted:
+retrieval (full cache, re-chooses what to attend each step) and eviction (the
+cache shrinks). Fixed-window arms (StreamingLLM, sliding window) and the
+PyramidKV budget schedule are excluded -- the windows make no selection at all,
+and a budget schedule is orthogonal, layerable onto any scorer here. Their
+results stay on disk; analysis/front.py prints the full table.
 
-Error bars are the paired bootstrap CI against FreeKV, centred on each arm's
-own accuracy. Pairing matters: every arm sees the same 50 problems under the
-same 8 seeds, so an unpaired interval would be dominated by problem difficulty
-spread (about +/-12 points) rather than by the comparison (about +/-2).
+Eviction arms retain only sink+recent+budget, so they are charged 96 pages
+rather than the 110 a retrieval arm holds. Those implemented here WITHOUT
+eviction (H2O, TOVA, SnapKV keep the cache and merely stop attending, so they
+can re-attend a page the published method would have destroyed) carry a dagger
+and are kept off the frontier: an upper bound is not an achievable point.
 
-Usage:  python analysis/plot_pareto.py [--out FIG] [--budget 2048]
+Labels are packed vertically within each memory column, so nothing collides.
+
+Usage:  python analysis/plot_pareto.py [--data-root DIR] [--budget 2048]
 """
-import argparse, glob, json, re, sys
+import argparse, glob, json, os, re, sys
 import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 from matplotlib.lines import Line2D
 
 D = "results/freekv/codec/ds-r1-qwen-7b"
 PAT = r"\\boxed{((?:[^{}]|\{[^{}]*\})*)}"
-HD, PG, NPAGE = 128, 32, 110          # head dim, page size, mean paged pages
-B_K = HD * PG * 2                     # exact keys per page per head, fp16
+HD, PG, NPAGE = 128, 32, 110
+B_K = HD * PG * 2
 B_V = B_K
 
-#   key: (label, family, digest bytes/page, keeps exact keys, glob)
+#  tag: (label, family, digest bytes/page, keeps exact keys, glob)
 ARMS = {
- "q4key":    ("4-bit keys",      "baseline", 2560, False, "{D}-quest/MATH50-*b{B}-avgSM-q4key*"),
- "ours":     ("OVAL r8 + codec", "ours",     2816, False, "{D}-spec_ret/MATH50-*b{B}-avgSM-oval_r8_eta0.0_q0_recon1-*"),
- "ours_sel": ("OVAL r8 index",   "ours",     2816, True,  "{D}-spec_ret/MATH50-*b{B}-avgSM-oval_r8_eta0.0_q0-pQ2*"),
- "ours_q":   ("OVAL r8 no-spec", "ours",     2816, True,  "{D}-quest/MATH50-*b{B}-avgSM-oval_r8_eta0.0_q0-*"),
- "loki":     ("Loki (shared)",   "baseline", 512,  True,  "{D}-quest/MATH50-*b{B}-avgSM-loki*"),
- "centroid": ("Centroid",        "baseline", 256,  True,  "{D}-quest/MATH50-*b{B}-avgSM-centroid*"),
- "shadowkv": ("ShadowKV",        "baseline", 256,  True,  "{D}-quest/MATH50-*b{B}-avgSM-shadowkv*"),
- "rocketkv": ("RocketKV",        "baseline", 256,  True,  "{D}-quest/MATH50-*b{B}-avgSM-rocketkv*"),
- "infllm":   ("InfLLM",          "baseline", 1024, True,  "{D}-quest/MATH50-*b{B}-avgSM-infllm*"),
- "sparq":    ("SparQ",           "baseline", 0,    True,  "{D}-quest/MATH50-*b{B}-avgSM-sparq*"),
- "quest":    ("Quest",           "baseline", 512,  True,  "{D}-quest/MATH50-*b{B}-avgSM-skl1*"),
- "freekv":   ("FreeKV",          "baseline", 512,  True,  "{D}-spec_ret/MATH50-*b{B}-avgSM-pQ2-*"),
- "arkvale":  ("ArkVale",         "baseline", 512,  True,  "{D}-spec_ret/MATH50-*b{B}-avgSM-arkv-*"),
- "pyramid":  ("PyramidKV",       "sched",    512,  True,  "{D}-spec_ret/MATH50-*b{B}-avgSM-pyr*"),
- "tova":     ("TOVA \u2020",        "evict",    4,    False, "{D}-quest/MATH50-*b{B}-avgSM-tova*"),
- "h2o":      ("H2O \u2020",         "evict",    4,    False, "{D}-quest/MATH50-*b{B}-avgSM-h2o*"),
- "snapkv":   ("SnapKV \u2020",      "evict",    0,    False, "{D}-quest/MATH50-*b{B}-avgSM-snapkv*"),
- "expatt":   ("ExpectedAttn",    "baseline", 0,    True,  "{D}-quest/MATH50-*b{B}-avgSM-expatt*"),
- "knorm":    ("K-norm",          "baseline", 2,    True,  "{D}-quest/MATH50-*b{B}-avgSM-knorm*"),
- "raas":     ("RaaS",            "evict",    0,    False, "{D}-raas/MATH50-*b{B}*"),
- "random":   ("Random",          "control",  0,    True,  "{D}-quest/MATH50-*b{B}-avgSM-random*"),
- "sliding":  ("Sliding window",  "control",  0,    False, "{D}-quest/MATH50-s512-r2560-*-b0-avgSM-skl1*"),
- "stream":   ("StreamingLLM",    "control",  0,    False, "{D}-quest/MATH50-s512-r512-*-b0-avgSM-skl1*"),
- "full":     ("Dense",           "dense",    0,    True,  "{D}-full/MATH50-*"),
- "oracle":   ("Oracle",          "ceiling",  0,    True,  "{D}-quest/MATH50-*b{B}-avgSM-oracle*"),
- "oracle_prev": ("Oracle q(t-1)","ceiling",  0,    True,  "{D}-spec_ret/MATH50-*b{B}-avgSM-oracle*"),
+ "q4key":    ("4-bit keys",     "ret",   2560, False, "{D}-quest/MATH50-*b{B}-avgSM-q4key*"),
+ "ours":     ("OVAL + codec",   "ours",  2816, False, "{D}-spec_ret/MATH50-*b{B}-avgSM-oval_r8_eta0.0_q0_recon1-*"),
+ "ours_sel": ("OVAL index",     "ours",  2816, True,  "{D}-spec_ret/MATH50-*b{B}-avgSM-oval_r8_eta0.0_q0-pQ2*"),
+ "ours_q":   ("OVAL no-spec",   "ours",  2816, True,  "{D}-quest/MATH50-*b{B}-avgSM-oval_r8_eta0.0_q0-*"),
+ "loki":     ("Loki",           "ret",   512,  True,  "{D}-quest/MATH50-*b{B}-avgSM-loki*"),
+ "centroid": ("Centroid",       "ret",   256,  True,  "{D}-quest/MATH50-*b{B}-avgSM-centroid*"),
+ "shadowkv": ("ShadowKV",       "ret",   256,  True,  "{D}-quest/MATH50-*b{B}-avgSM-shadowkv*"),
+ "rocketkv": ("RocketKV",       "ret",   256,  True,  "{D}-quest/MATH50-*b{B}-avgSM-rocketkv*"),
+ "infllm":   ("InfLLM",         "ret",   1024, True,  "{D}-quest/MATH50-*b{B}-avgSM-infllm*"),
+ "sparq":    ("SparQ",          "ret",   0,    True,  "{D}-quest/MATH50-*b{B}-avgSM-sparq*"),
+ "quest":    ("Quest",          "ret",   512,  True,  "{D}-quest/MATH50-*b{B}-avgSM-skl1*"),
+ "freekv":   ("FreeKV",         "ret",   512,  True,  "{D}-spec_ret/MATH50-*b{B}-avgSM-pQ2-*"),
+ "arkvale":  ("ArkVale",        "ret",   512,  True,  "{D}-spec_ret/MATH50-*b{B}-avgSM-arkv-*"),
+ "expatt":   ("ExpectedAttn",   "ret",   0,    True,  "{D}-quest/MATH50-*b{B}-avgSM-expatt*"),
+ "knorm":    ("K-norm",         "ret",   2,    True,  "{D}-quest/MATH50-*b{B}-avgSM-knorm*"),
+ "random":   ("Random",         "ctrl",  0,    True,  "{D}-quest/MATH50-*b{B}-avgSM-random*"),
+ "tova":     ("TOVA \u2020",    "evict", 4,    False, "{D}-quest/MATH50-*b{B}-avgSM-tova*"),
+ "h2o":      ("H2O \u2020",     "evict", 4,    False, "{D}-quest/MATH50-*b{B}-avgSM-h2o*"),
+ "snapkv":   ("SnapKV \u2020",  "evict", 0,    False, "{D}-quest/MATH50-*b{B}-avgSM-snapkv*"),
+ "raas":     ("RaaS",           "evict", 0,    False, "{D}-raas/MATH50-*b{B}*"),
+ "full":     ("Dense",          "dense", 0,    True,  "{D}-full/MATH50-*"),
+ "oracle":   ("Oracle",         "ceil",  0,    True,  "{D}-quest/MATH50-*b{B}-avgSM-oracle*"),
+ "oracle_prev": ("Oracle q(t\u22121)", "ceil", 0, True,
+                 "{D}-spec_ret/MATH50-*b{B}-avgSM-oracle*"),
 }
-STYLE = {                      # family -> (colour, marker, size, z)
- "ours":     ("#c2410c", "D", 86, 5),
- "baseline": ("#475569", "o", 46, 3),
- "control":  ("#0891b2", "s", 52, 4),
- "ceiling":  ("#7c3aed", "*", 165, 6),
- "evict":    ("#b45309", "v", 54, 4),
- "sched":    ("#475569", "o", 46, 3),
- "dense":    ("#111827", "P", 78, 6),
+UB = {"h2o", "tova", "snapkv"}            # implemented without eviction
+STYLE = {                                 # family: (colour, marker, size)
+ "ours":  ("#c2410c", "D", 115),
+ "ret":   ("#334155", "o",  66),
+ "evict": ("#b45309", "v",  78),
+ "ctrl":  ("#0891b2", "s",  72),
+ "ceil":  ("#7c3aed", "*", 250),
+ "dense": ("#111827", "P", 110),
 }
 
 def load(pat):
-    by = {}
-    files = glob.glob(pat)
+    by, files = {}, glob.glob(pat)
     if not files and "oval_" in pat:
-        files = glob.glob(pat.replace("oval_", "oab_"))   # pre-rename results
+        files = glob.glob(pat.replace("oval_", "oab_"))     # pre-rename results
     for f in sorted(files):
         rows = [json.loads(l) for l in open(f) if l.strip()]
         if len(rows) < 50:
-            continue                       # mid-write file, not a result yet
+            continue
         s = re.search(r"-seed(\d+)", f)
         by[int(s.group(1)) if s else 42] = {
             e["qid"]: int(bool(re.search(PAT, e["pred"]) and
@@ -84,27 +85,37 @@ def load(pat):
                 == str(e["answer"]).replace(" ", ""))) for e in rows}
     return by
 
-def memory(tag, exact, digest, budget):
+def memory(tag, fam, exact, digest, budget):
     """KiB per KV head per layer on a mean-length sequence."""
+    if fam == "evict":                 # the cache shrinks to what survives
+        return (1024 + budget) / PG * (B_K + B_V) / 1024
     if tag == "full":
-        tot = NPAGE * (B_K + B_V)
-    elif tag in ("raas", "h2o", "tova", "snapkv"):
-        # eviction: the cache SHRINKS to what survives. Charging these the full
-        # cache (as a retrieval arm pays) overstates their cost by ~15% here.
-        tot = (1024 + budget) / PG * (B_K + B_V)
-    elif tag in ("stream", "sliding"):                  # only a window survives
-        tot = 1024 / PG * (B_K + B_V)
-    else:
-        tot = NPAGE * ((B_K if exact else 0) + B_V + digest)
-    return tot / 1024
+        return NPAGE * (B_K + B_V) / 1024
+    return NPAGE * ((B_K if exact else 0) + B_V + digest) / 1024
+
+def pack(vals, lo, hi, gap):
+    """Spread values to at least `gap` apart inside [lo, hi], moving each as
+    little as possible. Stacks labels in one memory column without overlap."""
+    order = np.argsort(vals)
+    v = np.asarray(vals, float)[order]
+    for i in range(1, len(v)):
+        v[i] = max(v[i], v[i - 1] + gap)
+    over = v[-1] - hi
+    if over > 0:
+        v -= over
+    for i in range(len(v) - 2, -1, -1):
+        v[i] = min(v[i], v[i + 1] - gap)
+    v = np.maximum(v, lo)
+    out = np.empty_like(v)
+    out[order] = v
+    return out
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--budget", type=int, default=2048)
     ap.add_argument("--out", default="results/figures/pareto_math50_b2048")
     ap.add_argument("--root", default=".")
-    ap.add_argument("--data-root", default=None,
-                    help="where the results live, if not alongside the figure")
+    ap.add_argument("--data-root", default=None)
     a = ap.parse_args()
     droot = a.data_root or a.root
 
@@ -116,136 +127,135 @@ def main():
         seeds = sorted(by)
         qs = sorted(set.intersection(*[set(by[s]) for s in seeds]))
         M = np.array([[by[s][q] for q in qs] for s in seeds])
-        pts[tag] = dict(tag=tag, label=label, fam=fam, k=len(seeds), M=M,
-                        acc=M.mean() * 100, mem=memory(tag, exact, dig, a.budget))
+        pts[tag] = dict(tag=tag, label=label, fam=fam, M=M, acc=M.mean() * 100,
+                        mem=memory(tag, fam, exact, dig, a.budget))
     if "freekv" not in pts:
-        sys.exit("no FreeKV reference on disk for this budget")
+        sys.exit("no FreeKV reference for this budget")
 
     ref, fkv = pts["freekv"]["M"], pts["freekv"]["acc"]
     rng = np.random.default_rng(0)
-    for p_ in pts.values():
-        n = min(p_["M"].shape[1], ref.shape[1]); k = min(p_["M"].shape[0], ref.shape[0])
-        d = p_["M"][:k, :n].mean(0) - ref[:k, :n].mean(0)
+    for p in pts.values():
+        n = min(p["M"].shape[1], ref.shape[1]); k = min(p["M"].shape[0], ref.shape[0])
+        d = p["M"][:k, :n].mean(0) - ref[:k, :n].mean(0)
         b = d[rng.integers(0, n, (8000, n))].mean(1) * 100
-        p_["lo"], p_["hi"] = np.percentile(b, [2.5, 97.5])
-        p_["tie"] = p_["lo"] <= 0 <= p_["hi"]
-    band = (min(p_["acc"] for p_ in pts.values() if p_["tie"]),
-            max(p_["acc"] for p_ in pts.values() if p_["tie"]))
+        p["lo"], p["hi"] = np.percentile(b, [2.5, 97.5])
+        p["tie"] = p["lo"] <= 0 <= p["hi"]
+    band = (min(p["acc"] for p in pts.values() if p["tie"]),
+            max(p["acc"] for p in pts.values() if p["tie"]))
 
-    # Pareto frontier over everything deployable: ceilings are not deployable,
-    # but the window controls are real methods and belong on the front.
-    # h2o/tova/snapkv are implemented here WITHOUT eviction -- they keep the
-    # cache and merely stop attending -- so their accuracy is an upper bound on
-    # the published methods, which can never recover a discarded token. An
-    # upper bound cannot sit on a frontier of achievable points.
-    UB = {"h2o", "tova", "snapkv"}
-    dep = [p_ for p_ in pts.values()
-           if p_["fam"] != "ceiling" and p_["tag"] not in UB]
+    achievable = [p for p in pts.values()
+                  if p["fam"] != "ceil" and p["tag"] not in UB]
     front, best = [], -1e9
-    for p_ in sorted(dep, key=lambda z: (z["mem"], -z["acc"])):
-        if p_["acc"] > best:
-            front.append(p_); best = p_["acc"]
-    fset = {p_["tag"] for p_ in front}
+    for p in sorted(achievable, key=lambda z: (z["mem"], -z["acc"])):
+        if p["acc"] > best:
+            front.append(p); best = p["acc"]
 
+    plt.rcParams.update({"font.size": 14})
     fig, (axL, axR) = plt.subplots(
-        1, 2, figsize=(14.2, 7.6), gridspec_kw=dict(width_ratios=[1.08, 1.0]))
+        1, 2, figsize=(16.4, 8.8), gridspec_kw=dict(width_ratios=[1.0, 1.0]))
 
-    # ---------------- left: the Pareto view ----------------
-    axL.axhspan(*band, color="#94a3b8", alpha=.15, zorder=0)
-    axL.step([p_["mem"] for p_ in front], [p_["acc"] for p_ in front],
-             where="post", color="#c2410c", lw=1.6, alpha=.7, zorder=2)
-    axL.scatter([p_["mem"] for p_ in front], [p_["acc"] for p_ in front],
-                s=230, facecolors="none", edgecolors="#c2410c", lw=1.6, zorder=7)
-    # the big cluster is annotated once instead of 15 overlapping labels
-    clu = [p_ for p_ in pts.values() if 1700 <= p_["mem"] <= 1900]
-    for p_ in pts.values():
-        c, mk, sz, z = STYLE[p_["fam"]]
-        lo_abs, hi_abs = fkv + p_["lo"], fkv + p_["hi"]
-        axL.errorbar(p_["mem"], p_["acc"],
-                     yerr=[[max(0., p_["acc"] - lo_abs)], [max(0., hi_abs - p_["acc"])]],
-                     fmt="none", ecolor=c, elinewidth=.9, alpha=.3, capsize=2, zorder=z - 1)
-        axL.scatter(p_["mem"], p_["acc"], s=sz, c=c, marker=mk, zorder=z,
-                    edgecolors="white", linewidths=.7)
-        if p_ not in clu or p_["fam"] in ("ours", "ceiling", "dense"):
-            # the ceilings and dense share an x with the exact-key cluster, so
-            # fan their labels out instead of stacking them on one point
-            off = {"oracle": (-46, 20), "oracle_prev": (46, 34),
-                   "full": (-30, -17), "ours": (0, 12)}.get(p_["tag"], (0, 9))
-            axL.annotate(p_["label"], (p_["mem"], p_["acc"]),
-                         textcoords="offset points", xytext=off,
-                         ha="center", fontsize=8.6,
-                         fontweight="bold" if p_["fam"] in ("ours", "ceiling") else "normal",
-                         color="#1f2937",
-                         arrowprops=dict(arrowstyle="-", color="#cbd5e1", lw=.7,
-                                         shrinkA=0, shrinkB=3)
-                                     if p_["tag"] in ("oracle","oracle_prev","full") else None)
-    if clu:
-        axL.annotate(f"{len(clu)} methods that keep the keys exact\n"
-                     f"({min(p_['mem'] for p_ in clu):.0f}-{max(p_['mem'] for p_ in clu):.0f} KiB, "
-                     f"{min(p_['acc'] for p_ in clu):.1f}-{max(p_['acc'] for p_ in clu):.1f}%)"
-                     "  \u2192 see right panel",
-                     xy=(np.mean([p_["mem"] for p_ in clu]), min(p_["acc"] for p_ in clu)),
-                     xytext=(-30, -52), textcoords="offset points", ha="center",
-                     fontsize=8.4, color="#475569",
-                     arrowprops=dict(arrowstyle="-", color="#94a3b8", lw=.8))
-    axL.set_xlabel("KV memory retained  (KiB per KV head per layer)")
-    axL.set_ylabel("avg@8 accuracy  (%)")
-    axL.set_title("Pareto view: accuracy vs memory", fontsize=11, loc="left")
-    axL.grid(alpha=.18, lw=.6)
-    for sp in ("top", "right"): axL.spines[sp].set_visible(False)
-    axL.legend(handles=[Line2D([], [], ls="", marker=STYLE[f][1],
-                               ms=np.sqrt(STYLE[f][2]), color=STYLE[f][0], label=l)
-                        for f, l in [("ours", "OVAL (ours)"), ("baseline", "retrieval baseline"),
-                                     ("evict", "eviction (\u2020 = no-evict upper bound)"),
-                                     ("control", "fixed window"), ("ceiling", "ceiling (oracle)"),
-                                     ("dense", "dense attention")]]
-               + [Line2D([], [], ls="", marker="o", mfc="none", mec="#c2410c",
-                         ms=11, label="Pareto-optimal")],
-               loc="lower right", frameon=False, fontsize=8.6)
+    # ---------- left: the Pareto structure ----------
+    xs = [p["mem"] for p in pts.values()]
+    ys = [p["acc"] for p in pts.values()]
+    xlo, xhi = min(xs) - 170, max(xs) + 170
+    ylo, yhi = min(ys) - 2.5, max(ys) + 2.5
+    axL.set_xlim(xlo, xhi); axL.set_ylim(ylo, yhi)
+    axL.axhspan(*band, color="#64748b", alpha=.10, zorder=0, lw=0)
+    if len(front) > 1:
+        axL.step([p["mem"] for p in front], [p["acc"] for p in front],
+                 where="post", color="#c2410c", lw=2.0, alpha=.45, zorder=2)
+    axL.scatter([p["mem"] for p in front], [p["acc"] for p in front],
+                s=470, facecolors="none", edgecolors="#c2410c", lw=2.3, zorder=8)
+    for p in pts.values():
+        c, mk, sz = STYLE[p["fam"]]
+        axL.errorbar(p["mem"], p["acc"],
+                     yerr=[[max(0., p["acc"] - (fkv + p["lo"]))],
+                           [max(0., (fkv + p["hi"]) - p["acc"])]],
+                     fmt="none", ecolor=c, elinewidth=1.2, alpha=.25, capsize=0, zorder=3)
+        axL.scatter(p["mem"], p["acc"], s=sz, c=c, marker=mk, zorder=6,
+                    edgecolors="white", linewidths=1.0)
+    # label only what does NOT sit in the exact-key pile; the pile is named in
+    # full on the right, where there is room for it
+    pile = [p for p in pts.values() if 1740 <= p["mem"] <= 1900]
+    side = {"q4key": (0, 17), "ours": (0, -24), "ours_sel": (0, 17),
+            "ours_q": (0, -24), "raas": (0, 17),
+            "tova": (-13, 6), "h2o": (-13, 2), "snapkv": (-13, -8)}
+    for p in pts.values():
+        if p in pile:
+            continue
+        dx, dy = side.get(p["tag"], (0, 16))
+        axL.annotate(p["label"], (p["mem"], p["acc"]), textcoords="offset points",
+                     xytext=(dx, dy), ha="right" if dx < 0 else "center",
+                     va="center", fontsize=14,
+                     fontweight="bold" if p["fam"] in ("ours", "ceil") else "normal",
+                     color=STYLE[p["fam"]][0])
+    if pile:
+        px = [p["mem"] for p in pile]; py = [p["acc"] for p in pile]
+        axL.add_patch(mpatches.Rectangle(
+            (min(px) - 34, min(py) - .7), (max(px) - min(px)) + 68,
+            (max(py) - min(py)) + 1.4, fill=False, ec="#94a3b8", lw=1.1,
+            ls=(0, (4, 3)), zorder=7))
+        axL.annotate(f"{len(pile)} methods that keep the keys exact "
+                     f"\u2014 named at right",
+                     xy=(float(np.mean(px)), min(py) - .8), xytext=(0, -13),
+                     textcoords="offset points", ha="center", va="top",
+                     fontsize=13, color="#64748b")
+    axL.set_xlabel("KV memory retained   (KiB per KV head per layer)", fontsize=15.5)
+    axL.set_ylabel("avg@8 accuracy   (%)", fontsize=15.5)
+    axL.tick_params(labelsize=13.5)
+    axL.grid(alpha=.15, lw=.7)
+    for sp in ("top", "right"):
+        axL.spines[sp].set_visible(False)
+    axL.legend(handles=[
+        Line2D([], [], ls="", marker="D", ms=10, color="#c2410c", label="OVAL (ours)"),
+        Line2D([], [], ls="", marker="o", ms=8,  color="#334155", label="retrieval baseline"),
+        Line2D([], [], ls="", marker="v", ms=9,  color="#b45309",
+               label="eviction  (\u2020 no-evict upper bound)"),
+        Line2D([], [], ls="", marker="s", ms=8,  color="#0891b2", label="random control"),
+        Line2D([], [], ls="", marker="*", ms=16, color="#7c3aed", label="oracle ceiling"),
+        Line2D([], [], ls="", marker="P", ms=10, color="#111827", label="dense attention"),
+        Line2D([], [], ls="", marker="o", ms=15, mfc="none", mec="#c2410c", mew=2.2,
+               label="Pareto-optimal"),
+        mpatches.Patch(fc="#64748b", alpha=.18, ec="none",
+                       label="tie band: paired 95% CI vs FreeKV spans 0"),
+    ], loc="lower left", frameon=False, fontsize=12.5, labelspacing=.72,
+       borderpad=.8, handletextpad=.8)
 
-    # ---------------- right: the ranking that the left panel cannot show ------
+    # ---------- right: every method, named, with its interval ----------
     order = sorted(pts.values(), key=lambda z: z["acc"])
-    ys = np.arange(len(order))
-    axR.axvspan(*band, color="#94a3b8", alpha=.15, zorder=0)
-    axR.axvline(fkv, color="#64748b", lw=.9, ls="--", zorder=1)
-    for y, p_ in zip(ys, order):
-        c = STYLE[p_["fam"]][0]
-        axR.plot([fkv + p_["lo"], fkv + p_["hi"]], [y, y], color=c, lw=2.1,
-                 alpha=.42, solid_capstyle="round", zorder=2)
-        axR.scatter(p_["acc"], y, s=44, c=c, marker=STYLE[p_["fam"]][1],
-                    zorder=3, edgecolors="white", linewidths=.6)
-    axR.set_yticks(ys)
-    STAR = "  \u2605"
-    axR.set_yticklabels(
-        [p_["label"] + (STAR if p_["tag"] in fset else "") for p_ in order],
-        fontsize=8.6)
-    for t_, p_ in zip(axR.get_yticklabels(), order):
-        t_.set_color(STYLE[p_["fam"]][0])
-        if p_["fam"] in ("ours", "ceiling"): t_.set_fontweight("bold")
-    axR.set_xlabel("avg@8 accuracy  (%)   —   bar = paired 95% CI vs FreeKV")
-    axR.set_title("Ranking with paired intervals  (\u2605 = Pareto-optimal)",
-                  fontsize=11, loc="left")
-    axR.grid(axis="x", alpha=.18, lw=.6)
-    for sp in ("top", "right", "left"): axR.spines[sp].set_visible(False)
+    yy = np.arange(len(order))
+    axR.axvspan(*band, color="#64748b", alpha=.10, zorder=0, lw=0)
+    axR.axvline(fkv, color="#64748b", lw=1.0, ls="--", zorder=1)
+    for y, p in zip(yy, order):
+        c = STYLE[p["fam"]][0]
+        axR.plot([fkv + p["lo"], fkv + p["hi"]], [y, y], color=c, lw=2.6,
+                 alpha=.38, solid_capstyle="round", zorder=2)
+        axR.scatter(p["acc"], y, s=STYLE[p["fam"]][2] * .9, c=c,
+                    marker=STYLE[p["fam"]][1], zorder=3,
+                    edgecolors="white", linewidths=.9)
+    axR.set_yticks(yy)
+    axR.set_yticklabels([p["label"] for p in order], fontsize=14)
+    for t, p in zip(axR.get_yticklabels(), order):
+        t.set_color(STYLE[p["fam"]][0])
+        if p["fam"] in ("ours", "ceil"):
+            t.set_fontweight("bold")
+    axR.set_ylim(-.8, len(order) - .2)
+    axR.set_xlabel("avg@8 accuracy   (%)      bar = paired 95% CI vs FreeKV", fontsize=15.5)
+    axR.tick_params(axis="x", labelsize=13.5)
     axR.tick_params(axis="y", length=0)
+    axR.grid(axis="x", alpha=.15, lw=.7)
+    for sp in ("top", "right", "left"):
+        axR.spines[sp].set_visible(False)
 
-    fig.suptitle("KV-cache retrieval on MATH50 — 26 methods at matched budget   "
-                 f"(DS-R1-Qwen-7B, budget {a.budget}, sink 512, recent 512, 8 seeds)",
-                 fontsize=12.5, x=.012, ha="left", y=.985)
-    fig.text(.012, .013,
-             "Both oracles sit inside the tie band: even with perfect knowledge of the true attention distribution there is nothing to win at this budget, because "
-             "only ~20% of a\nreasoning trace is ever compressed (onset at token 3072, mean sequence 3869). No ordering within the band is a result \u2014 the separable "
-             "findings are the five arms below it.",
-             fontsize=8.5, color="#334155", va="bottom")
-    fig.tight_layout(rect=[0, .052, 1, .965])
-    import os
+    fig.tight_layout(w_pad=2.2)
     os.makedirs(os.path.dirname(f"{a.root}/{a.out}"), exist_ok=True)
     for ext in ("pdf", "png"):
         fig.savefig(f"{a.root}/{a.out}.{ext}", dpi=200, bbox_inches="tight")
-    print(f"wrote {a.out}.pdf/.png  ({len(pts)} arms, tie band {band[0]:.2f}-{band[1]:.2f}%)")
-    print("Pareto frontier:")
-    for p_ in front:
-        print(f"  {p_['tag']:<12}{p_['mem']:8.0f} KiB{p_['acc']:8.2f}%")
+    print(f"wrote {a.out}.pdf/.png   {len(pts)} arms   "
+          f"tie band {band[0]:.2f}-{band[1]:.2f}%")
+    print("Pareto frontier (achievable arms only):")
+    for p in front:
+        print(f"  {p['tag']:<10}{p['mem']:8.0f} KiB{p['acc']:8.2f}%")
 
 if __name__ == "__main__":
     main()
