@@ -54,7 +54,7 @@ def quant_enabled():
     return os.environ.get("OVAL_QUANT", "1") != "0"
 
 
-class OabSummaryStore:
+class OvalSummaryStore:
     """basis / coefficients / centroid for every (layer, batch, source page)."""
 
     def __init__(self, n_layers, bsz, max_pages, n_kv_heads, head_dim,
@@ -168,9 +168,18 @@ def build_summary(paged_k, paged_v, Gh, eta, rank):
     # centring costs one dof, so rank(X) <= page_size-1; asking for page_size
     # divides by a ~zero eigenvalue and returns garbage
     r = min(rank, U.shape[-1] - 1, X.shape[-1])
-    S = S2[..., -r:].clamp_min(1e-10).sqrt()
+    S2r = S2[..., -r:]
+    # A page whose true rank is below r leaves near-zero eigenvalues in this
+    # block. Clamping the DIVISOR divides a ~0 numerator by 1e-10 and amplifies
+    # round-off into a garbage basis column: at r=31 that gave a 126% key
+    # reconstruction error on layer 0, whose pages are rank-deficient by ~5
+    # directions. Drop those directions instead -- they carry no energy, so
+    # zeroing them is exact, and reconstruction becomes exact at full rank.
+    keep = (S2r > S2[..., -1:].clamp_min(0) * 1e-8).unsqueeze(-2)
+    S = S2r.clamp_min(1e-10).sqrt()
     U8 = U[..., -r:]
     basis = Xw.transpose(-1, -2) @ U8 / S.unsqueeze(-2)   # [B,P,H,d,r]
+    basis = basis * keep.to(basis.dtype)
     coef = X @ basis                                       # [B,P,H,page,r]
     if not quant_enabled():
         return mu.to(dt), basis.to(dt), coef.to(dt)

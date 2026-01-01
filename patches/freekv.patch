@@ -120,7 +120,7 @@ index 47f4b0f..120102a 100644
          preds = get_pred(
              model,
 diff --git a/accuracy/eval/util.py b/accuracy/eval/util.py
-index e4bd935..a872503 100644
+index e4bd935..cf7042c 100644
 --- a/accuracy/eval/util.py
 +++ b/accuracy/eval/util.py
 @@ -1,3 +1,4 @@
@@ -128,7 +128,7 @@ index e4bd935..a872503 100644
  import os, argparse
  import numpy as np
  from pathlib import Path
-@@ -31,7 +32,11 @@ def parse_common_args(parser):
+@@ -31,7 +32,16 @@ def parse_common_args(parser):
                          choices=["full", "duo_attn", "razor", 
                                   "quest", "arkv", "spec_ret", "raas"],
                          help="KV cache eviction/selection method")
@@ -137,11 +137,16 @@ index e4bd935..a872503 100644
 +                        help="OVAL output-aware mix; 0 = key PCA (the LOCKS special case)")
 +    parser.add_argument("--oval_rank", type=int, default=8,
 +                        help="OVAL basis rank")
++    parser.add_argument("--oval_recon", action="store_true",
++                        help="Use the OVAL records as a KEY CODEC: selected pages are "
++                             "reconstructed as mu + coef @ basis^T instead of read from "
++                             "the full key cache. Selection is unchanged. Values, sink "
++                             "and recent tokens stay exact.")
 +    parser.add_argument("--page_rep", type=str, default="quest", choices=["quest", "arkv", "oval"],
                          help="Page representation method")
      parser.add_argument("--GQA_policy", type=str, default="avgS",
                          choices=["maxQ", "avgQ", "maxS", "avgS", "maxSM", "avgSM"],
-@@ -128,6 +133,15 @@ def get_out_path(args, config, out_root_dir=None, mkdir=True):
+@@ -128,6 +138,19 @@ def get_out_path(args, config, out_root_dir=None, mkdir=True):
              else:
                  GQA_policy = config["GQA_policy"]
                  out_path += f"-{GQA_policy}"
@@ -154,10 +159,14 @@ index e4bd935..a872503 100644
 +                        out_path += (f"_r{config.get('oval_rank', 8)}"
 +                                     f"_eta{config.get('eta', 0.0)}"
 +                                     f"_q{int(os.environ.get('OVAL_QUANT', '1') != '0')}")
++                        # A codec run and a selection-only run differ ONLY in this
++                        # flag; without it in the path they overwrite each other.
++                        if config.get("oval_recon"):
++                            out_path += "_recon1"
                  if method == "spec_ret":
                      spec_ret_steps = config["spec_ret_steps"]
                      llb = config["llb"]
-@@ -213,6 +227,14 @@ def load_model_and_tokenizer(path, args):
+@@ -213,6 +236,14 @@ def load_model_and_tokenizer(path, args):
          low_cpu_mem_usage=True,
          attn_implementation="eager",
          device_map = "auto",
@@ -172,17 +181,18 @@ index e4bd935..a872503 100644
      )
  
      generation_config = GenerationConfig.from_pretrained(path)
-@@ -271,6 +293,8 @@ def load_model_and_tokenizer(path, args):
+@@ -271,6 +302,9 @@ def load_model_and_tokenizer(path, args):
          config["recent"] = recent_size
          config["skip_layer"] = args.skip_layer
          config["page_rep"] = args.page_rep
 +        config["eta"] = args.eta
 +        config["oval_rank"] = args.oval_rank
++        config["oval_recon"] = args.oval_recon
          print(f"Enabling {method} evaluation using sink size {sink_size} recent size {recent_size}, "
                f"skip {args.skip_layer} layers")
          if method in ["quest", "arkv", "spec_ret"]:
 diff --git a/accuracy/kvc/patch/dynamic_attention.py b/accuracy/kvc/patch/dynamic_attention.py
-index 32ac2af..764cb2f 100644
+index 32ac2af..35a210b 100644
 --- a/accuracy/kvc/patch/dynamic_attention.py
 +++ b/accuracy/kvc/patch/dynamic_attention.py
 @@ -14,6 +14,9 @@ def repeat_kv_BLH(hidden_states: torch.Tensor, n_rep: int) -> torch.Tensor:
@@ -283,11 +293,42 @@ index 32ac2af..764cb2f 100644
          _, ll_sel_page_indices = torch.topk(max_qk, ll_page_budget, dim=-1)
          # [bsz, num_kv_heads, (up to) page_budget + ll_page_budget]
          # still maybe repeated pages...
+@@ -226,7 +267,29 @@ def quest_arkv_attn(self,
+         sel_token_indices.shape[0], sel_token_indices.shape[1], -1
+     ).transpose(1, 2).unsqueeze(-1).expand(-1, -1, -1, head_dim)
+ 
+-    sel_k = torch.gather(k, dim=1, index=sel_token_indices)
++    if _use_oval and getattr(self, "oval_recon", False):
++        # KEY CODEC. The records that drive selection are also the only copy of
++        # the keys: rebuild the selected pages as mu + coef @ basis^T instead of
++        # reading the full key cache. Values, sink and recent tokens are exact,
++        # exactly as in every baseline. Reconstructing only the SELECTED pages
++        # is equivalent to storing every page compressed -- attention never
++        # touches an unselected page -- so this is faithful, not an approximation
++        # of the codec.
++        _bi = torch.arange(sel_page_indices.shape[0],
++                           device=sel_page_indices.device)[:, None, None]
++        _hi = torch.arange(sel_page_indices.shape[1],
++                           device=sel_page_indices.device)[None, :, None]
++        # the three index tensors are adjacent, so the gathered axes stay
++        # leading: [bsz, n_kv, n_sel_pages, ...]
++        _B = self.oval_basis[_bi, sel_page_indices, _hi]   # [b,H,P,d,r]
++        _C = self.oval_coef[_bi, sel_page_indices, _hi]    # [b,H,P,page,r]
++        _M = self.oval_mu[_bi, sel_page_indices, _hi]      # [b,H,P,d]
++        _khat = torch.matmul(_C, _B.transpose(-1, -2)) + _M.unsqueeze(-2)
++        # [b,H,P,page,d] -> [b, P*page, H, d], the layout the gather produces
++        sel_k = _khat.reshape(_khat.shape[0], _khat.shape[1], -1, head_dim) \
++                     .permute(0, 2, 1, 3).contiguous()
++    else:
++        sel_k = torch.gather(k, dim=1, index=sel_token_indices)
+     sel_v = torch.gather(v, dim=1, index=sel_token_indices)
+ 
+     used_k = torch.cat([
 diff --git a/accuracy/kvc/patch/llama.py b/accuracy/kvc/patch/llama.py
-index 7e50cbb..a95ed5e 100644
+index 7e50cbb..6837928 100644
 --- a/accuracy/kvc/patch/llama.py
 +++ b/accuracy/kvc/patch/llama.py
-@@ -504,19 +504,51 @@ def enable_llama_dyn_attention(
+@@ -504,19 +504,58 @@ def enable_llama_dyn_attention(
              module.GQA_policy = config["GQA_policy"]
              module.alloc_len = 512
              module.num_pages = 0    # === reset needed ===
@@ -322,7 +363,14 @@ index 7e50cbb..a95ed5e 100644
 +                # by the same page index. UNQUANTIZED (model dtype).
 +                from .oval import publish_metric as _oval_metric
 +                module.oval_eta = float(config.get("eta", 0.0))
-+                module.oval_rank = int(config.get("oval_rank", 8))
++                # build_summary clamps the rank to min(rank, page_size-1, d)
++                # because centring costs one degree of freedom. Allocating the
++                # UNCLAMPED rank leaves the surplus basis/coef columns as
++                # torch.empty garbage, which _score and the codec then read --
++                # so clamp the allocation to the same effective rank.
++                module.oval_rank = min(int(config.get("oval_rank", 8)),
++                                      module.page_size - 1, module.head_dim)
++                module.oval_recon = bool(config.get("oval_recon", False))
 +                _dev = module.q_proj.weight.device
 +                _r = module.oval_rank
 +                module.oval_basis = torch.empty(
@@ -540,7 +588,7 @@ index efa74df..d4f6233 100644
 +            self.raas_dg.n_tokens = [0] * self.n_layers
 +        if self.page_rep == "oval" and (
 +                self.oval is None or self.oval.bsz != bsz):
-+            self.oval = oval_summary.OabSummaryStore(
++            self.oval = oval_summary.OvalSummaryStore(
 +                self.n_layers, bsz, self.oval_max_pages, self.n_kv_heads,
 +                self.head_dim, self.oval_rank, self.oval_eta,
 +                self.dtype, self.device)

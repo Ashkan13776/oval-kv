@@ -1,0 +1,59 @@
+{
+ "_note": "Decode latency and summary-slab bytes, ds-r1-qwen-7b, 16384-token context, 497 resident pages, 48 timed decode steps after 8 warmup. recon=false is the selection-only control (keys read exact). slab_MiB is the preallocated record arena at KVC_MAX_TOKENS default; see analysis/codec_memory.py for the per-page closed form.",
+ "rows": [
+  {
+   "rank": 8,
+   "eff_rank": 8,
+   "recon": false,
+   "ctx": 16384,
+   "pages": 497,
+   "ms_per_token": 54.09229525442546,
+   "slab_MiB": 1232.0
+  },
+  {
+   "rank": 1,
+   "eff_rank": 1,
+   "recon": true,
+   "ctx": 16384,
+   "pages": 497,
+   "ms_per_token": 58.10191980951155,
+   "slab_MiB": 252.0
+  },
+  {
+   "rank": 4,
+   "eff_rank": 4,
+   "recon": true,
+   "ctx": 16384,
+   "pages": 497,
+   "ms_per_token": 59.769939087952174,
+   "slab_MiB": 672.0
+  },
+  {
+   "rank": 8,
+   "eff_rank": 8,
+   "recon": true,
+   "ctx": 16384,
+   "pages": 497,
+   "ms_per_token": 59.43561669361467,
+   "slab_MiB": 1232.0
+  },
+  {
+   "rank": 16,
+   "eff_rank": 16,
+   "recon": true,
+   "ctx": 16384,
+   "pages": 497,
+   "ms_per_token": 59.29887636254231,
+   "slab_MiB": 2352.0
+  },
+  {
+   "rank": 32,
+   "eff_rank": 31,
+   "recon": true,
+   "ctx": 16384,
+   "pages": 497,
+   "ms_per_token": 59.59412013180554,
+   "slab_MiB": 4452.0
+  }
+ ]
+}
