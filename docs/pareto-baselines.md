@@ -167,3 +167,51 @@ expatt    [0,4,5,6] x3                     query agnostic, constant by design
 The constant ones are correct: K-norm and Expected Attention do not depend on
 the query, so an unchanging selection is the expected signature rather than a
 bug. `q4key`, `shadowkv` and `rocketkv` are not yet in this table.
+
+
+## Result: the front is flat at B=2048, and dense proves it
+
+First read with 24 arms reporting (7 at the full 8 seeds, the rest at 3-4):
+
+| arm | avg@k | KiB/hd/lyr |
+| --- | --- | --- |
+| pyramid | 72.67 | 1815 |
+| loki | 72.50 | 1815 |
+| sparq | 72.00 | 1760 |
+| rocketkv | 72.00 | 1788 |
+| **oval** | **71.75** | **1182** |
+| infllm | 71.50 | 1870 |
+| shadowkv | 71.33 | 1788 |
+| quest / freekv | 71.25 | 1815 |
+| **full (dense)** | **70.75** | 1760 |
+| arkvale | 70.25 | 1815 |
+| stream | 59.33 | 512 |
+| raas | 50.50 | 1536 |
+
+**Dense ranks 11th of 24.** Ten compressed arms "beat" full attention, which
+cannot be a real effect: attending to a subset of the keys cannot be better
+than attending to all of them. The spread across the top twelve is therefore
+sampling noise, not method quality, and no ordering within it should be
+reported as a result. Paired against FreeKV, only `stream` (-11.33) and `raas`
+(-20.75) have intervals excluding zero; every other arm, OVAL included
+(+0.50, CI [-1.25, +2.50]), is a statistical tie.
+
+The cause is the budget arithmetic above: at B=2048 compression does not engage
+until token 3072 against a mean sequence of 3869, so roughly 20% of the trace
+is compressed and the scoring rule barely participates. The config is the right
+one for consistency with the published table -- it simply cannot discriminate
+between methods. B=128 is therefore run as a second operating point, where
+~70% of the trace is compressed; the same RaaS comparison moves from -11.25 to
+-20.75 between the two, which is the budget actually stressing the method.
+
+### RocketKV is degenerate at this budget, by construction
+
+RocketKV's coarse stage admits `2 x page_budget` pages before the exact pass
+ranks them. At B=2048 the budget is 64 pages out of ~89 paged pages on a mean
+sequence -- the budget already covers 72% of the context, so there is nothing
+for a pruning stage to prune, and the arm reduces to plain exact scoring. Its
+runtime advantage, which is the whole point of the method, cannot appear. This
+is not worked around: forcing the coarse stage to prune would make it a
+different method. It is reported as degenerate at B=2048 and measured properly
+at B=128, where the budget is 4 pages of ~89 and the coarse stage does real
+work. The same caveat applies to any two-stage or pruning baseline here.
