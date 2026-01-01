@@ -7,6 +7,9 @@ __pycache__/
 *.done
 *.png
 *.pdf
+# ...but figures that go in the paper are deliverables, not scratch
+!results/figures/*.png
+!results/figures/*.pdf
 logs_*.log
 run_sweep.sh
 run_recon_rank.sh
