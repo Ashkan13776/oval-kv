@@ -71,12 +71,52 @@ while :; do
   fi
 
   # No sweep running and work remains -> launch one.
+  #
+  # Run it in the BACKGROUND and watch it. Running it in the foreground blocks
+  # here for the sweep's entire lifetime, which made the monitoring branch below
+  # unreachable -- the stall detector never ran once.
   before=$(total_records)
   say "launching sweep ($done_n/$TARGET complete, $(( TARGET - done_n )) to go)"
   MODEL="$M" DATASETS="$DATASETS" ETAS="$ETAS" SEEDS="$SEEDS" \
     GPUS="${GPUS:-0 1}" KV_ROOT="$KV_ROOT" KV_PY="${KV_PY:-python}" \
     "$KV_ROOT/scripts/codec_reasoning_sweep.sh" \
-    >> "$KV_ROOT/logs/sweep_run.log" 2>&1
+    >> "$KV_ROOT/logs/sweep_run.log" 2>&1 &
+  SWEEP_PID=$!
+
+  waiting_since=0
+  while kill -0 "$SWEEP_PID" 2>/dev/null; do
+    rec=$(total_records); now=$(date +%s)
+    if [ "$rec" -ne "$last_rec" ]; then
+      last_rec=$rec; last_change=$now; waiting_since=0
+    else
+      # Distinguish the two reasons nothing is progressing:
+      #   (a) another user holds the GPUs and our scheduler is correctly
+      #       refusing to crowd them out -- benign, just log it once;
+      #   (b) we hold the GPUs but produce nothing -- that is a real stall.
+      ours=$(pgrep -cf "[e]val.reasoning.pred" || true)
+      if [ "${ours:-0}" -eq 0 ]; then
+        busy=""
+        for g in ${GPUS:-0 1}; do
+          u=$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits -i "$g" 2>/dev/null || echo 0)
+          [ "${u:-0}" -gt 2000 ] && busy="$busy $g(${u}MiB)"
+        done
+        if [ -n "$busy" ]; then
+          if [ "$waiting_since" -eq 0 ]; then
+            waiting_since=$now
+            say "WAITING: GPUs busy with another user -->$busy. Holding off; will start automatically when free."
+          elif [ $(( (now - waiting_since) % 3600 )) -lt 130 ]; then
+            say "still waiting for$busy ($(( (now - waiting_since) / 60 ))min so far)"
+          fi
+          last_change=$now      # not our stall; do not count it as one
+        fi
+      elif [ $((now - last_change)) -gt 2700 ]; then
+        say "STALL: our cells are running but no new record for 45min, cells $done_n/$TARGET"
+        last_change=$now
+      fi
+    fi
+    sleep 120
+  done
+  wait "$SWEEP_PID" 2>/dev/null || true
   after=$(total_records)
   if [ "$after" -le "$before" ]; then
     fails=$((fails+1))
