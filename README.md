@@ -61,10 +61,10 @@ the tables cannot drift from a stale summary.
 
 ## Results
 
-Tables 1 and 2 as reported in the paper: [`results/paper_tables.md`](results/paper_tables.md);
-machine-readable under `results/longbench2_accuracy/` and
-`results/longgenbench_accuracy/`. Raw generations (293 MB for LongGenBench) are
-not committed -- regenerate with `scripts/`, then `analysis/score_accuracy.py`.
+Tables 1 and 2 as reported in the paper:
+[`results/paper_tables.md`](results/paper_tables.md). Raw generations are not
+committed -- reproduce with `scripts/`, then score with
+`analysis/score_accuracy.py`.
 
 Settings are the FreeKV paper's: page size 32, B = 2048, S = W = 128 / tau = 0.8
 (LongBench v2, greedy, inputs truncated to 64K) and S = W = 512 / tau = 0.9

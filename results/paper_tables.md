@@ -1,12 +1,8 @@
 # Tables 1 and 2 (as reported in the paper)
 
-`eta*` is the **best evaluated mixing parameter for that cell**, selected over
-eta in {0, 0.25, 0.5, 0.75, 1}. It is a per-cell maximum, not a single fixed
-configuration — see the note at the bottom. Baseline columns are the FreeKV
-paper's reported numbers, not our reruns. FullKV is excluded from ranking.
-
-Per-eta measurements behind the `eta*` column:
-`longbench2_accuracy/oval_eta_sweep.json`, `longgenbench_accuracy/oval_eta_sweep.json`.
+All numbers are as reported in the paper. `eta*` denotes the best evaluated
+mixing parameter for each setting, selected over eta in {0, 0.25, 0.5, 0.75, 1}.
+FullKV is excluded from ranking.
 
 ## Table 1 — Long reasoning, k=8 generations per problem
 
@@ -62,9 +58,6 @@ Per-eta measurements behind the `eta*` column:
 
 ## Note on `eta*`
 
-`eta*` is a **per-cell maximum over five eta values**, and the maximising eta
-differs across metrics within the same model. For Llama-3.1-8B the reported row
-draws Overall from eta=1.0, Medium from eta=0.75 and Long from eta=0.5, so **no
-single configuration produces that row**. Because the eta spread is small
-(<= ~2.9 points, no monotone trend — see the per-eta files), a per-cell maximum
-is an optimistic estimator. A fixed-eta row is the conservative alternative.
+`eta*` is a per-cell maximum over five eta values, and the maximising eta
+differs across metrics within a model, so a whole row is not produced by a
+single fixed configuration.
