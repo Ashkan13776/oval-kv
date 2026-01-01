@@ -6,8 +6,11 @@ Scope. Only arms that decide WHAT TO KEEP from a given budget are plotted:
 retrieval (full cache, re-chooses what to attend each step) and eviction (the
 cache shrinks). Fixed-window arms (StreamingLLM, sliding window) and the
 PyramidKV budget schedule are excluded -- the windows make no selection at all,
-and a budget schedule is orthogonal, layerable onto any scorer here. Their
-results stay on disk; analysis/front.py prints the full table.
+and a budget schedule is orthogonal, layerable onto any scorer here. So is
+OVAL Retv. no-spec., which differs from OVAL Retv. only in FreeKV's
+speculative retrieval (docs/speculative-retrieval.md), a latency mechanism
+rather than a scoring rule. All of their results stay on disk;
+analysis/front.py prints the full table.
 
 Eviction arms retain only sink+recent+budget, so they are charged 96 pages
 rather than the 110 a retrieval arm holds. Those implemented here WITHOUT
@@ -56,7 +59,6 @@ ARMS = {
  "q4key":    ("4-bit keys",     "ret",   2560, False, "{D}-quest/MATH50-*b{B}-avgSM-q4key*"),
  "ours":     ("OVAL Retv.+Comp.", "ours",  2816, False, "{D}-spec_ret/MATH50-*b{B}-avgSM-oval_r8_eta0.0_q0_recon1-*"),
  "ours_sel": ("OVAL Retv.",       "ours",  2816, True,  "{D}-spec_ret/MATH50-*b{B}-avgSM-oval_r8_eta0.0_q0-pQ2*"),
- "ours_q":   ("OVAL Retv. no-spec.", "ours",  2816, True,  "{D}-quest/MATH50-*b{B}-avgSM-oval_r8_eta0.0_q0-*"),
  "loki":     ("Loki",           "ret",   512,  True,  "{D}-quest/MATH50-*b{B}-avgSM-loki*"),
  "centroid": ("Centroid",       "ret",   256,  True,  "{D}-quest/MATH50-*b{B}-avgSM-centroid*"),
  "shadowkv": ("ShadowKV",       "ret",   256,  True,  "{D}-quest/MATH50-*b{B}-avgSM-shadowkv*"),
@@ -196,7 +198,7 @@ def main():
     # within ~90 KiB of each other and cannot be labelled in place
     pile = [p for p in pts.values() if p["exact"] and p["fam"] != "ours"]
     side = {"q4key": (0, 18), "ours": (0, -26), "ours_sel": (0, 18),
-            "ours_q": (0, -26), "raas": (14, 0),
+            "raas": (14, 0),
             "tova": (14, 2), "h2o": (14, 0), "snapkv": (14, -2)}
     for p in pts.values():
         if p in pile:
