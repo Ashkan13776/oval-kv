@@ -41,20 +41,26 @@ and merging is a directory copy.
 | B | `ds-r1-llama-8b` | rank grid at seed 42 only -- **to run** |
 | C | `ds-r1-qwen-14b` | rank grid at seed 42 only -- **to run** |
 
-Cost of the full eta grid at k=8 (3 datasets x (5 etas + dense) x 8 seeds =
-144 cells), from cell times measured on machine A with 4 x 48GB GPUs:
+Cost of the full eta grid at k=8 (3 datasets x 5 etas x 8 seeds = **120
+cells**), from cell times measured on machine A with 4 x 48GB GPUs:
 
-| model | per-cell (MATH50 / AIME24 / GPQA50c) | 144 cells |
+| model | per-cell (MATH50 / AIME24 / GPQA50c) | 120 cells |
 |---|---|---|
-| `ds-r1-llama-8b` | 2.9h / 5.3h / 5.4h | ~6-7 days |
-| `ds-r1-qwen-14b` | 4.2h / 7.6h / 7.7h | **~10 days** |
+| `ds-r1-llama-8b` | 2.9h / 5.3h / 5.4h | ~5-6 days |
+| `ds-r1-qwen-14b` | 4.2h / 7.6h / 7.7h | **~8 days** |
+
+**Do not run the dense control.** `DENSE=1` exists in the script but is not
+wanted: the FullKV numbers come from the paper's Full column, and machine A
+already confirmed the harness reproduces them (AIME24 avg@k 55.00 measured vs
+56.66 published, pass@k 83.33 vs 83.33). Re-measuring dense on every model
+would cost 24 cells each and tell us nothing new. Run only our method.
 
 If ten days is too long, narrow an axis -- see "Running less" below. The eta
 axis is the one worth keeping, since re-deriving eta* is the point.
 
 ## Machine B -- ds-r1-llama-8b
 
-Full eta grid at k=8 plus the dense control:
+Full eta grid at k=8, our method only:
 
 ```bash
 git clone <this repo> oval-kv && cd oval-kv
@@ -64,7 +70,7 @@ export KV_PY=$(which python)          # a torch/CUDA env; see requirements.txt
                                       # installs the OVAL modules
 ./scripts/build_freekv.sh             # builds the CUDA extension
 
-MODEL=ds-r1-llama-8b DENSE=1 ./scripts/codec_reasoning_sweep.sh
+MODEL=ds-r1-llama-8b ./scripts/codec_reasoning_sweep.sh
 ```
 
 ## Machine C -- ds-r1-qwen-14b
@@ -72,7 +78,7 @@ MODEL=ds-r1-llama-8b DENSE=1 ./scripts/codec_reasoning_sweep.sh
 Same command, different model:
 
 ```bash
-MODEL=ds-r1-qwen-14b DENSE=1 ./scripts/codec_reasoning_sweep.sh
+MODEL=ds-r1-qwen-14b ./scripts/codec_reasoning_sweep.sh
 ```
 
 **The 14B needs >=40GB per GPU.** Measured footprint on machine A was ~37GB
@@ -85,8 +91,8 @@ MATH50 finishes roughly twice as fast as the other two datasets, so if you
 want a complete dataset early, run it first:
 
 ```bash
-MODEL=ds-r1-qwen-14b DENSE=1 DATASETS=MATH50 ./scripts/codec_reasoning_sweep.sh
-MODEL=ds-r1-qwen-14b DENSE=1 ./scripts/codec_reasoning_sweep.sh   # the rest
+MODEL=ds-r1-qwen-14b DATASETS=MATH50 ./scripts/codec_reasoning_sweep.sh
+MODEL=ds-r1-qwen-14b ./scripts/codec_reasoning_sweep.sh           # the rest
 ```
 
 The second call skips everything the first finished.
@@ -96,10 +102,10 @@ The second call skips everything the first finished.
 Narrow any axis; the script skips whatever is already complete:
 
 ```bash
-# only the PUBLISHED eta* per cell, plus dense. Cheapest useful run (48 cells),
+# only the PUBLISHED eta* per cell. Cheapest useful run (24 cells),
 # but note it inherits the eta* we are trying to re-derive -- see the last
 # section. llama-8b: 0.25 / 0.5 / 0.75.  qwen-14b: 0.5 / 0.25 / 0.5.
-MODEL=ds-r1-llama-8b DENSE=1 DATASETS=MATH50  ETAS=0.25 ./scripts/codec_reasoning_sweep.sh
+MODEL=ds-r1-llama-8b         DATASETS=MATH50  ETAS=0.25 ./scripts/codec_reasoning_sweep.sh
 MODEL=ds-r1-llama-8b         DATASETS=AIME24  ETAS=0.5  ./scripts/codec_reasoning_sweep.sh
 MODEL=ds-r1-llama-8b         DATASETS=GPQA50c ETAS=0.75 ./scripts/codec_reasoning_sweep.sh
 
@@ -134,11 +140,10 @@ collides with machine A's qwen directories.
 
 ## Reporting back
 
-Copy your model's two directories, e.g.
+Copy your model's results directory, e.g.
 
 ```
-results/codec/ds-r1-llama-8b-full/      results/codec/ds-r1-qwen-14b-full/
-results/codec/ds-r1-llama-8b-spec_ret/  results/codec/ds-r1-qwen-14b-spec_ret/
+results/codec/ds-r1-llama-8b-spec_ret/   results/codec/ds-r1-qwen-14b-spec_ret/
 ```
 
 They are small (`.jsonl` predictions). Then score everything with:
