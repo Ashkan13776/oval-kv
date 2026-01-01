@@ -4,6 +4,31 @@ This splits the sweep by MODEL. Each model writes to its own directory under
 `results/codec/`, so two machines never touch the same file and the results
 merge by copying directories.
 
+## Why this clones FreeKV
+
+FreeKV here is the **harness, not a baseline**. OVAL is implemented as a patch
+to it: `setup.sh` installs `oval/page_basis.py` into
+`FreeKV/accuracy/kvc/patch/oval.py`, the patch modifies 19 of their files, and
+the reasoning datasets (`math50`, `aime24`, `gpqa50c`) ship in their tree.
+There is no standalone OVAL to run.
+
+`--method spec_ret` is FreeKV's speculative-retrieval pipeline -- their query
+cache, their cosine-similarity correction, their page budget. We keep all of
+it and swap exactly one component: `--page_rep oval` replaces Quest's min/max
+page digest with our rank-r basis. (That is why eta=0 reduces to plain
+page-local key PCA.)
+
+The arms you will run are:
+
+| flag | what it is | run here? |
+|---|---|---|
+| `--method full` | dense FullKV | yes, the control |
+| `--method spec_ret --page_rep quest` | FreeKV's own method | **no** |
+| `--method spec_ret --page_rep oval --oval_recon` | ours | yes |
+
+FreeKV's own numbers are taken from their paper, not re-run, so you never need
+`--page_rep quest`.
+
 ## What is already done (machine A)
 
 | model | status |
