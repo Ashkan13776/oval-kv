@@ -181,6 +181,34 @@ def main():
     if "freekv" not in pts:
         sys.exit("no FreeKV reference for this budget")
 
+    # Arms that land on exactly the same (memory, accuracy) hide one another --
+    # SparQ, Oracle and Oracle q(t-1) all sit at (1872, 71.50), and the Oracle
+    # is the point that bounds the whole cluster, so losing it is not cosmetic.
+    # Fan coincident markers a few KiB apart for DRAWING only; px is the drawn
+    # position, mem stays the real one and is what the frontier uses.
+    from collections import defaultdict
+    CLUST_LO, CLUST_HI = 1860, 1935
+    _pile = [p for p in pts.values() if CLUST_LO <= p["mem"] <= CLUST_HI]
+    for p in pts.values():
+        p["px"] = p["mem"]
+    # Inside the cluster every arm costs within ~50 KiB of every other, which
+    # is narrower than a marker: SparQ, Oracle and Oracle q(t-1) land on the
+    # SAME pixel, and the Oracle is the point that bounds the whole cluster.
+    # So within the box, x is laid out per accuracy row rather than read off
+    # the axis -- the caption says the box is one memory cost. Outside the box
+    # x is the true value. `mem` is untouched; only the drawn position moves.
+    _row = defaultdict(list)
+    for p in _pile:
+        _row[round(p["acc"], 2)].append(p)
+    for grp in _row.values():
+        if len(grp) == 1:
+            continue
+        grp.sort(key=lambda z: z["mem"])
+        c = float(np.mean([z["mem"] for z in grp]))
+        span = 26.0 * (len(grp) - 1)
+        for i, p in enumerate(grp):
+            p["px"] = c - span / 2 + i * 26.0
+
     achievable = [p for p in pts.values()
                   if p["fam"] != "ceil" and p["tag"] not in UB]
     front, best = [], -1e9
@@ -192,8 +220,7 @@ def main():
     # The exact-key arms sit inside ~50 KiB of one another. No font size
     # separates thirteen labels in that box, so the box is drawn once and the
     # arms are named in the ranked panel instead of with thirteen leader lines.
-    CLUST_LO, CLUST_HI = 1860, 1935
-    pile = [p for p in pts.values() if CLUST_LO <= p["mem"] <= CLUST_HI]
+    pile = _pile
     loose = [p for p in pts.values() if p not in pile]
 
     # RaaS is ~17 points below everything else and would otherwise compress the
@@ -212,36 +239,38 @@ def main():
     axB = fig.add_subplot(gs[1, 0], sharex=axT) if low else None
     axR = fig.add_subplot(gs[:, 1])
 
-    xs = [p["mem"] for p in pts.values()]
+    xs = [p["px"] for p in pts.values()]
     xlo, xhi = min(xs) - 135, max(xs) + 145
     axT.set_xlim(xlo, xhi)
     axT.set_ylim(min(hi_acc) - 1.3, max(hi_acc) + 1.5)
 
     # frontier
     if len(front) > 1:
-        axT.step([p["mem"] for p in front], [p["acc"] for p in front],
+        axT.step([p["px"] for p in front], [p["acc"] for p in front],
                  where="post", color="#c2410c", lw=2.4, alpha=.40, zorder=2)
-    axT.scatter([p["mem"] for p in front if p["acc"] >= BRK],
+    axT.scatter([p["px"] for p in front if p["acc"] >= BRK],
                 [p["acc"] for p in front if p["acc"] >= BRK],
                 s=560, facecolors="none", edgecolors="#c2410c", lw=2.6, zorder=9)
 
     def draw(ax, group):
         for p in group:
             c, mk, sz = STYLE[p["fam"]]
-            ax.scatter(p["mem"], p["acc"], s=sz * 1.5, c=c, marker=mk, zorder=7,
+            ax.scatter(p["px"], p["acc"], s=sz * 1.5, c=c, marker=mk, zorder=7,
                        edgecolors="white", linewidths=1.3)
 
     draw(axT, [p for p in pts.values() if p["acc"] >= BRK])
 
     # the exact-key cluster: one box, one caption
     if pile:
-        px = [p["mem"] for p in pile]; py = [p["acc"] for p in pile]
+        px = [p["px"] for p in pile]; py = [p["acc"] for p in pile]
         axT.add_patch(mpatches.Rectangle(
             (min(px) - 34, min(py) - .30), (max(px) - min(px)) + 68,
             (max(py) - min(py)) + .60,
             fill=False, ec="#94a3b8", lw=1.3, ls=(0, (5, 4)), zorder=5))
         axT.annotate(f"{len(pile)} of the {len(pts)} methods store the keys\n"
-                     f"exactly, so they share one memory cost\n"
+                     f"exactly, so they cost within ~50 KiB of each other.\n"
+                     f"Inside the box they are spread sideways only to stay\n"
+                     f"countable \u2014 read their memory as one value.\n"
                      f"(all {len(pts)} are named at right)",
                      xy=(float(np.mean(px)), min(py) - .55),
                      xytext=(0, -16), textcoords="offset points",
@@ -256,7 +285,7 @@ def main():
         if p["acc"] < BRK:
             continue
         dx, dy = OFF.get(p["tag"], (0, 20))
-        axT.annotate(p["label"], (p["mem"], p["acc"]), textcoords="offset points",
+        axT.annotate(p["label"], (p["px"], p["acc"]), textcoords="offset points",
                      xytext=(dx, dy),
                      ha="right" if dx < 0 else ("left" if dx > 0 else "center"),
                      va="center", fontsize=14.5,
@@ -271,11 +300,11 @@ def main():
 
     if axB is not None:
         draw(axB, low)
-        axB.scatter([p["mem"] for p in front if p["acc"] < BRK],
+        axB.scatter([p["px"] for p in front if p["acc"] < BRK],
                     [p["acc"] for p in front if p["acc"] < BRK],
                     s=560, facecolors="none", edgecolors="#c2410c", lw=2.6, zorder=9)
         for p in low:
-            axB.annotate(p["label"], (p["mem"], p["acc"]), textcoords="offset points",
+            axB.annotate(p["label"], (p["px"], p["acc"]), textcoords="offset points",
                          xytext=(16, 0), ha="left", va="center", fontsize=14.5,
                          color=STYLE[p["fam"]][0])
         lo_acc = [p["acc"] for p in low]
