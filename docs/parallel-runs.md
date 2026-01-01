@@ -39,7 +39,7 @@ and merging is a directory copy.
 |---|---|---|
 | A | `ds-r1-qwen-7b` | rank grid at seed 42; k=8 at eta=0 and at the published eta*; full eta grid at k=8 **in progress** |
 | B | `ds-r1-llama-8b` | rank grid at seed 42 only -- **to run** |
-| C | `ds-r1-qwen-14b` | rank grid at seed 42 only -- **to run** |
+| C | `ds-r1-qwen-14b` | full eta grid at k=8 -- **done**, 120/120 cells (`results/codec/reasoning_k8_qwen14b.md`) |
 
 Cost of the full eta grid at k=8 (3 datasets x 5 etas x 8 seeds = **120
 cells**), from cell times measured on machine A with 4 x 48GB GPUs:
@@ -80,6 +80,14 @@ Same command, different model:
 ```bash
 MODEL=ds-r1-qwen-14b ./scripts/codec_reasoning_sweep.sh
 ```
+
+**Run ONE cell per GPU at 14B, even if a second GPU is free.** Three cells
+died with `CUDA error: the launch timed out and was terminated`, every one of
+them while two 37GB cells were generating 16K-token traces at the same time.
+Re-run sequentially, all three finished first try with exit 0. Use `GPUS="0"`.
+Running two-up costs ~2.5% of cells and the sweep does NOT retry them -- it
+builds its queue once at startup, so a crash leaves that row at k=7 until a
+later launch picks it up. `scripts/finish_stuck_cells.sh` cleans them up.
 
 **The 14B needs >=40GB per GPU.** Measured footprint on machine A was ~37GB
 per cell: ~28GB weights in bfloat16, ~6GB KV at the realised sequence length,
