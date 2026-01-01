@@ -278,3 +278,56 @@ them, are statistically indistinguishable from FreeKV, so "q4key dominates"
 means it has the best point estimate in a cluster where almost nothing
 separates -- not that it is reliably better. The separable findings remain the
 arms below the band.
+
+
+## Memory: the definition
+
+One rule, applied to every arm. **Resident KV bytes for one KV head in one
+layer, on a fixed reference sequence.** Nothing else is counted -- no model
+weights, no activations, no per-layer scalars below a byte per page.
+
+```
+HD = 128 head dim      BPE = 2 (fp16)      PG = 32 tokens/page
+TOK = HD * BPE = 256 B                 one token, one tensor (K or V)
+
+L_REF   = 3745 tokens   reference sequence length
+SINK    =  512          always exact, never paged
+RECENT  =  512          always exact, never paged
+N_EXACT = 1024          sink + recent
+N_PAGED = (L_REF - N_EXACT) // PG = 85 pages   the paged region
+```
+
+`L_REF` is **fixed across arms on purpose**. Measured mean total length differs
+by method -- dense 3745, FreeKV 3847, OVAL 3869 -- because a weaker method
+generates longer traces. Charging each arm its own length would fold accuracy
+into the memory axis and penalise a method twice for the same weakness. 3745
+is the dense mean.
+
+| arm type | resident bytes |
+| --- | --- |
+| dense | `L_REF * TOK` keys + `L_REF * TOK` values |
+| eviction | `min(L_REF, N_EXACT + budget) * TOK * 2` -- the cache genuinely shrinks |
+| retrieval | all keys + all values + `N_PAGED * digest` |
+| codec (OVAL Retv.+Comp., 4-bit keys) | as retrieval, but the PAGED keys are replaced by the record; sink and recent keys stay exact |
+
+Two corrections this definition fixed, both of which had been wrong:
+
+- The old model used `NPAGE = 110` (3520 tokens), a number that matched no
+  measurement, and used it simultaneously as "whole sequence" and as "number of
+  paged pages" -- which are different quantities.
+- The codec arms were charged **zero** exact keys across the whole sequence.
+  Sink and recent are never paged, so their keys stay exact; the old model
+  handed OVAL and 4-bit keys a 256 KiB discount neither earns. OVAL Retv.+Comp.
+  moves 1182 -> 1426 KiB, 4-bit keys 1155 -> 1405 KiB.
+
+Resulting values at B=2048 (KiB per KV head per layer):
+
+| | KiB | | KiB |
+| --- | --- | --- | --- |
+| 4-bit keys | 1405 | eviction (h2o/tova/snapkv/raas) | 1536 |
+| OVAL Retv.+Comp. | 1426 | dense, SparQ, ExpectedAttn, K-norm, Random, oracles | 1872 |
+| centroid/shadowkv/rocketkv | 1894 | quest/freekv/arkvale/loki | 1915 |
+| InfLLM | 1957 | OVAL Retv., OVAL Retv. no-spec. | 2106 |
+
+The frontier is unchanged by the correction: 4-bit keys still dominates, now
+at 1405 KiB against OVAL Retv.+Comp. at 1426.

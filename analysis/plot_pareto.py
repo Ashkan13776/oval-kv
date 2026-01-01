@@ -29,16 +29,34 @@ from matplotlib.lines import Line2D
 
 D = "results/freekv/codec/ds-r1-qwen-7b"
 PAT = r"\\boxed{((?:[^{}]|\{[^{}]*\})*)}"
-HD, PG, NPAGE = 128, 32, 110
-B_K = HD * PG * 2
+
+# ---------------------------------------------------------------- memory model
+# ONE definition, applied to every arm: the KV state resident for ONE KV head in
+# ONE layer, on a reference sequence, in bytes. Nothing else is counted.
+#
+#   HD      head dimension
+#   BPE     bytes per element (fp16)
+#   PG      page size, tokens
+#   L_REF   reference sequence length, tokens. FIXED across arms on purpose:
+#           a weaker method generates longer traces (dense 3745, FreeKV 3847,
+#           OVAL 3869 measured here), and charging each its own length would
+#           fold accuracy into the memory axis. 3745 = the dense mean.
+#   SINK/RECENT  always-exact regions: never paged, never summarised, so their
+#           KEYS stay exact even for arms that compress the paged keys.
+HD, BPE, PG = 128, 2, 32
+L_REF, SINK, RECENT = 3745, 512, 512
+TOK = HD * BPE                      # bytes for one token, one tensor (K or V)
+N_EXACT = SINK + RECENT             # tokens held exact by every arm
+N_PAGED = (L_REF - N_EXACT) // PG   # whole pages in the paged region
+B_K = PG * TOK                      # exact keys, one page
 B_V = B_K
 
 #  tag: (label, family, digest bytes/page, keeps exact keys, glob)
 ARMS = {
  "q4key":    ("4-bit keys",     "ret",   2560, False, "{D}-quest/MATH50-*b{B}-avgSM-q4key*"),
- "ours":     ("OVAL + codec",   "ours",  2816, False, "{D}-spec_ret/MATH50-*b{B}-avgSM-oval_r8_eta0.0_q0_recon1-*"),
- "ours_sel": ("OVAL index",     "ours",  2816, True,  "{D}-spec_ret/MATH50-*b{B}-avgSM-oval_r8_eta0.0_q0-pQ2*"),
- "ours_q":   ("OVAL no-spec",   "ours",  2816, True,  "{D}-quest/MATH50-*b{B}-avgSM-oval_r8_eta0.0_q0-*"),
+ "ours":     ("OVAL Retv.+Comp.", "ours",  2816, False, "{D}-spec_ret/MATH50-*b{B}-avgSM-oval_r8_eta0.0_q0_recon1-*"),
+ "ours_sel": ("OVAL Retv.",       "ours",  2816, True,  "{D}-spec_ret/MATH50-*b{B}-avgSM-oval_r8_eta0.0_q0-pQ2*"),
+ "ours_q":   ("OVAL Retv. no-spec.", "ours",  2816, True,  "{D}-quest/MATH50-*b{B}-avgSM-oval_r8_eta0.0_q0-*"),
  "loki":     ("Loki",           "ret",   512,  True,  "{D}-quest/MATH50-*b{B}-avgSM-loki*"),
  "centroid": ("Centroid",       "ret",   256,  True,  "{D}-quest/MATH50-*b{B}-avgSM-centroid*"),
  "shadowkv": ("ShadowKV",       "ret",   256,  True,  "{D}-quest/MATH50-*b{B}-avgSM-shadowkv*"),
@@ -86,12 +104,26 @@ def load(pat):
     return by
 
 def memory(tag, fam, exact, digest, budget):
-    """KiB per KV head per layer on a mean-length sequence."""
-    if fam == "evict":                 # the cache shrinks to what survives
-        return (1024 + budget) / PG * (B_K + B_V) / 1024
+    """Resident KV bytes for one KV head in one layer, as KiB.
+
+    dense      : K and V for every token.
+    eviction   : K and V for the survivors only -- sink + recent + budget --
+                 because the cache genuinely shrinks. Capped at L_REF.
+    retrieval  : the whole cache stays resident, so K and V for every token,
+                 plus the per-page digest it stores to decide what to attend.
+    codec      : as retrieval, except the PAGED keys are replaced by the record
+                 (`exact=False`). The sink and recent keys are not paged and
+                 stay exact -- charging zero for them would be a discount the
+                 method does not earn.
+    """
+    if fam == "evict":
+        return min(L_REF, N_EXACT + budget) * TOK * 2 / 1024
+    v_all = L_REF * TOK                                   # values, always exact
     if tag == "full":
-        return NPAGE * (B_K + B_V) / 1024
-    return NPAGE * ((B_K if exact else 0) + B_V + digest) / 1024
+        return (L_REF * TOK + v_all) / 1024
+    k_exact = N_EXACT * TOK                               # sink + recent keys
+    k_paged = N_PAGED * (B_K if exact else 0)             # exact, or replaced
+    return (k_exact + k_paged + v_all + N_PAGED * digest) / 1024
 
 def pack(vals, lo, hi, gap):
     """Spread values to at least `gap` apart inside [lo, hi], moving each as
@@ -128,20 +160,9 @@ def main():
         qs = sorted(set.intersection(*[set(by[s]) for s in seeds]))
         M = np.array([[by[s][q] for q in qs] for s in seeds])
         pts[tag] = dict(tag=tag, label=label, fam=fam, M=M, acc=M.mean() * 100,
-                        mem=memory(tag, fam, exact, dig, a.budget))
+                        exact=exact, mem=memory(tag, fam, exact, dig, a.budget))
     if "freekv" not in pts:
         sys.exit("no FreeKV reference for this budget")
-
-    ref, fkv = pts["freekv"]["M"], pts["freekv"]["acc"]
-    rng = np.random.default_rng(0)
-    for p in pts.values():
-        n = min(p["M"].shape[1], ref.shape[1]); k = min(p["M"].shape[0], ref.shape[0])
-        d = p["M"][:k, :n].mean(0) - ref[:k, :n].mean(0)
-        b = d[rng.integers(0, n, (8000, n))].mean(1) * 100
-        p["lo"], p["hi"] = np.percentile(b, [2.5, 97.5])
-        p["tie"] = p["lo"] <= 0 <= p["hi"]
-    band = (min(p["acc"] for p in pts.values() if p["tie"]),
-            max(p["acc"] for p in pts.values() if p["tie"]))
 
     achievable = [p for p in pts.values()
                   if p["fam"] != "ceil" and p["tag"] not in UB]
@@ -157,10 +178,9 @@ def main():
     # ---------- left: the Pareto structure ----------
     xs = [p["mem"] for p in pts.values()]
     ys = [p["acc"] for p in pts.values()]
-    xlo, xhi = min(xs) - 170, max(xs) + 170
+    xlo, xhi = min(xs) - 210, max(xs) + 230
     ylo, yhi = min(ys) - 2.5, max(ys) + 2.5
     axL.set_xlim(xlo, xhi); axL.set_ylim(ylo, yhi)
-    axL.axhspan(*band, color="#64748b", alpha=.10, zorder=0, lw=0)
     if len(front) > 1:
         axL.step([p["mem"] for p in front], [p["acc"] for p in front],
                  where="post", color="#c2410c", lw=2.0, alpha=.45, zorder=2)
@@ -168,24 +188,23 @@ def main():
                 s=470, facecolors="none", edgecolors="#c2410c", lw=2.3, zorder=8)
     for p in pts.values():
         c, mk, sz = STYLE[p["fam"]]
-        axL.errorbar(p["mem"], p["acc"],
-                     yerr=[[max(0., p["acc"] - (fkv + p["lo"]))],
-                           [max(0., (fkv + p["hi"]) - p["acc"])]],
-                     fmt="none", ecolor=c, elinewidth=1.2, alpha=.25, capsize=0, zorder=3)
         axL.scatter(p["mem"], p["acc"], s=sz, c=c, marker=mk, zorder=6,
                     edgecolors="white", linewidths=1.0)
     # label only what does NOT sit in the exact-key pile; the pile is named in
     # full on the right, where there is room for it
-    pile = [p for p in pts.values() if 1740 <= p["mem"] <= 1900]
-    side = {"q4key": (0, 17), "ours": (0, -24), "ours_sel": (0, 17),
-            "ours_q": (0, -24), "raas": (0, 17),
-            "tova": (-13, 6), "h2o": (-13, 2), "snapkv": (-13, -8)}
+    # every arm that keeps the paged keys exact and is not ours: these all land
+    # within ~90 KiB of each other and cannot be labelled in place
+    pile = [p for p in pts.values() if p["exact"] and p["fam"] != "ours"]
+    side = {"q4key": (0, 18), "ours": (0, -26), "ours_sel": (0, 18),
+            "ours_q": (0, -26), "raas": (14, 0),
+            "tova": (14, 2), "h2o": (14, 0), "snapkv": (14, -2)}
     for p in pts.values():
         if p in pile:
             continue
         dx, dy = side.get(p["tag"], (0, 16))
         axL.annotate(p["label"], (p["mem"], p["acc"]), textcoords="offset points",
-                     xytext=(dx, dy), ha="right" if dx < 0 else "center",
+                     xytext=(dx, dy),
+                     ha="left" if dx > 0 else ("right" if dx < 0 else "center"),
                      va="center", fontsize=14,
                      fontweight="bold" if p["fam"] in ("ours", "ceil") else "normal",
                      color=STYLE[p["fam"]][0])
@@ -216,20 +235,16 @@ def main():
         Line2D([], [], ls="", marker="P", ms=10, color="#111827", label="dense attention"),
         Line2D([], [], ls="", marker="o", ms=15, mfc="none", mec="#c2410c", mew=2.2,
                label="Pareto-optimal"),
-        mpatches.Patch(fc="#64748b", alpha=.18, ec="none",
-                       label="tie band: paired 95% CI vs FreeKV spans 0"),
-    ], loc="lower left", frameon=False, fontsize=12.5, labelspacing=.72,
+    ], loc="lower right", frameon=False, fontsize=12.5, labelspacing=.72,
        borderpad=.8, handletextpad=.8)
 
     # ---------- right: every method, named, with its interval ----------
     order = sorted(pts.values(), key=lambda z: z["acc"])
     yy = np.arange(len(order))
-    axR.axvspan(*band, color="#64748b", alpha=.10, zorder=0, lw=0)
-    axR.axvline(fkv, color="#64748b", lw=1.0, ls="--", zorder=1)
     for y, p in zip(yy, order):
         c = STYLE[p["fam"]][0]
-        axR.plot([fkv + p["lo"], fkv + p["hi"]], [y, y], color=c, lw=2.6,
-                 alpha=.38, solid_capstyle="round", zorder=2)
+        axR.plot([min(z["acc"] for z in order) - 1.2, p["acc"]], [y, y],
+                 color=c, lw=1.0, alpha=.18, zorder=1)
         axR.scatter(p["acc"], y, s=STYLE[p["fam"]][2] * .9, c=c,
                     marker=STYLE[p["fam"]][1], zorder=3,
                     edgecolors="white", linewidths=.9)
@@ -240,7 +255,7 @@ def main():
         if p["fam"] in ("ours", "ceil"):
             t.set_fontweight("bold")
     axR.set_ylim(-.8, len(order) - .2)
-    axR.set_xlabel("avg@8 accuracy   (%)      bar = paired 95% CI vs FreeKV", fontsize=15.5)
+    axR.set_xlabel("avg@8 accuracy   (%)", fontsize=15.5)
     axR.tick_params(axis="x", labelsize=13.5)
     axR.tick_params(axis="y", length=0)
     axR.grid(axis="x", alpha=.15, lw=.7)
@@ -251,8 +266,9 @@ def main():
     os.makedirs(os.path.dirname(f"{a.root}/{a.out}"), exist_ok=True)
     for ext in ("pdf", "png"):
         fig.savefig(f"{a.root}/{a.out}.{ext}", dpi=200, bbox_inches="tight")
-    print(f"wrote {a.out}.pdf/.png   {len(pts)} arms   "
-          f"tie band {band[0]:.2f}-{band[1]:.2f}%")
+    print(f"wrote {a.out}.pdf/.png   {len(pts)} arms")
+    print(f"memory model: L_REF={L_REF} tok, exact region {N_EXACT} tok, "
+          f"{N_PAGED} paged pages, {TOK} B/token/tensor")
     print("Pareto frontier (achievable arms only):")
     for p in front:
         print(f"  {p['tag']:<10}{p['mem']:8.0f} KiB{p['acc']:8.2f}%")

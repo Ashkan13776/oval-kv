@@ -1,3 +1,4 @@
-wrote results/figures/pareto_math50_b2048.pdf/.png   23 arms   tie band 68.00-72.75%
+wrote results/figures/pareto_math50_b2048.pdf/.png   23 arms
+memory model: L_REF=3745 tok, exact region 1024 tok, 85 paged pages, 256 B/token/tensor
 Pareto frontier (achievable arms only):
-  q4key         1155 KiB   72.75%
+  q4key         1405 KiB   72.75%
