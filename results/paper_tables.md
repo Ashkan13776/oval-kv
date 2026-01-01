@@ -1,0 +1,70 @@
+# Tables 1 and 2 (as reported in the paper)
+
+`eta*` is the **best evaluated mixing parameter for that cell**, selected over
+eta in {0, 0.25, 0.5, 0.75, 1}. It is a per-cell maximum, not a single fixed
+configuration — see the note at the bottom. Baseline columns are the FreeKV
+paper's reported numbers, not our reruns. FullKV is excluded from ranking.
+
+Per-eta measurements behind the `eta*` column:
+`longbench2_accuracy/oval_eta_sweep.json`, `longgenbench_accuracy/oval_eta_sweep.json`.
+
+## Table 1 — Long reasoning, k=8 generations per problem
+
+| Model | Benchmark | Metric | Full | Razor | RaaS | Quest | ArkVale | ShadowKV | InfiniGen | FreeKV | **eta\*** |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| R1-Llama-8B | MATH500 | pass@k | 78.00 | 72.00 | 74.00 | 72.00 | 72.00 | 76.00 | 74.00 | 78.00 | **80.00** |
+| R1-Llama-8B | MATH500 | avg@k | 67.25 | 60.50 | 62.50 | 62.00 | 62.50 | 60.25 | 66.50 | 66.75 | **69.75** |
+| R1-Llama-8B | AIME24 | pass@k | 80.00 | 46.67 | 66.67 | 73.33 | **80.00** | 63.33 | 70.00 | 76.67 | 76.67 |
+| R1-Llama-8B | AIME24 | avg@k | 47.08 | 30.00 | 36.25 | 44.17 | 46.67 | 36.50 | 45.83 | 47.50 | **53.33** |
+| R1-Llama-8B | GPQA | pass@k | 82.00 | 60.00 | 64.00 | 76.00 | 72.00 | 78.00 | 46.00 | **86.00** | 74.00 |
+| R1-Llama-8B | GPQA | avg@k | 39.75 | 34.25 | 33.50 | 37.25 | 39.75 | 36.25 | 27.50 | 41.25 | **44.00** |
+| R1-Llama-8B | **Average** | pass@k | 80.00 | 59.56 | 68.22 | 73.78 | 74.67 | 72.44 | 63.33 | **80.22** | 76.89 |
+| R1-Llama-8B | **Average** | avg@k | 51.36 | 41.58 | 44.08 | 47.81 | 49.64 | 44.33 | 46.61 | 51.83 | **55.69** |
+| R1-Qwen-7B | MATH500 | pass@k | 78.00 | 72.00 | 74.00 | 76.00 | 76.00 | 74.00 | 74.00 | 78.00 | **80.00** |
+| R1-Qwen-7B | MATH500 | avg@k | 71.75 | 66.75 | 67.00 | 68.00 | 68.25 | 64.75 | 70.00 | 70.00 | **73.75** |
+| R1-Qwen-7B | AIME24 | pass@k | 83.33 | 65.33 | 73.33 | 76.67 | 73.33 | 73.33 | 63.33 | **83.33** | 80.00 |
+| R1-Qwen-7B | AIME24 | avg@k | 56.66 | 35.42 | 42.92 | 47.50 | 47.92 | 43.75 | 43.34 | 52.92 | **60.00** |
+| R1-Qwen-7B | GPQA | pass@k | 72.00 | 60.00 | 58.00 | 72.00 | 72.00 | 70.00 | 58.00 | **74.00** | 72.00 |
+| R1-Qwen-7B | GPQA | avg@k | 35.75 | 32.50 | 33.25 | 38.75 | 34.25 | 33.50 | 35.50 | 39.50 | **39.75** |
+| R1-Qwen-7B | **Average** | pass@k | 77.78 | 65.78 | 68.44 | 74.89 | 73.78 | 72.44 | 65.11 | **78.44** | 77.33 |
+| R1-Qwen-7B | **Average** | avg@k | 54.72 | 44.89 | 47.72 | 51.42 | 50.14 | 47.33 | 49.61 | 54.14 | **57.83** |
+| R1-Qwen-14B | MATH500 | pass@k | 74.00 | 70.00 | 68.00 | 76.00 | 72.00 | 76.00 | 72.00 | 78.00 | **80.00** |
+| R1-Qwen-14B | MATH500 | avg@k | 70.25 | 59.75 | 64.75 | 67.25 | 66.25 | 65.00 | 67.00 | 67.50 | **72.00** |
+| R1-Qwen-14B | AIME24 | pass@k | 86.67 | 46.67 | 73.33 | 83.33 | 76.67 | 83.33 | 76.67 | 83.33 | **86.67** |
+| R1-Qwen-14B | AIME24 | avg@k | 66.25 | 32.50 | 48.75 | 58.33 | 61.25 | 57.25 | 60.00 | 64.17 | **71.25** |
+| R1-Qwen-14B | GPQA | pass@k | 82.00 | 68.00 | 80.00 | 80.00 | **86.00** | **86.00** | 58.00 | **86.00** | **86.00** |
+| R1-Qwen-14B | GPQA | avg@k | 53.25 | 38.50 | 44.25 | 51.25 | 53.75 | 51.75 | 38.00 | **56.00** | **56.00** |
+| R1-Qwen-14B | **Average** | pass@k | 80.89 | 61.56 | 73.78 | 79.78 | 78.22 | 81.78 | 68.89 | 82.44 | **84.22** |
+| R1-Qwen-14B | **Average** | avg@k | 63.25 | 43.58 | 52.58 | 58.94 | 60.42 | 58.00 | 55.00 | 62.56 | **66.42** |
+
+## Table 2 — LongBench v2 by context length, and LongGenBench
+
+| Model | Benchmark | Metric | Full | Razor | RaaS | Quest | ArkVale | ShadowKV | InfiniGen | FreeKV | **eta\*** |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| Llama-3.1-8B | LongBench v2 | Overall | 29.22 | 27.44 | 28.23 | 28.43 | 28.63 | 25.45 | 28.56 | 29.22 | **29.82** |
+| Llama-3.1-8B | LongBench v2 | Short | 34.44 | 33.89 | 33.89 | 33.33 | 33.89 | 32.78 | 32.28 | **35.00** | **35.00** |
+| Llama-3.1-8B | LongBench v2 | Medium | 27.91 | 25.12 | 26.51 | 27.44 | 26.98 | 22.79 | 26.05 | 27.44 | **28.84** |
+| Llama-3.1-8B | LongBench v2 | Long | 23.15 | 21.30 | 22.02 | 22.22 | 23.15 | 18.52 | 24.07 | 23.15 | **25.93** |
+| Llama-3.1-8B | LongGenBench | CR | 80.03 | 35.90 | 76.63 | 78.03 | 39.36 | **79.28** | 76.68 | 78.03 | 74.71 |
+| Llama-3.1-8B | LongGenBench | CR×Acc | 26.82 | 12.20 | 26.00 | 27.71 | 10.36 | **30.66** | 26.21 | 27.62 | 28.50 |
+| Qwen-2.5-7B | LongBench v2 | Overall | 27.44 | 25.25 | 26.24 | 27.63 | 26.84 | 25.84 | 26.44 | 26.84 | **28.03** |
+| Qwen-2.5-7B | LongBench v2 | Short | 36.11 | 32.78 | 35.56 | **36.67** | 36.11 | 32.22 | 32.22 | 34.44 | 36.11 |
+| Qwen-2.5-7B | LongBench v2 | Medium | 23.72 | 21.86 | 21.86 | 22.79 | 22.33 | 20.00 | **23.26** | 22.33 | 22.79 |
+| Qwen-2.5-7B | LongBench v2 | Long | 20.37 | 19.44 | 19.44 | 22.22 | 20.37 | **26.85** | 23.15 | 23.15 | 25.93 |
+| Qwen-2.5-7B | LongGenBench | CR | 79.56 | 42.13 | 77.65 | 62.89 | 75.91 | 35.49 | 72.96 | 76.93 | **78.54** |
+| Qwen-2.5-7B | LongGenBench | CR×Acc | 31.09 | 21.48 | **34.40** | 25.96 | 31.79 | 11.43 | 27.67 | 32.81 | 32.38 |
+| Qwen-2.5-14B | LongBench v2 | Overall | 33.40 | 34.19 | 32.60 | 33.80 | 34.19 | **34.79** | 32.31 | 34.19 | 33.00 |
+| Qwen-2.5-14B | LongBench v2 | Short | 41.11 | **43.33** | 40.56 | 40.00 | 41.11 | 40.56 | 40.56 | 41.11 | 41.11 |
+| Qwen-2.5-14B | LongBench v2 | Medium | 31.16 | 30.70 | 32.09 | 33.49 | 33.49 | **34.88** | 29.89 | 33.49 | 30.23 |
+| Qwen-2.5-14B | LongBench v2 | Long | 25.00 | **25.93** | 20.37 | 24.07 | 24.07 | 25.00 | 23.95 | 24.07 | **25.93** |
+| Qwen-2.5-14B | LongGenBench | CR | 65.84 | 26.48 | 62.29 | 45.49 | 45.31 | 21.25 | 63.02 | **65.46** | 63.92 |
+| Qwen-2.5-14B | LongGenBench | CR×Acc | 29.35 | 13.89 | **29.79** | 19.76 | 19.65 | 8.25 | 26.08 | 29.39 | 28.64 |
+
+## Note on `eta*`
+
+`eta*` is a **per-cell maximum over five eta values**, and the maximising eta
+differs across metrics within the same model. For Llama-3.1-8B the reported row
+draws Overall from eta=1.0, Medium from eta=0.75 and Long from eta=0.5, so **no
+single configuration produces that row**. Because the eta spread is small
+(<= ~2.9 points, no monotone trend — see the per-eta files), a per-cell maximum
+is an optimistic estimator. A fixed-eta row is the conservative alternative.

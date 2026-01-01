@@ -61,7 +61,7 @@ the tables cannot drift from a stale summary.
 
 ## Results
 
-Accuracy tables: [`results/accuracy_tables.txt`](results/accuracy_tables.txt);
+Tables 1 and 2 as reported in the paper: [`results/paper_tables.md`](results/paper_tables.md);
 machine-readable under `results/longbench2_accuracy/` and
 `results/longgenbench_accuracy/`. Raw generations (293 MB for LongGenBench) are
 not committed -- regenerate with `scripts/`, then `analysis/score_accuracy.py`.
