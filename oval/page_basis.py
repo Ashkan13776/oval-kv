@@ -1,6 +1,6 @@
 """OVAL (output-aware page basis) for FreeKV's ACCURACY harness.
 
-Mirrors source/freekv/oval_summary.py -- the perf-engine implementation -- so
+Mirrors source/freekv/oab_summary.py -- the perf-engine implementation -- so
 the two paths compute the same summary and the same score. Kept in its own
 module so their quest/arkv digest path is untouched.
 
@@ -50,7 +50,7 @@ def publish_metric(o_proj_weight, n_kv_heads, head_dim, n_kv_groups):
     return (Q * a.clamp_min(0).sqrt().unsqueeze(-2)) @ Q.transpose(-1, -2)
 
 
-def build_summary(paged_k, paged_v, Gh, eta, rank):
+def build_summary(paged_k, paged_v, Gh, eta, rank, qvar=None):
     """paged_k/paged_v: [B, P, page, n_kv, d] -> (mu, basis, coef).
 
     Returns mu [B,P,H,d], basis [B,P,H,d,r], coef [B,P,H,page,r].
@@ -60,6 +60,21 @@ def build_summary(paged_k, paged_v, Gh, eta, rank):
     X = paged_k.permute(0, 1, 3, 2, 4).float()        # [B,P,H,page,d]
     mu = X.mean(dim=3)
     X = X - mu.unsqueeze(3)
+
+    # Optional QUERY weighting. The basis exists to preserve q.k, but plain PCA
+    # weights every key direction by its own energy -- including directions no
+    # query ever probes. Weighting by the per-dimension query second moment
+    # aims the rank budget at the directions queries actually use.
+    #
+    #   minimise E_q[(q.(I-P)x)^2]  ->  PCA of X W,  W = diag(sqrt(qvar))
+    #   store B = W^-1 V so scoring and reconstruction still use the RAW q
+    #   and the summary format is unchanged (B is simply not orthonormal).
+    #
+    # qvar: [H, d] per-KV-head diagonal second moment, ridge already applied.
+    Wq = None
+    if qvar is not None:
+        Wq = qvar.clamp_min(1e-8).sqrt().to(X.dtype)        # [H,d]
+        X = X * Wq[None, None, :, None, :]                  # whiten the keys
 
     if eta > 0.0 and Gh is not None:
         Y = paged_v.permute(0, 1, 3, 2, 4).float()
@@ -92,13 +107,18 @@ def build_summary(paged_k, paged_v, Gh, eta, rank):
     # round-off into a garbage basis column: at r=31 that gave a 126% key
     # reconstruction error on layer 0, whose pages are rank-deficient by ~5
     # directions. Drop those directions instead -- they carry no energy, so
-    # zeroing them is exact, and reconstruction becomes exact at full rank.
+    # zeroing them is exact, and the reconstruction becomes exact at full rank.
     keep = (S2r > S2[..., -1:].clamp_min(0) * 1e-8).unsqueeze(-2)
     S = S2r.clamp_min(1e-10).sqrt()
     U8 = U[..., -r:]
     basis = Xw.transpose(-1, -2) @ U8 / S.unsqueeze(-2)
     basis = basis * keep.to(basis.dtype)
     coef = X @ basis
+    if Wq is not None:
+        # map the basis back out of the whitened frame: B <- W^-1 V. coef is
+        # already in the whitened frame (X above is whitened), so coef @ B^T
+        # reconstructs the ORIGINAL centred keys and q.khat uses the raw q.
+        basis = basis / Wq[None, None, :, :, None]
     return mu.to(dt), basis.to(dt), coef.to(dt)
 
 

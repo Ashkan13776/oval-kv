@@ -138,7 +138,7 @@ index 47f4b0f..ae898cf 100644
          preds = get_pred(
              model,
 diff --git a/accuracy/eval/util.py b/accuracy/eval/util.py
-index e4bd935..40291a7 100644
+index e4bd935..b33631f 100644
 --- a/accuracy/eval/util.py
 +++ b/accuracy/eval/util.py
 @@ -1,3 +1,4 @@
@@ -146,7 +146,7 @@ index e4bd935..40291a7 100644
  import os, argparse
  import numpy as np
  from pathlib import Path
-@@ -31,7 +32,16 @@ def parse_common_args(parser):
+@@ -31,7 +32,19 @@ def parse_common_args(parser):
                          choices=["full", "duo_attn", "razor", 
                                   "quest", "arkv", "spec_ret", "raas"],
                          help="KV cache eviction/selection method")
@@ -160,17 +160,35 @@ index e4bd935..40291a7 100644
 +                             "reconstructed as mu + coef @ basis^T instead of read from "
 +                             "the full key cache. Selection is unchanged. Values, sink "
 +                             "and recent tokens stay exact.")
-+    parser.add_argument("--page_rep", type=str, default="quest", choices=["quest", "arkv", "oval"],
++    parser.add_argument("--page_rep", type=str, default="quest", choices=["quest", "arkv", "oval", "random", "oracle",
++                                 "h2o", "tova", "snapkv",
++                                 "loki", "sparq", "infllm", "knorm", "centroid",
++                                 "expatt", "q4key", "shadowkv", "rocketkv"],
                          help="Page representation method")
      parser.add_argument("--GQA_policy", type=str, default="avgS",
                          choices=["maxQ", "avgQ", "maxS", "avgS", "maxSM", "avgSM"],
-@@ -128,6 +138,19 @@ def get_out_path(args, config, out_root_dir=None, mkdir=True):
+@@ -86,6 +99,10 @@ def parse_common_args(parser):
+     parser.add_argument("--repeat_bsz", type=int, default=None, 
+                         help="set for efficiency eval")
+ 
++    parser.add_argument("--pyramid", type=float, default=0.0,
++                        help="PyramidKV layer-wise budget schedule: budget scales "
++                             "linearly from (1+p)*B at layer 0 to (1-p)*B at the "
++                             "last layer, preserving the total. 0 = uniform.")
+     parser.add_argument("--kv8", action="store_true",
+                         help="Use 8-bit quantized KV cache (FP16 instead of BF16)")
+     return parser
+@@ -128,6 +145,23 @@ def get_out_path(args, config, out_root_dir=None, mkdir=True):
              else:
                  GQA_policy = config["GQA_policy"]
                  out_path += f"-{GQA_policy}"
 +                # Record the page representation in the FILENAME. Without this
 +                # an OVAL run and a quest run with otherwise identical settings
 +                # write to the SAME path and silently overwrite each other.
++                if config.get("pyramid", 0.0):
++                    # PyramidKV runs page_rep=quest, so without this tag its
++                    # results would overwrite FreeKV's on disk.
++                    out_path += f"-pyr{config['pyramid']}"
 +                if config.get("page_rep", "quest") != "quest":
 +                    out_path += f"-{config['page_rep']}"
 +                    if config.get("page_rep") == "oval":
@@ -184,7 +202,7 @@ index e4bd935..40291a7 100644
                  if method == "spec_ret":
                      spec_ret_steps = config["spec_ret_steps"]
                      llb = config["llb"]
-@@ -213,6 +236,14 @@ def load_model_and_tokenizer(path, args):
+@@ -213,6 +247,14 @@ def load_model_and_tokenizer(path, args):
          low_cpu_mem_usage=True,
          attn_implementation="eager",
          device_map = "auto",
@@ -199,7 +217,7 @@ index e4bd935..40291a7 100644
      )
  
      generation_config = GenerationConfig.from_pretrained(path)
-@@ -271,6 +302,9 @@ def load_model_and_tokenizer(path, args):
+@@ -271,13 +313,17 @@ def load_model_and_tokenizer(path, args):
          config["recent"] = recent_size
          config["skip_layer"] = args.skip_layer
          config["page_rep"] = args.page_rep
@@ -209,11 +227,37 @@ index e4bd935..40291a7 100644
          print(f"Enabling {method} evaluation using sink size {sink_size} recent size {recent_size}, "
                f"skip {args.skip_layer} layers")
          if method in ["quest", "arkv", "spec_ret"]:
+             print(f"Budget: {args.budget}, page size: {args.page_size}, GQA policy: {args.GQA_policy}")
+             assert recent_size % args.page_size == 0
+-            assert args.budget % args.page_size == 0
++            assert args.budget == 0 or args.budget % args.page_size == 0
+             config["budget"] = args.budget
++            config["pyramid"] = args.pyramid
+             config["page_size"] = args.page_size
+             config["GQA_policy"] = args.GQA_policy
+             if method == "spec_ret":
+@@ -292,8 +338,9 @@ def load_model_and_tokenizer(path, args):
+             print(f"Budget: {args.budget}, page size: {args.page_size}, alpha {args.raas_alpha}")
+             assert recent_size % args.page_size == 0
+             assert sink_size % args.page_size == 0
+-            assert args.budget % args.page_size == 0
++            assert args.budget == 0 or args.budget % args.page_size == 0
+             config["budget"] = args.budget
++            config["pyramid"] = args.pyramid
+             config["page_size"] = args.page_size
+             config["raas_alpha"] = args.raas_alpha
+ 
 diff --git a/accuracy/kvc/patch/dynamic_attention.py b/accuracy/kvc/patch/dynamic_attention.py
-index 32ac2af..f892fe2 100644
+index 32ac2af..3bc1c6d 100644
 --- a/accuracy/kvc/patch/dynamic_attention.py
 +++ b/accuracy/kvc/patch/dynamic_attention.py
-@@ -14,6 +14,9 @@ def repeat_kv_BLH(hidden_states: torch.Tensor, n_rep: int) -> torch.Tensor:
+@@ -1,3 +1,5 @@
++import os
++import math
+ from typing import Optional
+ import torch
+ from torch import nn
+@@ -14,6 +16,9 @@ def repeat_kv_BLH(hidden_states: torch.Tensor, n_rep: int) -> torch.Tensor:
      return hidden_states.reshape(batch, slen, num_key_value_heads * n_rep, head_dim)
  
  
@@ -223,7 +267,21 @@ index 32ac2af..f892fe2 100644
  def quest_sel(q, min_k_for_sel, max_k_for_sel, GQA_policy, num_heads, num_kv_heads):
      if GQA_policy in ["maxQ", "avgQ"]:
          # [bsz, 1, num_kv_heads, head_dim]
-@@ -103,7 +106,18 @@ def quest_arkv_attn(self,
+@@ -94,6 +99,13 @@ def quest_arkv_attn(self,
+ 
+     kv_seq_len = k.shape[1]
+     if self.num_pages == 0:
++        # new sequence: drop every piece of cross-sequence state, or h2o would
++        # carry the previous question's attention history into this one.
++        self._hist = None
++        self._loki_B = None
++        self._snap = None
++        self._ea = None
++        self._hist_seeded = False
+         # first decoding step that exceeds sink, init pages
+         num_init_pages = (kv_seq_len - sink_size) // page_size
+         assert num_init_pages < self.max_k.shape[1]
+@@ -103,7 +115,18 @@ def quest_arkv_attn(self,
              )
              mins = paged_k.min(dim=2).values
              maxs = paged_k.max(dim=2).values
@@ -243,7 +301,7 @@ index 32ac2af..f892fe2 100644
                  centers = (maxs + mins) / 2
                  dists = (
                      (
-@@ -124,7 +138,16 @@ def quest_arkv_attn(self,
+@@ -124,7 +147,16 @@ def quest_arkv_attn(self,
          )
          mins = new_paged_k.amin(dim=1)
          maxs = new_paged_k.amax(dim=1)
@@ -261,7 +319,7 @@ index 32ac2af..f892fe2 100644
              centers = (maxs + mins) / 2
              dists = (
                  (
-@@ -146,6 +169,12 @@ def quest_arkv_attn(self,
+@@ -146,7 +178,22 @@ def quest_arkv_attn(self,
          new_max_k = torch.empty((1, self.alloc_len, self.max_k.shape[-2], self.max_k.shape[-1]), 
                                  device=self.max_k.device, dtype=self.max_k.dtype)
          self.max_k = torch.cat([self.max_k, new_max_k], dim=1)
@@ -272,9 +330,32 @@ index 32ac2af..f892fe2 100644
 +                                   device=_t.device, dtype=_t.dtype)
 +                setattr(self, _n, torch.cat([_t, _new], dim=1))
      
++    if getattr(self, "_prefill_q", None) is not None and self.num_pages > 0:
++        # First step at which pages exist. Build the prompt-derived state now,
++        # then drop the stashed queries so this runs exactly once per sequence.
++        if self.page_rep == "expatt":
++            _prefill_query_stats(self, num_kv_heads, num_heads, head_dim)
++        else:
++            _prefill_history(self, q, k, sink_size, page_size, num_kv_heads,
++                             num_heads, head_dim, self._prefill_len)
++
      if update_only:
          return None
-@@ -171,6 +200,18 @@ def quest_arkv_attn(self,
+     
+@@ -157,6 +204,12 @@ def quest_arkv_attn(self,
+ 
+     do_compress = (kv_seq_len > sink_size + recent_size + max(token_budget, ll_token_budget))
+     if token_budget < 0 or not do_compress:
++        if os.environ.get("KVC_DEBUG_SEL") and self.layer_idx == int(os.environ.get("KVC_DEBUG_LAYER", 1)):
++            self._dbg_d = getattr(self, "_dbg_d", 0) + 1
++            if self._dbg_d <= 2:
++                print(f"[SEL] L{self.layer_idx} DENSE (no compress) kv_len={kv_seq_len} "
++                      f"thresh={sink_size + recent_size + max(token_budget, ll_token_budget)}",
++                      flush=True)
+         return self._flash_attention_forward(
+             q, k, v, padding_mask, q.shape[1], dropout=0.0
+         )
+@@ -171,6 +224,204 @@ def quest_arkv_attn(self,
      # [1, num_used_pages, num_kv_heads, head_dim]
      min_k_for_sel = self.min_k[:, :self.num_pages - num_recent_page, ...]
      max_k_for_sel = self.max_k[:, :self.num_pages - num_recent_page, ...]
@@ -285,24 +366,240 @@ index 32ac2af..f892fe2 100644
 +        _oc = self.oval_coef[:, :_n_sel, ...]
 +        _om = self.oval_mu[:, :_n_sel, ...]
 +
++    _rep = self.page_rep
++    _n_pages_sel = self.num_pages - num_recent_page
++
++    def _true_page_scores(qq=None):
++        """Exact per-page attention mass for the CURRENT query. Used by the
++        oracle ceiling and by h2o/tova to accumulate real attention history.
++        Costs a full q.K pass, so it is a measurement arm, not a deployable one."""
++        # The softmax denominator must span the FULL context -- sink and recent
++        # included -- or a head that puts most of its mass on the sink has its
++        # page preferences inflated ~20x before the mean over the GQA group,
++        # which silently reweights the group. These are true attention
++        # fractions, so the oracle is the optimum of retained attention mass.
++        qq = q if qq is None else qq
++        qg = qq[:, 0].reshape(qq.shape[0], num_kv_heads,
++                              num_heads // num_kv_heads, head_dim).float()
++        kall = k.permute(0, 2, 1, 3).float()                      # [b,H,L,d]
++        lg = torch.einsum('bhld,bhgd->bhgl', kall, qg) / math.sqrt(head_dim)
++        w = torch.softmax(lg, dim=-1)                             # over ALL keys
++        wp = w[..., sink_size: sink_size + _n_pages_sel * page_size]
++        return wp.reshape(qq.shape[0], num_kv_heads, num_heads // num_kv_heads,
++                          _n_pages_sel, page_size).sum(-1).mean(2)     # [b,H,P]
++
 +    def _score(qq):
-+        if _use_oval:
++        if _rep == "oval":
 +            return oval_sel(qq, _ob, _oc, _om, self.GQA_policy, num_heads, num_kv_heads)
++        if _rep == "random":
++            # control: selection carries no information about the query
++            g = torch.Generator(device=min_k_for_sel.device)
++            g.manual_seed(int(self.layer_idx) * 100003 + int(kv_seq_len))
++            return torch.rand((qq.shape[0], num_kv_heads, _n_pages_sel),
++                              device=min_k_for_sel.device, generator=g)
++        if _rep == "oracle":
++            # Ceiling: rank by TRUE attention mass, which no deployable method
++            # knows. Scored with the query it is handed, so running it under
++            # --method quest gives the true ceiling, and under --method spec_ret
++            # it gives the q_{t-1} ceiling -- the right bound for FreeKV's claim
++            # that the previous query is a good enough proxy.
++            return _true_page_scores(qq)
++        if _rep in ("h2o", "tova"):
++            # Attention history through step t-1 ONLY. The current query must not
++            # enter the score: an eviction method decides what to keep before it
++            # sees the next query, and scoring with it would make these arms the
++            # oracle. The history itself is accumulated after attention, over the
++            # pages that were actually attended -- a page that was dropped stops
++            # accruing, which is exactly what eviction does.
++            _ensure_hist(self, qq.shape[0], num_kv_heads, qq.device)
++            if not getattr(self, "_hist_seeded", False):
++                # On short-prompt / long-generation tasks the whole prompt sits
++                # inside the sink, so there are no prompt pages and the prompt
++                # accumulation above wrote nothing. An all-zero history makes
++                # topk break ties toward the lowest indices and lock onto the
++                # earliest pages forever -- an artefact, not the method. Anchor
++                # the history at compression onset instead.
++                self._hist[:, :, :_n_pages_sel] = _true_page_scores(qq)
++                self._hist_seeded = True
++            return self._hist[:, :, :_n_pages_sel]
++        if _rep == "expatt":
++            # Expected Attention: score a key by the attention it will receive in
++            # EXPECTATION over the query distribution estimated from the prompt,
++            # E[exp(q.k/sqrt(d))] = exp(mu.k/sqrt(d) + k'Sigma k/(2d)). Query
++            # agnostic, so each page is scored once, when it first appears, and
++            # the score never changes -- no per-step selection cost at all.
++            ea = getattr(self, "_ea", None)
++            have = 0 if ea is None else ea.shape[-1]
++            if have < _n_pages_sel:
++                mu, Sig = self._ea_mu, self._ea_cov          # [b,H,d], [b,H,d,d]
++                nnew = _n_pages_sel - have
++                kn = k[:, sink_size + have * page_size:
++                          sink_size + _n_pages_sel * page_size, ...]
++                kn = kn.reshape(kn.shape[0], nnew, page_size, num_kv_heads,
++                                head_dim).permute(0, 1, 3, 2, 4).float()
++                lin = torch.einsum('bphtd,bhd->bpht', kn, mu) / math.sqrt(head_dim)
++                quad = torch.einsum('bphtd,bhde,bphte->bpht', kn, Sig, kn) \
++                       / (2.0 * head_dim)
++                new = torch.logsumexp(lin + quad, dim=-1).permute(0, 2, 1)  # [b,H,P]
++                self._ea = new if ea is None else torch.cat([ea, new], dim=-1)
++            return self._ea[..., :_n_pages_sel]
++        if _rep in ("q4key", "shadowkv", "rocketkv"):
++            kk = k[:, sink_size: sink_size + _n_pages_sel * page_size, ...]
++            kk = kk.reshape(kk.shape[0], _n_pages_sel, page_size, num_kv_heads,
++                            head_dim).permute(0, 1, 3, 2, 4).float()   # [b,P,H,m,d]
++            qg = qq[:, 0].reshape(qq.shape[0], num_kv_heads,
++                                  num_heads // num_kv_heads, head_dim).float()
++
++            if _rep == "q4key":
++                # Quantised-key retrieval (PQCache / KIVI family): keep the keys
++                # at 4 bits per channel per page and score against the
++                # dequantised copy. This is the QUANTISATION counterpart to our
++                # low-rank record -- both replace the keys with something
++                # smaller to decide what to attend to -- at a near-identical
++                # footprint (2560 B/page vs our 2816 B), which makes it the
++                # sharpest contrast on the memory axis.
++                mn = kk.amin(-2, keepdim=True)
++                mx = kk.amax(-2, keepdim=True)
++                sc_ = (mx - mn).clamp_min(1e-8) / 15.0
++                kd = torch.round((kk - mn) / sc_).clamp_(0, 15) * sc_ + mn
++                sc = torch.einsum('bphtd,bhgd->bphgt', kd, qg).amax(-1).mean(-1)
++                return sc.permute(0, 2, 1)
++
++            mu = kk.mean(-2)                                       # [b,P,H,d]
++            if _rep == "shadowkv":
++                # ShadowKV landmarks: score by the page centroid, but force in
++                # the pages whose keys are LEAST mutually aligned -- a centroid
++                # represents those pages badly, so they are exactly the ones a
++                # mean-based digest would wrongly discard.
++                base = torch.einsum('bphd,bhgd->bphg', mu, qg).mean(-1)
++                kn = torch.nn.functional.normalize(kk, dim=-1)
++                coh = torch.einsum('bphtd,bphd->bpht', kn,
++                                   torch.nn.functional.normalize(mu, dim=-1)).mean(-1)
++                n_out = max(1, page_budget // 8)
++                out = (-coh).topk(min(n_out, coh.shape[1]), dim=1).indices  # [b,n,H]
++                base = base.scatter(1, out, float("inf"))
++                return base.permute(0, 2, 1)
++
++            # RocketKV: two stages. A cheap centroid pass narrows the field to
++            # 2x the budget, then an exact pass ranks only those. Costs far less
++            # than scoring every page exactly, and is the composable
++            # coarse-to-fine point on the runtime axis.
++            coarse = torch.einsum('bphd,bhgd->bphg', mu, qg).mean(-1)   # [b,P,H]
++            kc = min(2 * page_budget, _n_pages_sel)
++            cand = coarse.topk(kc, dim=1).indices                       # [b,kc,H]
++            ci = cand.permute(0, 2, 1)                                  # [b,H,kc]
++            gk = torch.gather(kk.permute(0, 2, 1, 3, 4), 2,
++                              ci[..., None, None].expand(-1, -1, -1, page_size, head_dim))
++            fine = torch.einsum('bhptd,bhgd->bhpgt', gk, qg).amax(-1).mean(-1)  # [b,H,kc]
++            out = torch.full((qq.shape[0], num_kv_heads, _n_pages_sel),
++                             float("-inf"), device=qq.device, dtype=fine.dtype)
++            return out.scatter(2, ci, fine)
++
++        if _rep in ("loki", "sparq", "infllm", "knorm", "centroid"):
++            kk = k[:, sink_size: sink_size + _n_pages_sel * page_size, ...]
++            kk = kk.reshape(kk.shape[0], _n_pages_sel, page_size, num_kv_heads, head_dim)
++            kk = kk.permute(0, 1, 3, 2, 4).float()                    # [b,P,H,m,d]
++            qg = qq[:, 0].reshape(qq.shape[0], num_kv_heads,
++                                  num_heads // num_kv_heads, head_dim).float()
++
++            if _rep == "knorm":
++                # K-norm: rank pages by mean key magnitude. Query-FREE, so it
++                # shows how much of retrieval is just "find the big keys".
++                sc = kk.norm(dim=-1).mean(-1).permute(0, 2, 1)        # [b,H,P]
++                return sc
++
++            if _rep == "centroid":
++                # rank-0 version of our basis: the page centroid alone.
++                mu = kk.mean(-2)                                       # [b,P,H,d]
++                sc = torch.einsum('bphd,bhgd->bphg', mu, qg).mean(-1)
++                return sc.permute(0, 2, 1)
++
++            if _rep == "sparq":
++                # SparQ: score using only the top-r components of |q|, the
++                # dimensions the query actually weights, instead of all d.
++                r = max(1, head_dim // 8)
++                idx = qg.abs().mean(2).topk(r, dim=-1).indices          # [b,H,r]
++                qs = torch.gather(qg, -1, idx.unsqueeze(2).expand(-1, -1, qg.shape[2], -1))
++                ks = torch.gather(kk, -1, idx[:, None, :, None, :]
++                                  .expand(-1, _n_pages_sel, -1, page_size, -1))
++                sc = torch.einsum('bphtd,bhgd->bphgt', ks, qs).amax(-1).mean(-1)
++                return sc.permute(0, 2, 1)
++
++            if _rep == "infllm":
++                # InfLLM: each block is represented by its few most "significant"
++                # tokens (largest key norm); the block is scored by its best
++                # representative rather than by a bound over all its tokens.
++                nrep = 4
++                rep = kk.norm(dim=-1).topk(nrep, dim=-1).indices        # [b,P,H,nrep]
++                kr = torch.gather(kk, -2, rep.unsqueeze(-1).expand(-1, -1, -1, -1, head_dim))
++                sc = torch.einsum('bphtd,bhgd->bphgt', kr, qg).amax(-1).mean(-1)
++                return sc.permute(0, 2, 1)
++
++            # loki: ONE basis shared by every page (from this layer's own keys),
++            # scoring in a low-rank projection. This is the shared-basis
++            # counterpart to our per-page basis -- the key ablation of our claim.
++            r = 8
++            if getattr(self, "_loki_B", None) is None:
++                flat = kk.reshape(kk.shape[0], -1, num_kv_heads, head_dim)
++                X = flat.permute(0, 2, 1, 3)                            # [b,H,N,d]
++                X = X - X.mean(-2, keepdim=True)
++                _, _, Vh = torch.linalg.svd(X.float(), full_matrices=False)
++                self._loki_B = Vh[..., :r, :].transpose(-1, -2)         # [b,H,d,r]
++            B_ = self._loki_B
++            kp = torch.einsum('bphtd,bhdr->bphtr', kk, B_)
++            qp = torch.einsum('bhgd,bhdr->bhgr', qg, B_)
++            sc = torch.einsum('bphtr,bhgr->bphgt', kp, qp).amax(-1).mean(-1)
++            return sc.permute(0, 2, 1)
++
++        if _rep not in ("quest", "arkv"):
++            raise ValueError(f"page_rep {_rep!r} has no scoring branch; it would "
++                             f"silently run as Quest and be written to disk "
++                             f"under its own name")
 +        return quest_sel(qq, min_k_for_sel, max_k_for_sel, self.GQA_policy,
 +                         num_heads, num_kv_heads)
  
      # selection with current or past query
      if token_budget > 0:
-@@ -199,7 +240,7 @@ def quest_arkv_attn(self,
+@@ -199,15 +450,43 @@ def quest_arkv_attn(self,
              else:
                  probe_q = past_q
  
 -        max_qk = quest_sel(probe_q, min_k_for_sel, max_k_for_sel, self.GQA_policy, num_heads, num_kv_heads)
-+        max_qk = _score(probe_q)
-         # [bsz, num_kv_heads, page_budget]
-         _, sel_page_indices = torch.topk(max_qk, page_budget, dim=-1)
+-        # [bsz, num_kv_heads, page_budget]
+-        _, sel_page_indices = torch.topk(max_qk, page_budget, dim=-1)
++        if _rep == "snapkv":
++            # SnapKV: score pages ONCE using the tail of the prompt (the
++            # observation window), then keep that selection fixed for the whole
++            # generation. Unlike the retrieval methods it never re-selects, so
++            # it pays no per-step selection cost and cannot adapt.
++            sc = getattr(self, "_snap", None)             # [b,H,P] from the prompt
++            if sc is None or sc.shape[-1] == 0:
++                # No prompt pages: on this benchmark the entire prompt fits in
++                # the sink, so SnapKV's observation window covers nothing.
++                # Anchor the single selection at compression onset instead,
++                # using the query available there (a W=1 window).
++                sc = _true_page_scores(q)
++                self._snap = sc
++            if sc.shape[-1] < _n_pages_sel:
++                # Pages generated AFTER the anchor were never scored. Published
++                # SnapKV never evicts generated tokens, but auto-retaining them
++                # here makes the arm grow into dense attention (most of a
++                # reasoning trace is generated post-anchor), so the budget could
++                # not be held fixed. We keep the budget and let those pages be
++                # covered only while they sit in the recent window. DEVIATION
++                # from the paper, and the reason SnapKV is weak here: its
++                # premise -- a static window predicts future attention -- fails
++                # when most context arrives after the selection is frozen.
++                pad = torch.full((sc.shape[0], sc.shape[1], _n_pages_sel - sc.shape[-1]),
++                                 float("-inf"), device=sc.device, dtype=sc.dtype)
++                sc = torch.cat([sc, pad], dim=-1)
++            _, sel_page_indices = torch.topk(sc[..., :_n_pages_sel], page_budget, dim=-1)
++        else:
++            max_qk = _score(probe_q)
++            # [bsz, num_kv_heads, page_budget]
++            _, sel_page_indices = torch.topk(max_qk, page_budget, dim=-1)
      
-@@ -207,7 +248,7 @@ def quest_arkv_attn(self,
+     # selection with last layer query
      if self.layer_idx > 0 and ll_page_budget > 0:
          llq_ptr = (self.last_layer_attn.q_ptr - 1) % self.spec_ret_steps
          llq = self.last_layer_attn.q_cache[:, llq_ptr, ...]
@@ -311,7 +608,32 @@ index 32ac2af..f892fe2 100644
          _, ll_sel_page_indices = torch.topk(max_qk, ll_page_budget, dim=-1)
          # [bsz, num_kv_heads, (up to) page_budget + ll_page_budget]
          # still maybe repeated pages...
-@@ -226,7 +267,29 @@ def quest_arkv_attn(self,
+@@ -215,6 +494,24 @@ def quest_arkv_attn(self,
+             sel_page_indices = ll_sel_page_indices
+         else:
+             sel_page_indices = torch.unique(torch.cat([sel_page_indices, ll_sel_page_indices], dim=-1), dim=-1)
++    if token_budget == 0 and ll_page_budget == 0:
++        # StreamingLLM: attend to sink + recent only, no retrieval at all.
++        # This is the floor that shows what the selection machinery actually buys.
++        used_k = torch.cat([k[:, :sink_size, ...], k[:, -recent_size:, ...]], dim=1)
++        used_v = torch.cat([v[:, :sink_size, ...], v[:, -recent_size:, ...]], dim=1)
++        used_pmask = torch.cat([padding_mask[:, :sink_size],
++                                padding_mask[:, -recent_size:]], dim=1) \
++                     if padding_mask is not None else None
++        return self._flash_attention_forward(q, used_k, used_v, used_pmask,
++                                             q.shape[1], dropout=0.0)
++
++    if os.environ.get("KVC_DEBUG_SEL") and self.layer_idx == int(os.environ.get("KVC_DEBUG_LAYER", 1)):
++        self._dbg_s = getattr(self, "_dbg_s", 0) + 1
++        if 100 <= self._dbg_s <= 102:
++            _p = sel_page_indices[0, 0].sort().values.tolist()
++            print(f"[SEL] L{self.layer_idx} rep={_rep} kv_len={kv_seq_len} "
++                  f"npages_sel={_n_pages_sel} head0_pages={_p}", flush=True)
++
+     # [bsz, num_kv_heads, page_budget, page_size]
+     sel_token_indices = (sink_size + sel_page_indices*page_size).unsqueeze(-1).expand(-1, -1, -1, page_size)
+     sel_token_indices = sel_token_indices + torch.arange(
+@@ -226,7 +523,29 @@ def quest_arkv_attn(self,
          sel_token_indices.shape[0], sel_token_indices.shape[1], -1
      ).transpose(1, 2).unsqueeze(-1).expand(-1, -1, -1, head_dim)
  
@@ -342,11 +664,195 @@ index 32ac2af..f892fe2 100644
      sel_v = torch.gather(v, dim=1, index=sel_token_indices)
  
      used_k = torch.cat([
+@@ -235,17 +554,123 @@ def quest_arkv_attn(self,
+     used_v = torch.cat([
+         v[:, :sink_size, ...], sel_v, v[:, -recent_size:, ...],
+     ], dim=1)
++    _nsel_tok = sel_page_indices.shape[-1] * page_size
++    _ones = self.budget_ones if self.budget_ones.shape[-1] == _nsel_tok else \
++            torch.ones((q.shape[0], _nsel_tok), device=q.device,
++                       dtype=self.budget_ones.dtype)
+     used_pmask = torch.cat([
+-        padding_mask[:, :sink_size], 
+-        self.budget_ones,
++        padding_mask[:, :sink_size],
++        _ones,
+         padding_mask[:, -recent_size:],
+     ], dim=1) if padding_mask is not None else None
+ 
++    if _rep in ("h2o", "tova"):
++        _accumulate_history(self, q, used_k, sel_page_indices, sink_size, page_size,
++                            num_kv_heads, num_heads, head_dim, _n_pages_sel,
++                            num_recent_page, page_budget)
++
+     return self._flash_attention_forward(
+         q, used_k, used_v, used_pmask, q.shape[1], dropout=0.0
+     )
+ 
+ 
++def _ensure_hist(self, bsz, num_kv_heads, device):
++    """Per-page attention history, sized to the page slab so that RECENT pages
++    accumulate too. A page that graduates out of the recent window must arrive
++    carrying the attention it earned while it was recent -- otherwise it enters
++    the contest with score 0 and can never be selected."""
++    npg = self.max_k.shape[1]
++    if getattr(self, "_hist", None) is None or self._hist.shape[2] < npg:
++        nh = torch.zeros((bsz, num_kv_heads, npg), device=device, dtype=torch.float32)
++        if getattr(self, "_hist", None) is not None:
++            nh[:, :, :self._hist.shape[2]] = self._hist
++        self._hist = nh
++    return self._hist
++
++
++def _prefill_history(self, q, k, sink_size, page_size, num_kv_heads,
++                     num_heads, head_dim, kv_seq_len):
++    """Initialise H2O/TOVA/SnapKV from the prompt.
++
++    H2O as published accumulates attention over the whole prompt before it
++    evicts anything; SnapKV averages an observation window of the last W prompt
++    queries. Without this the history starts uniformly at zero, topk breaks the
++    tie toward the lowest indices, and the method locks onto the earliest pages
++    forever -- an artefact of the implementation, not of the method.
++    """
++    qw = self._prefill_q                                   # [b,W,Hq,d]
++    self._prefill_q = None
++    b, W = qw.shape[0], qw.shape[1]
++    g = num_heads // num_kv_heads
++    qw = qw.reshape(b, W, num_kv_heads, g, head_dim).float()
++    L = kv_seq_len                                         # the PROMPT length
++    kk = k[:, :L].permute(0, 2, 1, 3).float()              # [b,H,L,d]
++    lg = torch.einsum('bwhgd,bhld->bhgwl', qw, kk) / math.sqrt(head_dim)
++    # causal: window query i sits at absolute prompt position L-W+i
++    pos = torch.arange(L - W, L, device=lg.device)[:, None]
++    lg = lg.masked_fill(torch.arange(L, device=lg.device)[None, :] > pos, float("-inf"))
++    w = torch.softmax(lg, dim=-1)                          # [b,H,g,W,L]
++    npg = min(self.num_pages, max(0, (L - sink_size) // page_size))
++    wp = w[..., sink_size: sink_size + npg * page_size]
++    per_page = wp.reshape(b, num_kv_heads, g, W, npg, page_size).sum(-1).mean(2)  # [b,H,W,P]
++    hist = _ensure_hist(self, b, num_kv_heads, q.device)
++    hist.zero_()
++    if npg > 0:
++        self._hist_seeded = True
++    if self.page_rep == "h2o":
++        hist[:, :, :npg] = per_page.sum(2)       # summed over the prompt, as published
++    elif self.page_rep == "tova":
++        hist[:, :, :npg] = per_page[:, :, -1]    # last prompt token only
++    else:                                        # snapkv: window MEAN, then frozen
++        self._snap = per_page.mean(2)            # [b,H,P] scores, not indices
++
++
++def _prefill_query_stats(self, num_kv_heads, num_heads, head_dim):
++    """Mean and covariance of the query vectors over the prompt window, per KV
++    head, pooling the GQA group. Expected Attention needs the DISTRIBUTION, not
++    a sample, so this is the whole model it ever sees of the queries."""
++    qw = self._prefill_q
++    self._prefill_q = None
++    b, W = qw.shape[0], qw.shape[1]
++    g = num_heads // num_kv_heads
++    X = qw.reshape(b, W, num_kv_heads, g, head_dim).permute(0, 2, 1, 3, 4) \
++          .reshape(b, num_kv_heads, W * g, head_dim).float()
++    mu = X.mean(-2)
++    Xc = X - mu.unsqueeze(-2)
++    self._ea_mu = mu
++    self._ea_cov = torch.einsum('bhnd,bhne->bhde', Xc, Xc) / max(1, X.shape[-2] - 1)
++
++
++def _accumulate_history(self, q, used_k, sel_page_indices, sink_size, page_size,
++                        num_kv_heads, num_heads, head_dim, n_pages_sel,
++                        num_recent_page, page_budget):
++    """Attention over the ATTENDED set, scattered back to absolute page ids.
++
++    Deliberately computed over used_k, not over the whole cache: an eviction
++    method can only observe attention to what it kept. Using the dense cache
++    here is what made the previous version strictly stronger than any
++    deployable method.
++    """
++    b = q.shape[0]
++    g = num_heads // num_kv_heads
++    qg = q[:, 0].reshape(b, num_kv_heads, g, head_dim).float()
++    uk = used_k.permute(0, 2, 1, 3).float()                # [b,H,S,d]
++    w = torch.softmax(torch.einsum('bhsd,bhgd->bhgs', uk, qg) / math.sqrt(head_dim), -1)
++    hist = _ensure_hist(self, b, num_kv_heads, q.device)
++    if self.page_rep == "tova":
++        hist.zero_()                                       # last step only
++    nsel = page_budget * page_size
++    sel = w[..., sink_size: sink_size + nsel] \
++            .reshape(b, num_kv_heads, g, page_budget, page_size).sum(-1).mean(2)
++    hist.scatter_add_(2, sel_page_indices, sel.to(hist.dtype))
++    if num_recent_page > 0:
++        rec = w[..., sink_size + nsel: sink_size + nsel + num_recent_page * page_size] \
++                .reshape(b, num_kv_heads, g, num_recent_page, page_size).sum(-1).mean(2)
++        rid = torch.arange(n_pages_sel, n_pages_sel + num_recent_page,
++                           device=hist.device)[None, None, :].expand(b, num_kv_heads, -1)
++        hist.scatter_add_(2, rid, rec.to(hist.dtype))
++
++
+ def raas_attn(self,
+               q: torch.Tensor,
+               k: torch.Tensor,
+@@ -274,6 +699,11 @@ def raas_attn(self,
+ 
+     kv_seq_len = self.kv_seq_len
+     if self.num_pages == 0:
++        # new sequence: drop every piece of cross-sequence state, or h2o would
++        # carry the previous question's attention history into this one.
++        self._hist = None
++        self._loki_B = None
++        self._snap = None
+         # first decoding step that exceeds sink, init pages
+         num_init_pages = (kv_seq_len - sink_size - recent_size) // page_size
+         # assert num_init_pages < page_budget
 diff --git a/accuracy/kvc/patch/llama.py b/accuracy/kvc/patch/llama.py
-index 7e50cbb..5fe285d 100644
+index 7e50cbb..e07aa03 100644
 --- a/accuracy/kvc/patch/llama.py
 +++ b/accuracy/kvc/patch/llama.py
-@@ -504,19 +504,58 @@ def enable_llama_dyn_attention(
+@@ -192,6 +192,17 @@ def llama_dyn_attention_forward(
+             streaming_value_states = torch.cat([past_streaming_value_states, streaming_value_states], dim=1)
+ 
+     if q_len == kv_seq_len:
++        # SnapKV's observation window, H2O's prompt accumulation and Expected
++        # Attention's query statistics are all estimated from the PROMPT. The
++        # only other place this was stashed sits inside `if self.kv8:`, which
++        # never runs unquantised -- so without this these three arms would
++        # silently start from no prompt information at all.
++        if getattr(self, "page_rep", "quest") in ("snapkv", "h2o", "tova", "expatt"):
++            _W = 32
++            self._prefill_q = query_states[
++                :, -_W:, self.num_full_query_head: self.num_full_query_head+self.num_dyn_query_head, :
++            ].detach()
++            self._prefill_len = q_len
+         # pre-filling: use flash attention
+         if is_raas:
+             attn_output = self.dynamic_attn(
+@@ -290,6 +301,16 @@ def llama_dyn_attention_forward(
+             _dyn_query_states = query_states[
+                 :, -1:, self.num_full_query_head: self.num_full_query_head+self.num_dyn_query_head, :
+             ]
++            # SnapKV/H2O/TOVA are initialised from the PROMPT, not from the first
++            # generated token: SnapKV averages an observation window of the last W
++            # prompt queries, and H2O accumulates attention over the prompt before
++            # it ever evicts. Stash the window here, where the keys are still
++            # unquantised, so those arms can build their prefill history.
++            if getattr(self, "page_rep", "quest") in ("snapkv", "h2o", "tova", "expatt"):
++                _W = 32
++                self._prefill_q = query_states[
++                    :, -_W:, self.num_full_query_head: self.num_full_query_head+self.num_dyn_query_head, :
++                ].detach()
+             if hasattr(self, "dynamic_attn"):
+                 _ = self.dynamic_attn(
+                     _dyn_query_states,
+@@ -501,22 +522,69 @@ def enable_llama_dyn_attention(
+         if method in ["quest", "arkv", "spec_ret"]:
+             module.page_size = config["page_size"]
+             module.token_budget = config["budget"] if idx >= config["skip_layer"] else -1
++            _py = float(config.get("pyramid", 0.0))
++            if _py > 0 and module.token_budget > 0:
++                # PyramidKV: spend more budget on early layers, less on late ones,
++                # holding the TOTAL across layers equal to the uniform setting.
++                _L = max(1, len(model.model.layers) - 1)
++                _s = 1.0 + _py - 2.0 * _py * (idx / _L)
++                module.token_budget = max(module.page_size,
++                    int(round(module.token_budget * _s / module.page_size)) * module.page_size)
              module.GQA_policy = config["GQA_policy"]
              module.alloc_len = 512
              module.num_pages = 0    # === reset needed ===
@@ -408,6 +914,21 @@ index 7e50cbb..5fe285d 100644
              module.ll_token_budget = 0
              if method == "spec_ret":
                  module.ll_token_budget = config["llb"]
+@@ -534,6 +602,14 @@ def enable_llama_dyn_attention(
+             module.dynamic_attn = types.MethodType(raas_attn, module)
+             module.page_size = config["page_size"]
+             module.token_budget = config["budget"] if idx >= config["skip_layer"] else -1
++            _py = float(config.get("pyramid", 0.0))
++            if _py > 0 and module.token_budget > 0:
++                # PyramidKV: spend more budget on early layers, less on late ones,
++                # holding the TOTAL across layers equal to the uniform setting.
++                _L = max(1, len(model.model.layers) - 1)
++                _s = 1.0 + _py - 2.0 * _py * (idx / _L)
++                module.token_budget = max(module.page_size,
++                    int(round(module.token_budget * _s / module.page_size)) * module.page_size)
+             module.alpha = config["raas_alpha"]
+             module.page_budget = module.token_budget // module.page_size
+             if module.token_budget > 0:
 diff --git a/accuracy/kvc/patch/step_update.py b/accuracy/kvc/patch/step_update.py
 index e91fc38..9191a23 100644
 --- a/accuracy/kvc/patch/step_update.py
@@ -502,7 +1023,7 @@ index df82a90..28b5d7f 100644
  }
 \ No newline at end of file
 diff --git a/source/freekv/adapter/modeling.py b/source/freekv/adapter/modeling.py
-index f9abf0a..3e2dc18 100644
+index f9abf0a..9d7ce65 100644
 --- a/source/freekv/adapter/modeling.py
 +++ b/source/freekv/adapter/modeling.py
 @@ -146,7 +146,7 @@ def _freekv_attn_forward(
@@ -542,7 +1063,7 @@ index f9abf0a..3e2dc18 100644
          mod_cls = str(mod.__class__)
          if "Attention" in mod_cls:
 diff --git a/source/freekv/infer_state.py b/source/freekv/infer_state.py
-index efa74df..18c9625 100644
+index efa74df..d4f6233 100644
 --- a/source/freekv/infer_state.py
 +++ b/source/freekv/infer_state.py
 @@ -7,6 +7,8 @@ from torch import Tensor
@@ -828,7 +1349,7 @@ index efa74df..18c9625 100644
      def alloc_page(self):
          if len(self._pool._free_ids) <= 0:
 diff --git a/source/freekv/kernels.py b/source/freekv/kernels.py
-index ad11d7a..d7520d0 100644
+index ad11d7a..3c158da 100644
 --- a/source/freekv/kernels.py
 +++ b/source/freekv/kernels.py
 @@ -84,6 +84,16 @@ def append_paged_kv_cache(
@@ -889,7 +1410,7 @@ index b77907c..8fa91d7 100644
                      self.budget
                      - self.n_win_pages
 diff --git a/source/freekv_cpp/src/api.cu b/source/freekv_cpp/src/api.cu
-index 318820b..844e544 100644
+index 318820b..a6db131 100644
 --- a/source/freekv_cpp/src/api.cu
 +++ b/source/freekv_cpp/src/api.cu
 @@ -10,6 +10,7 @@ PYBIND11_MODULE(freekv_cpp, m) {
@@ -901,7 +1422,7 @@ index 318820b..844e544 100644
  	m.def("prefill_select_topk", &prefill_select_topk);
    py::class_<BatchPrefillWithPagedKVCachePyTorchWrapper>(
 diff --git a/source/freekv_cpp/src/estimate_select_recall.cu b/source/freekv_cpp/src/estimate_select_recall.cu
-index 8392b5e..22b2acc 100644
+index 8392b5e..2f53bea 100644
 --- a/source/freekv_cpp/src/estimate_select_recall.cu
 +++ b/source/freekv_cpp/src/estimate_select_recall.cu
 @@ -41,10 +41,15 @@ void estimate_select_recall_core(
@@ -967,7 +1488,7 @@ index 8392b5e..22b2acc 100644
 +  ).wait();
  }
 diff --git a/source/freekv_cpp/src/flashinfer_ops.h b/source/freekv_cpp/src/flashinfer_ops.h
-index 4a32ad1..7949372 100644
+index 4a32ad1..52f1ff7 100644
 --- a/source/freekv_cpp/src/flashinfer_ops.h
 +++ b/source/freekv_cpp/src/flashinfer_ops.h
 @@ -58,6 +58,10 @@ void append_paged_kv_cache_decode(
@@ -1022,7 +1543,7 @@ index f819297..126e3ad 100644
  
    ~ThreadPool() {
 diff --git a/source/pred.py b/source/pred.py
-index a316410..7d2a847 100644
+index a316410..1c4103f 100644
 --- a/source/pred.py
 +++ b/source/pred.py
 @@ -107,6 +107,15 @@ def parse_args(args=None):
