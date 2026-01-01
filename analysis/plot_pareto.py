@@ -197,7 +197,9 @@ def main():
     # every arm that keeps the paged keys exact and is not ours: these all land
     # within ~90 KiB of each other and cannot be labelled in place
     pile = [p for p in pts.values() if p["exact"] and p["fam"] != "ours"]
-    side = {"q4key": (0, 18), "ours": (0, -26), "ours_sel": (0, 18),
+    # q4key and OVAL Retv.+Comp. are the two frontier points and sit ~20 KiB
+    # apart, so they need opposite sides rather than opposite vertical offsets
+    side = {"q4key": (-15, -9), "ours": (16, 9), "ours_sel": (0, 18),
             "raas": (14, 0),
             "tova": (14, 2), "h2o": (14, 0), "snapkv": (14, -2)}
     for p in pts.values():

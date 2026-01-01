@@ -266,12 +266,16 @@ tried). So the left panel carries the Pareto structure with the pile boxed and
 left unlabelled, and the right panel names every arm against its paired
 interval.
 
-**The frontier is a single point: 4-bit quantised keys, 1155 KiB, 72.75%.**
-It has the lowest memory of any achievable arm and the highest accuracy, so it
-dominates everything plotted, OVAL included (1182 KiB, 71.75%). Scalar
-quantisation of the keys beats a rank-8 basis on both axes at this budget.
-That is the honest reading and the figure is built to show it rather than
-bury it.
+**The frontier has two points and neither dominates the other:**
+
+| | memory | avg@8 |
+| --- | --- | --- |
+| 4-bit keys | 1405 KiB | 70.25% |
+| OVAL Retv.+Comp. | 1426 KiB | 71.75% |
+
+21 KiB cheaper against 1.5 points more accurate. An earlier version of this
+figure showed 4-bit keys dominating outright at 72.75%; that was an
+implementation fault, not a result -- see below.
 
 It should be read against the tie band: 21 of 23 arms, both oracles among
 them, are statistically indistinguishable from FreeKV, so "q4key dominates"
@@ -331,3 +335,36 @@ Resulting values at B=2048 (KiB per KV head per layer):
 
 The frontier is unchanged by the correction: 4-bit keys still dominates, now
 at 1405 KiB against OVAL Retv.+Comp. at 1426.
+
+
+## The 4-bit baseline was measured wrongly, in its own favour
+
+As first written, `q4key` **scored** pages with 4-bit quantised keys but then
+**attended with the exact fp16 keys** (the reconstruction path in
+`dynamic_attention.py` fired only for `page_rep == "oab"`; every other arm fell
+through to `torch.gather` on the real key cache). It was nevertheless charged
+codec memory -- 1405 KiB, as though the 4-bit copy were the only one it kept.
+
+A method cannot attend with keys it does not store. The arm was getting
+codec-level memory together with uncompressed-key accuracy, which is precisely
+the pairing the memory axis is supposed to price. OVAL Retv.+Comp. is a true
+codec: it attends with its reconstruction and absorbs that error.
+
+Fixed by dequantising the selected pages and attending on those, mirroring the
+OVAL reconstruction path. Effect:
+
+| | avg@8 |
+| --- | --- |
+| before (scored 4-bit, attended fp16) | 72.75% |
+| after (true codec, attends 4-bit) | 70.25% |
+| cost of making it honest | **-2.50** |
+
+The superseded cells are kept in `results/_superseded/`, not deleted.
+
+Two notes on scope. Every other arm was checked for the same fault and is
+consistent: Centroid, ShadowKV, RocketKV, Loki, SparQ and InfLLM are
+index-only, they attend with exact keys and are charged exact-key memory.
+Only `q4key` mixed the two. And the correction does not change the headline
+finding -- at B=2048 both oracles still sit inside the tie band, so no
+ordering in the cluster is reliable; it changes which arm the frontier ring
+lands on, not whether that ring means anything.
