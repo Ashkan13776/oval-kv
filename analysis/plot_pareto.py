@@ -50,7 +50,11 @@ HD, BPE, PG = 128, 2, 32
 L_REF, SINK, RECENT = 3745, 512, 512
 TOK = HD * BPE                      # bytes for one token, one tensor (K or V)
 N_EXACT = SINK + RECENT             # tokens held exact by every arm
-N_PAGED = (L_REF - N_EXACT) // PG   # whole pages in the paged region
+N_PAGED = (L_REF - N_EXACT) // PG   # whole pages that can be SELECTED
+N_DIGEST = (L_REF - SINK) // PG     # pages that have a digest written: the
+                                    # summary is built when a page completes,
+                                    # which includes pages still inside the
+                                    # recent window
 B_K = PG * TOK                      # exact keys, one page
 B_V = B_K
 
@@ -59,28 +63,27 @@ ARMS = {
  "q4key":    ("4-bit keys",     "ret",   2560, False, "{D}-quest/MATH50-*b{B}-avgSM-q4key*"),
  "ours":     ("OVAL Retv.+Comp.", "ours",  2816, False, "{D}-spec_ret/MATH50-*b{B}-avgSM-oval_r8_eta0.0_q0_recon1-*"),
  "ours_sel": ("OVAL Retv.",       "ours",  2816, True,  "{D}-spec_ret/MATH50-*b{B}-avgSM-oval_r8_eta0.0_q0-pQ2*"),
- "loki":     ("Loki",           "ret",   512,  True,  "{D}-quest/MATH50-*b{B}-avgSM-loki*"),
+ "loki":     ("Loki r16",       "ret",   1024, True,  "{D}-quest/MATH50-*b{B}-avgSM-loki*"),
  "centroid": ("Centroid",       "ret",   256,  True,  "{D}-quest/MATH50-*b{B}-avgSM-centroid*"),
  "shadowkv": ("ShadowKV",       "ret",   256,  True,  "{D}-quest/MATH50-*b{B}-avgSM-shadowkv*"),
  "rocketkv": ("RocketKV",       "ret",   256,  True,  "{D}-quest/MATH50-*b{B}-avgSM-rocketkv*"),
- "infllm":   ("InfLLM",         "ret",   1024, True,  "{D}-quest/MATH50-*b{B}-avgSM-infllm*"),
+ "infllm":   ("InfLLM",         "ret",   8,    True,  "{D}-quest/MATH50-*b{B}-avgSM-infllm*"),
  "sparq":    ("SparQ",          "ret",   0,    True,  "{D}-quest/MATH50-*b{B}-avgSM-sparq*"),
  "quest":    ("Quest",          "ret",   512,  True,  "{D}-quest/MATH50-*b{B}-avgSM-skl1*"),
  "freekv":   ("FreeKV",         "ret",   512,  True,  "{D}-spec_ret/MATH50-*b{B}-avgSM-pQ2-*"),
  "arkvale":  ("ArkVale",        "ret",   512,  True,  "{D}-spec_ret/MATH50-*b{B}-avgSM-arkv-*"),
- "expatt":   ("ExpectedAttn",   "ret",   0,    True,  "{D}-quest/MATH50-*b{B}-avgSM-expatt*"),
+ "expatt":   ("ExpectedAttn",   "ret",   4,    True,  "{D}-quest/MATH50-*b{B}-avgSM-expatt*"),
  "knorm":    ("K-norm",         "ret",   2,    True,  "{D}-quest/MATH50-*b{B}-avgSM-knorm*"),
  "random":   ("Random",         "ctrl",  0,    True,  "{D}-quest/MATH50-*b{B}-avgSM-random*"),
  "tova":     ("TOVA \u2020",    "evict", 4,    False, "{D}-quest/MATH50-*b{B}-avgSM-tova*"),
  "h2o":      ("H2O \u2020",     "evict", 4,    False, "{D}-quest/MATH50-*b{B}-avgSM-h2o*"),
- "snapkv":   ("SnapKV \u2020",  "evict", 0,    False, "{D}-quest/MATH50-*b{B}-avgSM-snapkv*"),
- "raas":     ("RaaS",           "evict", 0,    False, "{D}-raas/MATH50-*b{B}*"),
+ "raas":     ("RaaS",           "evict", 516,  False, "{D}-raas/MATH50-*b{B}*"),
  "full":     ("Dense",          "dense", 0,    True,  "{D}-full/MATH50-*"),
  "oracle":   ("Oracle",         "ceil",  0,    True,  "{D}-quest/MATH50-*b{B}-avgSM-oracle*"),
  "oracle_prev": ("Oracle q(t\u22121)", "ceil", 0, True,
                  "{D}-spec_ret/MATH50-*b{B}-avgSM-oracle*"),
 }
-UB = {"h2o", "tova", "snapkv"}            # implemented without eviction
+UB = {"h2o", "tova"}                      # implemented without eviction
 STYLE = {                                 # family: (colour, marker, size)
  "ours":  ("#c2410c", "D", 115),
  "ret":   ("#334155", "o",  66),
@@ -105,6 +108,15 @@ def load(pat):
                 == str(e["answer"]).replace(" ", ""))) for e in rows}
     return by
 
+# Fixed per-KV-head, per-layer overhead that is NOT per-page. Expected
+# Attention models the query distribution per QUERY head -- the published rule
+# -- so it holds a mean and a full covariance for each of the g heads sharing a
+# KV head: g * (d + d*d) floats = 451 KiB. That is a quarter of this arm's
+# footprint, and it is the honest price of the method rather than a rounding.
+GQA_G = 7                           # query heads per KV head, ds-r1-qwen-7b
+FIXED = {"expatt": GQA_G * (HD + HD * HD) * 4}
+
+
 def memory(tag, fam, exact, digest, budget):
     """Resident KV bytes for one KV head in one layer, as KiB.
 
@@ -119,13 +131,16 @@ def memory(tag, fam, exact, digest, budget):
                  method does not earn.
     """
     if fam == "evict":
-        return min(L_REF, N_EXACT + budget) * TOK * 2 / 1024
+        kept = min(L_REF, N_EXACT + budget)
+        # an eviction arm still holds a digest for each page it retains
+        return (kept * TOK * 2 + (budget // PG) * digest) / 1024
     v_all = L_REF * TOK                                   # values, always exact
     if tag == "full":
         return (L_REF * TOK + v_all) / 1024
     k_exact = N_EXACT * TOK                               # sink + recent keys
     k_paged = N_PAGED * (B_K if exact else 0)             # exact, or replaced
-    return (k_exact + k_paged + v_all + N_PAGED * digest) / 1024
+    return (k_exact + k_paged + v_all + N_DIGEST * digest
+            + FIXED.get(tag, 0)) / 1024
 
 def pack(vals, lo, hi, gap):
     """Spread values to at least `gap` apart inside [lo, hi], moving each as

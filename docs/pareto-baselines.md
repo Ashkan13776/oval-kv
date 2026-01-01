@@ -368,3 +368,58 @@ Only `q4key` mixed the two. And the correction does not change the headline
 finding -- at B=2048 both oracles still sit inside the tie band, so no
 ordering in the cluster is reliable; it changes which arm the frontier ring
 lands on, not whether that ring means anything.
+
+
+## Final numbers, after every comparison was put on equal terms
+
+Eleven arms were re-run (88 cells) once the audit faults were fixed. OVAL's own
+cells were NOT re-run and did not need to be: it already reduced in fp32 and
+already aggregated with logsumexp, so the corrections moved the baselines
+toward it, not it toward them.
+
+| arm | avg@8 | KiB |
+| --- | --- | --- |
+| **OVAL Retv.+Comp.** | **71.75** | **1470** |
+| Centroid | 71.75 | 1894 |
+| SparQ / InfLLM / RocketKV / TOVA† | 71.50 | - |
+| **Oracle / Oracle q(t-1)** | **71.50** | 1872 |
+| Quest / ArkVale | 71.25 | 1923 |
+| Dense / Loki r16 / 4-bit keys | 70.75 | - |
+| FreeKV / Random | 70.25 | - |
+| H2O† | 68.75 | 1536 |
+| ExpectedAttn | 68.00 | 2324 |
+| K-norm | 67.75 | 1872 |
+| StreamingLLM | 58.50 | 512 |
+| RaaS | 50.50 | 1568 |
+
+Pareto frontier: 4-bit keys (1445 KiB, 70.75%) and OVAL Retv.+Comp.
+(1470 KiB, 71.75%).
+
+### Why no ordering inside the cluster is reportable
+
+Three facts, any one of which is sufficient:
+
+- **OVAL (71.75) now exceeds the oracle (71.50).** Scoring with the true
+  attention distribution cannot be beaten by scoring with an approximation of
+  it. The gap is sampling noise.
+- **Centroid ties OVAL exactly.** A rank-0 page mean with a 256 B digest
+  matches the rank-8 basis.
+- **FreeKV lands on 70.25, identical to Random.** Selection carrying no
+  information about the query scores the same as the published method.
+
+Loki at the fair r=16 scored *below* the handicapped r=8 run (70.75 vs 71.25).
+More rank making a method worse is incoherent except as noise.
+
+FreeKV is also no longer a sound reference: the fp32 softmax fix moved it by
+-1.00, so a paired "+1.50 vs FreeKV" measures FreeKV's own movement as much as
+the arm's. Only SparQ clears significance against it (+1.25, CI [+0.25,
++2.75]), and that should not be leaned on.
+
+### What does survive
+
+The floor is real and separable: K-norm, Expected Attention, H2O,
+StreamingLLM and RaaS are genuinely worse than the cluster. And the headline
+stands on its own terms -- at the budget the published table uses, **no
+scoring rule separates on MATH50, including a perfect one.** That is a
+negative result about the benchmark and the operating point, not about any
+method in it.

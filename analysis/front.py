@@ -38,8 +38,8 @@ A = {
  "pyramid":     (512,  True,  f"{D}-spec_ret/MATH50-*b2048-avgSM-pyr*"),
  "oracle":      (0,    True,  f"{D}-quest/MATH50-*b2048-avgSM-oracle*"),
  "oracle_prev": (0,    True,  f"{D}-spec_ret/MATH50-*b2048-avgSM-oracle*"),
- "stream":      (0,    False, f"{D}-quest/MATH50-*-b0-avgSM-skl1*"),
- "sliding":     (0,    False, f"{D}-quest/MATH50-*r2560*-b0-*"),
+ "stream":      (0,    False, f"{D}-quest/MATH50-s512-r512-*-b0-avgSM-skl1*"),
+ "sliding":     (0,    False, f"{D}-quest/MATH50-s512-r2560-*-b0-avgSM-skl1*"),
 }
 CEIL = {"oracle", "oracle_prev"}
 def per_problem(pat):
