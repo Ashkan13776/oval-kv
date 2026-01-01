@@ -28,14 +28,14 @@ set -u
 KV_ROOT="${KV_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 KV_PY="${KV_PY:-python}"
 FREEKV_DIR="${FREEKV_DIR:-$KV_ROOT/third_party/FreeKV}"
-cd "$FREEKV_DIR/accuracy" || { echo "no FreeKV at $FREEKV_DIR -- run ./setup.sh"; exit 1; }
+M="${MODEL:?set MODEL, e.g. MODEL=ds-r1-qwen-14b}"
+cd "$FREEKV_DIR/accuracy" 2>/dev/null || { echo "no FreeKV at $FREEKV_DIR -- run ./setup.sh"; exit 1; }
 
 export PYTHONUNBUFFERED=1
 export OVAL_QUANT=0                    # bfloat16 records
 export KVC_MAX_TOKENS=32768            # short prompt + 16384 generated
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
-M="${MODEL:?set MODEL, e.g. MODEL=ds-r1-llama-8b}"
 DATASETS="${DATASETS:-MATH50 AIME24 GPQA50c}"
 ETAS="${ETAS:-0.0 0.25 0.5 0.75 1.0}"
 SEEDS="${SEEDS:-42 43 44 45 46 47 48 49}"

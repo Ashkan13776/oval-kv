@@ -29,17 +29,32 @@ The arms you will run are:
 FreeKV's own numbers are taken from their paper, not re-run, so you never need
 `--page_rep quest`.
 
-## What is already done (machine A)
+## Who runs what
 
-| model | status |
-|---|---|
-| `ds-r1-qwen-7b` | rank grid (r=1/4/8/16/32) at seed 42; k=8 at eta=0; k=8 at the published eta*; full eta grid at k=8 **in progress** |
-| `ds-r1-llama-8b` | rank grid at seed 42 only |
-| `ds-r1-qwen-14b` | rank grid at seed 42 only |
+Work is split **by model**. Each model writes only to its own
+`results/codec/<model>-*` directories, so machines never touch the same file
+and merging is a directory copy.
 
-## What machine B should run
+| machine | model | status |
+|---|---|---|
+| A | `ds-r1-qwen-7b` | rank grid at seed 42; k=8 at eta=0 and at the published eta*; full eta grid at k=8 **in progress** |
+| B | `ds-r1-llama-8b` | rank grid at seed 42 only -- **to run** |
+| C | `ds-r1-qwen-14b` | rank grid at seed 42 only -- **to run** |
 
-`ds-r1-llama-8b`, the full eta grid at k=8 plus the dense control:
+Cost of the full eta grid at k=8 (3 datasets x (5 etas + dense) x 8 seeds =
+144 cells), from cell times measured on machine A with 4 x 48GB GPUs:
+
+| model | per-cell (MATH50 / AIME24 / GPQA50c) | 144 cells |
+|---|---|---|
+| `ds-r1-llama-8b` | 2.9h / 5.3h / 5.4h | ~6-7 days |
+| `ds-r1-qwen-14b` | 4.2h / 7.6h / 7.7h | **~10 days** |
+
+If ten days is too long, narrow an axis -- see "Running less" below. The eta
+axis is the one worth keeping, since re-deriving eta* is the point.
+
+## Machine B -- ds-r1-llama-8b
+
+Full eta grid at k=8 plus the dense control:
 
 ```bash
 git clone <this repo> oval-kv && cd oval-kv
@@ -52,23 +67,47 @@ export KV_PY=$(which python)          # a torch/CUDA env; see requirements.txt
 MODEL=ds-r1-llama-8b DENSE=1 ./scripts/codec_reasoning_sweep.sh
 ```
 
-That is 3 datasets x (5 etas + dense) x 8 seeds = **144 cells**. On 4 x 48GB
-GPUs expect roughly **6-7 days**; llama-8b cells run ~2.9h on MATH50 and
-~5.3h on AIME24/GPQA50c.
+## Machine C -- ds-r1-qwen-14b
 
-To do less, narrow any axis:
+Same command, different model:
 
 ```bash
-# just the published eta* per cell (MATH50 0.25, AIME24 0.5, GPQA50c 0.75) + dense
+MODEL=ds-r1-qwen-14b DENSE=1 ./scripts/codec_reasoning_sweep.sh
+```
+
+**The 14B needs >=40GB per GPU.** Measured footprint on machine A was ~37GB
+per cell: ~28GB weights in bfloat16, ~6GB KV at the realised sequence length,
+~3GB summary slabs. It will not fit a 24GB card. If you only have smaller
+GPUs, run fewer concurrent cells (`GPUS="0"`) -- it is the per-cell footprint
+that binds, not the total.
+
+MATH50 finishes roughly twice as fast as the other two datasets, so if you
+want a complete dataset early, run it first:
+
+```bash
+MODEL=ds-r1-qwen-14b DENSE=1 DATASETS=MATH50 ./scripts/codec_reasoning_sweep.sh
+MODEL=ds-r1-qwen-14b DENSE=1 ./scripts/codec_reasoning_sweep.sh   # the rest
+```
+
+The second call skips everything the first finished.
+
+## Running less
+
+Narrow any axis; the script skips whatever is already complete:
+
+```bash
+# only the PUBLISHED eta* per cell, plus dense. Cheapest useful run (48 cells),
+# but note it inherits the eta* we are trying to re-derive -- see the last
+# section. llama-8b: 0.25 / 0.5 / 0.75.  qwen-14b: 0.5 / 0.25 / 0.5.
 MODEL=ds-r1-llama-8b DENSE=1 DATASETS=MATH50  ETAS=0.25 ./scripts/codec_reasoning_sweep.sh
 MODEL=ds-r1-llama-8b         DATASETS=AIME24  ETAS=0.5  ./scripts/codec_reasoning_sweep.sh
 MODEL=ds-r1-llama-8b         DATASETS=GPQA50c ETAS=0.75 ./scripts/codec_reasoning_sweep.sh
 
 # fewer seeds (k is however many you run)
-MODEL=ds-r1-llama-8b SEEDS="42 43 44 45" ./scripts/codec_reasoning_sweep.sh
+MODEL=<your model> SEEDS="42 43 44 45" ./scripts/codec_reasoning_sweep.sh
 
 # fewer GPUs
-MODEL=ds-r1-llama-8b GPUS="0 1" ./scripts/codec_reasoning_sweep.sh
+MODEL=<your model> GPUS="0 1" ./scripts/codec_reasoning_sweep.sh
 ```
 
 ## Things that will bite
@@ -95,17 +134,17 @@ collides with machine A's qwen directories.
 
 ## Reporting back
 
-Copy these two directories:
+Copy your model's two directories, e.g.
 
 ```
-results/codec/ds-r1-llama-8b-full/
-results/codec/ds-r1-llama-8b-spec_ret/
+results/codec/ds-r1-llama-8b-full/      results/codec/ds-r1-qwen-14b-full/
+results/codec/ds-r1-llama-8b-spec_ret/  results/codec/ds-r1-qwen-14b-spec_ret/
 ```
 
 They are small (`.jsonl` predictions). Then score everything with:
 
 ```bash
-python analysis/score_avg_pass_at_k.py --models ds-r1-llama-8b
+python analysis/score_avg_pass_at_k.py --models <your model>
 ```
 
 It prints avg@k, pass@k, **k and n per cell**, and the per-seed sequence. Read
@@ -115,10 +154,20 @@ mean is not comparable to a finished one.
 ## Why the eta grid is being re-measured
 
 The published eta* values do not reproduce in this tree. On qwen-7b at k=8 the
-published-eta* gaps over eta=0 came back +0.00 (paper +3.75), +2.50 (+6.67),
-and negative (+9.75). So eta* is being measured here rather than taken from
-the paper's ablation table, and the same needs doing for llama before any
-comparison is trusted.
+published-eta* gaps over eta=0 came back +0.00 (paper +3.75), +2.50 (+6.67)
+and -0.32 (+9.75) on MATH50/AIME24/GPQA50c. So eta* is being measured here
+rather than taken from the paper's ablation table, and the same needs doing
+for llama-8b and qwen-14b before any comparison is trusted.
+
+For reference, the published eta* per cell is:
+
+| model | MATH500 | AIME24 | GPQA | paper's gap over eta=0 |
+|---|---|---|---|---|
+| `ds-r1-qwen-7b` | 0.25 | 0.5 | 0.25 | +3.75 / +6.67 / +9.75 |
+| `ds-r1-llama-8b` | 0.25 | 0.5 | 0.75 | +1.75 / +11.25 / +5.00 |
+| `ds-r1-qwen-14b` | 0.5 | 0.25 | 0.5 | +0.25 / +7.50 / +4.25 |
+
+Those are the values to BEAT or refute, not to assume.
 
 ## Protocol, for reference
 
