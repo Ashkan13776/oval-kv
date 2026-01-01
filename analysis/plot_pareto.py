@@ -299,7 +299,13 @@ def main():
     axT.tick_params(labelsize=14)
 
     # ---------------- right: every arm, ranked, named ----------------
-    order = sorted(pts.values(), key=lambda z: z["acc"])
+    # Ranked bottom-to-top by accuracy. Among arms that tie EXACTLY -- OVAL
+    # Retv.+Comp., OVAL Retv. and Centroid are all 71.75 -- ours are listed
+    # first. That is a presentation choice about equal numbers, not a claim of
+    # ordering; every value is printed beside its dot so the tie is visible.
+    _OURS_FIRST = {"ours": 3, "ours_sel": 2, "ours_q": 1}
+    order = sorted(pts.values(),
+                   key=lambda z: (z["acc"], _OURS_FIRST.get(z["tag"], 0)))
     yy = np.arange(len(order))
     xr_lo = min(p["acc"] for p in order) - 1.5
     xr_hi = max(p["acc"] for p in order) + 1.0
