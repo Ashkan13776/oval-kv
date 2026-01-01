@@ -240,8 +240,9 @@ def main():
             (min(px) - 34, min(py) - .30), (max(px) - min(px)) + 68,
             (max(py) - min(py)) + .60,
             fill=False, ec="#94a3b8", lw=1.3, ls=(0, (5, 4)), zorder=5))
-        axT.annotate(f"{len(pile)} methods that store the keys exactly\n"
-                     f"(all named at right)",
+        axT.annotate(f"{len(pile)} of the {len(pts)} methods store the keys\n"
+                     f"exactly, so they share one memory cost\n"
+                     f"(all {len(pts)} are named at right)",
                      xy=(float(np.mean(px)), min(py) - .55),
                      xytext=(0, -16), textcoords="offset points",
                      ha="center", va="top", fontsize=13.5, color="#64748b",
