@@ -35,6 +35,8 @@ FREEKV_DIR="${FREEKV_DIR:-$KV_ROOT/third_party/FreeKV}"
 cd $FREEKV_DIR/accuracy || exit 1
 export HF_HOME=${HF_HOME}
 export PYTHONUNBUFFERED=1
+# accuracy path stores bf16 records; this also fixes the _q0 tag in output paths
+export OVAL_QUANT=0
 PY=$KV_PY
 OUT=$KV_ROOT/results/freekv/sweep
 
@@ -50,7 +52,7 @@ for M in $MODELS; do
         echo "=== FKSWEEP $M eta=$E $D seed=$S  $(date -Iseconds)"
         $PY -u -m eval.reasoning.pred \
           --model "$M" --dataset "$D" \
-          --method spec_ret --page_rep locks --eta "$E" \
+          --method spec_ret --page_rep oval --eta "$E" \
           --GQA_policy avgSM --spec_ret_steps 2 --spec_ret_corr 0.9 \
           --temperature 0.6 --top_p 0.95 --max_gen 16384 \
           --budget 2048 --sink 512 --recent 512 --page_size 32 \

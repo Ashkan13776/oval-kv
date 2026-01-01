@@ -60,17 +60,17 @@ for M in $MODELS; do
     run "$M" longinput arkvale   "$B" $LI --recall_impl arkvale
     run "$M" longinput raas      "$B" $LI --recall_impl cuda_cpy --method raas
     run "$M" longinput freekv    "$B" $LI --recall_impl cuda_cpy --spec_ret --corr 0.8
-    run "$M" longinput locks0    "$B" $LI --recall_impl cuda_cpy --spec_ret --corr 0.8 --page_rep locks --eta 0.0
-    run "$M" longinput locks50   "$B" $LI --recall_impl cuda_cpy --spec_ret --corr 0.8 --page_rep locks --eta 0.5
-    run "$M" longinput locks100  "$B" $LI --recall_impl cuda_cpy --spec_ret --corr 0.8 --page_rep locks --eta 1.0
+    run "$M" longinput oval0    "$B" $LI --recall_impl cuda_cpy --spec_ret --corr 0.8 --page_rep oval --eta 0.0
+    run "$M" longinput oval50   "$B" $LI --recall_impl cuda_cpy --spec_ret --corr 0.8 --page_rep oval --eta 0.5
+    run "$M" longinput oval100  "$B" $LI --recall_impl cuda_cpy --spec_ret --corr 0.8 --page_rep oval --eta 1.0
     # long-generation: 600 prompt, 16K generated, tau=0.9
     LG="--dataset lgbench --max_gen 16384"
     run "$M" longgen   arkvale   "$B" $LG --recall_impl arkvale
     run "$M" longgen   raas      "$B" $LG --recall_impl cuda_cpy --method raas
     run "$M" longgen   freekv    "$B" $LG --recall_impl cuda_cpy --spec_ret --corr 0.9
-    run "$M" longgen   locks0    "$B" $LG --recall_impl cuda_cpy --spec_ret --corr 0.9 --page_rep locks --eta 0.0
-    run "$M" longgen   locks50   "$B" $LG --recall_impl cuda_cpy --spec_ret --corr 0.9 --page_rep locks --eta 0.5
-    run "$M" longgen   locks100  "$B" $LG --recall_impl cuda_cpy --spec_ret --corr 0.9 --page_rep locks --eta 1.0
+    run "$M" longgen   oval0    "$B" $LG --recall_impl cuda_cpy --spec_ret --corr 0.9 --page_rep oval --eta 0.0
+    run "$M" longgen   oval50   "$B" $LG --recall_impl cuda_cpy --spec_ret --corr 0.9 --page_rep oval --eta 0.5
+    run "$M" longgen   oval100  "$B" $LG --recall_impl cuda_cpy --spec_ret --corr 0.9 --page_rep oval --eta 1.0
   done
 done
 echo "=== FIG6 ALL DONE  $(date -Iseconds)"

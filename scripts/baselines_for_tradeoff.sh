@@ -26,6 +26,8 @@ K=$KV_ROOT
 PY=$KV_PY
 L=$K/logs
 export HF_HOME=$HOME/.cache/huggingface PYTHONUNBUFFERED=1
+# accuracy path stores bf16 records; this also fixes the _q0 tag in output paths
+export OVAL_QUANT=0
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 M=llama-3.1-chat-8b
 

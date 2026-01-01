@@ -46,7 +46,7 @@ C_RAZOR = "#000000"
 ARMS = [
     ("arkvale", "ArkVale", C_ARKVALE),
     ("freekv",  "FreeKV",  C_FREEKV),
-    ("locks50", "OVAL (ours)", C_SHADOWKV),
+    ("oval50", "OVAL (ours)", C_SHADOWKV),
 ]
 BATCHES = [1, 2, 4]           # their x-axis; we only have 1 (see note below)
 PANELS = [
@@ -98,7 +98,7 @@ def main():
 
         # their bold-italic speedup annotation: ArkVale -> fastest arm
         base = V.get((model, sc, "arkvale", 1))
-        ours = V.get((model, sc, "locks50", 1))
+        ours = V.get((model, sc, "oval50", 1))
         if base and ours:
             lo, hi = ours * ntok / 1000.0, base * ntok / 1000.0
             xa = -0.4 + 0.74 + 0.10        # just right of the batch-1 group

@@ -14,6 +14,8 @@ FREEKV_DIR="${FREEKV_DIR:-$KV_ROOT/third_party/FreeKV}"
 
 cd $FREEKV_DIR/accuracy || exit 1
 export HF_HOME=$HOME/.cache/huggingface PYTHONUNBUFFERED=1
+# accuracy path stores bf16 records; this also fixes the _q0 tag in output paths
+export OVAL_QUANT=0
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 PY=$KV_PY
 L=$KV_ROOT/logs

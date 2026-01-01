@@ -58,7 +58,7 @@ ARMS = [
     ("ArkVale",     "arkvale", "arkv",     "",                ""),
     ("RaaS",        "raas",    "raas",     "",                ""),
     ("FreeKV",      "freekv",  "spec_ret", "avgSM-pQ2",       "oval"),
-    ("OVAL (ours)", "locks50", "spec_ret", "oval_r8_eta0.25", ""),
+    ("OVAL (ours)", "oval50", "spec_ret", "oval_r8_eta0.25", ""),
 ]
 # Dense reference: no page selection, so it has no Fig-6 latency point. Drawn
 # as a ceiling line rather than a plotted method.

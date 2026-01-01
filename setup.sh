@@ -22,11 +22,11 @@ echo "== applying patch"
 git -C "$TP/FreeKV" apply --3way "$KV_ROOT/patches/freekv.patch"
 
 echo "== installing OVAL modules"
-install -Dm644 "$KV_ROOT/oval/page_basis.py"   "$TP/FreeKV/accuracy/kvc/patch/locks_rep.py"
-install -Dm644 "$KV_ROOT/oval/page_summary.py" "$TP/FreeKV/source/freekv/locks_summary.py"
+install -Dm644 "$KV_ROOT/oval/page_basis.py"   "$TP/FreeKV/accuracy/kvc/patch/oval.py"
+install -Dm644 "$KV_ROOT/oval/page_summary.py" "$TP/FreeKV/source/freekv/oval_summary.py"
 install -Dm644 "$KV_ROOT/oval/raas.py"         "$TP/FreeKV/source/freekv/raas.py"
-install -Dm644 "$KV_ROOT/oval/locks_estimate.cu" \
-               "$TP/FreeKV/source/freekv_cpp/src/locks_estimate.cu"
+install -Dm644 "$KV_ROOT/oval/oval_estimate.cu" \
+               "$TP/FreeKV/source/freekv_cpp/src/oval_estimate.cu"
 install -Dm644 "$KV_ROOT/oval/infinitebench_pred.py" \
                "$TP/FreeKV/accuracy/eval/InfiniteBench/pred.py"
 

@@ -55,6 +55,6 @@ run() {  # run <bucket> <arm> <extra...>
 
 for B in short medium long; do
   run "$B" freekv --spec_ret --corr 0.8
-  run "$B" oval   --spec_ret --corr 0.8 --page_rep locks --eta 0.25 --locks_rank 8
+  run "$B" oval   --spec_ret --corr 0.8 --page_rep oval --eta 0.25 --oval_rank 8
 done
 echo "=== LB2LAT ALL DONE $(date -Iseconds)"

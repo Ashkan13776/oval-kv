@@ -269,8 +269,8 @@ def table_latency():
          "A100 40GB, so absolute\noffloading speedups are not expected to "
          "transfer.")
     arms = [("arkvale", "ArkVale"), ("raas", "RaaS"), ("freekv", "FreeKV"),
-            ("locks0", "OVAL eta=0"), ("locks50", "OVAL eta=0.5"),
-            ("locks100", "OVAL eta=1.0")]
+            ("oval0", "OVAL eta=0"), ("oval50", "OVAL eta=0.5"),
+            ("oval100", "OVAL eta=1.0")]
     scen = [("longinput", "Long Input (32K in / 512 out)"),
             ("longgen", "Long Generation (600 in / 16K out)")]
     for model in ["qwen-2.5-chat-7b", "llama-3.1-chat-8b"]:
