@@ -4,7 +4,7 @@ KV_ROOT="${KV_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 KV_PY="${KV_PY:-python}"
 FREEKV_DIR="${FREEKV_DIR:-$KV_ROOT/third_party/FreeKV}"
 
-export ENVDIR=${CONDA_ENV}
+export ENVDIR="${ENVDIR:-$(dirname "$(dirname "$(readlink -f "${KV_PY:-$(command -v python)}")")")}"
 export CUDA=$KV_ROOT/vendor/cuda128
 export CUDA_HOME=$CUDA CUDAToolkit_ROOT=$CUDA
 export PATH=$ENVDIR/bin:$CUDA/bin:$PATH

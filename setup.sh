@@ -11,12 +11,17 @@ FREEKV_REPO=https://github.com/sjtu-zhao-lab/FreeKV.git
 FREEKV_PIN=2c8a7d25c9f3c7c15ce15b2f84cd03f477bd7469
 IB_REPO=https://github.com/OpenBMB/InfiniteBench.git
 
+# FlashInfer pins one of its own submodules (spdlog) by SSH URL, which fails
+# for anyone without GitHub SSH keys -- the clone aborts midway. Rewrite SSH to
+# HTTPS for the duration of this clone only (-c, not a global config change).
+GIT_HTTPS=(-c url."https://github.com/".insteadOf=git@github.com:)
+
 if [ ! -d "$TP/FreeKV/.git" ]; then
   echo "== cloning FreeKV @ $FREEKV_PIN"
-  git clone --recurse-submodules "$FREEKV_REPO" "$TP/FreeKV"
+  git "${GIT_HTTPS[@]}" clone --recurse-submodules "$FREEKV_REPO" "$TP/FreeKV"
 fi
 git -C "$TP/FreeKV" checkout -q "$FREEKV_PIN"
-git -C "$TP/FreeKV" submodule update --init --recursive
+git "${GIT_HTTPS[@]}" -C "$TP/FreeKV" submodule update --init --recursive
 
 echo "== applying patch"
 git -C "$TP/FreeKV" apply --3way "$KV_ROOT/patches/freekv.patch"

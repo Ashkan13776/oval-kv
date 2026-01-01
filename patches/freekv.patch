@@ -74,9 +74,27 @@ index 20d90a3..9ef900e 100644
      model_name = args.model
      model, tokenizer, step_updater, eos_token_ids, config = load_model_and_tokenizer(
 diff --git a/accuracy/eval/reasoning/pred.py b/accuracy/eval/reasoning/pred.py
-index 47f4b0f..120102a 100644
+index 47f4b0f..ae898cf 100644
 --- a/accuracy/eval/reasoning/pred.py
 +++ b/accuracy/eval/reasoning/pred.py
+@@ -282,7 +282,7 @@ if __name__ == "__main__":
+     max_gen = args.max_gen
+ 
+     dataset = args.dataset
+-    ds_dir = "eval/o1/datasets"
++    ds_dir = "eval/reasoning/datasets"
+     answer_field_id = "answer"
+     if dataset == "AIME":
+         ds_path = f"{ds_dir}/aime.jsonl"
+@@ -307,7 +307,7 @@ if __name__ == "__main__":
+         raise ValueError(f"Unknown dataset {dataset}")
+     data = load_dataset("json", data_files=ds_path, split="train")
+     
+-    dataset2prompt = json.load(open("eval/o1/config/dataset2prompt.json", "r"))
++    dataset2prompt = json.load(open("eval/reasoning/config/dataset2prompt.json", "r"))
+     prompt_format = dataset2prompt[dataset]
+     if "cot" in model_name:
+         prompt_format += "<Thought> {thought} </Thought>\n"
 @@ -320,6 +320,41 @@ if __name__ == "__main__":
          data = data.select(range(args.data_from, len(data)))
      
@@ -120,7 +138,7 @@ index 47f4b0f..120102a 100644
          preds = get_pred(
              model,
 diff --git a/accuracy/eval/util.py b/accuracy/eval/util.py
-index e4bd935..cf7042c 100644
+index e4bd935..40291a7 100644
 --- a/accuracy/eval/util.py
 +++ b/accuracy/eval/util.py
 @@ -1,3 +1,4 @@
@@ -192,7 +210,7 @@ index e4bd935..cf7042c 100644
                f"skip {args.skip_layer} layers")
          if method in ["quest", "arkv", "spec_ret"]:
 diff --git a/accuracy/kvc/patch/dynamic_attention.py b/accuracy/kvc/patch/dynamic_attention.py
-index 32ac2af..35a210b 100644
+index 32ac2af..f892fe2 100644
 --- a/accuracy/kvc/patch/dynamic_attention.py
 +++ b/accuracy/kvc/patch/dynamic_attention.py
 @@ -14,6 +14,9 @@ def repeat_kv_BLH(hidden_states: torch.Tensor, n_rep: int) -> torch.Tensor:
@@ -325,7 +343,7 @@ index 32ac2af..35a210b 100644
  
      used_k = torch.cat([
 diff --git a/accuracy/kvc/patch/llama.py b/accuracy/kvc/patch/llama.py
-index 7e50cbb..6837928 100644
+index 7e50cbb..5fe285d 100644
 --- a/accuracy/kvc/patch/llama.py
 +++ b/accuracy/kvc/patch/llama.py
 @@ -504,19 +504,58 @@ def enable_llama_dyn_attention(
@@ -484,7 +502,7 @@ index df82a90..28b5d7f 100644
  }
 \ No newline at end of file
 diff --git a/source/freekv/adapter/modeling.py b/source/freekv/adapter/modeling.py
-index f9abf0a..9d7ce65 100644
+index f9abf0a..3e2dc18 100644
 --- a/source/freekv/adapter/modeling.py
 +++ b/source/freekv/adapter/modeling.py
 @@ -146,7 +146,7 @@ def _freekv_attn_forward(
@@ -524,7 +542,7 @@ index f9abf0a..9d7ce65 100644
          mod_cls = str(mod.__class__)
          if "Attention" in mod_cls:
 diff --git a/source/freekv/infer_state.py b/source/freekv/infer_state.py
-index efa74df..d4f6233 100644
+index efa74df..18c9625 100644
 --- a/source/freekv/infer_state.py
 +++ b/source/freekv/infer_state.py
 @@ -7,6 +7,8 @@ from torch import Tensor
@@ -810,7 +828,7 @@ index efa74df..d4f6233 100644
      def alloc_page(self):
          if len(self._pool._free_ids) <= 0:
 diff --git a/source/freekv/kernels.py b/source/freekv/kernels.py
-index ad11d7a..3c158da 100644
+index ad11d7a..d7520d0 100644
 --- a/source/freekv/kernels.py
 +++ b/source/freekv/kernels.py
 @@ -84,6 +84,16 @@ def append_paged_kv_cache(
@@ -871,7 +889,7 @@ index b77907c..8fa91d7 100644
                      self.budget
                      - self.n_win_pages
 diff --git a/source/freekv_cpp/src/api.cu b/source/freekv_cpp/src/api.cu
-index 318820b..a6db131 100644
+index 318820b..844e544 100644
 --- a/source/freekv_cpp/src/api.cu
 +++ b/source/freekv_cpp/src/api.cu
 @@ -10,6 +10,7 @@ PYBIND11_MODULE(freekv_cpp, m) {
@@ -883,7 +901,7 @@ index 318820b..a6db131 100644
  	m.def("prefill_select_topk", &prefill_select_topk);
    py::class_<BatchPrefillWithPagedKVCachePyTorchWrapper>(
 diff --git a/source/freekv_cpp/src/estimate_select_recall.cu b/source/freekv_cpp/src/estimate_select_recall.cu
-index 8392b5e..2f53bea 100644
+index 8392b5e..22b2acc 100644
 --- a/source/freekv_cpp/src/estimate_select_recall.cu
 +++ b/source/freekv_cpp/src/estimate_select_recall.cu
 @@ -41,10 +41,15 @@ void estimate_select_recall_core(
@@ -949,7 +967,7 @@ index 8392b5e..2f53bea 100644
 +  ).wait();
  }
 diff --git a/source/freekv_cpp/src/flashinfer_ops.h b/source/freekv_cpp/src/flashinfer_ops.h
-index 4a32ad1..52f1ff7 100644
+index 4a32ad1..7949372 100644
 --- a/source/freekv_cpp/src/flashinfer_ops.h
 +++ b/source/freekv_cpp/src/flashinfer_ops.h
 @@ -58,6 +58,10 @@ void append_paged_kv_cache_decode(
@@ -1004,7 +1022,7 @@ index f819297..126e3ad 100644
  
    ~ThreadPool() {
 diff --git a/source/pred.py b/source/pred.py
-index a316410..1c4103f 100644
+index a316410..7d2a847 100644
 --- a/source/pred.py
 +++ b/source/pred.py
 @@ -107,6 +107,15 @@ def parse_args(args=None):

@@ -14,8 +14,23 @@ KV_ROOT="${KV_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 KV_PY="${KV_PY:-python}"
 FREEKV_DIR="${FREEKV_DIR:-$KV_ROOT/third_party/FreeKV}"
 
-ENVDIR=${CONDA_ENV}
-CUDA=${CONDA_ENV}          # provides nvcc 12.8
+# The torch env and the CUDA toolkit are TWO different things and are not
+# always the same prefix: the torch env here has no nvcc, and nvcc 12.8 lives
+# in a separate conda env. Resolve them independently.
+#   KV_PY    -> python to build against   (its prefix becomes ENVDIR)
+#   CUDA_DIR -> prefix containing bin/nvcc (>= 12.8, first toolkit with sm_120)
+ENVDIR="${ENVDIR:-$(dirname "$(dirname "$(readlink -f "$KV_PY")")")}"
+if [ -z "${CUDA_DIR:-}" ]; then
+  if command -v nvcc >/dev/null 2>&1; then
+    CUDA_DIR="$(dirname "$(dirname "$(command -v nvcc)")")"
+  elif [ -x "$ENVDIR/bin/nvcc" ]; then
+    CUDA_DIR="$ENVDIR"
+  else
+    echo "no nvcc found. Set CUDA_DIR to a CUDA >= 12.8 prefix (needs bin/nvcc)." >&2
+    exit 1
+  fi
+fi
+CUDA="$CUDA_DIR"
 export CUDA_HOME=$CUDA
 export PATH=$ENVDIR/bin:$CUDA/bin:$PATH
 export TORCH_CUDA_ARCH_LIST="12.0"
