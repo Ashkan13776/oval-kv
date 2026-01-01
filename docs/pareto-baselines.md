@@ -215,3 +215,36 @@ is not worked around: forcing the coarse stage to prune would make it a
 different method. It is reported as degenerate at B=2048 and measured properly
 at B=128, where the budget is 4 pages of ~89 and the coarse stage does real
 work. The same caveat applies to any two-stage or pruning baseline here.
+
+
+## Not every arm is a retrieval method
+
+The front mixes four mechanisms, and treating them as one family is the
+easiest way to draw an unfair comparison. They are plotted with distinct
+markers for this reason.
+
+| family | arms | what it does to the cache |
+| --- | --- | --- |
+| **retrieval** (17) | quest, freekv, arkvale, OVAL x3, loki, centroid, shadowkv, rocketkv, infllm, sparq, q4key, knorm, expatt, oracle x2, random | keeps all of it; re-chooses what to ATTEND to each step |
+| **eviction** (4) | h2o, tova, snapkv, raas | permanently DISCARDS; the cache shrinks |
+| **fixed window** (2) | stream, sliding | no selection at all |
+| **budget schedule** (1) | pyramid | orthogonal: a per-layer budget applied to another scorer (Quest's here) |
+
+Two corrections this forced, both of which had the figure wrong in BOTH
+directions at once for the eviction arms:
+
+- **Memory.** Eviction methods retain only `sink+recent+budget` = 3072 tokens
+  = 96 pages = 1536 KiB, not the 1760 KiB a retrieval arm pays for holding the
+  whole cache. Charging them the full cache overstated their cost by 15%.
+- **Accuracy is an upper bound.** H2O, TOVA and SnapKV are implemented here
+  WITHOUT eviction -- they keep the cache and merely stop attending -- so they
+  can re-attend a page they previously passed over, which the published
+  methods can never do. Their accuracy is therefore optimistic, they are
+  marked with a dagger, and they are excluded from the Pareto frontier: an
+  upper bound is not an achievable point and cannot define a frontier.
+
+RaaS evicts for real, so it is plotted at eviction memory with no dagger.
+
+Pyramid is not a competing scorer at all. It is a budget schedule that could
+be layered onto any arm in the table; it appears once, on Quest, and should be
+read as "Quest + PyramidKV allocation", not as an independent method.

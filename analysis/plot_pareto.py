@@ -44,13 +44,13 @@ ARMS = {
  "quest":    ("Quest",           "baseline", 512,  True,  "{D}-quest/MATH50-*b{B}-avgSM-skl1*"),
  "freekv":   ("FreeKV",          "baseline", 512,  True,  "{D}-spec_ret/MATH50-*b{B}-avgSM-pQ2-*"),
  "arkvale":  ("ArkVale",         "baseline", 512,  True,  "{D}-spec_ret/MATH50-*b{B}-avgSM-arkv-*"),
- "pyramid":  ("PyramidKV",       "baseline", 512,  True,  "{D}-spec_ret/MATH50-*b{B}-avgSM-pyr*"),
- "tova":     ("TOVA",            "baseline", 4,    True,  "{D}-quest/MATH50-*b{B}-avgSM-tova*"),
- "h2o":      ("H2O",             "baseline", 4,    True,  "{D}-quest/MATH50-*b{B}-avgSM-h2o*"),
- "snapkv":   ("SnapKV",          "baseline", 0,    True,  "{D}-quest/MATH50-*b{B}-avgSM-snapkv*"),
+ "pyramid":  ("PyramidKV",       "sched",    512,  True,  "{D}-spec_ret/MATH50-*b{B}-avgSM-pyr*"),
+ "tova":     ("TOVA \u2020",        "evict",    4,    False, "{D}-quest/MATH50-*b{B}-avgSM-tova*"),
+ "h2o":      ("H2O \u2020",         "evict",    4,    False, "{D}-quest/MATH50-*b{B}-avgSM-h2o*"),
+ "snapkv":   ("SnapKV \u2020",      "evict",    0,    False, "{D}-quest/MATH50-*b{B}-avgSM-snapkv*"),
  "expatt":   ("ExpectedAttn",    "baseline", 0,    True,  "{D}-quest/MATH50-*b{B}-avgSM-expatt*"),
  "knorm":    ("K-norm",          "baseline", 2,    True,  "{D}-quest/MATH50-*b{B}-avgSM-knorm*"),
- "raas":     ("RaaS",            "baseline", 0,    False, "{D}-raas/MATH50-*b{B}*"),
+ "raas":     ("RaaS",            "evict",    0,    False, "{D}-raas/MATH50-*b{B}*"),
  "random":   ("Random",          "control",  0,    True,  "{D}-quest/MATH50-*b{B}-avgSM-random*"),
  "sliding":  ("Sliding window",  "control",  0,    False, "{D}-quest/MATH50-s512-r2560-*-b0-avgSM-skl1*"),
  "stream":   ("StreamingLLM",    "control",  0,    False, "{D}-quest/MATH50-s512-r512-*-b0-avgSM-skl1*"),
@@ -63,6 +63,8 @@ STYLE = {                      # family -> (colour, marker, size, z)
  "baseline": ("#475569", "o", 46, 3),
  "control":  ("#0891b2", "s", 52, 4),
  "ceiling":  ("#7c3aed", "*", 165, 6),
+ "evict":    ("#b45309", "v", 54, 4),
+ "sched":    ("#475569", "o", 46, 3),
  "dense":    ("#111827", "P", 78, 6),
 }
 
@@ -86,8 +88,12 @@ def memory(tag, exact, digest, budget):
     """KiB per KV head per layer on a mean-length sequence."""
     if tag == "full":
         tot = NPAGE * (B_K + B_V)
-    elif tag in ("raas", "stream", "sliding"):          # only a window survives
-        tot = (1024 + (budget if tag == "raas" else 0)) / PG * (B_K + B_V)
+    elif tag in ("raas", "h2o", "tova", "snapkv"):
+        # eviction: the cache SHRINKS to what survives. Charging these the full
+        # cache (as a retrieval arm pays) overstates their cost by ~15% here.
+        tot = (1024 + budget) / PG * (B_K + B_V)
+    elif tag in ("stream", "sliding"):                  # only a window survives
+        tot = 1024 / PG * (B_K + B_V)
     else:
         tot = NPAGE * ((B_K if exact else 0) + B_V + digest)
     return tot / 1024
@@ -128,7 +134,13 @@ def main():
 
     # Pareto frontier over everything deployable: ceilings are not deployable,
     # but the window controls are real methods and belong on the front.
-    dep = [p_ for p_ in pts.values() if p_["fam"] != "ceiling"]
+    # h2o/tova/snapkv are implemented here WITHOUT eviction -- they keep the
+    # cache and merely stop attending -- so their accuracy is an upper bound on
+    # the published methods, which can never recover a discarded token. An
+    # upper bound cannot sit on a frontier of achievable points.
+    UB = {"h2o", "tova", "snapkv"}
+    dep = [p_ for p_ in pts.values()
+           if p_["fam"] != "ceiling" and p_["tag"] not in UB]
     front, best = [], -1e9
     for p_ in sorted(dep, key=lambda z: (z["mem"], -z["acc"])):
         if p_["acc"] > best:
@@ -183,8 +195,9 @@ def main():
     for sp in ("top", "right"): axL.spines[sp].set_visible(False)
     axL.legend(handles=[Line2D([], [], ls="", marker=STYLE[f][1],
                                ms=np.sqrt(STYLE[f][2]), color=STYLE[f][0], label=l)
-                        for f, l in [("ours", "OVAL (ours)"), ("baseline", "published baseline"),
-                                     ("control", "control"), ("ceiling", "ceiling (oracle)"),
+                        for f, l in [("ours", "OVAL (ours)"), ("baseline", "retrieval baseline"),
+                                     ("evict", "eviction (\u2020 = no-evict upper bound)"),
+                                     ("control", "fixed window"), ("ceiling", "ceiling (oracle)"),
                                      ("dense", "dense attention")]]
                + [Line2D([], [], ls="", marker="o", mfc="none", mec="#c2410c",
                          ms=11, label="Pareto-optimal")],
