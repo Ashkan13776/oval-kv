@@ -1,0 +1,42 @@
+W0828 16:25:12.227000 3397543 site-packages/torch/utils/cpp_extension.py:2425] TORCH_CUDA_ARCH_LIST is not set, all archs for visible cards are included for compilation. 
+W0828 16:25:12.227000 3397543 site-packages/torch/utils/cpp_extension.py:2425] If this is not desired, please set os.environ['TORCH_CUDA_ARCH_LIST'] to specific architectures.
+2026-08-28 16:25:12,246 - INFO - flashinfer.jit: Prebuilt kernels not found, using JIT backend
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:02,  1.49it/s]Loading checkpoint shards:  50%|█████     | 2/4 [00:01<00:01,  1.68it/s]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:01<00:00,  1.74it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  1.84it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  1.77it/s]
+
+[96m────────────────────────────────────────────────────────────────────────────────────────────────────
+  KV Cache Config: token_budget=2048, page_budget=64, page_size=32, sink=512, recent=512
+────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+
+[locks] stashed o_proj for 28 layers (G=W^T W built lazily at first page summary)
+  0%|          | 0/1 [00:00<?, ?it/s][96m[Input] prompt_length=662, dtype=torch.int64, device=cuda:0[0m
+[93m[Warmup] Running 1 warmup round(s)...[0m
+HOME/.conda/envs/freekv/lib/python3.10/site-packages/transformers/generation/configuration_utils.py:601: UserWarning: `do_sample` is set to `False`. However, `temperature` is set to `0.7` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `temperature`.
+  warnings.warn(
+HOME/.conda/envs/freekv/lib/python3.10/site-packages/transformers/generation/configuration_utils.py:606: UserWarning: `do_sample` is set to `False`. However, `top_p` is set to `0.8` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `top_p`.
+  warnings.warn(
+HOME/.conda/envs/freekv/lib/python3.10/site-packages/transformers/generation/configuration_utils.py:623: UserWarning: `do_sample` is set to `False`. However, `top_k` is set to `20` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `top_k`.
+  warnings.warn(
+The attention mask is not set and cannot be inferred from input because pad token is same as eos token. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+[locks] page_rep=locks rank=8 eta=0.5 max_pages=4096 G=W^T W buffers=1057MB
+2026-08-28 16:25:20,778 - INFO - flashinfer.jit: Loading JIT ops: rope
+2026-08-28 16:25:20,787 - INFO - flashinfer.jit: Finished loading JIT ops: rope
+Starting from v4.46, the `logits` model output will have the same type as the model (except at train time, where it will always be FP32)
+[93m[Warmup] Done.[0m
+HOME/.conda/envs/freekv/lib/python3.10/site-packages/transformers/generation/configuration_utils.py:601: UserWarning: `do_sample` is set to `False`. However, `temperature` is set to `0.7` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `temperature`.
+  warnings.warn(
+HOME/.conda/envs/freekv/lib/python3.10/site-packages/transformers/generation/configuration_utils.py:606: UserWarning: `do_sample` is set to `False`. However, `top_p` is set to `0.8` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `top_p`.
+  warnings.warn(
+HOME/.conda/envs/freekv/lib/python3.10/site-packages/transformers/generation/configuration_utils.py:623: UserWarning: `do_sample` is set to `False`. However, `top_k` is set to `20` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `top_k`.
+  warnings.warn(
+
+[92m────────────────────────────────────────────────────────────────────────────────────────────────────
+  [qwen-2.5-chat-7b] Generation Summary
+────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+  Tokens generated : [8172]
+  Total time       : 152.38s
+  Decode time      : 152.28s
+  Avg TBT (decode) : 18.64 ms
+[92m────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+
+[1m[Batch 0] Output preview:[0m #*# Week 1 (January 1st - January 7th): The New Year dawned frosty and bright, with temperatures stubbornly clinging to a cool 5°C. The cold didn't deter us from our annual New Year's walk through the nearby park, a tradition that helps us set our intentions for the year ahead. Wrapped in our warmest coats, my wife and I discussed our personal and professional goals for 2018, making plans to nurture both our careers and our family. Back at work this week, the atmosphere in the engineering lab was charged with fresh energy and enthusiasm. The new projects on the
+100%|██████████| 1/1 [05:08<00:00, 308.99s/it]100%|██████████| 1/1 [05:08<00:00, 308.99s/it]

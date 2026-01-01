@@ -1,0 +1,110 @@
+W0828 16:57:36.919000 3410735 site-packages/torch/utils/cpp_extension.py:2425] TORCH_CUDA_ARCH_LIST is not set, all archs for visible cards are included for compilation. 
+W0828 16:57:36.919000 3410735 site-packages/torch/utils/cpp_extension.py:2425] If this is not desired, please set os.environ['TORCH_CUDA_ARCH_LIST'] to specific architectures.
+2026-08-28 16:57:36,938 - INFO - flashinfer.jit: Prebuilt kernels not found, using JIT backend
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:01,  1.56it/s]Loading checkpoint shards:  50%|█████     | 2/4 [00:01<00:01,  1.72it/s]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:01<00:00,  1.76it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  1.87it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  1.80it/s]
+
+[96m────────────────────────────────────────────────────────────────────────────────────────────────────
+  KV Cache Config: token_budget=2048, page_budget=64, page_size=32, sink=512, recent=512
+────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+
+[locks] stashed o_proj for 28 layers (G=W^T W built lazily at first page summary)
+  0%|          | 0/1 [00:00<?, ?it/s][96m[Input] prompt_length=662, dtype=torch.int64, device=cuda:0[0m
+[93m[Warmup] Running 1 warmup round(s)...[0m
+HOME/.conda/envs/freekv/lib/python3.10/site-packages/transformers/generation/configuration_utils.py:601: UserWarning: `do_sample` is set to `False`. However, `temperature` is set to `0.7` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `temperature`.
+  warnings.warn(
+HOME/.conda/envs/freekv/lib/python3.10/site-packages/transformers/generation/configuration_utils.py:606: UserWarning: `do_sample` is set to `False`. However, `top_p` is set to `0.8` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `top_p`.
+  warnings.warn(
+HOME/.conda/envs/freekv/lib/python3.10/site-packages/transformers/generation/configuration_utils.py:623: UserWarning: `do_sample` is set to `False`. However, `top_k` is set to `20` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `top_k`.
+  warnings.warn(
+The attention mask is not set and cannot be inferred from input because pad token is same as eos token. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+[locks] page_rep=locks rank=8 eta=1.0 max_pages=4096 G=W^T W buffers=1057MB
+2026-08-28 16:57:45,497 - INFO - flashinfer.jit: Loading JIT ops: rope
+2026-08-28 16:57:45,506 - INFO - flashinfer.jit: Finished loading JIT ops: rope
+Starting from v4.46, the `logits` model output will have the same type as the model (except at train time, where it will always be FP32)
+[93m[Warmup] Done.[0m
+HOME/.conda/envs/freekv/lib/python3.10/site-packages/transformers/generation/configuration_utils.py:601: UserWarning: `do_sample` is set to `False`. However, `temperature` is set to `0.7` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `temperature`.
+  warnings.warn(
+HOME/.conda/envs/freekv/lib/python3.10/site-packages/transformers/generation/configuration_utils.py:606: UserWarning: `do_sample` is set to `False`. However, `top_p` is set to `0.8` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `top_p`.
+  warnings.warn(
+HOME/.conda/envs/freekv/lib/python3.10/site-packages/transformers/generation/configuration_utils.py:623: UserWarning: `do_sample` is set to `False`. However, `top_k` is set to `20` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `top_k`.
+  warnings.warn(
+  0%|          | 0/1 [04:15<?, ?it/s]
+Traceback (most recent call last):
+  File "HOME/kv-compression/vendor/FreeKV/source/pred.py", line 304, in <module>
+    preds = get_pred(
+  File "HOME/kv-compression/vendor/FreeKV/source/pred.py", line 239, in get_pred
+    output = generate_once(
+  File "HOME/kv-compression/vendor/FreeKV/source/pred.py", line 72, in generate_once
+    return model.generate(
+  File "HOME/.conda/envs/freekv/lib/python3.10/site-packages/torch/utils/_contextlib.py", line 120, in decorate_context
+    return func(*args, **kwargs)
+  File "HOME/.conda/envs/freekv/lib/python3.10/site-packages/transformers/generation/utils.py", line 2047, in generate
+    result = self._sample(
+  File "HOME/.conda/envs/freekv/lib/python3.10/site-packages/transformers/generation/utils.py", line 3007, in _sample
+    outputs = self(**model_inputs, return_dict=True)
+  File "HOME/.conda/envs/freekv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "HOME/.conda/envs/freekv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "HOME/kv-compression/vendor/FreeKV/source/freekv/adapter/modeling.py", line 327, in _new_self_forward
+    ret = _old_self_forward(*args, **kwargs)
+  File "HOME/.conda/envs/freekv/lib/python3.10/site-packages/transformers/models/qwen2/modeling_qwen2.py", line 1167, in forward
+    outputs = self.model(
+  File "HOME/.conda/envs/freekv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "HOME/.conda/envs/freekv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "HOME/.conda/envs/freekv/lib/python3.10/site-packages/transformers/models/qwen2/modeling_qwen2.py", line 976, in forward
+    layer_outputs = decoder_layer(
+  File "HOME/.conda/envs/freekv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "HOME/.conda/envs/freekv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "HOME/.conda/envs/freekv/lib/python3.10/site-packages/transformers/models/qwen2/modeling_qwen2.py", line 702, in forward
+    hidden_states, self_attn_weights, present_key_value = self.self_attn(
+  File "HOME/.conda/envs/freekv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "HOME/.conda/envs/freekv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "HOME/kv-compression/vendor/FreeKV/source/freekv/adapter/modeling.py", line 293, in <lambda>
+    lambda mod: lambda *args, **kwargs: _freekv_attn_forward(
+  File "HOME/kv-compression/vendor/FreeKV/source/freekv/adapter/modeling.py", line 209, in _freekv_attn_forward
+    state.recall(cur_id, eids, rids, blocking=True, need_recall_corr=to_corr)
+  File "HOME/kv-compression/vendor/FreeKV/source/freekv/infer_state.py", line 585, in recall
+    kernels.recall_cuda_cpy_cpuhnd_2buf(
+  File "HOME/kv-compression/vendor/FreeKV/source/freekv/kernels.py", line 401, in recall_cuda_cpy_cpuhnd_2buf
+    _cpp.recall_cuda_cpy_cpuhnd_2buf(rids_gpu, eids_gpu, cpu_c2p, cpu_buffer_pinned, 
+torch.AcceleratorError: CUDA error: an illegal memory access was encountered
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+
+terminate called after throwing an instance of 'c10::AcceleratorError'
+  what():  CUDA error: an illegal memory access was encountered
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+
+Exception raised from c10_cuda_check_implementation at /pytorch/c10/cuda/CUDAException.cpp:42 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) + 0x80 (0x74ad5437eeb0 in HOME/.conda/envs/freekv/lib/python3.10/site-packages/torch/lib/libc10.so)
+frame #1: <unknown function> + 0x111c7 (0x74ad5476c1c7 in HOME/.conda/envs/freekv/lib/python3.10/site-packages/torch/lib/libc10_cuda.so)
+frame #2: <unknown function> + 0x1cb3e (0x74ad54777b3e in HOME/.conda/envs/freekv/lib/python3.10/site-packages/torch/lib/libc10_cuda.so)
+frame #3: <unknown function> + 0x1ddb8 (0x74ad54778db8 in HOME/.conda/envs/freekv/lib/python3.10/site-packages/torch/lib/libc10_cuda.so)
+frame #4: <unknown function> + 0x43fc6f (0x74ad46c3fc6f in HOME/.conda/envs/freekv/lib/python3.10/site-packages/torch/lib/libtorch_python.so)
+frame #5: c10::TensorImpl::~TensorImpl() + 0x9 (0x74ad5435c179 in HOME/.conda/envs/freekv/lib/python3.10/site-packages/torch/lib/libc10.so)
+frame #6: <unknown function> + 0x6df3d8 (0x74ad46edf3d8 in HOME/.conda/envs/freekv/lib/python3.10/site-packages/torch/lib/libtorch_python.so)
+frame #7: <unknown function> + 0x6df774 (0x74ad46edf774 in HOME/.conda/envs/freekv/lib/python3.10/site-packages/torch/lib/libtorch_python.so)
+frame #8: <unknown function> + 0x128756 (0x62b74fb9b756 in HOME/.conda/envs/freekv/bin/python)
+frame #9: <unknown function> + 0x14cef0 (0x62b74fbbfef0 in HOME/.conda/envs/freekv/bin/python)
+frame #10: <unknown function> + 0x11bc05 (0x62b74fb8ec05 in HOME/.conda/envs/freekv/bin/python)
+frame #11: <unknown function> + 0x128756 (0x62b74fb9b756 in HOME/.conda/envs/freekv/bin/python)
+frame #12: <unknown function> + 0x199baf (0x62b74fc0cbaf in HOME/.conda/envs/freekv/bin/python)
+frame #13: <unknown function> + 0x11f114 (0x62b74fb92114 in HOME/.conda/envs/freekv/bin/python)
+frame #14: <unknown function> + 0x20612c (0x62b74fc7912c in HOME/.conda/envs/freekv/bin/python)
+frame #15: Py_FinalizeEx + 0x150 (0x62b74fc77900 in HOME/.conda/envs/freekv/bin/python)
+frame #16: <unknown function> + 0x93a40 (0x62b74fb06a40 in HOME/.conda/envs/freekv/bin/python)
+frame #17: Py_BytesMain + 0x37 (0x62b74fc38287 in HOME/.conda/envs/freekv/bin/python)
+frame #18: <unknown function> + 0x2a1ca (0x74ad5762a1ca in /lib/x86_64-linux-gnu/libc.so.6)
+frame #19: __libc_start_main + 0x8b (0x74ad5762a28b in /lib/x86_64-linux-gnu/libc.so.6)
+frame #20: _start + 0x2e (0x62b74fc3817e in HOME/.conda/envs/freekv/bin/python)
+

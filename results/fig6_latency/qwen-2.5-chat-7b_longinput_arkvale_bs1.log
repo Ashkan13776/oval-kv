@@ -1,0 +1,40 @@
+W0828 16:03:48.877000 3387933 site-packages/torch/utils/cpp_extension.py:2425] TORCH_CUDA_ARCH_LIST is not set, all archs for visible cards are included for compilation. 
+W0828 16:03:48.877000 3387933 site-packages/torch/utils/cpp_extension.py:2425] If this is not desired, please set os.environ['TORCH_CUDA_ARCH_LIST'] to specific architectures.
+2026-08-28 16:03:48,899 - INFO - flashinfer.jit: Prebuilt kernels not found, using JIT backend
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:01,  1.51it/s]Loading checkpoint shards:  50%|█████     | 2/4 [00:01<00:01,  1.67it/s]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:01<00:00,  1.75it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  1.85it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  1.78it/s]
+
+[96m────────────────────────────────────────────────────────────────────────────────────────────────────
+  KV Cache Config: token_budget=2048, page_budget=64, page_size=32, sink=512, recent=512
+────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+
+  0%|          | 0/1 [00:00<?, ?it/s][96m[Input] prompt_length=32036, dtype=torch.int64, device=cuda:0[0m
+[93m[Warmup] Running 1 warmup round(s)...[0m
+HOME/.conda/envs/freekv/lib/python3.10/site-packages/transformers/generation/configuration_utils.py:601: UserWarning: `do_sample` is set to `False`. However, `temperature` is set to `0.7` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `temperature`.
+  warnings.warn(
+HOME/.conda/envs/freekv/lib/python3.10/site-packages/transformers/generation/configuration_utils.py:606: UserWarning: `do_sample` is set to `False`. However, `top_p` is set to `0.8` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `top_p`.
+  warnings.warn(
+HOME/.conda/envs/freekv/lib/python3.10/site-packages/transformers/generation/configuration_utils.py:623: UserWarning: `do_sample` is set to `False`. However, `top_k` is set to `20` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `top_k`.
+  warnings.warn(
+The attention mask is not set and cannot be inferred from input because pad token is same as eos token. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+2026-08-28 16:03:57,799 - INFO - flashinfer.jit: Loading JIT ops: rope
+2026-08-28 16:03:57,807 - INFO - flashinfer.jit: Finished loading JIT ops: rope
+Starting from v4.46, the `logits` model output will have the same type as the model (except at train time, where it will always be FP32)
+[93m[Warmup] Done.[0m
+HOME/.conda/envs/freekv/lib/python3.10/site-packages/transformers/generation/configuration_utils.py:601: UserWarning: `do_sample` is set to `False`. However, `temperature` is set to `0.7` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `temperature`.
+  warnings.warn(
+HOME/.conda/envs/freekv/lib/python3.10/site-packages/transformers/generation/configuration_utils.py:606: UserWarning: `do_sample` is set to `False`. However, `top_p` is set to `0.8` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `top_p`.
+  warnings.warn(
+HOME/.conda/envs/freekv/lib/python3.10/site-packages/transformers/generation/configuration_utils.py:623: UserWarning: `do_sample` is set to `False`. However, `top_k` is set to `20` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `top_k`.
+  warnings.warn(
+
+[92m────────────────────────────────────────────────────────────────────────────────────────────────────
+  [qwen-2.5-chat-7b] Generation Summary
+────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+  Tokens generated : [512]
+  Total time       : 23.86s
+  Decode time      : 20.76s
+  Avg TBT (decode) : 40.62 ms
+[92m────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+
+[1m[Batch 0] Output preview:[0m ### Summary of the Gerald R. Ford (CVN-78) Class Aircraft Carrier Oversight and Funding Report The Gerald R. Ford (CVN-78) and subsequent Ford-class aircraft carriers represent a pivotal advancement in naval aviation and maritime warfare. Launched in 2017, the USS Gerald R. Ford (CVN-78) embodies a transformative leap in naval warfare, boasting a 2027 projected operational debut. Fundamentally, the Ford-class carriers, spearheaded by the USS Gerald R. Ford, embody unparalleled technological advancements aimed at enhancing operational flexibility, sortie generation, and 50-year lifecycle cost-efficiencies, totaling approximately \$13.1 billion for FY2019 procurement. The FY2020 budget reevaluation**: - The FY2020 budget proposes sustaining
+100%|██████████| 1/1 [00:46<00:00, 46.98s/it]100%|██████████| 1/1 [00:46<00:00, 46.98s/it]

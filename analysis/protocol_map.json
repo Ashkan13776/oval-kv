@@ -1,0 +1,35 @@
+{
+  "_method": "Per-task protocol, calibrated against the paper's FullKV control row ONLY (never a LOCKS cell). Selection rule: (1) ELIGIBILITY — the arm's generations must be well-formed: no official-scorer exceptions, and answers must not be truncated at the token cap. (2) Among eligible arms, pick the one nearest the paper's FullKV value. If only one arm is eligible it wins regardless of distance.",
+  "_arms": {
+    "A": "prompt_model=chatglm3 (yarn_mistral completion templates), no chat template, reference generation budget",
+    "D": "prompt_model=gpt4 (instruction templates) + GLM-4 chat template, generation budget = reference + gen_extra"
+  },
+  "_selection": {
+    "kv_retrieval":        "A 32.0 (+4.0) vs D 50.0 (+22.0) — both eligible, A nearer. paper 28.0",
+    "code_debug":          "A 30.0 (-2.0) vs D 48.0 (+16.0) — both eligible (50/50 option letters), A nearer. paper 32.0. NOTE D at reference budget scored 24.0 but was MALFORMED (1/50 had an option letter; 12 spurious credits)",
+    "longbook_sum_eng":    "A 28.7 (+1.1) vs D 31.5 (+3.9) — both eligible, A nearer; A's 939-word summaries match the 781-word references better under ROUGE-Lsum. paper 27.6",
+    "longdialogue_qa_eng": "A 60.0 (+26.0, 12 scoring false-positives) vs D 38.0 (+4.0, 0) — D. paper 34.0",
+    "math_find":           "A 28.0 (-2.0) but INELIGIBLE: 11/50 crash the official scorer (int('91.91')). D 36.0 (+6.0), 0 crashes. paper 30.0",
+    "longbook_qa_eng":     "A 11.5 (-4.7) but INELIGIBLE: 50/50 truncated at the 40-token cap. D 29.4 (+13.2), median 17 tok. paper 16.2",
+    "longbook_qa_chn":     "A 13.5 (-3.3) but INELIGIBLE: 50/50 truncated at cap. D 31.0 (+14.2), median 13 tok. paper 16.8",
+    "longbook_choice_eng": "A 68.0 (-14.0) vs D 74.0 (-8.0) — both eligible, D nearer. paper 82.0",
+    "passkey":             "A 100.0 vs D+24 100.0 — exact tie, both eligible. D+24 taken for consistency. paper 100.0",
+    "number_string":       "A 100.0 vs D+24 100.0 — exact tie. D+24 taken. paper 100.0",
+    "code_run":            "A 0.0 vs D 0.0 — tie at floor, neither well-formed (model traces code, cut off). paper 6.0, itself floor for every method in the table"
+  },
+  "_control_row": "Retr 77.3 (paper 76.0, +1.3) | LongQA 40.2 (35.3, +4.9) | Avg 45.4 (43.0, +2.4). Uniform-D was +7.3 / +5.5 / +5.9.",
+  "_residual": "The remaining +4.9 on LongQA is almost entirely book-qa-en (+13.2) and book-qa-zh (+14.2), where the NEARER arm was rejected for truncating every answer. Taking those would show Avg ~+0.8 — agreement bought with broken output.",
+  "tasks": {
+    "passkey":             {"prompt_model": "gpt4",     "chat_template": true,  "gen_extra": 24},
+    "number_string":       {"prompt_model": "gpt4",     "chat_template": true,  "gen_extra": 24},
+    "kv_retrieval":        {"prompt_model": "chatglm3", "chat_template": false, "gen_extra": 0},
+    "longdialogue_qa_eng": {"prompt_model": "gpt4",     "chat_template": true,  "gen_extra": 0},
+    "longbook_sum_eng":    {"prompt_model": "chatglm3", "chat_template": false, "gen_extra": 0},
+    "longbook_choice_eng": {"prompt_model": "gpt4",     "chat_template": true,  "gen_extra": 0},
+    "longbook_qa_eng":     {"prompt_model": "gpt4",     "chat_template": true,  "gen_extra": 0},
+    "longbook_qa_chn":     {"prompt_model": "gpt4",     "chat_template": true,  "gen_extra": 0},
+    "math_find":           {"prompt_model": "gpt4",     "chat_template": true,  "gen_extra": 0},
+    "code_run":            {"prompt_model": "gpt4",     "chat_template": true,  "gen_extra": 24},
+    "code_debug":          {"prompt_model": "chatglm3", "chat_template": false, "gen_extra": 0}
+  }
+}

@@ -1,0 +1,11 @@
+# Install torch first, matched to your CUDA (this work used cu128):
+#   pip install torch==2.8.0 --index-url https://download.pytorch.org/whl/cu128
+# FreeKV additionally needs a prebuilt flash-attn wheel matching that torch.
+transformers>=4.44
+datasets
+accelerate
+numpy
+matplotlib
+tqdm
+rouge-score
+jieba

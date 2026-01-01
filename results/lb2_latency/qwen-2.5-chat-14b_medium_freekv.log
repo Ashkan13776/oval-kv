@@ -1,0 +1,41 @@
+W0919 14:02:59.314000 3798240 site-packages/torch/utils/cpp_extension.py:2425] TORCH_CUDA_ARCH_LIST is not set, all archs for visible cards are included for compilation. 
+W0919 14:02:59.314000 3798240 site-packages/torch/utils/cpp_extension.py:2425] If this is not desired, please set os.environ['TORCH_CUDA_ARCH_LIST'] to specific architectures.
+2026-09-19 14:02:59,334 - INFO - flashinfer.jit: Prebuilt kernels not found, using JIT backend
+Loading checkpoint shards:   0%|          | 0/8 [00:00<?, ?it/s]Loading checkpoint shards:  12%|█▎        | 1/8 [00:00<00:06,  1.13it/s]Loading checkpoint shards:  25%|██▌       | 2/8 [00:01<00:04,  1.22it/s]Loading checkpoint shards:  38%|███▊      | 3/8 [00:02<00:03,  1.29it/s]Loading checkpoint shards:  50%|█████     | 4/8 [00:03<00:03,  1.29it/s]Loading checkpoint shards:  62%|██████▎   | 5/8 [00:03<00:02,  1.31it/s]Loading checkpoint shards:  75%|███████▌  | 6/8 [00:04<00:01,  1.30it/s]Loading checkpoint shards:  88%|████████▊ | 7/8 [00:05<00:00,  1.30it/s]Loading checkpoint shards: 100%|██████████| 8/8 [00:05<00:00,  1.48it/s]Loading checkpoint shards: 100%|██████████| 8/8 [00:05<00:00,  1.35it/s]
+
+[96m────────────────────────────────────────────────────────────────────────────────────────────────────
+  KV Cache Config: token_budget=2048, page_budget=64, page_size=32, sink=512, recent=512
+────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+
+  0%|          | 0/1 [00:00<?, ?it/s][96m[Input] prompt_length=65572, dtype=torch.int64, device=cuda:0[0m
+[93m[Warmup] Running 1 warmup round(s)...[0m
+HOME/.conda/envs/freekv/lib/python3.10/site-packages/transformers/generation/configuration_utils.py:601: UserWarning: `do_sample` is set to `False`. However, `temperature` is set to `0.7` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `temperature`.
+  warnings.warn(
+HOME/.conda/envs/freekv/lib/python3.10/site-packages/transformers/generation/configuration_utils.py:606: UserWarning: `do_sample` is set to `False`. However, `top_p` is set to `0.8` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `top_p`.
+  warnings.warn(
+HOME/.conda/envs/freekv/lib/python3.10/site-packages/transformers/generation/configuration_utils.py:623: UserWarning: `do_sample` is set to `False`. However, `top_k` is set to `20` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `top_k`.
+  warnings.warn(
+The attention mask is not set and cannot be inferred from input because pad token is same as eos token. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+2026-09-19 14:03:16,014 - INFO - flashinfer.jit: Loading JIT ops: rope
+2026-09-19 14:03:16,024 - INFO - flashinfer.jit: Finished loading JIT ops: rope
+Starting from v4.46, the `logits` model output will have the same type as the model (except at train time, where it will always be FP32)
+This is a friendly reminder - the current text generation call will exceed the model's predefined maximum length (32768). Depending on the model, you may observe exceptions, performance degradation, or nothing at all.
+[93m[Warmup] Done.[0m
+HOME/.conda/envs/freekv/lib/python3.10/site-packages/transformers/generation/configuration_utils.py:601: UserWarning: `do_sample` is set to `False`. However, `temperature` is set to `0.7` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `temperature`.
+  warnings.warn(
+HOME/.conda/envs/freekv/lib/python3.10/site-packages/transformers/generation/configuration_utils.py:606: UserWarning: `do_sample` is set to `False`. However, `top_p` is set to `0.8` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `top_p`.
+  warnings.warn(
+HOME/.conda/envs/freekv/lib/python3.10/site-packages/transformers/generation/configuration_utils.py:623: UserWarning: `do_sample` is set to `False`. However, `top_k` is set to `20` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `top_k`.
+  warnings.warn(
+
+[92m────────────────────────────────────────────────────────────────────────────────────────────────────
+  [qwen-2.5-chat-14b] Generation Summary
+────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+  Tokens generated : [54]
+  Total time       : 21.05s
+  Decode time      : 2.51s
+  Avg TBT (decode) : 47.27 ms
+[92m────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+
+[1m[Batch 0] Output preview:[0m The correct answer is not directly stated in the options provided, but based on the information provided, it appears to be (C). IEJ. 2 choices do not seem to be on The correct answer based on the information provided is (C).
+100%|██████████| 1/1 [00:46<00:00, 46.77s/it]100%|██████████| 1/1 [00:46<00:00, 46.77s/it]

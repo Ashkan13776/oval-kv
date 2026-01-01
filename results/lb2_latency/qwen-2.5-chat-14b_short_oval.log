@@ -1,0 +1,42 @@
+W0919 14:02:15.865000 3798036 site-packages/torch/utils/cpp_extension.py:2425] TORCH_CUDA_ARCH_LIST is not set, all archs for visible cards are included for compilation. 
+W0919 14:02:15.865000 3798036 site-packages/torch/utils/cpp_extension.py:2425] If this is not desired, please set os.environ['TORCH_CUDA_ARCH_LIST'] to specific architectures.
+2026-09-19 14:02:15,887 - INFO - flashinfer.jit: Prebuilt kernels not found, using JIT backend
+Loading checkpoint shards:   0%|          | 0/8 [00:00<?, ?it/s]Loading checkpoint shards:  12%|█▎        | 1/8 [00:00<00:05,  1.18it/s]Loading checkpoint shards:  25%|██▌       | 2/8 [00:01<00:04,  1.22it/s]Loading checkpoint shards:  38%|███▊      | 3/8 [00:02<00:03,  1.28it/s]Loading checkpoint shards:  50%|█████     | 4/8 [00:03<00:03,  1.28it/s]Loading checkpoint shards:  62%|██████▎   | 5/8 [00:03<00:02,  1.29it/s]Loading checkpoint shards:  75%|███████▌  | 6/8 [00:04<00:01,  1.31it/s]Loading checkpoint shards:  88%|████████▊ | 7/8 [00:05<00:00,  1.29it/s]Loading checkpoint shards: 100%|██████████| 8/8 [00:05<00:00,  1.47it/s]Loading checkpoint shards: 100%|██████████| 8/8 [00:05<00:00,  1.34it/s]
+
+[96m────────────────────────────────────────────────────────────────────────────────────────────────────
+  KV Cache Config: token_budget=2048, page_budget=64, page_size=32, sink=512, recent=512
+────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+
+[locks] stashed o_proj for 48 layers (G=W^T W built lazily at first page summary)
+  0%|          | 0/1 [00:00<?, ?it/s][96m[Input] prompt_length=29877, dtype=torch.int64, device=cuda:0[0m
+[93m[Warmup] Running 1 warmup round(s)...[0m
+HOME/.conda/envs/freekv/lib/python3.10/site-packages/transformers/generation/configuration_utils.py:601: UserWarning: `do_sample` is set to `False`. However, `temperature` is set to `0.7` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `temperature`.
+  warnings.warn(
+HOME/.conda/envs/freekv/lib/python3.10/site-packages/transformers/generation/configuration_utils.py:606: UserWarning: `do_sample` is set to `False`. However, `top_p` is set to `0.8` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `top_p`.
+  warnings.warn(
+HOME/.conda/envs/freekv/lib/python3.10/site-packages/transformers/generation/configuration_utils.py:623: UserWarning: `do_sample` is set to `False`. However, `top_k` is set to `20` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `top_k`.
+  warnings.warn(
+The attention mask is not set and cannot be inferred from input because pad token is same as eos token. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+[locks] page_rep=locks rank=8 eta=0.25 max_pages=4096 G=W^T W buffers=3624MB
+2026-09-19 14:02:31,829 - INFO - flashinfer.jit: Loading JIT ops: rope
+2026-09-19 14:02:31,839 - INFO - flashinfer.jit: Finished loading JIT ops: rope
+Starting from v4.46, the `logits` model output will have the same type as the model (except at train time, where it will always be FP32)
+[93m[Warmup] Done.[0m
+HOME/.conda/envs/freekv/lib/python3.10/site-packages/transformers/generation/configuration_utils.py:601: UserWarning: `do_sample` is set to `False`. However, `temperature` is set to `0.7` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `temperature`.
+  warnings.warn(
+HOME/.conda/envs/freekv/lib/python3.10/site-packages/transformers/generation/configuration_utils.py:606: UserWarning: `do_sample` is set to `False`. However, `top_p` is set to `0.8` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `top_p`.
+  warnings.warn(
+HOME/.conda/envs/freekv/lib/python3.10/site-packages/transformers/generation/configuration_utils.py:623: UserWarning: `do_sample` is set to `False`. However, `top_k` is set to `20` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `top_k`.
+  warnings.warn(
+
+[92m────────────────────────────────────────────────────────────────────────────────────────────────────
+  [qwen-2.5-chat-14b] Generation Summary
+────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+  Tokens generated : [44]
+  Total time       : 8.85s
+  Decode time      : 2.11s
+  Avg TBT (decode) : 49.07 ms
+[92m────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+
+[1m[Batch 0] Output preview:[0m The correct answer is (B) The fluorescence intensity and lifetime of the GRABACh3.0 sensor in cells are sensitive to changes in acetylcholine (ACh) concentrations, demonstrating its high sensitivity.
+100%|██████████| 1/1 [00:22<00:00, 22.82s/it]100%|██████████| 1/1 [00:22<00:00, 22.82s/it]

@@ -1,0 +1,1015 @@
+diff --git a/accuracy/eval/reasoning/pred.py b/accuracy/eval/reasoning/pred.py
+index 47f4b0f..120102a 100644
+--- a/accuracy/eval/reasoning/pred.py
++++ b/accuracy/eval/reasoning/pred.py
+@@ -320,6 +320,41 @@ if __name__ == "__main__":
+         data = data.select(range(args.data_from, len(data)))
+     
+     out_path = get_out_path(args, config)
++    # Resume: results are APPENDED, so re-running a cell would duplicate every
++    # record rather than skip it.  Drop the problems already written for this
++    # exact (model, dataset, method, eta, seed) cell.  Cells here run for hours,
++    # so a restart must not have to redo completed work -- or silently
++    # double-count it into the pass@k / avg@k denominators.
++    if os.path.exists(out_path):
++        _done = set()
++        with open(out_path, encoding="utf-8") as _f:
++            for _line in _f:
++                _line = _line.strip()
++                if _line:
++                    try:
++                        _done.add(json.loads(_line)["qid"])
++                    except Exception:
++                        pass
++        if _done:
++            # qid is `enumerate index + data_from`, so the remaining problems
++            # must keep their ORIGINAL numbering -- selecting a subset would
++            # renumber them from 0 and collide with the qids already written.
++            # Records are appended in order, so what is done is a prefix:
++            # advance data_from past it instead of reindexing.
++            _base = args.data_from or 0
++            _next = max(_done) + 1
++            _skip = _next - _base
++            print(f"[resume] {len(_done)} already done in {os.path.basename(out_path)}; "
++                  f"resuming at qid {_next}")
++            if _skip >= len(data):
++                print("[resume] cell already complete, nothing to do")
++                raise SystemExit(0)
++            if _skip > 0:
++                if len(_done) != _next - _base:
++                    print(f"[resume] WARNING: {_next - _base - len(_done)} gap(s) in "
++                          f"qids below {_next} will NOT be re-run")
++                data = data.select(range(_skip, len(data)))
++                args.data_from = _next
+     if args.batch_size == 1:
+         preds = get_pred(
+             model,
+diff --git a/accuracy/eval/util.py b/accuracy/eval/util.py
+index e4bd935..cd6c4eb 100644
+--- a/accuracy/eval/util.py
++++ b/accuracy/eval/util.py
+@@ -31,8 +31,20 @@ def parse_common_args(parser):
+                         choices=["full", "duo_attn", "razor", 
+                                  "quest", "arkv", "spec_ret", "raas"],
+                         help="KV cache eviction/selection method")
+-    parser.add_argument("--page_rep", type=str, default="quest", choices=["quest", "arkv"],
+-                        help="Page representation method")
++    parser.add_argument("--page_rep", type=str, default="quest",
++                        choices=["quest", "arkv", "oval", "oab", "locks"],
++                        help="Page representation method. 'oval' (legacy aliases: 'oab', 'locks') is the rank-r "
++                             "output-aware page basis (see kvc/patch/locks_rep.py); "
++                             "its mixing weight is --eta.")
++    parser.add_argument("--eta", type=float, default=0.0,
++                        help="page_rep=locks only. Trace-normalised mixing weight "
++                             "between the key-energy and output-coupled metrics: "
++                             "M_eta = (1-eta)*X^T X/tr(.) + eta*X^T Y G Y^T X/tr(.). "
++                             "eta=0 is the plain rank-r key PCA; eta=1 is the "
++                             "output-only basis.")
++    parser.add_argument("--oval_rank", "--locks_rank", type=int, default=8,
++                        dest="locks_rank",
++                        help="page_rep=locks only. Rank r of the page basis.")
+     parser.add_argument("--GQA_policy", type=str, default="avgS",
+                         choices=["maxQ", "avgQ", "maxS", "avgS", "maxSM", "avgSM"],
+                         help="Grouped-query attention aggregation policy")
+@@ -128,6 +140,14 @@ def get_out_path(args, config, out_root_dir=None, mkdir=True):
+             else:
+                 GQA_policy = config["GQA_policy"]
+                 out_path += f"-{GQA_policy}"
++                # page_rep is part of the arm's identity: without it every eta
++                # in a sweep writes to the SAME file and silently overwrites
++                # the previous one.
++                if config.get("page_rep") == "locks":
++                    # 'oval' is the current name; _q0 records that records are
++                    # unquantized (bf16), matching the other machine's files
++                    out_path += f"-oval_r{config.get('locks_rank', 8)}" \
++                                f"_eta{config.get('eta', 0.0)}_q0"
+                 if method == "spec_ret":
+                     spec_ret_steps = config["spec_ret_steps"]
+                     llb = config["llb"]
+@@ -270,7 +290,12 @@ def load_model_and_tokenizer(path, args):
+         config["sink"] = sink_size
+         config["recent"] = recent_size
+         config["skip_layer"] = args.skip_layer
+-        config["page_rep"] = args.page_rep
++        # 'oval' is the current name for what the code calls 'locks'; normalise
++        # here so one implementation serves both and older result files stay
++        # readable.
++        config["page_rep"] = "locks" if args.page_rep in ("oval", "oab") else args.page_rep
++        config["eta"] = args.eta
++        config["locks_rank"] = args.locks_rank
+         print(f"Enabling {method} evaluation using sink size {sink_size} recent size {recent_size}, "
+               f"skip {args.skip_layer} layers")
+         if method in ["quest", "arkv", "spec_ret"]:
+diff --git a/accuracy/kvc/patch/dynamic_attention.py b/accuracy/kvc/patch/dynamic_attention.py
+index 32ac2af..46b5ff2 100644
+--- a/accuracy/kvc/patch/dynamic_attention.py
++++ b/accuracy/kvc/patch/dynamic_attention.py
+@@ -5,6 +5,8 @@ import torch.nn.functional as F
+ from transformers.models.llama.modeling_llama import repeat_kv
+ import math
+ 
++from .locks_rep import build_page_summary, locks_sel, gqa_combine
++
+ 
+ def repeat_kv_BLH(hidden_states: torch.Tensor, n_rep: int) -> torch.Tensor:
+     batch, slen, num_key_value_heads, head_dim = hidden_states.shape
+@@ -103,7 +105,17 @@ def quest_arkv_attn(self,
+             )
+             mins = paged_k.min(dim=2).values
+             maxs = paged_k.max(dim=2).values
+-            if self.page_rep == "arkv":
++            if self.page_rep == "locks":
++                paged_v = v[:, sink_size: sink_size + num_init_pages*page_size, :, :].reshape(
++                    v.shape[0], num_init_pages, page_size, num_kv_heads, head_dim
++                )
++                mu, bs, cf = build_page_summary(
++                    paged_k, paged_v, getattr(self, "locks_Gh", None),
++                    self.locks_eta, self.locks_rank)
++                self.mu_k[:, :num_init_pages, ...] = mu
++                self.basis_k[:, :num_init_pages, ...] = bs
++                self.coef_k[:, :num_init_pages, ...] = cf
++            elif self.page_rep == "arkv":
+                 centers = (maxs + mins) / 2
+                 dists = (
+                     (
+@@ -124,7 +136,18 @@ def quest_arkv_attn(self,
+         )
+         mins = new_paged_k.amin(dim=1)
+         maxs = new_paged_k.amax(dim=1)
+-        if self.page_rep == "arkv":
++        if self.page_rep == "locks":
++            new_paged_v = v[:, sink_size + self.num_pages*page_size:, :, :].reshape(
++                v.shape[0], page_size, num_kv_heads, head_dim
++            )
++            # build_page_summary works on a page AXIS; add one of length 1
++            mu, bs, cf = build_page_summary(
++                new_paged_k.unsqueeze(1), new_paged_v.unsqueeze(1),
++                getattr(self, "locks_Gh", None), self.locks_eta, self.locks_rank)
++            self.mu_k[:, self.num_pages, ...] = mu[:, 0]
++            self.basis_k[:, self.num_pages, ...] = bs[:, 0]
++            self.coef_k[:, self.num_pages, ...] = cf[:, 0]
++        elif self.page_rep == "arkv":
+             centers = (maxs + mins) / 2
+             dists = (
+                 (
+@@ -143,9 +166,15 @@ def quest_arkv_attn(self,
+         new_min_k = torch.empty((1, self.alloc_len, self.min_k.shape[-2], self.min_k.shape[-1]), 
+                                 device=self.min_k.device, dtype=self.min_k.dtype)
+         self.min_k = torch.cat([self.min_k, new_min_k], dim=1)
+-        new_max_k = torch.empty((1, self.alloc_len, self.max_k.shape[-2], self.max_k.shape[-1]), 
++        new_max_k = torch.empty((1, self.alloc_len, self.max_k.shape[-2], self.max_k.shape[-1]),
+                                 device=self.max_k.device, dtype=self.max_k.dtype)
+         self.max_k = torch.cat([self.max_k, new_max_k], dim=1)
++        if self.page_rep == "locks":
++            for nm in ("mu_k", "basis_k", "coef_k"):
++                buf = getattr(self, nm)
++                pad = torch.empty((buf.shape[0], self.alloc_len, *buf.shape[2:]),
++                                  device=buf.device, dtype=buf.dtype)
++                setattr(self, nm, torch.cat([buf, pad], dim=1))
+     
+     if update_only:
+         return None
+@@ -171,6 +200,19 @@ def quest_arkv_attn(self,
+     # [1, num_used_pages, num_kv_heads, head_dim]
+     min_k_for_sel = self.min_k[:, :self.num_pages - num_recent_page, ...]
+     max_k_for_sel = self.max_k[:, :self.num_pages - num_recent_page, ...]
++    if self.page_rep == "locks":
++        n_sel = self.num_pages - num_recent_page
++        _lk = (self.mu_k[:, :n_sel, ...], self.basis_k[:, :n_sel, ...],
++               self.coef_k[:, :n_sel, ...])
++
++        def _page_score(probe):
++            # per-head rank-r page score, then FreeKV's own group combine
++            return gqa_combine(locks_sel(probe, *_lk, num_heads, num_kv_heads),
++                               self.GQA_policy, num_heads, num_kv_heads)
++    else:
++        def _page_score(probe):
++            return quest_sel(probe, min_k_for_sel, max_k_for_sel,
++                             self.GQA_policy, num_heads, num_kv_heads)
+ 
+     # selection with current or past query
+     if token_budget > 0:
+@@ -199,7 +241,7 @@ def quest_arkv_attn(self,
+             else:
+                 probe_q = past_q
+ 
+-        max_qk = quest_sel(probe_q, min_k_for_sel, max_k_for_sel, self.GQA_policy, num_heads, num_kv_heads)
++        max_qk = _page_score(probe_q)
+         # [bsz, num_kv_heads, page_budget]
+         _, sel_page_indices = torch.topk(max_qk, page_budget, dim=-1)
+     
+@@ -207,7 +249,7 @@ def quest_arkv_attn(self,
+     if self.layer_idx > 0 and ll_page_budget > 0:
+         llq_ptr = (self.last_layer_attn.q_ptr - 1) % self.spec_ret_steps
+         llq = self.last_layer_attn.q_cache[:, llq_ptr, ...]
+-        max_qk = quest_sel(llq, min_k_for_sel, max_k_for_sel, self.GQA_policy, num_heads, num_kv_heads)
++        max_qk = _page_score(llq)
+         _, ll_sel_page_indices = torch.topk(max_qk, ll_page_budget, dim=-1)
+         # [bsz, num_kv_heads, (up to) page_budget + ll_page_budget]
+         # still maybe repeated pages...
+diff --git a/accuracy/kvc/patch/llama.py b/accuracy/kvc/patch/llama.py
+index 7e50cbb..b769676 100644
+--- a/accuracy/kvc/patch/llama.py
++++ b/accuracy/kvc/patch/llama.py
+@@ -29,6 +29,9 @@ except ImportError:
+ from .dynamic_attention import (
+     quest_arkv_attn, raas_attn
+ )
++from .locks_rep import (
++    outproj_metric_sqrt,
++)
+ 
+ from .utils import flash_attn_maybe_npu, asym_quant_int8, asym_dequant_int8
+ 
+@@ -504,7 +507,12 @@ def enable_llama_dyn_attention(
+             module.GQA_policy = config["GQA_policy"]
+             module.alloc_len = 512
+             module.num_pages = 0    # === reset needed ===
+-            max_num_pages = 128 * 1024 // module.page_size
++            # Upstream hardcodes 128K of page slabs regardless of the model's
++            # actual context. KVC_MAX_TOKENS sizes them to what is really
++            # used (64K here), which matters because the locks/oval buffers
++            # scale with this too.
++            _max_tok = int(os.environ.get('KVC_MAX_TOKENS', 128 * 1024))
++            max_num_pages = _max_tok // module.page_size
+             if module.token_budget > 0:
+                 module.budget_ones = torch.ones((bsz, module.token_budget), 
+                                                 device=module.q_proj.weight.device)
+@@ -517,6 +525,26 @@ def enable_llama_dyn_attention(
+                 module.page_rep = "arkv"
+             else:   # for quest or spec_kv
+                 module.page_rep = config.get("page_rep", "quest")
++            if module.page_rep == "locks":
++                module.locks_eta = config.get("eta", 0.0)
++                module.locks_rank = config.get("locks_rank", 8)
++                r = module.locks_rank
++                _mk = lambda *sh: torch.empty(
++                    (bsz, max_num_pages, num_dyn_attn_heads, *sh),
++                    device=module.q_proj.weight.device, dtype=dtype)
++                module.mu_k = _mk(module.head_dim)
++                module.basis_k = _mk(module.head_dim, r)
++                module.coef_k = _mk(config["page_size"], r)
++                # G^{1/2} for the output-coupled term.  o_proj has ALREADY been
++                # reordered above, so its head order matches the pages'.
++                module.locks_Gh = None
++                if module.locks_eta > 0.0:
++                    module.locks_Gh = outproj_metric_sqrt(
++                        module.o_proj.weight, num_dyn_attn_heads,
++                        module.head_dim, module.num_key_value_groups)
++                if idx == 0:
++                    print(f"[locks] page_rep=locks eta={module.locks_eta} "
++                          f"rank={r} G={'W^T W' if module.locks_Gh is not None else 'off (eta=0)'}")
+             module.ll_token_budget = 0
+             if method == "spec_ret":
+                 module.ll_token_budget = config["llb"]
+diff --git a/accuracy/kvc/patch/tuple_kv_cache.py b/accuracy/kvc/patch/tuple_kv_cache.py
+index 178fa0a..d640323 100644
+--- a/accuracy/kvc/patch/tuple_kv_cache.py
++++ b/accuracy/kvc/patch/tuple_kv_cache.py
+@@ -137,6 +137,17 @@ def old_flash_attention_2_forward(
+             self.v_zero = torch.cat([self.v_zero, v_zero], dim=1)
+             past_key_value = (torch.cat([past_key_value[0], new_quant_k], dim=1), 
+                               torch.cat([past_key_value[1], new_quant_v], dim=1)) if use_cache else None
++    else:
++        # UPSTREAM BUG: the cache was only ever written on the kv8 (int8) path.
++        # In bf16 -- the default, and what --method full runs -- past_key_value
++        # was returned UNCHANGED, so every decode step got a tuple of Nones,
++        # saw an empty cache, and re-RoPEd the new token at position 0. Prefill
++        # is correct, so the first generated token is right and everything after
++        # it is garbage; on InfiniteBench that reads as FullKV scoring 9.39,
++        # passing only the tasks graded on their first token.
++        # key_states/value_states are already the concatenated full sequence at
++        # this point (see the cat above), so the cache is just those.
++        past_key_value = (key_states, value_states) if use_cache else None
+ 
+     attn_output = attn_output.reshape(bsz, q_len, self.hidden_size).contiguous()
+     attn_output = self.o_proj(attn_output)
+@@ -383,7 +394,10 @@ def old_llama_model_forward(
+     seq_length_with_past = seq_length
+     past_key_values_length = 0
+ 
+-    if past_key_values is not None:
++    # Upstream checks only that past_key_values is not None, but on the FIRST
++    # forward pass transformers passes a TUPLE OF NONES, so past_key_values[0]
++    # is None and the subscript raises. This is why `--method full` crashes.
++    if past_key_values is not None and past_key_values[0] is not None:
+         past_key_values_length = past_key_values[0][0].shape[1]
+         seq_length_with_past = seq_length_with_past + past_key_values_length
+ 
+diff --git a/config/model2maxlen.json b/config/model2maxlen.json
+index 695c078..9c35f1e 100644
+--- a/config/model2maxlen.json
++++ b/config/model2maxlen.json
+@@ -1,7 +1,8 @@
+ {
+-	"qwen-2.5-chat-7b": 120000,
+-	"llama-3.1-chat-8b": 120000,
+-	"ds-r1-qwen-7b": 120000,
+-	"ds-r1-llama-8b": 120000,
+-	"ds-r1-qwen-14b": 120000
+-}
++ "qwen-2.5-chat-7b": 120000,
++ "llama-3.1-chat-8b": 120000,
++ "ds-r1-qwen-7b": 120000,
++ "ds-r1-llama-8b": 120000,
++ "ds-r1-qwen-14b": 120000,
++ "qwen-2.5-chat-14b": 65536
++}
+\ No newline at end of file
+diff --git a/config/model2path.json b/config/model2path.json
+index df82a90..28b5d7f 100644
+--- a/config/model2path.json
++++ b/config/model2path.json
+@@ -1,7 +1,8 @@
+ {
+-	"qwen-2.5-chat-7b": "Qwen/Qwen2.5-7B-Instruct",
+-	"llama-3.1-chat-8b": "meta-llama/Llama-3.1-8B-Instruct",
+-	"ds-r1-qwen-7b": "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B",
+-	"ds-r1-llama-8b": "deepseek-ai/DeepSeek-R1-Distill-Llama-8B",
+-	"ds-r1-qwen-14b": "deepseek-ai/DeepSeek-R1-Distill-Qwen-14B"
++ "qwen-2.5-chat-7b": "Qwen/Qwen2.5-7B-Instruct",
++ "llama-3.1-chat-8b": "NousResearch/Meta-Llama-3.1-8B-Instruct",
++ "ds-r1-qwen-7b": "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B",
++ "ds-r1-llama-8b": "deepseek-ai/DeepSeek-R1-Distill-Llama-8B",
++ "ds-r1-qwen-14b": "deepseek-ai/DeepSeek-R1-Distill-Qwen-14B",
++ "qwen-2.5-chat-14b": "Qwen/Qwen2.5-14B-Instruct"
+ }
+\ No newline at end of file
+diff --git a/source/freekv/adapter/modeling.py b/source/freekv/adapter/modeling.py
+index f9abf0a..afe3c71 100644
+--- a/source/freekv/adapter/modeling.py
++++ b/source/freekv/adapter/modeling.py
+@@ -146,7 +146,7 @@ def _freekv_attn_forward(
+                     evt = torch.cuda.Event()
+                     evt.record(state.prefill_backup_stream)
+                     state.prefill_backup_events[cur_id] = evt
+-                state.prefill_save_digests(cur_id, key_states)
++                state.prefill_save_digests(cur_id, key_states, value_states)
+             attn_output = state.prefill_sdpa(cur_id, query_states)
+             infer_state.prefill_evict_extra_pages(
+                 cur_id, query_states[:, -1:, ...].contiguous()
+@@ -227,6 +227,14 @@ def _freekv_attn_forward(
+ 
+                     if state.corr is not None:
+                         state.last_step_q[cur_id] = query_states
++                elif state.method == "raas":
++                    # dropping method: score pages with the engine's own min/max
++                    # bound, refresh timestamps, arm the oldest slot for
++                    # permanent eviction. No selection top-k, no recall, no
++                    # CPU<->GPU transfer -- that is what makes it a "dropping"
++                    # method and why the paper calls it offload-free.
++                    state.raas_step(cur_id, query_states)
++                    attn_output = state.decode_sdpa(cur_id, query_states, attn_page_ids)
+                 else:
+                     state.estimate_select_recall(cur_id, query_states)
+                     attn_output = state.decode_sdpa(cur_id, query_states, attn_page_ids)
+@@ -277,6 +285,15 @@ def enable_offload(
+         self.lm_head.forward = lambda x: \
+             _lm_head_forward_streamed(x, _lm_head_forward, infer_state=infer_state)
+ 
++    # publish G = W^T W per layer for the locks page representation (eta > 0).
++    # o_proj is NOT reordered in this engine, so head order is native.
++    if getattr(infer_state, "page_rep", "quest") == "locks" and infer_state.locks_eta > 0:
++        for mod in self.modules():
++            if "Attention" in str(mod.__class__) and hasattr(mod, "layer_idx"):
++                infer_state.locks_publish_metric(mod.layer_idx, mod.o_proj.weight)
++        print(f"[locks] stashed o_proj for {len(infer_state.locks_oproj)} layers "
++              f"(G=W^T W built lazily at first page summary)")
++
+     for mod in self.modules():
+         mod_cls = str(mod.__class__)
+         if "Attention" in mod_cls:
+diff --git a/source/freekv/infer_state.py b/source/freekv/infer_state.py
+index efa74df..008a58c 100644
+--- a/source/freekv/infer_state.py
++++ b/source/freekv/infer_state.py
+@@ -7,6 +7,8 @@ from torch import Tensor
+ 
+ from .kv_cache import KvPool, KvCache
+ from . import kernels
++from . import locks_summary
++from . import raas as raas_mod
+ from . import utils
+ import atexit
+ 
+@@ -53,6 +55,21 @@ class InferState:
+         self.dtype = dtype
+         self.device = device
+ 
++        # ---- locks page representation (our output-aware basis) ----------
++        self.page_rep = kwargs.get("page_rep", "quest")
++        self.locks_rank = int(kwargs.get("locks_rank", 8))
++        self.locks_eta = float(kwargs.get("eta", 0.0))
++        self.locks_max_pages = int(kwargs.get("locks_max_pages", 4096))
++        self.locks = None
++        # o_proj weights stashed at patch time; G^{1/2} is materialised lazily
++        # because enable_offload runs BEFORE the locks store is allocated.
++        self.locks_oproj = {}
++
++        # ---- RaaS dropping method (Fig 6 baseline, not in the artifact) ----
++        self.method = kwargs.get("method", "freekv")
++        self.raas_alpha = float(kwargs.get("raas_alpha", 0.02))
++        self.raas = None
++
+         if n_max_pages is None:
+             assert n_max_bytes is not None
+             n_max_pages = n_max_bytes // (
+@@ -141,7 +158,12 @@ class InferState:
+         self.dg_indptrs: Tensor = None
+ 
+         # maybe larger for larger batch
+-        wbufs = [torch.empty(64 * 1024 * 1024, **self._u8) for _ in self.budget2layers]
++        # Their fixed 64MiB is not enough for the long-generation scenario
++        # (600 in / 16K out), where FlashInfer's planner fails with
++        # "Out of workspace memory in AlignedAlloactor". Overridable so the
++        # deviation is explicit rather than a silently changed constant.
++        _wmib = int(os.environ.get("FREEKV_WORKSPACE_MIB", "64"))
++        wbufs = [torch.empty(_wmib * 1024 * 1024, **self._u8) for _ in self.budget2layers]
+         self.prefill_handler = kernels.BatchPrefillWithPagedKVCacheWrapper(
+             wbufs[0], self.layout
+         )
+@@ -279,6 +301,32 @@ class InferState:
+             self.layer2budget[i] and KvCache(self._pool, bsz)
+             for i in range(self.n_layers)
+         ]
++        if self.method == "raas" and self.raas is None:
++            b = max([x for x in self.layer2budget if x] + [0])
++            self.raas = raas_mod.RaasState(self.n_layers, bsz, b,
++                                           self.n_groups, self.device)
++            print(f"[raas] dropping method active: budget={b} pages, "
++                  f"alpha={self.raas_alpha}, no offload / no recall")
++        elif self.method == "raas":
++            self.raas.reset()
++
++        if self.page_rep == "locks" and (
++                self.locks is None or self.locks.bsz != bsz):
++            # Our summary cannot live in their KvPool (page shape is a
++            # [2, page, n_kv, d] max/min pair), so it gets its own buffers
++            # indexed by SOURCE PAGE INDEX -- valid because digests are never
++            # evicted, only the KV pages they summarise are.
++            self.locks = locks_summary.LocksSummaryStore(
++                self.n_layers, bsz, self.locks_max_pages, self.n_kv_heads,
++                self.head_dim, self.locks_rank, self.locks_eta,
++                self.dtype, self.device)
++            print(f"[locks] page_rep=locks rank={self.locks_rank} "
++                  f"eta={self.locks_eta} max_pages={self.locks_max_pages} "
++                  f"G={'W^T W' if self.locks_eta > 0 else 'off (eta=0)'} "
++                  f"buffers={self.locks.bytes()/1e6:.0f}MB")
++        elif self.page_rep == "locks":
++            # reuse the buffers across requests; just restart the page counters
++            self.locks.n_pages = [0] * self.n_layers
+         self._cpu_pool.clear()
+         self.cpu_kv_caches = [
+             self.layer2budget[i] and KvCache(self._cpu_pool, bsz)
+@@ -471,6 +519,8 @@ class InferState:
+     ):
+         if n_groups is None:
+             n_groups = self.n_groups
++        if self.page_rep == "locks":
++            return self._locks_scores(layer_idx, query_states, n_groups)
+         dgc = self.dg_caches[layer_idx]
+         return kernels.estimate_scores(
+             query_states,
+@@ -609,6 +659,32 @@ class InferState:
+         rs_group = layer_idx % (self.n_recall_stream // 2)
+         recall_stream1 = self.recall_streams[rs_group*2]
+         recall_stream2 = self.recall_streams[rs_group*2 + 1]
++
++        # --- cross-stream hazard fix -------------------------------------
++        # estimate_select_recall_core runs estimate/topk/recall on the RECALL
++        # streams (estimate_select_recall.cu:99) but reads `q`, which is
++        # produced on compute_stream, and the whole call is dispatched to a CPU
++        # thread pool. Nothing in the C++ makes the recall streams wait for the
++        # producer, so the pool thread can launch EstimateScores while q is
++        # still being written -- a timing-dependent race that corrupts decoding.
++        #
++        # 1. order the recall streams after the current (compute) stream
++        _cur = torch.cuda.current_stream(self.device)
++        _ev = torch.cuda.Event()
++        _ev.record(_cur)
++        recall_stream1.wait_event(_ev)
++        recall_stream2.wait_event(_ev)
++        # 2. tell the caching allocator these blocks are live on the recall
++        #    streams too, or it may recycle them once compute_stream is done
++        #    while the async recall is still reading them.
++        for _t in (q, dgc.buffer, dgc.c2p, self.dg_indptrs, self.dg_last_page_lens,
++                   dout, eids, rids, newi, buff, cc2gp, gc2cc,
++                   cpu_kvc.c2p, kvc.buffer, self.recall_buf1, self.recall_buf2):
++            if torch.is_tensor(_t) and _t.is_cuda:
++                _t.record_stream(recall_stream1)
++                _t.record_stream(recall_stream2)
++        # -----------------------------------------------------------------
++
+         kernels.estimate_select_recall_pool(
+             # for estimate
+             q, dgc.buffer, dgc.c2p, dgc.seq_len,
+@@ -622,7 +698,8 @@ class InferState:
+             ng, gs, ns, nw, 
+             self.recall_buf1, self.recall_buf2,
+             recall_stream1.cuda_stream, recall_stream2.cuda_stream,
+-            recall_evt1.cuda_event, recall_evt2.cuda_event
++            recall_evt1.cuda_event, recall_evt2.cuda_event,
++            *self._locks_spec_bufs(layer_idx),
+         )
+ 
+     def prefill_backup_pages(self, layer_idx: int):
+@@ -650,6 +727,77 @@ class InferState:
+             else:
+                 cpu_kvc[i, -2].copy_(kvc[i, kvc.evict_idx], non_blocking=True)
+ 
++    # ---- locks page representation -----------------------------------
++    def _locks_build(self, layer_idx: int, paged_k: Tensor, paged_v: Tensor,
++                     first_page: int):
++        """Build and store rank-r summaries for pages [first_page, ...)."""
++        st = self.locks
++        st._ensure_coef(self.page_size)
++        mu, bs, cf = locks_summary.build_summary(
++            paged_k, paged_v, self._locks_gh(layer_idx), st.eta, st.rank)
++        n = mu.shape[1]
++        sl = slice(first_page, first_page + n)
++        st.mu[layer_idx, :, sl] = mu
++        st.basis[layer_idx, :, sl] = bs
++        st.coef[layer_idx, :, sl] = cf
++        st.n_pages[layer_idx] = first_page + n
++
++    def locks_publish_metric(self, layer_idx: int, o_proj_weight):
++        """Stash o_proj for layer; G^{1/2} is computed on first page build."""
++        if self.locks_eta > 0.0:
++            self.locks_oproj[layer_idx] = o_proj_weight
++
++    def _locks_gh(self, layer_idx: int):
++        if self.locks_eta <= 0.0:
++            return None
++        gh = self.locks.Gh[layer_idx]
++        if gh is None and layer_idx in self.locks_oproj:
++            gh = locks_summary.publish_metric(
++                self.locks_oproj[layer_idx], self.n_kv_heads, self.head_dim,
++                self.n_qo_heads // self.n_kv_heads)
++            self.locks.Gh[layer_idx] = gh
++        return gh
++
++    def raas_step(self, layer_idx: int, q: Tensor):
++        """Score pages, refresh timestamps, arm the victim slot for eviction."""
++        kvc = self.kv_caches[layer_idx]
++        scores = self.estimate_scores(layer_idx, q)
++        victim = raas_mod.refresh_and_pick_victim(
++            self.raas, layer_idx, scores, kvc.seq_len, self.raas_alpha,
++            self.n_sink_pages, self.n_win_pages)
++        kvc.raas_evict_idx = victim
++
++    def _locks_spec_bufs(self, layer_idx: int):
++        """(basis, coef, mu) slices for the fused spec_ret call, or (None,)*3."""
++        if self.page_rep != "locks":
++            return (None, None, None)
++        st = self.locks
++        n = st.n_pages[layer_idx]
++        return (st.basis[layer_idx, :, :n].contiguous(),
++                st.coef[layer_idx, :, :n].contiguous(),
++                st.mu[layer_idx, :, :n].contiguous())
++
++    def _locks_scores(self, layer_idx: int, q: Tensor, n_groups: int):
++        """Drop-in for estimate_scores under page_rep=locks.
++
++        Returns [bsz*n_groups, n_qo_heads_per_group, n_pages] to match the
++        layout their select_topk consumes.
++        """
++        st = self.locks
++        n = st.n_pages[layer_idx]
++        b = self.batch_size
++        qv = q.reshape(b, self.n_qo_heads, self.head_dim)
++        if os.environ.get("LOCKS_TORCH_SCORER") == "1":
++            return locks_summary.score_pages(
++                qv, st.mu[layer_idx, :, :n], st.basis[layer_idx, :, :n],
++                st.coef[layer_idx, :, :n], self.n_qo_heads, self.n_kv_heads,
++                n_groups)
++        return kernels.locks_estimate_scores(
++            qv.contiguous(),
++            st.basis[layer_idx, :, :n].contiguous(),
++            st.coef[layer_idx, :, :n].contiguous(),
++            st.mu[layer_idx, :, :n].contiguous(), n_groups)
++
+     def _summarize_keys(self, filled_keys: Tensor) -> Digest:
+         maxs = filled_keys.max(dim=2).values
+         mins = filled_keys.min(dim=2).values
+@@ -666,14 +814,21 @@ class InferState:
+         maxs = centers + dists
+         return maxs, mins
+ 
+-    def prefill_save_digests(self, layer_idx: int, keys: Tensor):
++    def prefill_save_digests(self, layer_idx: int, keys: Tensor,
++                             values: Tensor = None):
+         if self.layer2budget[layer_idx] is None:
+             return
+         bsz, q_len, *_ = keys.shape
+         n_filled_pages = (q_len + self.page_size - 1) // self.page_size - 1
+-        filled_keys = keys[:, : n_filled_pages * self.page_size, ...].reshape(
+-            bsz, n_filled_pages, self.page_size, self.n_kv_heads, self.head_dim
+-        )
++        shp = (bsz, n_filled_pages, self.page_size, self.n_kv_heads, self.head_dim)
++        filled_keys = keys[:, : n_filled_pages * self.page_size, ...].reshape(*shp)
++        if self.page_rep == "locks":
++            # the output-aware term needs VALUES, which their digest path never
++            # plumbs through (it summarises keys only)
++            fv = values[:, : n_filled_pages * self.page_size, ...].reshape(*shp) \
++                if values is not None else filled_keys
++            self._locks_build(layer_idx, filled_keys, fv, 0)
++            return
+         self.save_digests(layer_idx, self._summarize_keys(filled_keys))
+ 
+     def decode_save_1_digest(self, layer_idx: int):
+@@ -684,6 +839,16 @@ class InferState:
+             [kvc[i, kvc.evict_idx][:1][None, ...] for i in range(self.batch_size)],
+             dim=0,
+         )
++        if self.page_rep == "locks":
++            # kvc[i, idx] is [2, page, n_kv, d]: index 0 is K, 1 is V. Their
++            # path takes [:1] (keys only); we need both.
++            filled_vals = torch.cat(
++                [kvc[i, kvc.evict_idx][1:2][None, ...]
++                 for i in range(self.batch_size)], dim=0,
++            )
++            self._locks_build(layer_idx, filled_keys, filled_vals,
++                              self.locks.n_pages[layer_idx])
++            return
+         self.save_digests(layer_idx, self._summarize_keys(filled_keys))
+ 
+     def prefill_evict_extra_pages(self, layer_idx: int, query_states: Tensor):
+diff --git a/source/freekv/kernels.py b/source/freekv/kernels.py
+index ad11d7a..60702c6 100644
+--- a/source/freekv/kernels.py
++++ b/source/freekv/kernels.py
+@@ -84,6 +84,16 @@ def append_paged_kv_cache(
+     )
+ 
+ 
++def locks_estimate_scores(
++    q: torch.Tensor,       # [bsz, n_qo_heads, head_dim]
++    basis: torch.Tensor,   # [bsz, n_pages, n_kv, head_dim, rank]
++    coef: torch.Tensor,    # [bsz, n_pages, n_kv, page_size, rank]
++    mu: torch.Tensor,      # [bsz, n_pages, n_kv, head_dim]
++    n_groups: int = 1,
++) -> torch.Tensor:         # [bsz, n_groups, n_pages]
++    return _cpp.locks_estimate_scores(q, basis, coef, mu, n_groups)
++
++
+ def estimate_scores(
+     q: torch.Tensor,  # [bsz, 1, num_heads, head_dim]
+     dg_data: torch.Tensor,  # [n_max_pages, 2, page_size, n_kv_heads, head_dim]
+@@ -435,7 +445,10 @@ def estimate_select_recall_pool(
+     recall_buf1, recall_buf2,
+     stream1, stream2,
+     event1, event2,
++    locks_basis=None, locks_coef=None, locks_mu=None,
+ ):
++    # empty tensors => the C++ side uses their min/max digest path
++    _e = torch.empty(0, device=query_states.device, dtype=query_states.dtype)
+     _cpp.estimate_select_recall_pool(
+         # for estimate
+         query_states,
+@@ -452,6 +465,9 @@ def estimate_select_recall_pool(
+         recall_buf1, recall_buf2,
+         stream1, stream2,
+         event1, event2,
++        _e if locks_basis is None else locks_basis,
++        _e if locks_coef is None else locks_coef,
++        _e if locks_mu is None else locks_mu,
+     )
+ 
+ def alloc_managed_bool(rows: int, cols: int):
+diff --git a/source/freekv/kv_cache.py b/source/freekv/kv_cache.py
+index b77907c..5d99645 100644
+--- a/source/freekv/kv_cache.py
++++ b/source/freekv/kv_cache.py
+@@ -172,7 +172,15 @@ class KvCache:
+                 # [bsz, n_groups] <= [bsz,]
+                 self.cc2gp[..., -1] = self.c2p[..., -1].unsqueeze(-1)
+         else:
+-            if self.n_win_pages > 1:
++            # RaaS (a DROPPING method) supplies the victim slot itself: the
++            # page with the oldest timestamp. FreeKV instead rotates a window
++            # slot, because for it no page is ever really dropped -- every page
++            # lives on CPU and selection+recall swaps it back in. Under RaaS the
++            # evicted page is gone for good, so the CPU backup below is skipped.
++            _raas_victim = getattr(self, "raas_evict_idx", None)
++            if _raas_victim is not None:
++                e_gci = int(_raas_victim)
++            elif self.n_win_pages > 1:
+                 e_gci = (
+                     self.budget
+                     - self.n_win_pages
+diff --git a/source/freekv_cpp/src/api.cu b/source/freekv_cpp/src/api.cu
+index 318820b..d481dd8 100644
+--- a/source/freekv_cpp/src/api.cu
++++ b/source/freekv_cpp/src/api.cu
+@@ -10,6 +10,7 @@ PYBIND11_MODULE(freekv_cpp, m) {
+ 	m.def("append_paged_kv_cache_prefill", &append_paged_kv_cache_prefill);
+ 	m.def("append_paged_kv_cache_decode", &append_paged_kv_cache_decode);
+ 	m.def("estimate_scores", &estimate_scores);
++	m.def("locks_estimate_scores", &locks_estimate_scores);
+ 	m.def("select_topk", &select_topk);
+ 	m.def("prefill_select_topk", &prefill_select_topk);
+   py::class_<BatchPrefillWithPagedKVCachePyTorchWrapper>(
+diff --git a/source/freekv_cpp/src/estimate_select_recall.cu b/source/freekv_cpp/src/estimate_select_recall.cu
+index 8392b5e..a7d871f 100644
+--- a/source/freekv_cpp/src/estimate_select_recall.cu
++++ b/source/freekv_cpp/src/estimate_select_recall.cu
+@@ -41,10 +41,15 @@ void estimate_select_recall_core(
+     uint64_t stream_handle1,
+     uint64_t stream_handle2,
+     uint64_t event_handle1,
+-    uint64_t event_handle2
++    uint64_t event_handle2,
++    // locks page representation; empty tensors => use their min/max digest
++    const torch::Tensor &locks_basis,
++    const torch::Tensor &locks_coef,
++    const torch::Tensor &locks_mu
+ ) {
++  const bool use_locks = locks_basis.numel() > 0;
+   CHECK_INPUT(q);
+-  CHECK_INPUT(dg_data);
++  if (!use_locks) { CHECK_INPUT(dg_data); }
+   CHECK_INPUT(dg_indices);
+   CHECK_INPUT(dg_indptr);
+ 
+@@ -106,6 +111,7 @@ void estimate_select_recall_core(
+   torch::Tensor o =
+     torch::empty({batch_size, num_qo_heads, dg_seq_len}, q.options());
+ 
++  if (!use_locks)
+   DISPATCH_PYTORCH_DTYPE_TO_CTYPE(q.scalar_type(), c_type, [&] {
+     return DISPATCH_kv_layout(QKVLayout::kNHD, KV_LAYOUT, [&] {
+       paged_kv_t<PageStorage::kIndices, KV_LAYOUT, c_type, int32_t> paged_kv(
+@@ -126,8 +132,11 @@ void estimate_select_recall_core(
+     });
+   });
+ 
+-  torch::Tensor scores = 
+-    o.reshape({batch_size, n_groups, num_qo_heads / n_groups, dg_seq_len}).mean(2);
++  torch::Tensor scores =
++    use_locks
++      ? locks_estimate_scores(q.reshape({batch_size, num_qo_heads, head_dim}),
++                              locks_basis, locks_coef, locks_mu, n_groups)
++      : o.reshape({batch_size, n_groups, num_qo_heads / n_groups, dg_seq_len}).mean(2);
+   scores = scores.reshape({sel_bsz, -1});
+   CHECK_INPUT(scores);
+ 
+@@ -191,9 +200,18 @@ void estimate_select_recall_pool(
+     uint64_t stream_handle1,
+     uint64_t stream_handle2,
+     uint64_t event_handle1,
+-    uint64_t event_handle2
++    uint64_t event_handle2,
++    const torch::Tensor &locks_basis,
++    const torch::Tensor &locks_coef,
++    const torch::Tensor &locks_mu
+ ) {
+   TORCH_CHECK(recall_thread_pool);
++  // Block until the pool thread has ISSUED its launches and recorded the
++  // events. All the work inside is asynchronous CUDA launches on the recall
++  // streams, so the GPU overlap that speculative retrieval exists for is
++  // preserved; only the CPU-side handoff is ordered. Without this the caller
++  // can reach the next step's wait_event before the record is issued and
++  // consume a stale event recording -- a non-deterministic decode corruption.
+   recall_thread_pool->enqueue(
+     estimate_select_recall_core,
+     q, dg_data, dg_indices, dg_seq_len, dg_indptr, dg_last_page_len,
+@@ -202,6 +220,7 @@ void estimate_select_recall_pool(
+     n_groups, gs, n_sink_pages, n_win_pages,
+     recall_buf1, recall_buf2, 
+     stream_handle1, stream_handle2,
+-    event_handle1, event_handle2
+-  );
++    event_handle1, event_handle2,
++    locks_basis, locks_coef, locks_mu
++  ).wait();
+ }
+diff --git a/source/freekv_cpp/src/flashinfer_ops.h b/source/freekv_cpp/src/flashinfer_ops.h
+index 4a32ad1..1d4eca0 100644
+--- a/source/freekv_cpp/src/flashinfer_ops.h
++++ b/source/freekv_cpp/src/flashinfer_ops.h
+@@ -58,6 +58,10 @@ void append_paged_kv_cache_decode(
+ 	torch::Tensor kv_last_page_len, // [bsz]
+ 	unsigned int layout);
+ 
++torch::Tensor locks_estimate_scores(torch::Tensor q, torch::Tensor basis,
++                                    torch::Tensor coef, torch::Tensor mu,
++                                    int64_t n_groups);
++
+ torch::Tensor estimate_scores(
+ 	torch::Tensor q, // [bsz, 1, num_heads, head_dim]
+ 	torch::Tensor dg_data, // [n_max_pages, 2, page_size, n_kv_heads, head_dim]
+@@ -270,8 +274,10 @@ void estimate_select_recall_pool(
+     uint64_t stream_handle1,
+     uint64_t stream_handle2,
+     uint64_t event_handle1,
+-    uint64_t event_handle2
+-);
++    uint64_t event_handle2,
++    const torch::Tensor &locks_basis,
++    const torch::Tensor &locks_coef,
++    const torch::Tensor &locks_mu);
+ 
+ torch::Tensor alloc_managed_bool(int64_t rows, int64_t cols);
+ 
+diff --git a/source/freekv_cpp/src/thread_pool.h b/source/freekv_cpp/src/thread_pool.h
+index f819297..d22d1d2 100644
+--- a/source/freekv_cpp/src/thread_pool.h
++++ b/source/freekv_cpp/src/thread_pool.h
+@@ -40,8 +40,11 @@ public:
+     }
+ 
+   template<class F, class... Args>
+-  // Use std::function to avoid template in enqueue signature for easier binding
+-  void enqueue(F&& f, Args&&... args) {
++  // Returns a future so the caller can order the CPU-side handoff. The CUDA
++  // events alone are NOT sufficient: they are pre-recorded at init to be
++  // "valid", so a wait_event issued before the pool thread has reached its
++  // cudaEventRecord consumes the STALE recording and returns immediately.
++  std::future<void> enqueue(F&& f, Args&&... args) {
+     auto task = std::make_shared< std::packaged_task<void()> >(
+       std::bind(std::forward<F>(f), std::forward<Args>(args)...)
+     );
+@@ -51,7 +54,7 @@ public:
+       tasks.emplace([task](){ (*task)(); });
+     }
+     condition.notify_one();
+-    // Note: We are not returning the future here as Python side will use CUDA events
++    return task->get_future();
+   }
+ 
+   ~ThreadPool() {
+diff --git a/source/pred.py b/source/pred.py
+index a316410..a27e225 100644
+--- a/source/pred.py
++++ b/source/pred.py
+@@ -79,6 +79,12 @@ def generate_once(model, input_ids, max_gen, temperature, eos_token_ids, pad_tok
+     )
+ 
+ 
++# GPU page-pool size. Upstream hardcodes 6 GiB, which is far more than B=2048
++# needs (2048 tok x n_layers x 2 x n_kv x head_dim x 2B is ~0.4 GiB) and makes
++# the run impossible to fit alongside another user on a shared card.
++_POOL_GIB = float(os.environ.get("FREEKV_GPU_POOL_GIB", "6"))
++_CPU_POOL_GIB = float(os.environ.get("FREEKV_CPU_POOL_GIB", "0"))
++
+ def simplify_text_preview(text, max_tokens=100):
+     tokens = text.split()
+     return " ".join(tokens[:max_tokens])
+@@ -89,10 +95,13 @@ def parse_args(args=None):
+     parser.add_argument("--seed", type=int, default=42)
+ 
+     parser.add_argument("--model", type=str, default=None, help="Model name (key in config/model2path.json)")
+-    parser.add_argument("--dataset", type=str, required=True, choices=["AIME24", "gov_report", "lgbench"], help="Evaluation dataset to use")
++    parser.add_argument("--dataset", type=str, required=True, choices=["AIME24", "gov_report", "lgbench", "longbench2"], help="Evaluation dataset to use")
+     parser.add_argument("--temperature", type=float, default=0.0, help="Sampling temperature (0 for greedy)")
+     parser.add_argument("--max_length", type=int, default=32000, help="Max input token length (longer inputs are truncated from the middle)")
+     parser.add_argument("--max_gen", type=int, default=8192, help="Max number of new tokens to generate")
++    parser.add_argument("--lb2_length", type=str, default=None,
++                        choices=["short", "medium", "long"],
++                        help="longbench2 only: restrict to one length bucket")
+     parser.add_argument("--data_idx", type=int, default=None, help="Single data index to evaluate")
+     parser.add_argument("--data_idx_to", type=int, default=None, help="Evaluate data from index 0 to this index (exclusive)")
+ 
+@@ -107,6 +116,21 @@ def parse_args(args=None):
+     parser.add_argument("--n_recall_stream", type=int, default=2, help="Number of CUDA streams for recall")
+     parser.add_argument("--recall_impl", type=str, default="cuda_cpy",
+                         choices=["arkvale", "torch_cpy", "cuda_cpy"], help="Recall implementation")
++    parser.add_argument("--method", type=str, default="freekv",
++                        choices=["freekv", "raas"],
++                        help="freekv = their retrieval engine; raas = dropping "
++                             "method (Fig 6 baseline, implemented here)")
++    parser.add_argument("--raas_alpha", type=float, default=0.02,
++                        help="RaaS timestamp-refresh threshold")
++    parser.add_argument("--page_rep", type=str, default="quest",
++                        choices=["quest", "locks"],
++                        help="Page representation: their min/max digest, or our "
++                             "rank-r output-aware basis")
++    parser.add_argument("--eta", type=float, default=0.0,
++                        help="page_rep=locks only: trace-normalised mix between "
++                             "key-energy and output-coupled metrics")
++    parser.add_argument("--locks_rank", type=int, default=8,
++                        help="page_rep=locks only: rank r of the page basis")
+     parser.add_argument("--corr", type=float, default=None, help="Correction threshold (cosine similarity); None to disable")
+     parser.add_argument("--warmup", type=int, default=2, help="Number of warmup generation rounds before timing")
+ 
+@@ -147,8 +171,8 @@ def load_model_and_tokenizer(path):
+             page_topks=page_budgets-1,
+             n_sink_pages=n_sink_pages,
+             n_win_pages=n_win_pages,
+-            n_max_bytes=6 * (1 << 30),
+-            n_max_cpu_bytes=20 * (1 << 30),
++            n_max_bytes=int(_POOL_GIB * (1 << 30)),
++            n_max_cpu_bytes=int((_CPU_POOL_GIB or 20) * (1 << 30)),
+             group_size=1,
+             cpu_layout=args.cpu_layout,
+             spec_ret=args.spec_ret,
+@@ -156,6 +180,11 @@ def load_model_and_tokenizer(path):
+             n_recall_stream=args.n_recall_stream,
+             recall_impl=args.recall_impl,
+             corr=args.corr,
++            method=args.method,
++            raas_alpha=args.raas_alpha,
++            page_rep=args.page_rep,
++            eta=args.eta,
++            locks_rank=args.locks_rank,
+         )
+     else:
+         assert not args.spec_ret
+@@ -165,8 +194,8 @@ def load_model_and_tokenizer(path):
+             device=dev, 
+             page_size=page_size,
+             page_budgets=None, # page_budgets=None means "full" (no eviction & recall)
+-            n_max_bytes=6 * (1 << 30),
+-            n_max_cpu_bytes=40 * (1 << 30),
++            n_max_bytes=int(_POOL_GIB * (1 << 30)),
++            n_max_cpu_bytes=int((_CPU_POOL_GIB or 40) * (1 << 30)),
+             group_size=1,
+         )
+ 
+@@ -185,6 +214,7 @@ def get_pred(
+     model_name,
+     temperature,
+     warmup,
++    no_tile=False,
+ ):
+     preds = []
+     for json_obj in tqdm(data):
+@@ -195,8 +225,12 @@ def get_pred(
+         tokenized_prompt = tokenizer(
+             prompt, truncation=False, return_tensors="pt"
+         ).input_ids[0]
+-        if len(tokenized_prompt) > 8192 and len(tokenized_prompt) < max_length:
+-            # only for long inputs
++        if (len(tokenized_prompt) > 8192 and len(tokenized_prompt) < max_length
++                and not no_tile):
++            # Their synthetic long-input trick: tile a short prompt until it
++            # fills max_length. Correct for a stopwatch, WRONG for a real
++            # benchmark prompt -- it would force every LongBench2 record to the
++            # same length and erase the very variation we want to measure.
+             tokenized_prompt = tokenized_prompt.repeat(max_length // len(tokenized_prompt) + 1)
+             assert len(tokenized_prompt) > max_length
+         if len(tokenized_prompt) > max_length:
+@@ -277,17 +311,42 @@ if __name__ == "__main__":
+         prompt_format = "You are given a report by a government agency. Write a one-page summary of the report.\n\nReport:\n{context}\n\nNow, write a one-page summary of the report.\n\nSummary:"
+     elif dataset == "lgbench":
+         ds_path = f"{ds_dir}/longgenbench.json"
++    elif dataset == "longbench2":
++        # Time the SAME prompts the accuracy harness scores, so an accuracy
++        # point and a latency point can come from one benchmark. Built with
++        # their 0shot template and truncated by their rule (head half + tail
++        # half at model2maxlen), so prompt_length here == prompt_length there.
++        ds_path = os.path.expanduser(
++            "~/.cache/huggingface/hub/datasets--THUDM--LongBench-v2/snapshots/"
++            "2b48e494f2c7a2f0af81aae178e05c7e1dde0fe9/data.json")
++        tmpl = open("accuracy/eval/LongBench2/prompts/0shot.txt",
++                    encoding="utf-8").read()
++        recs = json.load(open(ds_path, encoding="utf-8"))
++        if args.lb2_length:
++            recs = [r for r in recs if r["length"] == args.lb2_length]
++        data = [{"prompt": (tmpl.replace("$DOC$", r["context"].strip())
++                            .replace("$Q$", r["question"].strip())
++                            .replace("$C_A$", r["choice_A"].strip())
++                            .replace("$C_B$", r["choice_B"].strip())
++                            .replace("$C_C$", r["choice_C"].strip())
++                            .replace("$C_D$", r["choice_D"].strip())),
++                 "length": r["length"], "_id": r["_id"]} for r in recs]
++        if args.data_idx is not None:
++            data = data[args.data_idx:args.data_idx + 1]
++        elif args.data_idx_to is not None:
++            data = data[:args.data_idx_to]
+     elif dataset == "AIME24":
+         answer_field_id = "answer"
+         ds_path = f"{ds_dir}/aime_2024.jsonl"
+         dataset2prompt = json.load(open("eval/o1/config/dataset2prompt.json", "r"))
+         prompt_format = dataset2prompt[dataset]
+ 
+-    data = load_dataset("json", data_files=ds_path, split="train")
++    if dataset != "longbench2":
++        data = load_dataset("json", data_files=ds_path, split="train")
+ 
+-    if args.data_idx is not None:
++    if dataset != "longbench2" and args.data_idx is not None:
+         data = data.select(range(args.data_idx, args.data_idx+1))
+-    elif args.data_idx_to is not None:
++    elif dataset != "longbench2" and args.data_idx_to is not None:
+         data = data.select(range(0, args.data_idx_to))
+     preds = get_pred(
+         model,
+@@ -301,12 +360,16 @@ if __name__ == "__main__":
+         model_name,
+         args.temperature,
+         args.warmup,
++        no_tile=(dataset == "longbench2"),
+     )
+ 
+     out_dir = f"tmp_res/{model_name}"
+     if not os.path.exists(out_dir):
+         os.makedirs(out_dir)
+-    out_path = f"{out_dir}/{dataset}.jsonl"
++    # Tag the output per arm. Upstream writes every arm to one fixed path, so
++    # a six-arm sweep leaves only the last arm's generations on disk.
++    tag = os.environ.get("FREEKV_RUN_TAG", "")
++    out_path = f"{out_dir}/{dataset}{('-' + tag) if tag else ''}.jsonl"
+     with open(out_path, "w", encoding="utf-8") as f:
+         for pred in preds:
+             json.dump(pred, f, ensure_ascii=False)

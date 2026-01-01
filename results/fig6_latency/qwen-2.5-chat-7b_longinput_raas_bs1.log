@@ -1,0 +1,41 @@
+W0831 13:56:46.787000 2341366 site-packages/torch/utils/cpp_extension.py:2425] TORCH_CUDA_ARCH_LIST is not set, all archs for visible cards are included for compilation. 
+W0831 13:56:46.787000 2341366 site-packages/torch/utils/cpp_extension.py:2425] If this is not desired, please set os.environ['TORCH_CUDA_ARCH_LIST'] to specific architectures.
+2026-08-31 13:56:46,806 - INFO - flashinfer.jit: Prebuilt kernels not found, using JIT backend
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:02,  1.34it/s]Loading checkpoint shards:  50%|█████     | 2/4 [00:01<00:01,  1.55it/s]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:01<00:00,  1.62it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  1.74it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  1.66it/s]
+
+[96m────────────────────────────────────────────────────────────────────────────────────────────────────
+  KV Cache Config: token_budget=2048, page_budget=64, page_size=32, sink=512, recent=512
+────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+
+  0%|          | 0/1 [00:00<?, ?it/s][96m[Input] prompt_length=32036, dtype=torch.int64, device=cuda:0[0m
+[93m[Warmup] Running 1 warmup round(s)...[0m
+HOME/.conda/envs/freekv/lib/python3.10/site-packages/transformers/generation/configuration_utils.py:601: UserWarning: `do_sample` is set to `False`. However, `temperature` is set to `0.7` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `temperature`.
+  warnings.warn(
+HOME/.conda/envs/freekv/lib/python3.10/site-packages/transformers/generation/configuration_utils.py:606: UserWarning: `do_sample` is set to `False`. However, `top_p` is set to `0.8` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `top_p`.
+  warnings.warn(
+HOME/.conda/envs/freekv/lib/python3.10/site-packages/transformers/generation/configuration_utils.py:623: UserWarning: `do_sample` is set to `False`. However, `top_k` is set to `20` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `top_k`.
+  warnings.warn(
+The attention mask is not set and cannot be inferred from input because pad token is same as eos token. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+[raas] dropping method active: budget=64 pages, alpha=0.02, no offload / no recall
+2026-08-31 13:56:56,421 - INFO - flashinfer.jit: Loading JIT ops: rope
+2026-08-31 13:56:56,429 - INFO - flashinfer.jit: Finished loading JIT ops: rope
+Starting from v4.46, the `logits` model output will have the same type as the model (except at train time, where it will always be FP32)
+[93m[Warmup] Done.[0m
+HOME/.conda/envs/freekv/lib/python3.10/site-packages/transformers/generation/configuration_utils.py:601: UserWarning: `do_sample` is set to `False`. However, `temperature` is set to `0.7` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `temperature`.
+  warnings.warn(
+HOME/.conda/envs/freekv/lib/python3.10/site-packages/transformers/generation/configuration_utils.py:606: UserWarning: `do_sample` is set to `False`. However, `top_p` is set to `0.8` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `top_p`.
+  warnings.warn(
+HOME/.conda/envs/freekv/lib/python3.10/site-packages/transformers/generation/configuration_utils.py:623: UserWarning: `do_sample` is set to `False`. However, `top_k` is set to `20` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `top_k`.
+  warnings.warn(
+
+[92m────────────────────────────────────────────────────────────────────────────────────────────────────
+  [qwen-2.5-chat-7b] Generation Summary
+────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+  Tokens generated : [512]
+  Total time       : 47.20s
+  Decode time      : 32.70s
+  Avg TBT (decode) : 63.99 ms
+[92m────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+
+[1m[Batch 0] Output preview:[0m ### Summary of the Report The report provides an overview of the Gerald R. Ford (CVN-78) class aircraft carrier program and relevant oversight issues for Congress. Key points include: 1. **Program Funding**: The Navy's FY2019 budget requests $2.3 billion for the Gerald R. Ford (CVN-78) class aircraft carrier program. The FY2020 budget initially proposed not funding the mid-life nuclear refueling overhaul (RCOH) for the CVN-75 (Harry S. Truman) and instead retiring the ship around FY2024, but the Administration later withdrew this proposal and now supports funding the RCOH and keeping the ship in service. The report discusses the Gerald R.
+100%|██████████| 1/1 [01:36<00:00, 96.98s/it]100%|██████████| 1/1 [01:36<00:00, 96.98s/it]

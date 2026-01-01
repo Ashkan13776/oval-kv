@@ -1,0 +1,123 @@
+
+==============================================================================
+1. InfiniteBench — Llama-3.1-8B-Instruct, FreeKV harness
+B=2048 as sink 128 + recent 128 + budget 1792, tau 0.8, page 32, avgSM,
+spec_ret_steps 2, greedy, 50 seeded-random records/task (seed 42), official scorers.
+==============================================================================
+
+task                     FreeKV (quest)   OVAL r8 eta.25          ArkVale             RaaS           FullKV
+-----------------------------------------------------------------------------------------------------------
+passkey =                       100.0            100.0            100.0            100.0            100.0  
+num-str                          82.0             86.0             84.0             92.0             98.0  
+kv-retr                           0.0             14.0              0.0              0.0             56.0  
+dialog-qa =                      30.0             30.0             30.0             30.0             30.0  
+bk-sum                           22.7             24.6             23.2             23.3             27.3  
+bk-choice =                      46.0             46.0             46.0             46.0             46.0  
+bk-qa-en                         32.6             32.0             32.9             29.5             36.1  
+bk-qa-zh =                       35.5             36.9             37.2             33.0             36.8  
+math-find =                      26.0             26.0             26.0             26.0             26.0  
+code-run =                        0.0              0.0              0.0              0.0              0.0  
+code-dbg =                       16.0             16.0             16.0             16.0             16.0  
+-----------------------------------------------------------------------------------------------------------
+mean (all 11)                   35.53            37.42            35.94            35.98            42.93  
+mean (4 w/ headroom)            34.32            39.16            35.03            36.20            54.36  
+
+  = : FullKV does not beat the best sparse arm, so the task cannot rank
+      selection quality. Tasks WITH headroom: num-str, kv-retr, bk-sum, bk-qa-en.
+  ~ : still running, scored from a partial file. records/task seen: [50]
+
+==============================================================================
+2. LongBench v2 — Qwen-2.5-14B-Instruct
+Their own command: --sink 128 --recent 128 --budget 1792 (B=2048), tau 0.8,
+page 32, avgSM, spec_ret_steps 2, corr 0.8, 64K truncation, greedy, 503 questions.
+==============================================================================
+
+arm                       n  overall    easy    hard   short  medium    long
+----------------------------------------------------------------------------
+FreeKV (quest)          503    32.60   35.94   30.55   40.56   30.23   24.07
+FullKV                    0   (empty — run did not complete)
+OVAL r16 eta=0.25       503    32.80   36.98   30.23   41.11   29.30   25.93
+OVAL r4 eta=0.25        503    32.41   35.94   30.23   41.11   28.84   25.00
+OVAL r8 eta=0.0         503    32.41   36.46   29.90   40.56   29.30   25.00
+OVAL r8 eta=0.25        503    32.21   36.46   29.58   40.56   28.84   25.00
+OVAL r8 eta=0.5         503    32.60   36.98   29.90   41.11   28.84   25.93
+OVAL r8 eta=0.75        503    33.00   37.50   30.23   41.11   30.23   25.00
+OVAL r8 eta=1.0         503    32.60   36.46   30.23   41.11   29.77   24.07
+
+  Paper's published column (their harness): FullKV 33.40, FreeKV 34.19.
+  Compare WITHIN this table only — our harness reproduces their own method
+  1.59 points low, so cross-harness deltas are not interpretable.
+
+==============================================================================
+3. FreeKV Table 3 — DeepSeek-R1 distills, reasoning benchmarks
+sink 512 + recent 512 + --budget 2048, tau 0.9, page 32, avgSM, spec_ret_steps 2,
+T=0.6 top-p 0.95, max_gen 16384, 1 seed. strict = their scorer; loose = OUR permissive
+extraction, a diagnostic for format loss, NOT comparable to the paper.
+==============================================================================
+
+  !! BUDGET: the accuracy harness ADDS sink+recent to --budget, so these cells
+     attended 512+512+2048 = 3072 tokens, NOT the paper's B=2048. Every arm here
+     carries the same offset, so the eta comparison is internally valid; the
+     LEVELS are not comparable to the paper's column. Re-running one cell at the
+     correct b1024 moved it 0.00 points — measured once, not verified elsewhere.
+
+  ds-r1-qwen-7b
+    bench              eta=0.0  eta=0.25   eta=0.5  eta=0.75
+    --------------------------------------------------------
+    AIME24               53.33     53.33     60.00     50.00
+    GPQA50c              26.00     40.00     34.00     38.00
+      GPQA50c loose      32.00     50.00     42.00     42.00
+    MATH50               70.00     74.00     70.00     72.00
+    mean (strict)        49.78     55.78     54.67     53.33
+    generations that hit the 16384-token cap: 47/520
+
+  ds-r1-llama-8b
+    bench              eta=0.0  eta=0.25   eta=0.5  eta=0.75
+    --------------------------------------------------------
+    AIME24               40.00     46.67     53.33     33.33
+    GPQA50c              26.00     22.00     34.00     32.00
+      GPQA50c loose      42.00     46.00     48.00     54.00
+    MATH50               68.00     70.00     62.00     66.00
+      MATH50 loose       68.00     72.00     64.00     66.00
+    mean (strict)        44.67     46.22     49.78     43.78
+    generations that hit the 16384-token cap: 90/520
+
+  ds-r1-qwen-14b
+    bench              eta=0.0  eta=0.25   eta=0.5  eta=0.75
+    --------------------------------------------------------
+    AIME24               63.33     73.33     66.67     60.00
+    GPQA50c              30.00     26.00     40.00     32.00
+      GPQA50c loose      54.00     56.00     66.00     58.00
+    MATH50               72.00     68.00     72.00     72.00
+    mean (strict)        55.11     55.78     59.56     54.67
+    generations that hit the 16384-token cap: 44/520
+
+==============================================================================
+4. Fig. 6 latency — Avg TBT (decode), ms/token, batch 1
+PERF harness: sink/window are CARVED OUT of --budget here (opposite of the
+accuracy path). 2048/32 = 64 pages; topk 32 + 16 sink + 16 window = 64 pages = B.
+RTX PRO 6000 Blackwell 97GB; the paper used A100 40GB, so absolute
+offloading speedups are not expected to transfer.
+==============================================================================
+
+  qwen-2.5-chat-7b
+    arm                       Long Input       Long Generation
+    ----------------------------------------------------------
+    ArkVale                 40.62 ms                 29.49 ms       
+    RaaS                    63.99 ms (1.58x)                    --
+    FreeKV                  21.60 ms (0.53x)          16.96 ms (0.58x)
+    OVAL eta=0              23.79 ms (0.59x)          18.28 ms (0.62x)
+    OVAL eta=0.5            23.72 ms (0.58x)          18.64 ms (0.63x)
+    OVAL eta=1.0            23.73 ms (0.58x)                    --
+    (x) = relative to ArkVale on the same scenario
+
+  llama-3.1-chat-8b
+    arm                       Long Input       Long Generation
+    ----------------------------------------------------------
+    ArkVale                 76.86 ms                 75.71 ms       
+    RaaS                    27.42 ms (0.36x)          22.93 ms (0.30x)
+    FreeKV                  22.98 ms (0.30x)          18.89 ms (0.25x)
+    OVAL eta=0              28.17 ms (0.37x)          21.33 ms (0.28x)
+    OVAL eta=0.5            28.61 ms (0.37x)          21.65 ms (0.29x)
+    OVAL eta=1.0            28.56 ms (0.37x)          21.55 ms (0.28x)
+    (x) = relative to ArkVale on the same scenario
