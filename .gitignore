@@ -7,3 +7,6 @@ __pycache__/
 *.done
 *.png
 *.pdf
+logs_*.log
+run_sweep.sh
+run_recon_rank.sh

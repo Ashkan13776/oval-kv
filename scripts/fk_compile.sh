@@ -7,5 +7,5 @@ export ENVDIR="${ENVDIR:-$(dirname "$(dirname "$(readlink -f "${KV_PY:-$(command
 export CUDA=$KV_ROOT/vendor/cuda128
 export CUDA_HOME=$CUDA CUDAToolkit_ROOT=$CUDA
 export PATH=$ENVDIR/bin:$CUDA/bin:$PATH
-export TORCH_CUDA_ARCH_LIST="12.0"
+export TORCH_CUDA_ARCH_LIST="${TORCH_CUDA_ARCH_LIST:-12.0}"
 cd /tmp/fkbuild && cmake --build . --target freekv_cpp -j 16

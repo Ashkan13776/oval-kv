@@ -84,18 +84,31 @@ run_job () {
   echo "=== DONE  $M/$d/s$s/eta$e/$tag exit=$? $(date -Iseconds)"
 }
 
+# SLOTS concurrent jobs per GPU, and a GPU is only claimed when it has MINFREE
+# MiB free -- so a card held by someone else's job is skipped and picked up
+# automatically once it frees, instead of being excluded by hand.
+SLOTS="${SLOTS:-1}"
+MINFREE="${MINFREE:-40000}"
+SETTLE="${SETTLE:-60}"
+SLOTLIST=""
+for g in $GPUS; do
+  for i in $(seq 1 "$SLOTS"); do SLOTLIST="$SLOTLIST $g:$i"; done
+done
+echo "=== scheduler: $SLOTS slot(s) x GPUs [$GPUS], minfree ${MINFREE}MiB"
+
 declare -A BUSY
 while [ -s "$Q" ]; do
-  for g in $GPUS; do
-    [ -n "${BUSY[$g]:-}" ] && kill -0 "${BUSY[$g]}" 2>/dev/null && continue
-    BUSY[$g]=""
-    u=$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits -i "$g")
-    [ "$u" -gt 2000 ] && continue
+  for slot in $SLOTLIST; do
+    g="${slot%%:*}"
+    [ -n "${BUSY[$slot]:-}" ] && kill -0 "${BUSY[$slot]}" 2>/dev/null && continue
+    BUSY[$slot]=""
+    free=$(nvidia-smi --query-gpu=memory.free --format=csv,noheader,nounits -i "$g")
+    [ "$free" -lt "$MINFREE" ] && continue
     job=$(head -1 "$Q"); [ -z "$job" ] && break
     sed -i '1d' "$Q"
     run_job "$job" "$g" &
-    BUSY[$g]=$!
-    sleep 25
+    BUSY[$slot]=$!
+    sleep "$SETTLE"
   done
   sleep 45
 done

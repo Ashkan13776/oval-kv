@@ -33,7 +33,7 @@ fi
 CUDA="$CUDA_DIR"
 export CUDA_HOME=$CUDA
 export PATH=$ENVDIR/bin:$CUDA/bin:$PATH
-export TORCH_CUDA_ARCH_LIST="12.0"
+export TORCH_CUDA_ARCH_LIST="${TORCH_CUDA_ARCH_LIST:-12.0}"
 cd $FREEKV_DIR/source
 echo "=== nvcc: $(nvcc --version | tail -2 | head -1)"
 echo "=== python: $($ENVDIR/bin/python -V)"

@@ -8,7 +8,7 @@ export ENVDIR="${ENVDIR:-$(dirname "$(dirname "$(readlink -f "${KV_PY:-$(command
 export CUDA=$KV_ROOT/vendor/cuda128
 export CUDA_HOME=$CUDA CUDAToolkit_ROOT=$CUDA
 export PATH=$ENVDIR/bin:$CUDA/bin:$PATH
-export TORCH_CUDA_ARCH_LIST="12.0"
+export TORCH_CUDA_ARCH_LIST="${TORCH_CUDA_ARCH_LIST:-12.0}"
 rm -rf /tmp/fkbuild && mkdir -p /tmp/fkbuild && cd /tmp/fkbuild
 cmake $FREEKV_DIR/source/freekv_cpp \
   -DCMAKE_PREFIX_PATH=$ENVDIR/lib/python3.10/site-packages/torch/share/cmake \
