@@ -18,6 +18,11 @@ DATASETS="${DATASETS:-MATH50 AIME24 GPQA50c}"
 ETAS="${ETAS:-0.0 0.25 0.5 0.75 1.0}"
 SEEDS="${SEEDS:-42 43 44 45 46 47 48 49}"
 RES="$KV_ROOT/results/codec/${M}-spec_ret"
+# VRANK mode: ETAS is the VALUE eta, the key eta comes per dataset from ETAMAP
+ETAMAP="${ETAMAP:-MATH50:0.25 AIME24:1.0 GPQA50c:0.25}"
+keta_of () { local kv; for kv in $ETAMAP; do [ "${kv%%:*}" = "$1" ] && echo "${kv#*:}"; done; }
+VBASIS="${VBASIS:-pca}"
+[ -n "${VRANK:-}" ] && [ "$VBASIS" = "pca" ] && ETAS="pca"     # no value eta: one cell per dataset
 HB="$KV_ROOT/logs/supervisor.log"
 mkdir -p "$KV_ROOT/logs" "$RES"
 
@@ -34,19 +39,24 @@ complete_cells () {
   for d in $DATASETS; do
     want=${NPROB[$d]}
     for e in $ETAS; do
-      for f in "$RES"/${d}-*oval_r8_eta${e}_q0_recon1*.jsonl; do
+      if [ -n "${VRANK:-}" ]; then ke=$(keta_of "$d")
+        if [ "$VBASIS" = "pca" ]; then vt="_vr${VRANK}_vpca"; else vt="_vr${VRANK}_veta${e}"; fi
+      else ke=$e; vt=""; fi
+      for f in "$RES"/${d}-*oval_r8_eta${ke}_q0_recon1${vt}-pQ2*.jsonl; do
         [ -e "$f" ] || continue
-        [ "$(grep -c . "$f" 2>/dev/null || echo 0)" -ge "$want" ] && n=$((n+1))
+        [ "$(grep -c . "$f" 2>/dev/null; true)" -ge "$want" ] && n=$((n+1))
       done
     done
   done
   echo "$n"
 }
-total_records () { cat "$RES"/*.jsonl 2>/dev/null | grep -c . || echo 0; }
+# grep -c already prints 0 on no input; '|| echo 0' made that "0\n0", which
+# broke every later integer comparison and blinded the stall detector
+total_records () { cat "$RES"/*.jsonl 2>/dev/null | grep -c . ; return 0; }
 
 NSEED=$(echo $SEEDS | wc -w); NETA=$(echo $ETAS | wc -w)
 NDS=$(echo $DATASETS | wc -w); TARGET=$((NDS * NETA * NSEED))
-say "supervisor up: target $TARGET complete cells for $M"
+say "supervisor up: target $TARGET complete cells for $M${VRANK:+ vr$VRANK}"
 
 fails=0; last_rec=$(total_records); last_change=$(date +%s)
 while :; do
@@ -77,7 +87,7 @@ while :; do
   # unreachable -- the stall detector never ran once.
   before=$(total_records)
   say "launching sweep ($done_n/$TARGET complete, $(( TARGET - done_n )) to go)"
-  MODEL="$M" DATASETS="$DATASETS" ETAS="$ETAS" SEEDS="$SEEDS" \
+  MODEL="$M" DATASETS="$DATASETS" ETAS="$ETAS" SEEDS="$SEEDS" VRANK="${VRANK:-}" ETAMAP="$ETAMAP" VBASIS="$VBASIS" \
     GPUS="${GPUS:-0 1}" KV_ROOT="$KV_ROOT" KV_PY="${KV_PY:-python}" \
     "$KV_ROOT/scripts/codec_reasoning_sweep.sh" \
     >> "$KV_ROOT/logs/sweep_run.log" 2>&1 &
@@ -110,8 +120,18 @@ while :; do
           last_change=$now      # not our stall; do not count it as one
         fi
       elif [ $((now - last_change)) -gt 2700 ]; then
-        say "STALL: our cells are running but no new record for 45min, cells $done_n/$TARGET"
+        # No record from ANY of our cells in 45 min. The longest machine-wide
+        # gap seen in normal running is ~8 min, so this is a hung machine, not
+        # a hard problem. Kill the cells; the next launch resumes each one
+        # from its last finished problem.
+        say "STALL: our cells are running but no new record for 45min, cells $done_n/$TARGET -- restarting them"
+        kill "$SWEEP_PID" 2>/dev/null
+        pkill -P "$SWEEP_PID" 2>/dev/null
+        pkill -f "^${KV_PY:-python} -u -m eval.reasoning.pred" 2>/dev/null
+        sleep 30
+        pkill -9 -f "^${KV_PY:-python} -u -m eval.reasoning.pred" 2>/dev/null
         last_change=$now
+        break
       fi
     fi
     sleep 120

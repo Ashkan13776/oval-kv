@@ -9,6 +9,14 @@ Checks, in order of what would silently corrupt results:
      Gram route, which is the non-obvious part)
   5. G = W^T W is summed over the right GQA group
   6. logsumexp scorer reproduces the exact page mass when rank == page_size
+  7. the rank clamp fires
+Value codec (build_value_summary):
+  8. plain PCA (Gh=None, the configuration being swept) == Eckart-Young on the
+     centred values, every rank swept, and eta is ignored
+  9. full rank (page-1) reconstructs exactly; a rank-64 request clamps to 31
+ 10. page mean preserved exactly
+ 11. output-aware basis (--vbasis oval) == unconstrained optimum of its
+     hybrid objective, built independently
 """
 import sys, torch
 # load oval/page_basis.py directly: the kvc.patch package __init__ imports llama.py,
@@ -21,6 +29,7 @@ _spec = importlib.util.spec_from_file_location(
 _m = importlib.util.module_from_spec(_spec); _spec.loader.exec_module(_m)
 build_summary, publish_metric, oval_sel = (
     _m.build_summary, _m.publish_metric, _m.oval_sel)
+build_value_summary, metric_inv_sqrt = _m.build_value_summary, _m.metric_inv_sqrt
 
 torch.manual_seed(0)
 B, P, page, nkv, hd, r = 1, 6, 32, 4, 128, 8
@@ -85,3 +94,37 @@ print(f"6. rank=page-1 scorer vs exact lse    : {(approx.double()-exact).abs().m
 # 7: the clamp actually fires
 _, bs4, _ = build_summary(K, V, None, 0.0, page)      # over-rank request
 print(f"7. rank clamped {page} -> {bs4.shape[-1]:<21}: {'OK' if bs4.shape[-1]==page-1 else 'NOT CLAMPED'}")
+
+# ---- value codec --------------------------------------------------------
+Yv = V * torch.logspace(0, -2, hd).double()               # anisotropic values
+Yc = Yv.permute(0,1,3,2,4) - Yv.permute(0,1,3,2,4).mean(3, keepdim=True)
+def vrec(rec): nu, Dm, T = (t.double() for t in rec); return T @ Dm.transpose(-1,-2) + nu.unsqueeze(-2)
+U_, S_, Vh_ = torch.linalg.svd(Yc, full_matrices=False)
+w8 = 0.0
+for rv in (1, 4, 8, 16):
+    best = (U_[..., :rv] * S_[..., None, :rv]) @ Vh_[..., :rv, :]
+    rec = vrec(build_value_summary(K, Yv, None, None, 0.7, rv)) - \
+          Yv.permute(0,1,3,2,4).mean(3, keepdim=True)
+    w8 = max(w8, ((rec - best).norm() / Yc.norm()).item())
+print(f"8. value PCA vs Eckart-Young r=1..16  : {w8:.2e}")
+full = build_value_summary(K, Yv, None, None, 0.0, 64)
+print(f"9. value rank 64 -> {full[1].shape[-1]}, full-rank err   : "
+      f"{((vrec(full) - Yv.permute(0,1,3,2,4)).norm() / Yc.norm()).item():.2e}")
+E = Yv.permute(0,1,3,2,4) - vrec(build_value_summary(K, Yv, None, None, 0.0, 8))
+print(f"10. value page mean |sum_t e_t|/|Y|   : {(E.sum(-2).norm() / Yc.norm()).item():.2e}")
+# 11: output-aware value basis vs an independent unconstrained optimum
+Ghd = Gh.double(); Ghi = metric_inv_sqrt(Ghd).double()
+Z = Yc @ Ghd
+w11 = 0.0
+for eta_v in (0.0, 0.5, 1.0):
+    trr = (Z*Z).sum((-1,-2)); tro_ = ((X.transpose(-1,-2) @ Z)**2).sum((-1,-2))
+    Mt = (1-eta_v)/trr[...,None,None]*torch.eye(page).double() + \
+         eta_v/tro_[...,None,None]*(X @ X.transpose(-1,-2))
+    a, Q = torch.linalg.eigh(Mt)
+    h = (Q * a.clamp_min(0).sqrt().unsqueeze(-2)) @ Q.transpose(-1,-2)
+    Uo, So, Vo = torch.linalg.svd(h @ Z, full_matrices=False)
+    opt = torch.linalg.pinv(h) @ ((Uo[..., :8] * So[..., None, :8]) @ Vo[..., :8, :]) @ Ghi
+    ours = vrec(build_value_summary(K, Yv, Ghd, Ghi, eta_v, 8)) - \
+           Yv.permute(0,1,3,2,4).mean(3, keepdim=True)
+    w11 = max(w11, ((ours - opt).norm() / Yc.norm()).item())
+print(f"11. oval value basis vs optimum       : {w11:.2e}")

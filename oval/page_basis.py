@@ -122,6 +122,73 @@ def build_summary(paged_k, paged_v, Gh, eta, rank, qvar=None):
     return mu.to(dt), basis.to(dt), coef.to(dt)
 
 
+def metric_inv_sqrt(Gh, rcond=1e-6):
+    """G^{-1/2} per KV head from publish_metric's G^{1/2}, computed once per layer.
+
+    Pseudo-inverse: directions of G below rcond * max are dropped, which
+    discards centred value components invisible to W_O.
+    """
+    s, Q = torch.linalg.eigh(Gh.float())                    # s = eig(G)^{1/2}
+    keep = s > s[..., -1:].clamp_min(0) * rcond
+    si = torch.where(keep, 1.0 / s.clamp_min(1e-30), torch.zeros_like(s))
+    return (Q * si.unsqueeze(-2)) @ Q.transpose(-1, -2)
+
+
+def build_value_summary(paged_k, paged_v, Gh, Ghi, eta, rank, eps=1e-30):
+    """Output-aware rank-r VALUE record: (nu, D, T), same layout as the key record.
+
+    paged_k/paged_v: [B, P, page, n_kv, d] -> nu [B,P,H,d], D [B,P,H,d,r],
+    T [B,P,H,page,r], reconstructed as  V_hat = 1 nu^T + T D^T.
+
+    G = W_O^T W_O summed over each KV head's GQA group -- the same G as the key
+    basis (Gh = G^{1/2} from publish_metric, Ghi = G^{-1/2}). With X, Y the
+    page's centred keys and values and Z = Y G^{1/2}:
+
+        M_rec = Z^T Z                       value reconstruction in the G metric
+        M_out = Z^T X X^T Z = A A^T,  A = G^{1/2} Y^T X
+                (the key output matrix is X^T Y G Y^T X = A^T A)
+        M_eta = (1-eta) M_rec / tr(M_rec) + eta M_out / tr(M_out)
+
+    U = top-r eigenvectors of M_eta; store T = Z U, D = G^{-1/2} U.
+
+    Both terms put G on the channel side, so the hybrid objective
+    (1-eta) ||E G^{1/2}||^2 / tr(M_rec) + eta tr(E^T X X^T E G) / tr(M_out)
+    is || M_t^{1/2} E G^{1/2} ||^2 with M_t = (1-eta) I/tr(M_rec) + eta XX^T/tr(M_out)
+    -- separable -- and this record is its exact rank-r optimum over all
+    reconstructions, not only over projections. eta=0 is PCA in the G metric
+    (peaked attention: one token's value error through W_O); eta=1 is the
+    first-order output error under diffuse attention.
+
+    Gh = Ghi = None is plain (Euclidean) value PCA: G = I, and eta is ignored.
+    """
+    dt = paged_v.dtype
+    Y = paged_v.permute(0, 1, 3, 2, 4).float()            # [B,P,H,n,d]
+    nu = Y.mean(dim=3)
+    Y = Y - nu.unsqueeze(3)
+    n, d = Y.shape[-2], Y.shape[-1]
+    r = min(rank, n - 1, d)                                # centring costs one dof
+
+    Z = Y if Gh is None else Y @ Gh.float()                # Y G^{1/2}  (Gh symmetric)
+    M = Z.transpose(-1, -2) @ Z                            # M_rec
+    if eta > 0.0 and Gh is not None:
+        X = paged_k.permute(0, 1, 3, 2, 4).float()
+        X = X - X.mean(dim=3, keepdim=True)
+        AT = X.transpose(-1, -2) @ Z                       # A^T = X^T Y G^{1/2}  [.., d, d]
+        Mo = AT.transpose(-1, -2) @ AT                     # M_out = A A^T
+        tr_r = M.diagonal(dim1=-2, dim2=-1).sum(-1) + eps
+        tr_o = Mo.diagonal(dim1=-2, dim2=-1).sum(-1) + eps
+        M = ((1.0 - eta) / tr_r)[..., None, None] * M + (eta / tr_o)[..., None, None] * Mo
+    lam, Ue = torch.linalg.eigh(M)                         # ascending
+    U = Ue[..., -r:]                                       # top-r = LAST r columns
+    # same degenerate-direction guard as build_summary: a direction with no
+    # energy is zeroed, never amplified
+    keep = (lam[..., -r:] > lam[..., -1:].clamp_min(0) * 1e-10).unsqueeze(-2)
+    U = U * keep.to(U.dtype)
+    T = Z @ U                                              # [.., n, r]
+    D = U if Ghi is None else Ghi.float() @ U              # [.., d, r]
+    return nu.to(dt), D.to(dt), T.to(dt)
+
+
 def oval_sel(q, basis, coef, mu, GQA_policy, num_heads, num_kv_heads):
     """Page scores, matching quest_sel's contract exactly: [bsz, n_kv, n_pages].
 

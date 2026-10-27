@@ -74,7 +74,7 @@ index 20d90a3..9ef900e 100644
      model_name = args.model
      model, tokenizer, step_updater, eos_token_ids, config = load_model_and_tokenizer(
 diff --git a/accuracy/eval/reasoning/pred.py b/accuracy/eval/reasoning/pred.py
-index 47f4b0f..ae898cf 100644
+index 47f4b0f..787c149 100644
 --- a/accuracy/eval/reasoning/pred.py
 +++ b/accuracy/eval/reasoning/pred.py
 @@ -282,7 +282,7 @@ if __name__ == "__main__":
@@ -95,7 +95,7 @@ index 47f4b0f..ae898cf 100644
      prompt_format = dataset2prompt[dataset]
      if "cot" in model_name:
          prompt_format += "<Thought> {thought} </Thought>\n"
-@@ -320,6 +320,41 @@ if __name__ == "__main__":
+@@ -320,6 +320,51 @@ if __name__ == "__main__":
          data = data.select(range(args.data_from, len(data)))
      
      out_path = get_out_path(args, config)
@@ -105,6 +105,16 @@ index 47f4b0f..ae898cf 100644
 +    # so a restart must not have to redo completed work -- or silently
 +    # double-count it into the pass@k / avg@k denominators.
 +    if os.path.exists(out_path):
++        # A cell killed mid-write leaves a partial last record (json.dump writes
++        # a long trace in several chunks). Appending after it would fuse the next
++        # record onto that line and corrupt both, so cut back to the last newline.
++        with open(out_path, "rb+") as _f:
++            _raw = _f.read()
++            if _raw and not _raw.endswith(b"\n"):
++                _cut = _raw.rfind(b"\n") + 1
++                _f.truncate(_cut)
++                print(f"[resume] dropped a partial trailing record "
++                      f"({len(_raw) - _cut} bytes) from {os.path.basename(out_path)}")
 +        _done = set()
 +        with open(out_path, encoding="utf-8") as _f:
 +            for _line in _f:
@@ -138,7 +148,7 @@ index 47f4b0f..ae898cf 100644
          preds = get_pred(
              model,
 diff --git a/accuracy/eval/util.py b/accuracy/eval/util.py
-index e4bd935..b33631f 100644
+index e4bd935..1c0c2a3 100644
 --- a/accuracy/eval/util.py
 +++ b/accuracy/eval/util.py
 @@ -1,3 +1,4 @@
@@ -146,7 +156,7 @@ index e4bd935..b33631f 100644
  import os, argparse
  import numpy as np
  from pathlib import Path
-@@ -31,7 +32,19 @@ def parse_common_args(parser):
+@@ -31,7 +32,30 @@ def parse_common_args(parser):
                          choices=["full", "duo_attn", "razor", 
                                   "quest", "arkv", "spec_ret", "raas"],
                          help="KV cache eviction/selection method")
@@ -160,6 +170,17 @@ index e4bd935..b33631f 100644
 +                             "reconstructed as mu + coef @ basis^T instead of read from "
 +                             "the full key cache. Selection is unchanged. Values, sink "
 +                             "and recent tokens stay exact.")
++    parser.add_argument("--oval_vrank", type=int, default=None,
++                        help="VALUE CODEC rank. When set, each page also stores an "
++                             "output-aware rank-r value record and selected pages' "
++                             "values are reconstructed from it instead of read from the "
++                             "value cache. Sink and recent stay exact. Unset = values exact.")
++    parser.add_argument("--vbasis", type=str, default="pca", choices=["pca", "oval"],
++                        help="VALUE basis: pca = plain PCA of the centred values; "
++                             "oval = output-aware basis in the keys' G metric (uses --veta)")
++    parser.add_argument("--veta", type=float, default=0.0,
++                        help="VALUE basis mix eta_V, independent of the key --eta: "
++                             "0 = PCA in the G metric, 1 = output term G^1/2 Y^T X X^T Y G^1/2")
 +    parser.add_argument("--page_rep", type=str, default="quest", choices=["quest", "arkv", "oval", "random", "oracle",
 +                                 "h2o", "tova", "snapkv",
 +                                 "loki", "sparq", "infllm", "knorm", "centroid",
@@ -167,7 +188,7 @@ index e4bd935..b33631f 100644
                          help="Page representation method")
      parser.add_argument("--GQA_policy", type=str, default="avgS",
                          choices=["maxQ", "avgQ", "maxS", "avgS", "maxSM", "avgSM"],
-@@ -86,6 +99,10 @@ def parse_common_args(parser):
+@@ -86,6 +110,10 @@ def parse_common_args(parser):
      parser.add_argument("--repeat_bsz", type=int, default=None, 
                          help="set for efficiency eval")
  
@@ -178,7 +199,7 @@ index e4bd935..b33631f 100644
      parser.add_argument("--kv8", action="store_true",
                          help="Use 8-bit quantized KV cache (FP16 instead of BF16)")
      return parser
-@@ -128,6 +145,23 @@ def get_out_path(args, config, out_root_dir=None, mkdir=True):
+@@ -128,6 +156,29 @@ def get_out_path(args, config, out_root_dir=None, mkdir=True):
              else:
                  GQA_policy = config["GQA_policy"]
                  out_path += f"-{GQA_policy}"
@@ -199,10 +220,16 @@ index e4bd935..b33631f 100644
 +                        # flag; without it in the path they overwrite each other.
 +                        if config.get("oval_recon"):
 +                            out_path += "_recon1"
++                        # value codec rank: a values-exact run and a value-codec
++                        # run otherwise share every other tag
++                        if config.get("oval_vrank") is not None:
++                            out_path += f"_vr{int(config['oval_vrank'])}"
++                            out_path += ("_vpca" if config.get("vbasis", "pca") == "pca"
++                                         else f"_veta{config.get('veta', 0.0)}")
                  if method == "spec_ret":
                      spec_ret_steps = config["spec_ret_steps"]
                      llb = config["llb"]
-@@ -213,6 +247,14 @@ def load_model_and_tokenizer(path, args):
+@@ -213,6 +264,14 @@ def load_model_and_tokenizer(path, args):
          low_cpu_mem_usage=True,
          attn_implementation="eager",
          device_map = "auto",
@@ -217,13 +244,16 @@ index e4bd935..b33631f 100644
      )
  
      generation_config = GenerationConfig.from_pretrained(path)
-@@ -271,13 +313,17 @@ def load_model_and_tokenizer(path, args):
+@@ -271,13 +330,20 @@ def load_model_and_tokenizer(path, args):
          config["recent"] = recent_size
          config["skip_layer"] = args.skip_layer
          config["page_rep"] = args.page_rep
 +        config["eta"] = args.eta
 +        config["oval_rank"] = args.oval_rank
 +        config["oval_recon"] = args.oval_recon
++        config["oval_vrank"] = args.oval_vrank
++        config["veta"] = args.veta
++        config["vbasis"] = args.vbasis
          print(f"Enabling {method} evaluation using sink size {sink_size} recent size {recent_size}, "
                f"skip {args.skip_layer} layers")
          if method in ["quest", "arkv", "spec_ret"]:
@@ -236,7 +266,7 @@ index e4bd935..b33631f 100644
              config["page_size"] = args.page_size
              config["GQA_policy"] = args.GQA_policy
              if method == "spec_ret":
-@@ -292,8 +338,9 @@ def load_model_and_tokenizer(path, args):
+@@ -292,8 +358,9 @@ def load_model_and_tokenizer(path, args):
              print(f"Budget: {args.budget}, page size: {args.page_size}, alpha {args.raas_alpha}")
              assert recent_size % args.page_size == 0
              assert sink_size % args.page_size == 0
@@ -248,7 +278,7 @@ index e4bd935..b33631f 100644
              config["raas_alpha"] = args.raas_alpha
  
 diff --git a/accuracy/kvc/patch/dynamic_attention.py b/accuracy/kvc/patch/dynamic_attention.py
-index 32ac2af..eae3d5f 100644
+index 32ac2af..1c4a27c 100644
 --- a/accuracy/kvc/patch/dynamic_attention.py
 +++ b/accuracy/kvc/patch/dynamic_attention.py
 @@ -1,3 +1,5 @@
@@ -257,11 +287,12 @@ index 32ac2af..eae3d5f 100644
  from typing import Optional
  import torch
  from torch import nn
-@@ -14,6 +16,21 @@ def repeat_kv_BLH(hidden_states: torch.Tensor, n_rep: int) -> torch.Tensor:
+@@ -14,6 +16,22 @@ def repeat_kv_BLH(hidden_states: torch.Tensor, n_rep: int) -> torch.Tensor:
      return hidden_states.reshape(batch, slen, num_key_value_heads * n_rep, head_dim)
  
  
 +from .oval import build_summary as _oval_build, oval_sel
++from .oval import build_value_summary as _oval_vbuild
 +
 +
 +def _gqa_avgSM(s):
@@ -279,7 +310,7 @@ index 32ac2af..eae3d5f 100644
  def quest_sel(q, min_k_for_sel, max_k_for_sel, GQA_policy, num_heads, num_kv_heads):
      if GQA_policy in ["maxQ", "avgQ"]:
          # [bsz, 1, num_kv_heads, head_dim]
-@@ -51,7 +68,11 @@ def quest_sel(q, min_k_for_sel, max_k_for_sel, GQA_policy, num_heads, num_kv_hea
+@@ -51,7 +69,11 @@ def quest_sel(q, min_k_for_sel, max_k_for_sel, GQA_policy, num_heads, num_kv_hea
                  max_qk.shape[0], num_kv_heads, num_heads//num_kv_heads, max_qk.shape[-1]
              ).max(dim=-2).values
          elif GQA_policy == "avgSM":
@@ -292,7 +323,7 @@ index 32ac2af..eae3d5f 100644
              max_qk = max_qk.reshape(
                  max_qk.shape[0], num_kv_heads, num_heads//num_kv_heads, max_qk.shape[-1]
              ).mean(dim=-2)
-@@ -94,6 +115,15 @@ def quest_arkv_attn(self,
+@@ -94,6 +116,15 @@ def quest_arkv_attn(self,
  
      kv_seq_len = k.shape[1]
      if self.num_pages == 0:
@@ -308,7 +339,7 @@ index 32ac2af..eae3d5f 100644
          # first decoding step that exceeds sink, init pages
          num_init_pages = (kv_seq_len - sink_size) // page_size
          assert num_init_pages < self.max_k.shape[1]
-@@ -103,7 +133,18 @@ def quest_arkv_attn(self,
+@@ -103,7 +134,24 @@ def quest_arkv_attn(self,
              )
              mins = paged_k.min(dim=2).values
              maxs = paged_k.max(dim=2).values
@@ -324,11 +355,17 @@ index 32ac2af..eae3d5f 100644
 +                self.oval_mu[:, :num_init_pages, ...] = _mu
 +                self.oval_basis[:, :num_init_pages, ..., :_b.shape[-1]] = _b
 +                self.oval_coef[:, :num_init_pages, ..., :_c.shape[-1]] = _c
++                if getattr(self, "oval_vrank", None) is not None:
++                    _vm, _vb, _vc = _oval_vbuild(paged_k, paged_v, self.oval_vGh, self.oval_vGhi,
++                                                self.oval_veta, self.oval_vrank)
++                    self.oval_vmu[:, :num_init_pages, ...] = _vm
++                    self.oval_vbasis[:, :num_init_pages, ..., :_vb.shape[-1]] = _vb
++                    self.oval_vcoef[:, :num_init_pages, ..., :_vc.shape[-1]] = _vc
 +            elif self.page_rep == "arkv":
                  centers = (maxs + mins) / 2
                  dists = (
                      (
-@@ -124,7 +165,16 @@ def quest_arkv_attn(self,
+@@ -124,7 +172,23 @@ def quest_arkv_attn(self,
          )
          mins = new_paged_k.amin(dim=1)
          maxs = new_paged_k.amax(dim=1)
@@ -342,16 +379,26 @@ index 32ac2af..eae3d5f 100644
 +            self.oval_mu[:, self.num_pages, ...] = _mu[:, 0]
 +            self.oval_basis[:, self.num_pages, ..., :_b.shape[-1]] = _b[:, 0]
 +            self.oval_coef[:, self.num_pages, ..., :_c.shape[-1]] = _c[:, 0]
++            if getattr(self, "oval_vrank", None) is not None:
++                _vm, _vb, _vc = _oval_vbuild(new_paged_k.unsqueeze(1), new_paged_v.unsqueeze(1),
++                                            self.oval_vGh, self.oval_vGhi,
++                                            self.oval_veta, self.oval_vrank)
++                self.oval_vmu[:, self.num_pages, ...] = _vm[:, 0]
++                self.oval_vbasis[:, self.num_pages, ..., :_vb.shape[-1]] = _vb[:, 0]
++                self.oval_vcoef[:, self.num_pages, ..., :_vc.shape[-1]] = _vc[:, 0]
 +        elif self.page_rep == "arkv":
              centers = (maxs + mins) / 2
              dists = (
                  (
-@@ -146,7 +196,22 @@ def quest_arkv_attn(self,
+@@ -146,7 +210,25 @@ def quest_arkv_attn(self,
          new_max_k = torch.empty((1, self.alloc_len, self.max_k.shape[-2], self.max_k.shape[-1]), 
                                  device=self.max_k.device, dtype=self.max_k.dtype)
          self.max_k = torch.cat([self.max_k, new_max_k], dim=1)
 +        if self.page_rep == "oval":
-+            for _n in ("oval_basis", "oval_coef", "oval_mu"):
++            _slabs = ["oval_basis", "oval_coef", "oval_mu"]
++            if getattr(self, "oval_vrank", None) is not None:
++                _slabs += ["oval_vbasis", "oval_vcoef", "oval_vmu"]
++            for _n in _slabs:
 +                _t = getattr(self, _n)
 +                _new = torch.empty((_t.shape[0], self.alloc_len, *_t.shape[2:]),
 +                                   device=_t.device, dtype=_t.dtype)
@@ -369,7 +416,7 @@ index 32ac2af..eae3d5f 100644
      if update_only:
          return None
      
-@@ -157,6 +222,12 @@ def quest_arkv_attn(self,
+@@ -157,6 +239,12 @@ def quest_arkv_attn(self,
  
      do_compress = (kv_seq_len > sink_size + recent_size + max(token_budget, ll_token_budget))
      if token_budget < 0 or not do_compress:
@@ -382,7 +429,7 @@ index 32ac2af..eae3d5f 100644
          return self._flash_attention_forward(
              q, k, v, padding_mask, q.shape[1], dropout=0.0
          )
-@@ -171,6 +242,263 @@ def quest_arkv_attn(self,
+@@ -171,6 +259,263 @@ def quest_arkv_attn(self,
      # [1, num_used_pages, num_kv_heads, head_dim]
      min_k_for_sel = self.min_k[:, :self.num_pages - num_recent_page, ...]
      max_k_for_sel = self.max_k[:, :self.num_pages - num_recent_page, ...]
@@ -646,7 +693,7 @@ index 32ac2af..eae3d5f 100644
  
      # selection with current or past query
      if token_budget > 0:
-@@ -199,15 +527,43 @@ def quest_arkv_attn(self,
+@@ -199,15 +544,43 @@ def quest_arkv_attn(self,
              else:
                  probe_q = past_q
  
@@ -694,7 +741,7 @@ index 32ac2af..eae3d5f 100644
          _, ll_sel_page_indices = torch.topk(max_qk, ll_page_budget, dim=-1)
          # [bsz, num_kv_heads, (up to) page_budget + ll_page_budget]
          # still maybe repeated pages...
-@@ -215,6 +571,24 @@ def quest_arkv_attn(self,
+@@ -215,6 +588,24 @@ def quest_arkv_attn(self,
              sel_page_indices = ll_sel_page_indices
          else:
              sel_page_indices = torch.unique(torch.cat([sel_page_indices, ll_sel_page_indices], dim=-1), dim=-1)
@@ -719,11 +766,12 @@ index 32ac2af..eae3d5f 100644
      # [bsz, num_kv_heads, page_budget, page_size]
      sel_token_indices = (sink_size + sel_page_indices*page_size).unsqueeze(-1).expand(-1, -1, -1, page_size)
      sel_token_indices = sel_token_indices + torch.arange(
-@@ -226,7 +600,46 @@ def quest_arkv_attn(self,
+@@ -226,8 +617,70 @@ def quest_arkv_attn(self,
          sel_token_indices.shape[0], sel_token_indices.shape[1], -1
      ).transpose(1, 2).unsqueeze(-1).expand(-1, -1, -1, head_dim)
  
 -    sel_k = torch.gather(k, dim=1, index=sel_token_indices)
+-    sel_v = torch.gather(v, dim=1, index=sel_token_indices)
 +    if _use_oval and getattr(self, "oval_recon", False):
 +        # KEY CODEC. The records that drive selection are also the only copy of
 +        # the keys: rebuild the selected pages as mu + coef @ basis^T instead of
@@ -764,10 +812,34 @@ index 32ac2af..eae3d5f 100644
 +        sel_k = _kq.reshape(_b, _P * page_size, _H, _d).to(_ek.dtype)
 +    else:
 +        sel_k = torch.gather(k, dim=1, index=sel_token_indices)
-     sel_v = torch.gather(v, dim=1, index=sel_token_indices)
++    if _use_oval and getattr(self, "oval_vrank", None) is not None:
++        # VALUE CODEC, mirroring the key codec above: the selected pages' values
++        # are rebuilt from their output-aware value records. Sink and recent
++        # stay exact, as for keys.
++        _bi = torch.arange(sel_page_indices.shape[0],
++                           device=sel_page_indices.device)[:, None, None]
++        _hi = torch.arange(sel_page_indices.shape[1],
++                           device=sel_page_indices.device)[None, :, None]
++        _VB = self.oval_vbasis[_bi, sel_page_indices, _hi]   # [b,H,P,d,rv]
++        _VC = self.oval_vcoef[_bi, sel_page_indices, _hi]    # [b,H,P,page,rv]
++        _VM = self.oval_vmu[_bi, sel_page_indices, _hi]      # [b,H,P,d]
++        _vhat = torch.matmul(_VC, _VB.transpose(-1, -2)) + _VM.unsqueeze(-2)
++        sel_v = _vhat.reshape(_vhat.shape[0], _vhat.shape[1], -1, head_dim) \
++                     .permute(0, 2, 1, 3).contiguous()
++        if os.environ.get("KVC_DEBUG_VREC") and self.layer_idx == int(os.environ.get("KVC_DEBUG_LAYER", 1)):
++            # layout check: the rebuilt pages must line up with the exact ones
++            self._dbg_v = getattr(self, "_dbg_v", 0) + 1
++            if self._dbg_v in (1, 50, 200):
++                _ex = torch.gather(v, dim=1, index=sel_token_indices).float()
++                print(f"[VREC] L{self.layer_idx} step{self._dbg_v} rank={self.oval_vrank} veta={self.oval_veta if self.oval_vGh is not None else 'pca'} "
++                      f"rel_err={((sel_v.float() - _ex).norm() / _ex.norm()).item():.4%}",
++                      flush=True)
++    else:
++        sel_v = torch.gather(v, dim=1, index=sel_token_indices)
  
      used_k = torch.cat([
-@@ -235,17 +648,123 @@ def quest_arkv_attn(self,
+         k[:, :sink_size, ...], sel_k, k[:, -recent_size:, ...],
+@@ -235,17 +688,123 @@ def quest_arkv_attn(self,
      used_v = torch.cat([
          v[:, :sink_size, ...], sel_v, v[:, -recent_size:, ...],
      ], dim=1)
@@ -893,7 +965,7 @@ index 32ac2af..eae3d5f 100644
  def raas_attn(self,
                q: torch.Tensor,
                k: torch.Tensor,
-@@ -274,6 +793,11 @@ def raas_attn(self,
+@@ -274,6 +833,11 @@ def raas_attn(self,
  
      kv_seq_len = self.kv_seq_len
      if self.num_pages == 0:
@@ -906,7 +978,7 @@ index 32ac2af..eae3d5f 100644
          num_init_pages = (kv_seq_len - sink_size - recent_size) // page_size
          # assert num_init_pages < page_budget
 diff --git a/accuracy/kvc/patch/llama.py b/accuracy/kvc/patch/llama.py
-index 7e50cbb..e07aa03 100644
+index 7e50cbb..30e54e8 100644
 --- a/accuracy/kvc/patch/llama.py
 +++ b/accuracy/kvc/patch/llama.py
 @@ -192,6 +192,17 @@ def llama_dyn_attention_forward(
@@ -944,7 +1016,7 @@ index 7e50cbb..e07aa03 100644
              if hasattr(self, "dynamic_attn"):
                  _ = self.dynamic_attn(
                      _dyn_query_states,
-@@ -501,22 +522,69 @@ def enable_llama_dyn_attention(
+@@ -501,22 +522,95 @@ def enable_llama_dyn_attention(
          if method in ["quest", "arkv", "spec_ret"]:
              module.page_size = config["page_size"]
              module.token_budget = config["budget"] if idx >= config["skip_layer"] else -1
@@ -1014,10 +1086,36 @@ index 7e50cbb..e07aa03 100644
 +                    module.oval_Gh = _oval_metric(
 +                        module.o_proj.weight, num_dyn_attn_heads, module.head_dim, None
 +                    ).to(_dev)
++                # VALUE codec: its own output-aware record with its own eta_V and
++                # rank, built in the SAME G metric as the keys (G^{1/2} from this
++                # layer's o_proj). Same clamp as the keys: centring costs one dof.
++                _vr = config.get("oval_vrank", None)
++                module.oval_vrank = None if _vr is None else \
++                    min(int(_vr), module.page_size - 1, module.head_dim)
++                module.oval_veta = float(config.get("veta", 0.0))
++                module.oval_vGh = module.oval_vGhi = None    # None = plain PCA (G = I)
++                if module.oval_vrank is not None:
++                    module.oval_vbasis = torch.empty(
++                        (bsz, max_num_pages, num_dyn_attn_heads, module.head_dim,
++                         module.oval_vrank), device=_dev, dtype=dtype)
++                    module.oval_vcoef = torch.empty(
++                        (bsz, max_num_pages, num_dyn_attn_heads, module.page_size,
++                         module.oval_vrank), device=_dev, dtype=dtype)
++                    module.oval_vmu = torch.empty(
++                        (bsz, max_num_pages, num_dyn_attn_heads, module.head_dim),
++                        device=_dev, dtype=dtype)
++                if module.oval_vrank is not None and config.get("vbasis", "pca") == "oval":
++                    from .oval import metric_inv_sqrt as _oval_ghi
++                    # needed at every eta_V (eta_V=0 is PCA in the G metric), so
++                    # computed here even when the KEY eta is 0
++                    module.oval_vGh = module.oval_Gh if module.oval_Gh is not None else \
++                        _oval_metric(module.o_proj.weight, num_dyn_attn_heads,
++                                     module.head_dim, None).to(_dev)
++                    module.oval_vGhi = _oval_ghi(module.oval_vGh)
              module.ll_token_budget = 0
              if method == "spec_ret":
                  module.ll_token_budget = config["llb"]
-@@ -534,6 +602,14 @@ def enable_llama_dyn_attention(
+@@ -534,6 +628,14 @@ def enable_llama_dyn_attention(
              module.dynamic_attn = types.MethodType(raas_attn, module)
              module.page_size = config["page_size"]
              module.token_budget = config["budget"] if idx >= config["skip_layer"] else -1
@@ -1126,7 +1224,7 @@ index df82a90..28b5d7f 100644
  }
 \ No newline at end of file
 diff --git a/source/freekv/adapter/modeling.py b/source/freekv/adapter/modeling.py
-index f9abf0a..9d7ce65 100644
+index f9abf0a..3e2dc18 100644
 --- a/source/freekv/adapter/modeling.py
 +++ b/source/freekv/adapter/modeling.py
 @@ -146,7 +146,7 @@ def _freekv_attn_forward(
@@ -1166,7 +1264,7 @@ index f9abf0a..9d7ce65 100644
          mod_cls = str(mod.__class__)
          if "Attention" in mod_cls:
 diff --git a/source/freekv/infer_state.py b/source/freekv/infer_state.py
-index efa74df..d4f6233 100644
+index efa74df..18c9625 100644
 --- a/source/freekv/infer_state.py
 +++ b/source/freekv/infer_state.py
 @@ -7,6 +7,8 @@ from torch import Tensor
@@ -1452,7 +1550,7 @@ index efa74df..d4f6233 100644
      def alloc_page(self):
          if len(self._pool._free_ids) <= 0:
 diff --git a/source/freekv/kernels.py b/source/freekv/kernels.py
-index ad11d7a..3c158da 100644
+index ad11d7a..d7520d0 100644
 --- a/source/freekv/kernels.py
 +++ b/source/freekv/kernels.py
 @@ -84,6 +84,16 @@ def append_paged_kv_cache(
@@ -1513,7 +1611,7 @@ index b77907c..8fa91d7 100644
                      self.budget
                      - self.n_win_pages
 diff --git a/source/freekv_cpp/src/api.cu b/source/freekv_cpp/src/api.cu
-index 318820b..a6db131 100644
+index 318820b..844e544 100644
 --- a/source/freekv_cpp/src/api.cu
 +++ b/source/freekv_cpp/src/api.cu
 @@ -10,6 +10,7 @@ PYBIND11_MODULE(freekv_cpp, m) {
@@ -1525,7 +1623,7 @@ index 318820b..a6db131 100644
  	m.def("prefill_select_topk", &prefill_select_topk);
    py::class_<BatchPrefillWithPagedKVCachePyTorchWrapper>(
 diff --git a/source/freekv_cpp/src/estimate_select_recall.cu b/source/freekv_cpp/src/estimate_select_recall.cu
-index 8392b5e..2f53bea 100644
+index 8392b5e..22b2acc 100644
 --- a/source/freekv_cpp/src/estimate_select_recall.cu
 +++ b/source/freekv_cpp/src/estimate_select_recall.cu
 @@ -41,10 +41,15 @@ void estimate_select_recall_core(
@@ -1591,7 +1689,7 @@ index 8392b5e..2f53bea 100644
 +  ).wait();
  }
 diff --git a/source/freekv_cpp/src/flashinfer_ops.h b/source/freekv_cpp/src/flashinfer_ops.h
-index 4a32ad1..52f1ff7 100644
+index 4a32ad1..7949372 100644
 --- a/source/freekv_cpp/src/flashinfer_ops.h
 +++ b/source/freekv_cpp/src/flashinfer_ops.h
 @@ -58,6 +58,10 @@ void append_paged_kv_cache_decode(
@@ -1646,7 +1744,7 @@ index f819297..126e3ad 100644
  
    ~ThreadPool() {
 diff --git a/source/pred.py b/source/pred.py
-index a316410..1c4103f 100644
+index a316410..7d2a847 100644
 --- a/source/pred.py
 +++ b/source/pred.py
 @@ -107,6 +107,15 @@ def parse_args(args=None):
