@@ -1,0 +1,12 @@
+{
+ "model": "ds-r1-llama-8b",
+ "task": "AIME24",
+ "ncalib": 1,
+ "ngen": 6144,
+ "nwin": 3,
+ "gen_s": 209,
+ "load_s": 0.48285698890686035,
+ "compute_s": 196.7106261253357,
+ "max_abs_diff_vs_deployed": 1.0,
+ "gpu": "NVIDIA RTX A6000"
+}

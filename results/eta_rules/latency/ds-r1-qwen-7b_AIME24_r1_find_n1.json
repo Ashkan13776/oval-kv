@@ -1,0 +1,12 @@
+{
+ "model": "ds-r1-qwen-7b",
+ "task": "AIME24",
+ "ncalib": 1,
+ "ngen": 6144,
+ "nwin": 3,
+ "gen_s": 185,
+ "load_s": 0.2786874771118164,
+ "compute_s": 86.32315635681152,
+ "max_abs_diff_vs_deployed": 1.0,
+ "gpu": "NVIDIA RTX A6000"
+}

@@ -94,6 +94,8 @@ if logf.exists():
 res = {"model": args.model, "task": args.task, "ncalib": args.ncalib, "ngen": args.ngen,
        "nwin": args.nwin, "gen_s": gen_s, "load_s": load_s, "compute_s": compute_s,
        "max_abs_diff_vs_deployed": diff, "gpu": torch.cuda.get_device_name(dev)}
-out = ROOT / f"results/eta_rules/latency/{args.model}_{args.task}_r1_find.json"
+# --ncalib 1: eta* from a single trace, the per-sequence cost (latency_oracle_r1)
+out = ROOT / f"results/eta_rules/latency/{args.model}_{args.task}_r1_find" \
+    f"{'' if args.ncalib == 4 else f'_n{args.ncalib}'}.json"
 json.dump(res, open(out, "w"), indent=1)
 print(json.dumps(res))

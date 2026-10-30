@@ -5,13 +5,10 @@ times of the timed round, written by FreeKV's source/pred.py --tbt_out) and
 plots, per model:
   top left   mean ms per decode step (first step excluded, as pred.py's Avg TBT)
   top right  ms per step vs decode position, smoothed over 256 steps
-  bottom panel (a) per model at several sequence lengths (prefixes of the
-         timed run), with two extra bars for setting eta: the fixed-eta sweep
-         (one decode per grid eta {0, .25, .5, .75, 1}, i.e. 5 x its ms/step)
-         and rule 1 (one decode, plus the cost of finding eta* from
-         time_rule1_find.py -- calibration traces + endpoint errors and the
-         closed form -- divided over that sequence's decode steps; it is
-         paid once per (model, task), so this is its worst case)
+  bottom     per model, OVAL oracle vs OVAL rule 1 on example sequences
+             (results/eta_rules/latency/seq, natural EOS): oracle = sweeping
+             the 5 grid etas, i.e. 5 x the measured eta=0 decode; rule 1 = one
+             decode + computing eta* (time_rule1_find.py --ncalib 1)
 
   python analysis/plot_latency_rule1.py [--suffix _g256] [--out ...]
 """
@@ -35,8 +32,8 @@ ap.add_argument("--models", nargs="+", default=["ds-r1-qwen-7b", "ds-r1-llama-8b
 ap.add_argument("--dir", default=str(ROOT / "results/eta_rules/latency"))
 ap.add_argument("--suffix", default="", help="e.g. _g256 for a short MAX_GEN run")
 ap.add_argument("--smooth", type=int, default=256)
-ap.add_argument("--lengths", type=int, nargs="+", default=[4096, 8192, 16384],
-                help="sequence lengths for the bottom row (prefixes of the timed run)")
+ap.add_argument("--probs", type=int, nargs="+", default=[0, 8, 1],
+                help="AIME24 problems of the bottom row (scripts/latency_oracle_r1.sh)")
 ap.add_argument("--find_task", default="AIME24", help="task of the timed eta* search (time_rule1_find.py)")
 ap.add_argument("--out", default=str(ROOT / "results/eta_rules/figures/latency_rule1"))
 A = ap.parse_args()
@@ -92,52 +89,52 @@ ax1.set_title(f"{NAME.get(m0, m0)}: per-step decode time over the generation", f
 ax1.legend(fontsize=8); ax1.grid(alpha=0.3)
 
 
-# ---- bottom row: panel (a) at several sequence lengths, per model. A decode
-# of N tokens is the first N steps of the timed run (same prompt, greedy,
-# --ignore_eos), so every length comes from the same measurement. The two
-# ways of setting eta are added: the fixed-eta sweep decodes the sequence once
-# per grid eta (5 x the fixed-eta ms/step), rule 1 once plus the cost of
-# finding eta* (time_rule1_find.py) divided over the N steps -- paid once per
-# (model, task), so this charges it all to one sequence (its worst case).
-GRID = ["0.0", "0.25", "0.5", "0.75", "1.0"]
-BARS = ARMS[:5] + [("sweep", "OVAL fixed eta: 5-eta sweep"), ("oval_r1", "OVAL rule 1 (+ finding eta*)")]
-COL["sweep"] = "#fdae6b"
-print(f"\n{'model':<16}{'N':>7}" + "".join(f"{lab[:15]:>17}" for _, lab in BARS) + "  eta*(ms/step)")
+# ---- bottom row: OVAL oracle vs OVAL rule 1 on example sequences, per model
+# (scripts/latency_oracle_r1.sh). Every run stops at its natural EOS. Oracle =
+# sweep the 5 grid etas {0, .25, .5, .75, 1} on the sequence, i.e. 5 decodes;
+# eta does not change the per-step cost, so it is 5 x the measured eta=0
+# decode over the same number of steps as rule 1's sequence (an eta=0 run that
+# stopped early at EOS is re-run with --ignore_eos to that length). Rule 1 = one measured decode with the rule-1 table plus computing
+# eta* from one trace (time_rule1_find.py --ncalib 1: endpoint errors, a, b, c,
+# closed form).
+NGRID = 5
+sd = os.path.join(A.dir, "seq")
+print(f"\n{'model':<16}{'prob':>5}{'tokens':>8}{'eta=0':>9}{'oracle':>10}{'r1':>7}{'eta*':>8}{'ratio':>7}   (ms / decode step)")
 for axm, m in zip(axL, A.models):
-    ff = os.path.join(A.dir, f"{m}_{A.find_task}_r1_find.json")
-    fd = json.load(open(ff)) if os.path.exists(ff) else None
-    find_ms = ((fd["gen_s"] or 0.0) + fd["compute_s"] + fd["load_s"]) * 1e3 if fd else 0.0
-    xs = np.arange(len(A.lengths)); wb = 0.8 / len(BARS)
-    for bi, (a, lab) in enumerate(BARS):
-        src = data.get((m, "oval_fix" if a == "sweep" else a))
-        if src is None:
+    ff = os.path.join(A.dir, f"{m}_{A.find_task}_r1_find_n1.json")
+    eta_s = (lambda d: d["compute_s"] + d["load_s"])(json.load(open(ff))) if os.path.exists(ff) else 0.0
+    xs, labels = [], []
+    for j, pi in enumerate(A.probs):
+        load = lambda arm: (lambda f: json.load(open(f)) if os.path.exists(f) else None)(
+            os.path.join(sd, f"{m}_{A.find_task}_p{pi}_{arm}.json"))
+        r1, fx = load("r1"), load("eta0.0")
+        if r1 is None or fx is None:
             continue
-        t = np.asarray(src["tbt_ms"][1:], float)
-        dec = np.array([t[:N - 1].mean() for N in A.lengths])
-        y = dec * len(GRID) if a == "sweep" else dec
-        xb = xs + (bi - (len(BARS) - 1) / 2) * wb
-        axm.bar(xb, y, wb, color=COL[a], label=lab)
-        top = y
-        if a == "oval_r1":
-            eta = np.array([find_ms / (N - 1) for N in A.lengths])
-            axm.bar(xb, eta, wb, bottom=y, color=COL[a], alpha=0.4, hatch="//", edgecolor="white",
-                    label="  finding eta* (spread over this sequence)")
-            top = y + eta
-        for xx, yy in zip(xb, top):
-            axm.text(xx, yy, f"{yy:.0f}", ha="center", va="bottom", fontsize=6.5)
-    for N in A.lengths:
-        row = []
-        for a, _ in BARS:
-            src = data.get((m, "oval_fix" if a == "sweep" else a))
-            v = np.asarray(src["tbt_ms"][1:N], float).mean() if src else np.nan
-            row.append(v * len(GRID) if a == "sweep" else v)
-        print(f"{m:<16}{N:>7}" + "".join(f"{v:>17.1f}" for v in row) + f"  {find_ms / (N - 1):.1f}")
-    axm.set_xticks(xs); axm.set_xticklabels([f"{N // 1024}K tokens" for N in A.lengths])
-    axm.set_ylabel("ms per decode step (mean)")
-    axm.set_title(f"{NAME.get(m, m)}: decode time by sequence length\n"
-                  "sweep = 5 decodes (one per eta); rule 1 = 1 decode + finding eta*", fontsize=10)
-    axm.legend(fontsize=7.5, ncol=2, loc="upper left"); axm.grid(axis="y", alpha=0.3)
-    axm.set_ylim(0, axm.get_ylim()[1] * 1.35)
+        n = len(r1["tbt_ms"])                     # the sweep decodes THIS sequence: same length
+        if len(fx["tbt_ms"]) < n:
+            print(f"  skip {m} p{pi}: eta=0 run has {len(fx['tbt_ms'])} < {n} steps (rerun with --ignore_eos)")
+            continue
+        # ms per decode step of the sequence, as in panel (a): total time / n
+        fxs, r1s = sum(fx["tbt_ms"][:n]) / n, sum(r1["tbt_ms"]) / n
+        eta_ms = eta_s * 1e3 / n
+        axm.bar(j - 0.19, NGRID * fxs, 0.36, color=COL["oval_fix"],
+                label=f"OVAL oracle ({NGRID}-eta sweep = {NGRID} decodes)" if not xs else None)
+        axm.bar(j + 0.19, r1s, 0.36, color=COL["oval_r1"],
+                label="OVAL rule 1: decode" if not xs else None)
+        axm.bar(j + 0.19, eta_ms, 0.36, bottom=r1s, color=COL["oval_r1"], alpha=0.4, hatch="//",
+                edgecolor="white", label="OVAL rule 1: compute eta*" if not xs else None)
+        axm.text(j - 0.19, NGRID * fxs, f"{NGRID * fxs:.0f}", ha="center", va="bottom", fontsize=8)
+        axm.text(j + 0.19, r1s + eta_ms, f"{r1s + eta_ms:.0f}", ha="center", va="bottom", fontsize=8)
+        xs.append(j); labels.append(f"AIME24 #{pi}\n{len(r1['tbt_ms'])} tokens")
+        print(f"{m:<16}{pi:>5}{n:>8}{fxs:>9.1f}{NGRID * fxs:>10.1f}{r1s:>7.1f}{eta_ms:>8.1f}"
+              f"{NGRID * fxs / (r1s + eta_ms):>7.2f}")
+    axm.set_xticks(xs); axm.set_xticklabels(labels, fontsize=8.5)
+    axm.set_ylabel("ms per decode step (sequence total / tokens)")
+    axm.set_title(f"{NAME.get(m, m)}: OVAL oracle (sweep 5 etas) vs OVAL rule 1", fontsize=10)
+    if xs:
+        axm.legend(fontsize=8, loc="upper left")
+        axm.set_ylim(0, axm.get_ylim()[1] * 1.25)
+    axm.grid(axis="y", alpha=0.3)
 
 fig.tight_layout()
 os.makedirs(os.path.dirname(A.out), exist_ok=True)

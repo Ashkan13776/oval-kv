@@ -322,43 +322,30 @@ per page, and the per-step scoring and attention never read it, so the
 rule-1 and fixed-eta arms agree within run-to-run noise (+0.6% / -0.6%).
 OVAL is ~12% above FreeKV (the rank-8 record build and scoring).
 
-**Per sequence, a sweep costs ~5x in decode time.** Setting eta by sweeping
-means plugging each of the 5 grid values {0, .25, .5, .75, 1} in, i.e.
-decoding the sequence 5 times. Rule 1 decodes it once, plus the cost of
-finding eta*: generating the 4 calibration traces (6144 tokens each, dense HF
-decode) and computing the endpoint errors, a, b, c and the closed form on them
-(`analysis/time_rule1_find.py`, AIME24, A6000; it reproduces the deployed
-tables to the 4-decimal rounding). Right panel of the figure, in ms per decode
-step of one 16384-token sequence, with the whole eta* cost divided over that
-sequence's decode steps:
+**OVAL oracle vs OVAL rule 1 on example sequences** (bottom row of the
+figure; `scripts/latency_oracle_r1.sh`, same engine and budget as above, every
+run stops at its natural EOS). The oracle sweeps the 5 grid etas {0, .25, .5,
+.75, 1} on the sequence, i.e. decodes it 5 times; eta does not change the
+per-step cost, so it is 5 x the measured eta = 0 decode over the same number
+of steps (an eta = 0 run that hit EOS earlier than rule 1 was re-run with
+`--ignore_eos` to rule 1's length). Rule 1 decodes once with its table, plus
+computing eta* from one trace (endpoint errors, a, b, c, closed form;
+`analysis/time_rule1_find.py --ncalib 1`: 87 s qwen, 197 s llama on an A6000).
+ms per decode step = the sequence's total time / its tokens:
 
-| model | sweep (5 x decode) | rule 1 decode | + eta*: traces | + eta*: compute | rule 1 total | sweep / rule 1 |
-|---|---|---|---|---|---|---|
-| qwen-7b | 200.9 | 40.4 | 44.9 | 20.9 | 106.2 | 1.9x, -> 5.0x amortised |
-| llama-8b | 234.7 | 46.7 | 50.7 | 47.1 | 144.5 | 1.6x, -> 5.0x amortised |
+| model | AIME24 problem | tokens | oracle (5 x eta=0) | rule 1 decode | + eta* | rule 1 total | oracle / rule 1 |
+|---|---|---|---|---|---|---|---|
+| qwen-7b | #0 | 3423 | 160.2 | 32.7 | 25.3 | 58.0 | 2.8x |
+| qwen-7b | #8 | 6874 | 174.0 | 37.3 | 12.6 | 49.9 | 3.5x |
+| qwen-7b | #1 | 16384 | 204.4 | 42.2 | 5.3 | 47.5 | 4.3x |
+| llama-8b | #0 | 3432 | 178.7 | 36.3 | 57.5 | 93.8 | 1.9x |
+| llama-8b | #8 | 16060 | 230.5 | 48.6 | 12.3 | 60.9 | 3.8x |
+| llama-8b | #1 | 16384 | 240.6 | 50.3 | 12.0 | 62.3 | 3.9x |
 
-By sequence length (bottom row of the figure; a decode of N tokens is the
-first N steps of the same timed run), ms per decode step:
-
-| model | N | fixed eta (1 decode) | sweep (5 decodes) | rule 1 decode | + eta* spread over N | rule 1 total |
-|---|---|---|---|---|---|---|
-| qwen-7b | 4K | 32.9 | 164.4 | 33.2 | 263.3 | 296.5 |
-| qwen-7b | 8K | 36.9 | 184.4 | 37.2 | 131.6 | 168.8 |
-| qwen-7b | 16K | 40.2 | 200.9 | 40.4 | 65.8 | 106.2 |
-| llama-8b | 4K | 36.5 | 182.3 | 36.5 | 391.1 | 427.6 |
-| llama-8b | 8K | 42.1 | 210.7 | 42.0 | 195.5 | 237.5 |
-| llama-8b | 16K | 46.9 | 234.7 | 46.7 | 97.7 | 144.4 |
-
-The eta* cost is fixed (4 traces of 6144 tokens), so charged to a single
-short sequence it outweighs the sweep: rule 1 wins on one sequence from 8K
-(qwen) / 16K (llama). Over the 240 sequences of one task's evaluation
-(30 problems x 8 seeds for AIME24) it is < 2 ms per step at 4K.
-
-eta* is found once per (model, task) and reused by every later sequence, so
-the finding cost is charged in full to a single sequence above and the
-ratio tends to the 5x decode ratio after a few sequences. A sweep also needs
-a way to pick among the 5 outputs (answers or a score); rule 1 needs no
-labels.
+The eta* cost is fixed per sequence, so the gap grows with length toward the
+5x of the decodes alone. In the deployed setting eta* is computed once per
+(model, task) on calibration traces and reused, which removes it entirely
+from later sequences.
 
 Caveats:
 
