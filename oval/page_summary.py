@@ -127,6 +127,28 @@ def publish_metric(o_proj_weight, n_kv_heads, head_dim, n_kv_groups):
     return Gh.to(o_proj_weight.dtype)
 
 
+def read_eta_table(path):
+    """Per-(layer, KV head) eta table (--eta_table) -> (eta list of lists, hash).
+
+    Same file format, validation and content hash as the accuracy harness
+    (oval/page_basis.py::read_eta_table / eta_table_hash), so a table names the
+    same cell in both engines.
+    """
+    import hashlib, json, math
+    tab = json.load(open(path))
+    eta = tab["eta"] if isinstance(tab, dict) else tab
+    if not eta or not all(isinstance(r, list) and len(r) == len(eta[0]) for r in eta):
+        raise ValueError(f"{path}: 'eta' must be a rectangular list of lists")
+    for row in eta:
+        for v in row:
+            v = float(v)
+            if not math.isfinite(v) or v < 0.0 or v > 1.0:
+                raise ValueError(f"{path}: eta entries must lie in [0, 1], got {v}")
+    canon = json.dumps([[round(float(v), 4) for v in row] for row in eta],
+                       separators=(",", ":"))
+    return eta, hashlib.sha1(canon.encode()).hexdigest()[:8]
+
+
 def build_summary(paged_k, paged_v, Gh, eta, rank):
     """Rank-r summary of a batch of pages.
 
@@ -136,13 +158,29 @@ def build_summary(paged_k, paged_v, Gh, eta, rank):
     Solved in the page_size x page_size Gram, not the d x d covariance:
     page_size (32) << head_dim (128), so the Gram route is cheaper and exactly
     equivalent on the leading directions.
+
+    eta is a float shared by every head, or a float64 tensor [n_kv] with one
+    eta per KV head (--eta_table). The per-head arithmetic is the accuracy
+    harness's (oval/page_basis.py::build_summary) line for line, so the two
+    engines build the same records from the same table.
     """
     dt = paged_k.dtype
     X = paged_k.permute(0, 1, 3, 2, 4).float()        # [B,P,H,page,d]
     mu = X.mean(dim=3)
     X = X - mu.unsqueeze(3)
 
-    if eta > 0.0 and Gh is not None:
+    eta_t = None
+    if torch.is_tensor(eta):
+        eta_t = eta.detach().to(torch.float64).reshape(-1)
+        if eta_t.numel() != X.shape[2]:
+            raise ValueError(f"per-head eta has {eta_t.numel()} entries for "
+                             f"{X.shape[2]} KV heads")
+        # a table already on the GPU (infer_state) is only paired with a Gh
+        # when some head of the layer has eta > 0, so skip the host sync
+        use_out = Gh is not None and (eta_t.is_cuda or bool((eta_t > 0.0).any()))
+    else:
+        use_out = eta > 0.0 and Gh is not None
+    if use_out:
         Y = paged_v.permute(0, 1, 3, 2, 4).float()
         Y = Y - Y.mean(dim=3, keepdim=True)
         Z = Y @ Gh.to(Y.dtype)
@@ -151,8 +189,14 @@ def build_summary(paged_k, paged_v, Gh, eta, rank):
         tr_key = (X * X).sum(dim=(-1, -2)).clamp_min(1e-30)
         tr_out = (Mo * Xg).sum(dim=(-1, -2)).clamp_min(1e-30)
         eye = torch.eye(X.shape[-2], device=X.device, dtype=X.dtype)
-        A = ((1.0 - eta) / tr_key)[..., None, None] * eye \
-            + (eta / tr_out)[..., None, None] * Mo
+        if eta_t is None:
+            A = ((1.0 - eta) / tr_key)[..., None, None] * eye \
+                + (eta / tr_out)[..., None, None] * Mo
+        else:
+            w1 = (1.0 - eta_t).to(X.dtype).to(X.device)          # [H]
+            w2 = eta_t.to(X.dtype).to(X.device)                  # [H]
+            A = (tr_key.reciprocal() * w1)[..., None, None] * eye \
+                + (tr_out.reciprocal() * w2)[..., None, None] * Mo
         # normalise A to unit mean diagonal -- without this the absolute scale
         # of A rides into the eigenvalues and corrupts near-degenerate pages
         A = A * (X.shape[-2] / A.diagonal(dim1=-2, dim2=-1).sum(-1)
@@ -160,6 +204,11 @@ def build_summary(paged_k, paged_v, Gh, eta, rank):
         a, Q = torch.linalg.eigh(A)
         Ah = (Q * a.clamp_min(0).sqrt().unsqueeze(-2)) @ Q.transpose(-1, -2)
         Xw = Ah @ X
+        if eta_t is not None:
+            # heads at eta = 0 take the plain-PCA path, as in the harness;
+            # torch.where, not a boolean index, so the decode loop never syncs
+            zero = (eta_t == 0.0).to(X.device)[:, None, None]    # [H,1,1]
+            Xw = torch.where(zero, X, Xw)
     else:
         Xw = X
 

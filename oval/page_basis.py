@@ -54,7 +54,9 @@ def build_summary(paged_k, paged_v, Gh, eta, rank, qvar=None):
     """paged_k/paged_v: [B, P, page, n_kv, d] -> (mu, basis, coef).
 
     Returns mu [B,P,H,d], basis [B,P,H,d,r], coef [B,P,H,page,r].
-    Line-for-line the perf path's build_summary.
+    Line-for-line the perf path's build_summary. eta is a float shared by
+    every head, or a float64 tensor [n_kv] with one eta per KV head
+    (--eta_table); the two agree exactly when the tensor is constant.
     """
     dt = paged_k.dtype
     X = paged_k.permute(0, 1, 3, 2, 4).float()        # [B,P,H,page,d]
@@ -76,7 +78,25 @@ def build_summary(paged_k, paged_v, Gh, eta, rank, qvar=None):
         Wq = qvar.clamp_min(1e-8).sqrt().to(X.dtype)        # [H,d]
         X = X * Wq[None, None, :, None, :]                  # whiten the keys
 
-    if eta > 0.0 and Gh is not None:
+    # eta is a python float (one value for every head) or a float64 tensor
+    # [H] holding one value per KV head (--eta_table). The per-head path
+    # reproduces the scalar arithmetic bit for bit: `float / tensor` is
+    # Tensor.__rtruediv__, i.e. tr.reciprocal() * float32(1-eta), so the
+    # table path forms the same reciprocal and multiplies it by the float64
+    # entries cast to float32 at the same point (verified bitwise in
+    # analysis/test_eta_rules.py, check 7). Heads whose entry is exactly 0
+    # take the plain-PCA branch (Xw = X) instead of an identity whitening, so
+    # they match the scalar eta=0 path exactly too.
+    eta_t = None
+    if torch.is_tensor(eta):
+        eta_t = eta.detach().to(torch.float64).reshape(-1)
+        if eta_t.numel() != X.shape[2]:
+            raise ValueError(f"per-head eta has {eta_t.numel()} entries for "
+                             f"{X.shape[2]} KV heads")
+        use_out = bool((eta_t > 0.0).any()) and Gh is not None
+    else:
+        use_out = eta > 0.0 and Gh is not None
+    if use_out:
         Y = paged_v.permute(0, 1, 3, 2, 4).float()
         Y = Y - Y.mean(dim=3, keepdim=True)
         Z = Y @ Gh.to(Y.dtype)
@@ -85,8 +105,14 @@ def build_summary(paged_k, paged_v, Gh, eta, rank, qvar=None):
         tr_key = (X * X).sum(dim=(-1, -2)).clamp_min(1e-30)
         tr_out = (Mo * Xg).sum(dim=(-1, -2)).clamp_min(1e-30)
         eye = torch.eye(X.shape[-2], device=X.device, dtype=X.dtype)
-        A = ((1.0 - eta) / tr_key)[..., None, None] * eye \
-            + (eta / tr_out)[..., None, None] * Mo
+        if eta_t is None:
+            A = ((1.0 - eta) / tr_key)[..., None, None] * eye \
+                + (eta / tr_out)[..., None, None] * Mo
+        else:
+            w1 = (1.0 - eta_t).to(X.dtype).to(X.device)          # [H]
+            w2 = eta_t.to(X.dtype).to(X.device)                  # [H]
+            A = (tr_key.reciprocal() * w1)[..., None, None] * eye \
+                + (tr_out.reciprocal() * w2)[..., None, None] * Mo
         # normalise A to unit mean diagonal -- without this the absolute scale
         # of A rides into the eigenvalues and corrupts near-degenerate pages
         A = A * (X.shape[-2] / A.diagonal(dim1=-2, dim2=-1).sum(-1)
@@ -94,6 +120,13 @@ def build_summary(paged_k, paged_v, Gh, eta, rank, qvar=None):
         a, Q = torch.linalg.eigh(A)
         Ah = (Q * a.clamp_min(0).sqrt().unsqueeze(-2)) @ Q.transpose(-1, -2)
         Xw = Ah @ X
+        if eta_t is not None:
+            zero = (eta_t == 0.0).to(X.device)                   # [H]
+            if bool(zero.any()):
+                # in place on the matmul output: torch.where would adopt
+                # X's permuted strides and MKL then takes a different gemm
+                # path, which breaks bitwise agreement with the scalar path
+                Xw[:, :, zero] = X[:, :, zero]
     else:
         Xw = X
 
@@ -231,3 +264,55 @@ def oval_sel(q, basis, coef, mu, GQA_policy, num_heads, num_kv_heads):
             f"GQA_policy={GQA_policy} pools queries before scoring; OVAL scores "
             "per query head. Use avgSM (the paper's setting) or another S-policy.")
     raise AssertionError(f"unknown GQA_policy {GQA_policy}")
+
+
+# ---------------------------------------------------------------------------
+# Per-(layer, KV head) eta tables (--eta_table). A table is a JSON file with
+# "eta": [[...] * n_kv_heads] * n_layers in the harness's dynamic-attention
+# KV-head order. With sparsity 1 (every head dynamic, the only mode this repo
+# runs) reorder_linear_weights keeps the model's head order, so row h is the
+# model's KV head h and matches publish_metric's G[h]. load_eta_table refuses
+# anything else.
+
+def eta_table_hash(eta):
+    """8-hex content hash of a table, over the entries rounded to 4 decimals.
+
+    Used as the output-path tag (_etab<hash>) in place of _eta<E>, so two rules
+    that select the same table share one cell and tables differing anywhere
+    never collide. The hash covers the VALUES only, not the file or rule name.
+    """
+    import hashlib, json
+    canon = json.dumps([[round(float(v), 4) for v in row] for row in eta],
+                       separators=(",", ":"))
+    return hashlib.sha1(canon.encode()).hexdigest()[:8]
+
+
+def read_eta_table(path):
+    """Load and validate a table file -> (eta list of lists, hash)."""
+    import json, math
+    tab = json.load(open(path))
+    eta = tab["eta"] if isinstance(tab, dict) else tab
+    if not eta or not all(isinstance(r, list) and len(r) == len(eta[0]) for r in eta):
+        raise ValueError(f"{path}: 'eta' must be a rectangular list of lists")
+    for row in eta:
+        for v in row:
+            v = float(v)
+            if not math.isfinite(v) or v < 0.0 or v > 1.0:
+                raise ValueError(f"{path}: eta entries must lie in [0, 1], got {v}")
+    return eta, eta_table_hash(eta)
+
+
+def load_eta_table(path, layer_idx, n_layers, n_kv_heads, n_full_heads):
+    """The per-head eta row for one layer as a float64 CPU tensor [n_kv_heads]."""
+    eta, _ = read_eta_table(path)
+    if len(eta) != n_layers:
+        raise ValueError(f"{path}: table has {len(eta)} layers, model has {n_layers}")
+    if len(eta[0]) != n_kv_heads:
+        raise ValueError(f"{path}: table has {len(eta[0])} KV heads per layer, "
+                         f"the model's dynamic attention has {n_kv_heads}")
+    if n_full_heads != 0:
+        raise ValueError("--eta_table assumes every KV head is dynamic (sparsity 1); "
+                         f"layer {layer_idx} has {n_full_heads} full heads, after which "
+                         "reorder_linear_weights permutes the KV heads and the table "
+                         "rows would not line up")
+    return torch.tensor([float(v) for v in eta[layer_idx]], dtype=torch.float64)

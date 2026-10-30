@@ -148,7 +148,7 @@ index 47f4b0f..787c149 100644
          preds = get_pred(
              model,
 diff --git a/accuracy/eval/util.py b/accuracy/eval/util.py
-index e4bd935..1c0c2a3 100644
+index e4bd935..2a51ecf 100644
 --- a/accuracy/eval/util.py
 +++ b/accuracy/eval/util.py
 @@ -1,3 +1,4 @@
@@ -156,13 +156,17 @@ index e4bd935..1c0c2a3 100644
  import os, argparse
  import numpy as np
  from pathlib import Path
-@@ -31,7 +32,30 @@ def parse_common_args(parser):
+@@ -31,7 +32,34 @@ def parse_common_args(parser):
                          choices=["full", "duo_attn", "razor", 
                                   "quest", "arkv", "spec_ret", "raas"],
                          help="KV cache eviction/selection method")
 -    parser.add_argument("--page_rep", type=str, default="quest", choices=["quest", "arkv"],
 +    parser.add_argument("--eta", type=float, default=0.0,
 +                        help="OVAL output-aware mix; 0 = key PCA (the LOCKS special case)")
++    parser.add_argument("--eta_table", type=str, default=None,
++                        help="JSON with 'eta': [n_layers][n_kv_heads], one key-basis eta per "
++                             "(layer, KV head); overrides --eta. The output path is tagged "
++                             "_etab<content hash> instead of _eta<E> (see oval.eta_table_hash)")
 +    parser.add_argument("--oval_rank", type=int, default=8,
 +                        help="OVAL basis rank")
 +    parser.add_argument("--oval_recon", action="store_true",
@@ -188,7 +192,7 @@ index e4bd935..1c0c2a3 100644
                          help="Page representation method")
      parser.add_argument("--GQA_policy", type=str, default="avgS",
                          choices=["maxQ", "avgQ", "maxS", "avgS", "maxSM", "avgSM"],
-@@ -86,6 +110,10 @@ def parse_common_args(parser):
+@@ -86,6 +114,10 @@ def parse_common_args(parser):
      parser.add_argument("--repeat_bsz", type=int, default=None, 
                          help="set for efficiency eval")
  
@@ -199,7 +203,7 @@ index e4bd935..1c0c2a3 100644
      parser.add_argument("--kv8", action="store_true",
                          help="Use 8-bit quantized KV cache (FP16 instead of BF16)")
      return parser
-@@ -128,6 +156,29 @@ def get_out_path(args, config, out_root_dir=None, mkdir=True):
+@@ -128,6 +160,36 @@ def get_out_path(args, config, out_root_dir=None, mkdir=True):
              else:
                  GQA_policy = config["GQA_policy"]
                  out_path += f"-{GQA_policy}"
@@ -213,8 +217,15 @@ index e4bd935..1c0c2a3 100644
 +                if config.get("page_rep", "quest") != "quest":
 +                    out_path += f"-{config['page_rep']}"
 +                    if config.get("page_rep") == "oval":
++                        # per-head table: tag by CONTENT hash so identical tables
++                        # from different rules share a cell and different tables
++                        # never collide (two etas rounded to 4 decimals that
++                        # differ anywhere hash differently)
++                        _etag = (f"etab{config['eta_table_hash']}"
++                                 if config.get("eta_table") is not None
++                                 else f"eta{config.get('eta', 0.0)}")
 +                        out_path += (f"_r{config.get('oval_rank', 8)}"
-+                                     f"_eta{config.get('eta', 0.0)}"
++                                     f"_{_etag}"
 +                                     f"_q{int(os.environ.get('OVAL_QUANT', '1') != '0')}")
 +                        # A codec run and a selection-only run differ ONLY in this
 +                        # flag; without it in the path they overwrite each other.
@@ -229,7 +240,7 @@ index e4bd935..1c0c2a3 100644
                  if method == "spec_ret":
                      spec_ret_steps = config["spec_ret_steps"]
                      llb = config["llb"]
-@@ -213,6 +264,14 @@ def load_model_and_tokenizer(path, args):
+@@ -213,6 +275,14 @@ def load_model_and_tokenizer(path, args):
          low_cpu_mem_usage=True,
          attn_implementation="eager",
          device_map = "auto",
@@ -244,11 +255,17 @@ index e4bd935..1c0c2a3 100644
      )
  
      generation_config = GenerationConfig.from_pretrained(path)
-@@ -271,13 +330,20 @@ def load_model_and_tokenizer(path, args):
+@@ -271,13 +341,26 @@ def load_model_and_tokenizer(path, args):
          config["recent"] = recent_size
          config["skip_layer"] = args.skip_layer
          config["page_rep"] = args.page_rep
 +        config["eta"] = args.eta
++        config["eta_table"] = args.eta_table
++        if args.eta_table is not None:
++            from kvc.patch.oval import read_eta_table
++            _tab, config["eta_table_hash"] = read_eta_table(args.eta_table)
++            print(f"eta table {args.eta_table}: {len(_tab)} layers x {len(_tab[0])} KV heads, "
++                  f"tag etab{config['eta_table_hash']} (--eta {args.eta} ignored)")
 +        config["oval_rank"] = args.oval_rank
 +        config["oval_recon"] = args.oval_recon
 +        config["oval_vrank"] = args.oval_vrank
@@ -266,7 +283,7 @@ index e4bd935..1c0c2a3 100644
              config["page_size"] = args.page_size
              config["GQA_policy"] = args.GQA_policy
              if method == "spec_ret":
-@@ -292,8 +358,9 @@ def load_model_and_tokenizer(path, args):
+@@ -292,8 +375,9 @@ def load_model_and_tokenizer(path, args):
              print(f"Budget: {args.budget}, page size: {args.page_size}, alpha {args.raas_alpha}")
              assert recent_size % args.page_size == 0
              assert sink_size % args.page_size == 0
@@ -978,7 +995,7 @@ index 32ac2af..1c4a27c 100644
          num_init_pages = (kv_seq_len - sink_size - recent_size) // page_size
          # assert num_init_pages < page_budget
 diff --git a/accuracy/kvc/patch/llama.py b/accuracy/kvc/patch/llama.py
-index 7e50cbb..30e54e8 100644
+index 7e50cbb..f75ba18 100644
 --- a/accuracy/kvc/patch/llama.py
 +++ b/accuracy/kvc/patch/llama.py
 @@ -192,6 +192,17 @@ def llama_dyn_attention_forward(
@@ -1016,7 +1033,7 @@ index 7e50cbb..30e54e8 100644
              if hasattr(self, "dynamic_attn"):
                  _ = self.dynamic_attn(
                      _dyn_query_states,
-@@ -501,22 +522,95 @@ def enable_llama_dyn_attention(
+@@ -501,22 +522,105 @@ def enable_llama_dyn_attention(
          if method in ["quest", "arkv", "spec_ret"]:
              module.page_size = config["page_size"]
              module.token_budget = config["budget"] if idx >= config["skip_layer"] else -1
@@ -1062,6 +1079,14 @@ index 7e50cbb..30e54e8 100644
 +                # by the same page index. UNQUANTIZED (model dtype).
 +                from .oval import publish_metric as _oval_metric
 +                module.oval_eta = float(config.get("eta", 0.0))
++                if config.get("eta_table") is not None:
++                    # one eta per KV head of THIS layer, float64 [n_kv]; build_summary
++                    # broadcasts it over pages. Refuses tables whose shape does not
++                    # match the model or when full heads would permute the KV order.
++                    from .oval import load_eta_table as _load_eta_table
++                    module.oval_eta = _load_eta_table(
++                        config["eta_table"], idx, len(model.model.layers),
++                        num_dyn_attn_heads, num_full_attn_heads)
 +                # build_summary clamps the rank to min(rank, page_size-1, d)
 +                # because centring costs one degree of freedom. Allocating the
 +                # UNCLAMPED rank leaves the surplus basis/coef columns as
@@ -1082,7 +1107,9 @@ index 7e50cbb..30e54e8 100644
 +                    (bsz, max_num_pages, num_dyn_attn_heads, module.head_dim),
 +                    device=_dev, dtype=dtype)
 +                module.oval_Gh = None
-+                if module.oval_eta > 0.0:
++                _eta_pos = (bool((module.oval_eta > 0.0).any()) if torch.is_tensor(module.oval_eta)
++                            else module.oval_eta > 0.0)
++                if _eta_pos:
 +                    module.oval_Gh = _oval_metric(
 +                        module.o_proj.weight, num_dyn_attn_heads, module.head_dim, None
 +                    ).to(_dev)
@@ -1115,7 +1142,7 @@ index 7e50cbb..30e54e8 100644
              module.ll_token_budget = 0
              if method == "spec_ret":
                  module.ll_token_budget = config["llb"]
-@@ -534,6 +628,14 @@ def enable_llama_dyn_attention(
+@@ -534,6 +638,14 @@ def enable_llama_dyn_attention(
              module.dynamic_attn = types.MethodType(raas_attn, module)
              module.page_size = config["page_size"]
              module.token_budget = config["budget"] if idx >= config["skip_layer"] else -1
@@ -1224,7 +1251,7 @@ index df82a90..28b5d7f 100644
  }
 \ No newline at end of file
 diff --git a/source/freekv/adapter/modeling.py b/source/freekv/adapter/modeling.py
-index f9abf0a..3e2dc18 100644
+index f9abf0a..86c0236 100644
 --- a/source/freekv/adapter/modeling.py
 +++ b/source/freekv/adapter/modeling.py
 @@ -146,7 +146,7 @@ def _freekv_attn_forward(
@@ -1249,12 +1276,13 @@ index f9abf0a..3e2dc18 100644
                  else:
                      state.estimate_select_recall(cur_id, query_states)
                      attn_output = state.decode_sdpa(cur_id, query_states, attn_page_ids)
-@@ -277,6 +283,13 @@ def enable_offload(
+@@ -277,6 +283,14 @@ def enable_offload(
          self.lm_head.forward = lambda x: \
              _lm_head_forward_streamed(x, _lm_head_forward, infer_state=infer_state)
  
-+    # stash o_proj per layer for the OVAL output-aware metric (eta > 0)
-+    if getattr(infer_state, "page_rep", "quest") == "oval" and infer_state.oval_eta > 0:
++    # stash o_proj per layer for the OVAL output-aware metric (eta > 0; with
++    # --eta_table, oval_publish_metric keeps only layers with some head > 0)
++    if getattr(infer_state, "page_rep", "quest") == "oval" and infer_state._oval_needs_g():
 +        for mod in self.modules():
 +            if "Attention" in str(mod.__class__) and hasattr(mod, "layer_idx"):
 +                infer_state.oval_publish_metric(mod.layer_idx, mod.o_proj.weight)
@@ -1264,7 +1292,7 @@ index f9abf0a..3e2dc18 100644
          mod_cls = str(mod.__class__)
          if "Attention" in mod_cls:
 diff --git a/source/freekv/infer_state.py b/source/freekv/infer_state.py
-index efa74df..18c9625 100644
+index efa74df..b451b41 100644
 --- a/source/freekv/infer_state.py
 +++ b/source/freekv/infer_state.py
 @@ -7,6 +7,8 @@ from torch import Tensor
@@ -1276,7 +1304,7 @@ index efa74df..18c9625 100644
  from . import utils
  import atexit
  
-@@ -53,6 +55,20 @@ class InferState:
+@@ -53,6 +55,33 @@ class InferState:
          self.dtype = dtype
          self.device = device
  
@@ -1284,6 +1312,19 @@ index efa74df..18c9625 100644
 +        self.page_rep = kwargs.get("page_rep", "quest")
 +        self.oval_rank = int(kwargs.get("oval_rank", 8))
 +        self.oval_eta = float(kwargs.get("eta", 0.0))
++        # per-(layer, KV head) eta (--eta_table): one float64 [n_kv] row per
++        # layer, used in place of the scalar at page build. eta only enters the
++        # page-record build, never the per-step scoring or attention.
++        self.oval_eta_rows = None
++        self.oval_eta_hash = None
++        self.oval_eta_dev = None
++        if kwargs.get("eta_table"):
++            tab, self.oval_eta_hash = oval_summary.read_eta_table(kwargs["eta_table"])
++            if len(tab) != self.n_layers or len(tab[0]) != self.n_kv_heads:
++                raise ValueError(f"{kwargs['eta_table']}: table is {len(tab)}x{len(tab[0])}, "
++                                 f"model has {self.n_layers} layers x {self.n_kv_heads} KV heads")
++            self.oval_eta_rows = [torch.tensor([float(v) for v in row], dtype=torch.float64)
++                                  for row in tab]
 +        self.oval_max_pages = int(kwargs.get("oval_max_pages", 4096))
 +        self.oval = None
 +        # o_proj stashed at patch time; G^{1/2} built lazily (enable_offload
@@ -1297,7 +1338,7 @@ index efa74df..18c9625 100644
          if n_max_pages is None:
              assert n_max_bytes is not None
              n_max_pages = n_max_bytes // (
-@@ -141,7 +157,8 @@ class InferState:
+@@ -141,7 +170,8 @@ class InferState:
          self.dg_indptrs: Tensor = None
  
          # maybe larger for larger batch
@@ -1307,7 +1348,7 @@ index efa74df..18c9625 100644
          self.prefill_handler = kernels.BatchPrefillWithPagedKVCacheWrapper(
              wbufs[0], self.layout
          )
-@@ -279,6 +296,34 @@ class InferState:
+@@ -279,6 +309,37 @@ class InferState:
              self.layer2budget[i] and KvCache(self._pool, bsz)
              for i in range(self.n_layers)
          ]
@@ -1332,9 +1373,12 @@ index efa74df..18c9625 100644
 +                self.n_layers, bsz, self.oval_max_pages, self.n_kv_heads,
 +                self.head_dim, self.oval_rank, self.oval_eta,
 +                self.dtype, self.device)
++            _eta_s = (f"table {self.oval_eta_hash} (mean "
++                      f"{float(torch.stack(self.oval_eta_rows).mean()):.3f})"
++                      if self.oval_eta_rows is not None else f"{self.oval_eta}")
 +            print(f"[oval] page_rep=oval rank={self.oval_rank} "
-+                  f"eta={self.oval_eta} "
-+                  f"G={'W^T W' if self.oval_eta > 0 else 'off (eta=0)'} "
++                  f"eta={_eta_s} "
++                  f"G={'W^T W' if self._oval_needs_g() else 'off (eta=0)'} "
 +                  f"buffers={self.oval.bytes()/1e6:.0f}MB")
 +        elif self.page_rep == "oval":
 +            self.oval.n_pages = [0] * self.n_layers
@@ -1342,7 +1386,7 @@ index efa74df..18c9625 100644
          self._cpu_pool.clear()
          self.cpu_kv_caches = [
              self.layer2budget[i] and KvCache(self._cpu_pool, bsz)
-@@ -297,7 +342,12 @@ class InferState:
+@@ -297,7 +358,12 @@ class InferState:
  
          self.topk_buff = torch.empty([self.n_layers, bsz1 * (1 << 10)], **self._u8)
          # we do not pre-allocate real kv-pages before prefill
@@ -1356,7 +1400,7 @@ index efa74df..18c9625 100644
          n_kv_pages = (q_len + self.page_size - 1) // self.page_size
          self.kv_last_page_len = (q_len - 1) % self.page_size + 1
          self.kv_last_page_lens = torch.tensor(
-@@ -369,7 +419,8 @@ class InferState:
+@@ -369,7 +435,8 @@ class InferState:
          self.kv_last_page_lens = torch.tensor(
              [self.kv_last_page_len] * bsz, **self._i32
          )
@@ -1366,7 +1410,7 @@ index efa74df..18c9625 100644
  
          if n_new_kv_pages > 0:
              assert n_new_kv_pages == 1
-@@ -471,6 +522,23 @@ class InferState:
+@@ -471,6 +538,23 @@ class InferState:
      ):
          if n_groups is None:
              n_groups = self.n_groups
@@ -1390,7 +1434,7 @@ index efa74df..18c9625 100644
          dgc = self.dg_caches[layer_idx]
          return kernels.estimate_scores(
              query_states,
-@@ -622,10 +690,13 @@ class InferState:
+@@ -622,10 +706,13 @@ class InferState:
              ng, gs, ns, nw, 
              self.recall_buf1, self.recall_buf2,
              recall_stream1.cuda_stream, recall_stream2.cuda_stream,
@@ -1405,7 +1449,7 @@ index efa74df..18c9625 100644
          kvc = self.kv_caches[layer_idx]
          cpu_kvc = self.cpu_kv_caches[layer_idx]
          if kvc.budget is None:
-@@ -639,6 +710,8 @@ class InferState:
+@@ -639,6 +726,8 @@ class InferState:
                  cpu_kvc.buffer[ci].copy_(kvc.buffer[gi], non_blocking=True)
  
      def decode_backup_1_page(self, layer_idx: int):
@@ -1414,17 +1458,24 @@ index efa74df..18c9625 100644
          kvc = self.kv_caches[layer_idx]
          cpu_kvc = self.cpu_kv_caches[layer_idx]
          if kvc.budget is None:
-@@ -650,6 +723,68 @@ class InferState:
+@@ -650,6 +739,82 @@ class InferState:
              else:
                  cpu_kvc[i, -2].copy_(kvc[i, kvc.evict_idx], non_blocking=True)
  
 +    # ---- oval / raas ------------------------------------------------
++    def _oval_needs_g(self, layer_idx=None):
++        """G^{1/2} is needed wherever some eta > 0 (any head of that layer)."""
++        if self.oval_eta_rows is None:
++            return self.oval_eta > 0.0
++        rows = self.oval_eta_rows if layer_idx is None else [self.oval_eta_rows[layer_idx]]
++        return any(bool((r > 0.0).any()) for r in rows)
++
 +    def oval_publish_metric(self, layer_idx: int, o_proj_weight):
-+        if self.oval_eta > 0.0:
++        if self._oval_needs_g(layer_idx):
 +            self.oval_oproj[layer_idx] = o_proj_weight
 +
 +    def _oval_gh(self, layer_idx: int):
-+        if self.oval_eta <= 0.0:
++        if not self._oval_needs_g(layer_idx):
 +            return None
 +        gh = self.oval.Gh[layer_idx]
 +        if gh is None and layer_idx in self.oval_oproj:
@@ -1438,8 +1489,15 @@ index efa74df..18c9625 100644
 +                     first_page: int):
 +        st = self.oval
 +        st._ensure_coef(self.page_size)
++        eta = st.eta
++        if self.oval_eta_rows is not None:
++            # moved to the GPU once: a per-build host->device copy is a sync
++            # inside the overlapped recall pipeline
++            if self.oval_eta_dev is None:
++                self.oval_eta_dev = [r.to(self.device) for r in self.oval_eta_rows]
++            eta = self.oval_eta_dev[layer_idx]
 +        mu, bs, cf = oval_summary.build_summary(
-+            paged_k, paged_v, self._oval_gh(layer_idx), st.eta, st.rank)
++            paged_k, paged_v, self._oval_gh(layer_idx), eta, st.rank)
 +        n = mu.shape[1]
 +        sl = slice(first_page, first_page + n)
 +        st.mu[layer_idx, :, sl] = mu
@@ -1483,7 +1541,7 @@ index efa74df..18c9625 100644
      def _summarize_keys(self, filled_keys: Tensor) -> Digest:
          maxs = filled_keys.max(dim=2).values
          mins = filled_keys.min(dim=2).values
-@@ -666,14 +801,21 @@ class InferState:
+@@ -666,14 +831,21 @@ class InferState:
          maxs = centers + dists
          return maxs, mins
  
@@ -1509,7 +1567,7 @@ index efa74df..18c9625 100644
          self.save_digests(layer_idx, self._summarize_keys(filled_keys))
  
      def decode_save_1_digest(self, layer_idx: int):
-@@ -684,6 +826,26 @@ class InferState:
+@@ -684,6 +856,26 @@ class InferState:
              [kvc[i, kvc.evict_idx][:1][None, ...] for i in range(self.batch_size)],
              dim=0,
          )
@@ -1536,7 +1594,7 @@ index efa74df..18c9625 100644
          self.save_digests(layer_idx, self._summarize_keys(filled_keys))
  
      def prefill_evict_extra_pages(self, layer_idx: int, query_states: Tensor):
-@@ -719,6 +881,12 @@ class InferState:
+@@ -719,6 +911,12 @@ class InferState:
              .expand(bsz, ng, kvc.gc2cc.shape[-1])
              .contiguous()
          )
@@ -1744,10 +1802,33 @@ index f819297..126e3ad 100644
  
    ~ThreadPool() {
 diff --git a/source/pred.py b/source/pred.py
-index a316410..7d2a847 100644
+index a316410..e8828e9 100644
 --- a/source/pred.py
 +++ b/source/pred.py
-@@ -107,6 +107,15 @@ def parse_args(args=None):
+@@ -58,10 +58,14 @@ def build_chat(tokenizer, prompt, model_name):
+ 
+ 
+ def generate_once(model, input_ids, max_gen, temperature, eos_token_ids, pad_token_id):
++    # --ignore_eos: decode exactly max_gen tokens, so every arm of a latency
++    # comparison averages its TBT over the same number of steps
++    fixed = dict(min_new_tokens=max_gen) if args.ignore_eos else {}
+     if temperature > 0:
+         return model.generate(
+             input_ids,
+             max_new_tokens=max_gen,
++            **fixed,
+             num_beams=1,
+             do_sample=True,
+             temperature=temperature,
+@@ -72,6 +76,7 @@ def generate_once(model, input_ids, max_gen, temperature, eos_token_ids, pad_tok
+     return model.generate(
+         input_ids,
+         max_new_tokens=max_gen,
++        **fixed,
+         do_sample=False,
+         eos_token_id=eos_token_ids,
+         pad_token_id=pad_token_id,
+@@ -107,6 +112,22 @@ def parse_args(args=None):
      parser.add_argument("--n_recall_stream", type=int, default=2, help="Number of CUDA streams for recall")
      parser.add_argument("--recall_impl", type=str, default="cuda_cpy",
                          choices=["arkvale", "torch_cpy", "cuda_cpy"], help="Recall implementation")
@@ -1759,11 +1840,18 @@ index a316410..7d2a847 100644
 +                        choices=["quest", "oval"],
 +                        help="their min/max digest, or our rank-r output-aware basis")
 +    parser.add_argument("--eta", type=float, default=0.0)
++    parser.add_argument("--eta_table", type=str, default=None,
++                        help="per-(layer, KV head) eta JSON (as the accuracy harness's "
++                             "--eta_table); replaces --eta")
++    parser.add_argument("--ignore_eos", action="store_true",
++                        help="decode exactly --max_gen tokens (min_new_tokens = max_gen)")
++    parser.add_argument("--tbt_out", type=str, default=None,
++                        help="write the per-step decode times (ms) of the timed run to this JSON")
 +    parser.add_argument("--oval_rank", type=int, default=8)
      parser.add_argument("--corr", type=float, default=None, help="Correction threshold (cosine similarity); None to disable")
      parser.add_argument("--warmup", type=int, default=2, help="Number of warmup generation rounds before timing")
  
-@@ -156,6 +165,11 @@ def load_model_and_tokenizer(path):
+@@ -156,6 +177,12 @@ def load_model_and_tokenizer(path):
              n_recall_stream=args.n_recall_stream,
              recall_impl=args.recall_impl,
              corr=args.corr,
@@ -1771,7 +1859,49 @@ index a316410..7d2a847 100644
 +            raas_alpha=args.raas_alpha,
 +            page_rep=args.page_rep,
 +            eta=args.eta,
++            eta_table=args.eta_table,
 +            oval_rank=args.oval_rank,
          )
      else:
          assert not args.spec_ret
+@@ -165,6 +192,7 @@ def load_model_and_tokenizer(path):
+             device=dev, 
+             page_size=page_size,
+             page_budgets=None, # page_budgets=None means "full" (no eviction & recall)
++            recall_impl=args.recall_impl,   # unused without recall; InferState asserts it is set
+             n_max_bytes=6 * (1 << 30),
+             n_max_cpu_bytes=40 * (1 << 30),
+             group_size=1,
+@@ -240,6 +268,10 @@ def get_pred(
+         print(f"  Total time       : {sum(model.tbt_stat_ms)/1000:.2f}s")
+         print(f"  Decode time      : {sum(decode_ms)/1000:.2f}s")
+         print(f"  Avg TBT (decode) : {avg_tbt:.2f} ms")
++        if args.tbt_out:
++            os.makedirs(os.path.dirname(os.path.abspath(args.tbt_out)), exist_ok=True)
++            json.dump({"tokens": gen_token, "prompt_length": prompt_length,
++                       "tbt_ms": list(model.tbt_stat_ms)}, open(args.tbt_out, "w"))
+         print(f"{GREEN}{SEP}{RESET}\n")
+         for b in range(len(output)):
+             pred = tokenizer.decode(output[b], skip_special_tokens=True)
+@@ -259,6 +291,8 @@ def get_pred(
+ 
+ if __name__ == "__main__":
+     args = parse_args()
++    if args.eta_table and args.eta != 0.0:
++        raise SystemExit("--eta_table replaces --eta; pass one or the other")
+     seed_everything(args.seed)
+     model2path = json.load(open("config/model2path.json", "r"))
+ 
+@@ -279,8 +313,10 @@ if __name__ == "__main__":
+         ds_path = f"{ds_dir}/longgenbench.json"
+     elif dataset == "AIME24":
+         answer_field_id = "answer"
+-        ds_path = f"{ds_dir}/aime_2024.jsonl"
+-        dataset2prompt = json.load(open("eval/o1/config/dataset2prompt.json", "r"))
++        # upstream points at eval/datasets/aime_2024.jsonl and eval/o1/config,
++        # neither of which exists at this pin; use the accuracy harness's copies
++        ds_path = "accuracy/eval/reasoning/datasets/aime24.jsonl"
++        dataset2prompt = json.load(open("accuracy/eval/reasoning/config/dataset2prompt.json", "r"))
+         prompt_format = dataset2prompt[dataset]
+ 
+     data = load_dataset("json", data_files=ds_path, split="train")
