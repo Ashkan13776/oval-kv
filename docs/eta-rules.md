@@ -337,6 +337,23 @@ sequence's decode steps:
 | qwen-7b | 200.9 | 40.4 | 44.9 | 20.9 | 106.2 | 1.9x, -> 5.0x amortised |
 | llama-8b | 234.7 | 46.7 | 50.7 | 47.1 | 144.5 | 1.6x, -> 5.0x amortised |
 
+By sequence length (bottom row of the figure; a decode of N tokens is the
+first N steps of the same timed run), ms per decode step:
+
+| model | N | fixed eta (1 decode) | sweep (5 decodes) | rule 1 decode | + eta* spread over N | rule 1 total |
+|---|---|---|---|---|---|---|
+| qwen-7b | 4K | 32.9 | 164.4 | 33.2 | 263.3 | 296.5 |
+| qwen-7b | 8K | 36.9 | 184.4 | 37.2 | 131.6 | 168.8 |
+| qwen-7b | 16K | 40.2 | 200.9 | 40.4 | 65.8 | 106.2 |
+| llama-8b | 4K | 36.5 | 182.3 | 36.5 | 391.1 | 427.6 |
+| llama-8b | 8K | 42.1 | 210.7 | 42.0 | 195.5 | 237.5 |
+| llama-8b | 16K | 46.9 | 234.7 | 46.7 | 97.7 | 144.4 |
+
+The eta* cost is fixed (4 traces of 6144 tokens), so charged to a single
+short sequence it outweighs the sweep: rule 1 wins on one sequence from 8K
+(qwen) / 16K (llama). Over the 240 sequences of one task's evaluation
+(30 problems x 8 seeds for AIME24) it is < 2 ms per step at 4K.
+
 eta* is found once per (model, task) and reused by every later sequence, so
 the finding cost is charged in full to a single sequence above and the
 ratio tends to the 5x decode ratio after a few sequences. A sweep also needs
