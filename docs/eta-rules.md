@@ -320,7 +320,26 @@ the accuracy harness), pages of 32.
 Rule 1 costs nothing at decode: eta enters only the page-record build, once
 per page, and the per-step scoring and attention never read it, so the
 rule-1 and fixed-eta arms agree within run-to-run noise (+0.6% / -0.6%).
-OVAL is ~12% above FreeKV (the rank-8 record build and scoring). Caveats:
+OVAL is ~12% above FreeKV (the rank-8 record build and scoring).
+
+**The fixed-eta arm also has a one-time selection cost** that decode latency
+does not show: its eta is picked by an accuracy sweep over {0, .25, .5, .75,
+1} x 3 tasks x 8 seeds, scored against the answers. Rule 1 needs only its
+calibration traces (4 per task x 6144 tokens, unlabelled) and a closed form.
+Right panel of the figure, in decoded tokens:
+
+| model | fixed-eta sweep | rule 1 calibration | ratio |
+|---|---|---|---|
+| qwen-7b | 37.3M (est.: 5 x the rule-1 cells; the 7b grid is not in this repo) | 74K | ~506x |
+| llama-8b | 39.8M (counted from the 120 grid cells in `results/codec/`) | 74K | ~540x |
+
+At the calibration's own batch-1 decode speed (~30-34 ms/token) the sweep
+is roughly 300-380 GPU-hours per model. Rule 1's measured calibration wall
+time was 1.7 h (qwen) / 2.6 h (llama) on one GPU, and that is an upper
+bound: it also captured the 2 held-out traces per task and evaluated all
+six rules on a 21-point eta grid, while rule 1 needs only eta = 0 and 1.
+
+Caveats:
 
 - The perf engine has no kernel for the key/value codec, so the OVAL arms
   recall EXACT KV for the selected pages; these numbers time selection, not
