@@ -322,22 +322,25 @@ per page, and the per-step scoring and attention never read it, so the
 rule-1 and fixed-eta arms agree within run-to-run noise (+0.6% / -0.6%).
 OVAL is ~12% above FreeKV (the rank-8 record build and scoring).
 
-**The fixed-eta arm also has a one-time selection cost** that decode latency
-does not show: its eta is picked by an accuracy sweep over {0, .25, .5, .75,
-1} x 3 tasks x 8 seeds, scored against the answers. Rule 1 needs only its
-calibration traces (4 per task x 6144 tokens, unlabelled) and a closed form.
-Right panel of the figure, in decoded tokens:
+**Per sequence, a sweep costs ~5x.** Setting eta by sweeping means plugging
+each of the 5 grid values {0, .25, .5, .75, 1} in, i.e. decoding the sequence
+5 times. Rule 1 decodes it once, plus the cost of finding eta*: generating
+the 4 calibration traces (6144 tokens each, dense HF decode) and computing
+the endpoint errors, a, b, c and the closed form on them
+(`analysis/time_rule1_find.py`, AIME24, A6000; it reproduces the deployed
+tables to the 4-decimal rounding). Right panel of the figure, one
+16384-token sequence:
 
-| model | fixed-eta sweep | rule 1 calibration | ratio |
-|---|---|---|---|
-| qwen-7b | 37.3M (est.: 5 x the rule-1 cells; the 7b grid is not in this repo) | 74K | ~506x |
-| llama-8b | 39.8M (counted from the 120 grid cells in `results/codec/`) | 74K | ~540x |
+| model | sweep (5 decodes) | rule 1 decode | find eta* (traces + compute) | sweep / rule 1 |
+|---|---|---|---|---|
+| qwen-7b | 55 min | 11 min | 18 min (12.3 + 5.7) | 1.9x on the first sequence, -> 5.0x |
+| llama-8b | 64 min | 13 min | 27 min (13.8 + 12.8) | 1.6x on the first sequence, -> 5.0x |
 
-At the calibration's own batch-1 decode speed (~30-34 ms/token) the sweep
-is roughly 300-380 GPU-hours per model. Rule 1's measured calibration wall
-time was 1.7 h (qwen) / 2.6 h (llama) on one GPU, and that is an upper
-bound: it also captured the 2 held-out traces per task and evaluated all
-six rules on a 21-point eta grid, while rule 1 needs only eta = 0 and 1.
+eta* is found once per (model, task) and reused by every later sequence, so
+the finding cost is charged in full to a single sequence above and the
+ratio tends to the 5x decode ratio after a few sequences. A sweep also needs
+a way to pick among the 5 outputs (answers or a score); rule 1 needs no
+labels.
 
 Caveats:
 
