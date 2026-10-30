@@ -374,3 +374,20 @@ Caveats:
   avoids host syncs in the decode loop; it builds records bitwise equal to
   the accuracy harness's (checked at eta 0, 0.25, 1.0 and with constant
   tables vs the scalar path).
+
+### Latency figure caption (LaTeX)
+
+The figure (`results/eta_rules/figures/latency_rule1.pdf`) has no titles; use:
+
+```latex
+\caption{Decode latency (ms per generated token) in FreeKV's engine on one RTX A6000,
+batch 1, greedy, KV budget 2048 tokens including 512 sink and 512 recent tokens,
+pages of 32, rank-8 OVAL records.
+OVAL oracle sweeps the five values $\eta\in\{0, .25, .5, .75, 1\}$, i.e.\ decodes
+the sequence five times; OVAL rule~1 decodes once with its per-head $\eta^*$, plus
+the time to compute $\eta^*$ (hatched), divided over the sequence's tokens.
+(a)~Mean over a 16{,}384-token generation (AIME24 problem 0).
+(b)~Per-token time along that generation for R1-Distill-Qwen-7B (256-step moving average).
+(c, d)~OVAL oracle vs.\ OVAL rule~1 on three AIME24 sequences of different lengths
+for R1-Distill-Qwen-7B and R1-Distill-Llama-8B.}
+```
