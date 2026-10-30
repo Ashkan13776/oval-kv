@@ -4,7 +4,10 @@ Reads results/eta_rules/latency/<model>_<arm>[_g<N>].json (per-step decode
 times of the timed round, written by FreeKV's source/pred.py --tbt_out) and
 plots, per model:
   top left   mean ms per decode step (first step excluded, as pred.py's Avg TBT)
-  top right  ms per step vs decode position, smoothed over 256 steps
+             of Full KV, ArkVale, RaaS, FreeKV and the two ways of getting
+             OVAL's eta: the oracle (5-eta sweep = 5 x the fixed-eta decode)
+             and rule 1 (one decode + computing eta*, spread over the steps)
+  top right  the same arms' ms per step vs decode position, smoothed
   bottom     per model, OVAL oracle vs OVAL rule 1 on example sequences
              (results/eta_rules/latency/seq, natural EOS): oracle = sweeping
              the 5 grid etas, i.e. 5 x the measured eta=0 decode; rule 1 = one
@@ -51,41 +54,74 @@ fig = plt.figure(figsize=(16, 10))
 gs = fig.add_gridspec(2, 2, width_ratios=[1, 1.3])
 ax0, ax1 = fig.add_subplot(gs[0, 0]), fig.add_subplot(gs[0, 1])
 axL = [fig.add_subplot(gs[1, 0]), fig.add_subplot(gs[1, 1])]
-w = 0.8 / len(ARMS)
+# ---- top row. OVAL with a fixed eta and with rule 1 decode at the same speed
+# (eta only enters the page-record build), so the two OVAL arms shown are the
+# ways of GETTING eta: the oracle sweeps the 5 grid etas {0, .25, .5, .75, 1},
+# i.e. decodes the sequence 5 times (5 x the measured fixed-eta decode); rule 1
+# decodes once, plus computing eta* from one trace (time_rule1_find.py
+# --ncalib 1), whose total is divided over the sequence's decode steps.
+NGRID = 5
+TOP = ARMS[:4] + [("oracle", "OVAL oracle (5-eta sweep)"), ("oval_r1", "OVAL rule 1 (+ eta*)")]
+COL["oracle"] = COL["oval_fix"]
+
+
+def eta_star_s(m):
+    ff = os.path.join(A.dir, f"{m}_{A.find_task}_r1_find_n1.json")
+    return (lambda d: d["compute_s"] + d["load_s"])(json.load(open(ff))) if os.path.exists(ff) else 0.0
+
+
+def steps(m, a):
+    """per-step ms of an arm of the top row (None if not measured)."""
+    d = data.get((m, "oval_fix" if a == "oracle" else a))
+    if d is None:
+        return None
+    t = np.asarray(d["tbt_ms"][1:], float)
+    if a == "oracle":
+        return NGRID * t
+    if a == "oval_r1":
+        return t + eta_star_s(m) * 1e3 / len(t)
+    return t
+
+
+w = 0.8 / len(TOP)
 x = np.arange(len(A.models))
-print(f"{'model':<16}" + "".join(f"{lab:>16}" for _, lab in ARMS) + "   (ms / decode step)")
-for i, (a, lab) in enumerate(ARMS):
-    ys = []
-    for m in A.models:
-        d = data.get((m, a))
-        ys.append(np.mean(d["tbt_ms"][1:]) if d else np.nan)
-    bars = ax0.bar(x + (i - (len(ARMS) - 1) / 2) * w, ys, w, color=COL[a], label=lab)
-    for b, y in zip(bars, ys):
+print(f"{'model':<16}" + "".join(f"{lab[:15]:>17}" for _, lab in TOP) + "   (ms / decode step)")
+for i, (a, lab) in enumerate(TOP):
+    ys = [np.mean(steps(m, a)) if steps(m, a) is not None else np.nan for m in A.models]
+    xb = x + (i - (len(TOP) - 1) / 2) * w
+    if a == "oval_r1":
+        dec = [np.mean(data[(m, a)]["tbt_ms"][1:]) for m in A.models]
+        ax0.bar(xb, dec, w, color=COL[a], label="OVAL rule 1: decode")
+        ax0.bar(xb, np.array(ys) - np.array(dec), w, bottom=dec, color=COL[a], alpha=0.4, hatch="//",
+                edgecolor="white", label="OVAL rule 1: compute eta*")
+    else:
+        ax0.bar(xb, ys, w, color=COL[a], label=lab)
+    for xx, y in zip(xb, ys):
         if np.isfinite(y):
-            ax0.text(b.get_x() + b.get_width() / 2, y, f"{y:.1f}", ha="center", va="bottom", fontsize=7.5)
+            ax0.text(xx, y, f"{y:.1f}", ha="center", va="bottom", fontsize=7.5)
 for m in A.models:
-    print(f"{m:<16}" + "".join(f"{np.mean(data[(m, a)]['tbt_ms'][1:]) if (m, a) in data else float('nan'):>16.2f}"
-                              for a, _ in ARMS))
+    print(f"{m:<16}" + "".join(f"{np.mean(steps(m, a)) if steps(m, a) is not None else float('nan'):>17.2f}"
+                              for a, _ in TOP) + f"   eta* {eta_star_s(m):.0f} s")
 ntok = sorted({len(d["tbt_ms"]) for d in data.values()})
 ax0.set_xticks(x); ax0.set_xticklabels([NAME.get(m, m) for m in A.models])
 ax0.set_ylabel("ms per decode step (mean)")
 ax0.set_title(f"Decode latency, AIME24 problem 0, {ntok[-1]} decoded tokens, batch 1\n"
               "budget 2048 tokens (incl. 512 sink + 512 recent), A6000", fontsize=10)
-ymax = max(np.mean(d["tbt_ms"][1:]) for d in data.values())
+ymax = max(np.mean(steps(m, a)) for m in A.models for a, _ in TOP if steps(m, a) is not None)
 ax0.set_ylim(0, ymax * 1.3)                       # headroom for the legend
 ax0.legend(fontsize=8, ncol=3, loc="upper center"); ax0.grid(axis="y", alpha=0.3)
 
 m0 = A.models[0]
-for a, lab in ARMS:
-    d = data.get((m0, a))
-    if not d:
+for a, lab in TOP:
+    t = steps(m0, a)
+    if t is None:
         continue
-    t = np.asarray(d["tbt_ms"][1:], float)
     k = min(A.smooth, max(1, len(t) // 4))
     sm = np.convolve(t, np.ones(k) / k, mode="valid")
     ax1.plot(np.arange(len(sm)) + k // 2 + 1, sm, color=COL[a], lw=1.4, label=lab)
 ax1.set_xlabel("decode step"); ax1.set_ylabel(f"ms per step ({A.smooth}-step mean)")
-ax1.set_title(f"{NAME.get(m0, m0)}: per-step decode time over the generation", fontsize=10)
+ax1.set_title(f"{NAME.get(m0, m0)}: per-step decode time over the generation\n"
+              "rule 1 includes its eta* time spread evenly over the steps", fontsize=10)
 ax1.legend(fontsize=8); ax1.grid(alpha=0.3)
 
 
@@ -97,12 +133,10 @@ ax1.legend(fontsize=8); ax1.grid(alpha=0.3)
 # stopped early at EOS is re-run with --ignore_eos to that length). Rule 1 = one measured decode with the rule-1 table plus computing
 # eta* from one trace (time_rule1_find.py --ncalib 1: endpoint errors, a, b, c,
 # closed form).
-NGRID = 5
 sd = os.path.join(A.dir, "seq")
 print(f"\n{'model':<16}{'prob':>5}{'tokens':>8}{'eta=0':>9}{'oracle':>10}{'r1':>7}{'eta*':>8}{'ratio':>7}   (ms / decode step)")
 for axm, m in zip(axL, A.models):
-    ff = os.path.join(A.dir, f"{m}_{A.find_task}_r1_find_n1.json")
-    eta_s = (lambda d: d["compute_s"] + d["load_s"])(json.load(open(ff))) if os.path.exists(ff) else 0.0
+    eta_s = eta_star_s(m)
     xs, labels = [], []
     for j, pi in enumerate(A.probs):
         load = lambda arm: (lambda f: json.load(open(f)) if os.path.exists(f) else None)(

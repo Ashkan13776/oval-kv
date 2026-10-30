@@ -312,15 +312,24 @@ round; metric = mean ms per decode step of the timed round. Budget 2048
 tokens INCLUDING 512 sink + 512 recent (the perf engine's convention, unlike
 the accuracy harness), pages of 32.
 
-| model | Full KV | ArkVale | RaaS | FreeKV | OVAL fixed eta (1.0) | OVAL rule 1 |
+| model | Full KV | ArkVale | RaaS | FreeKV | OVAL fixed eta (1.0) | OVAL rule 1 decode |
 |---|---|---|---|---|---|---|
 | qwen-7b | 24.67 | 71.92 | 28.64 | 35.86 | 40.17 | 40.40 |
 | llama-8b | 26.83 | 142.56 | 30.36 | 42.03 | 46.94 | 46.65 |
 
-Rule 1 costs nothing at decode: eta enters only the page-record build, once
-per page, and the per-step scoring and attention never read it, so the
-rule-1 and fixed-eta arms agree within run-to-run noise (+0.6% / -0.6%).
-OVAL is ~12% above FreeKV (the rank-8 record build and scoring).
+A fixed eta and rule 1 decode at the same speed: eta enters only the
+page-record build, once per page, and the per-step scoring and attention never
+read it (+0.6% / -0.6%, run-to-run noise). OVAL is ~12% above FreeKV (the
+rank-8 record build and scoring). The figure therefore shows OVAL by how eta
+is obtained: the **oracle** sweeps the 5 grid etas {0, .25, .5, .75, 1}, i.e.
+decodes the sequence 5 times (5 x the fixed-eta decode); **rule 1** decodes
+once plus computing eta* from one trace (87 s qwen, 197 s llama), divided
+over the sequence's steps. Panel (a), ms per decode step:
+
+| model | Full KV | ArkVale | RaaS | FreeKV | OVAL oracle | OVAL rule 1 (+ eta*) |
+|---|---|---|---|---|---|---|
+| qwen-7b | 24.67 | 71.92 | 28.64 | 35.86 | 200.85 | 45.69 |
+| llama-8b | 26.83 | 142.56 | 30.36 | 42.03 | 234.69 | 58.69 |
 
 **OVAL oracle vs OVAL rule 1 on example sequences** (bottom row of the
 figure; `scripts/latency_oracle_r1.sh`, same engine and budget as above, every
