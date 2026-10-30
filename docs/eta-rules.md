@@ -290,31 +290,29 @@ Rule 1 is at or above the hand-picked fixed eta on every qwen task; no
 difference is significant. Llama has no fixed-eta cell to compare against.
 
 **Output error vs eta** (`analysis/plot_eta_rule1.py` ->
-`results/eta_rules/figures/eta_rule1_error.pdf`; one row per model). Left:
-measured calibration loss L(eta) for three example heads against rule 1's
-quadratic (1-eta)^2 a + eta^2 b + 2 eta(1-eta) c, fitted from the two
-endpoints only. Right: held-out excess output error over the per-head grid
-oracle for every shared eta vs rule 1's per-head table. The quadratic matches
-the measured L(0.5) to < 1% (median head); single heads can deviate (qwen
-layer 1 head 0 in the figure) while still picking the right end. Held-out
-excess error, best shared eta -> rule 1: qwen MATH 4.7% -> 0.7%, AIME 3.0% ->
-0.3%, GPQA 3.5% -> 1.3%; llama MATH 6.1% -> 4.1%, AIME 2.5% -> 1.5%, GPQA
-3.2% -> 1.5%. (Not in the figure: correlation of eta* with the held-out best
-eta, qwen 0.83-0.87, llama 0.45-0.60.)
+`results/eta_rules/figures/eta_rule1_error.pdf`). One row per model, one panel
+per layer (5 layers spread over the depth), KV heads 0-3 of each, AIME24
+calibration traces: the measured output error L(eta) on the 21-point grid as %
+above that head's best grid value (dots), rule 1's quadratic
+(1-eta)^2 a + eta^2 b + 2 eta(1-eta) c built from the two endpoints only (line,
+scaled to L(0)), and eta* (star). Most heads are close to quadratic and rule 1
+lands near the measured minimum; the quadratic matches the measured L(0.5) to
+< 1% for the median head. It misses where L(eta) is not convex (e.g. qwen layer
+27 head 1, llama layer 9 head 1: a hump in the middle), and there eta* can sit
+several % above the best grid point. Held-out excess error over the per-head
+oracle, best shared eta -> rule 1 (not in the figure): qwen MATH 4.7% -> 0.7%,
+AIME 3.0% -> 0.3%, GPQA 3.5% -> 1.3%; llama MATH 6.1% -> 4.1%, AIME 2.5% ->
+1.5%, GPQA 3.2% -> 1.5%.
 
 Caption (LaTeX):
 
 ```latex
-\caption{Output error of OVAL's rank-8 key records as a function of the
-output-aware mixing coefficient $\eta$, for R1-Distill-Qwen-7B (a, b) and
-R1-Distill-Llama-8B (c, d).
-(a, c)~Three example (layer, KV head) pairs on AIME24 calibration traces:
-measured output error relative to its minimum over $\eta$ (dots) and rule~1's
-quadratic, built from the errors at $\eta=0$ and $\eta=1$ only (lines); stars
-mark the chosen $\eta^*$.
-(b, d)~Output error on held-out traces in excess of the per-head best $\eta$
-(oracle), averaged over layers $\geq 1$: one $\eta$ shared by all heads (lines)
-vs.\ rule~1's per-head $\eta^*$ (stars, at the mean $\eta^*$).}
+\caption{Output error of OVAL's rank-8 key records vs.\ the output-aware mixing
+coefficient $\eta$, per KV head, for R1-Distill-Qwen-7B (top) and
+R1-Distill-Llama-8B (bottom) on AIME24 calibration traces; five layers spread
+over the depth, KV heads 0--3. Dots: measured error, as \% above the head's
+best value over $\eta$. Lines: rule~1's quadratic, built from the errors at
+$\eta=0$ and $\eta=1$ only. Stars: the $\eta^*$ rule~1 selects.}
 ```
 
 ## Decode latency of rule 1

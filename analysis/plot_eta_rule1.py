@@ -7,13 +7,12 @@ on a 21-point grid, on the calibration traces (1-4) and the held-out traces
 L_h(eta) = sum_q ||Delta_h(q)||^2 / sum_q ||u_h(q)||^2, Delta_h the KV head's
 residual-stream error vs dense attention (docs/eta-rules.md).
 
-Row per model, two panels (no titles; the caption is in docs/eta-rules.md):
-  left   three example heads: measured L(eta) on the calibration split (dots),
-         the rule-1 quadratic f(eta) = (1-eta)^2 a + eta^2 b + 2 eta (1-eta) c
-         fitted from the two endpoints only (line, same scale as L), and eta* (star)
-  right  held-out output error, layers >= 1, relative to the per-head grid
-         oracle: one curve per task for a single eta shared by every head, with
-         rule 1's per-head eta* as a star at its mean eta
+One row per model, one panel per layer (spread over the depth), the first
+--heads KV heads of each: measured L(eta) on the calibration split as % above
+the head's minimum over eta (dots), rule 1's quadratic
+f(eta) = (1-eta)^2 a + eta^2 b + 2 eta (1-eta) c built from the two endpoints
+only (line, same scale), and its eta* (star). No titles; the caption is in
+docs/eta-rules.md.
 
   python analysis/plot_eta_rule1.py [--out results/eta_rules/figures/eta_rule1_error]
 """
@@ -21,6 +20,7 @@ import argparse, json, os, sys
 from pathlib import Path
 import numpy as np
 import matplotlib
+import matplotlib.lines, matplotlib.ticker
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -28,83 +28,66 @@ from paths import ROOT
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--models", nargs="+", default=["ds-r1-qwen-7b", "ds-r1-llama-8b"])
-ap.add_argument("--tasks", nargs="+", default=["MATH50", "AIME24", "GPQA50c"])
 ap.add_argument("--eta_dir", default=str(ROOT / "results/eta_rules"))
-ap.add_argument("--example_task", default="AIME24")
+ap.add_argument("--task", default="AIME24")
+ap.add_argument("--layer_fracs", type=float, nargs="+", default=[0.05, 0.3, 0.55, 0.8, 1.0],
+                help="layers shown, as fractions of the depth")
+ap.add_argument("--heads", type=int, default=4, help="first N KV heads of each layer")
 ap.add_argument("--out", default=str(ROOT / "results/eta_rules/figures/eta_rule1_error"))
 A = ap.parse_args()
 
 NAME = {"ds-r1-qwen-7b": "R1-Distill-Qwen-7B", "ds-r1-llama-8b": "R1-Distill-Llama-8B"}
-# pastel palette, in deeper shades for lines and markers so they stay readable
-COL = {"MATH50": "#6FA3D2", "AIME24": "#E06C75", "GPQA50c": "#7FBF8E"}
-HEAD = ["#A58BCB", "#F5A25D", "#5FB7B2"]
+HEADC = ["#6FA3D2", "#E06C75", "#7FBF8E", "#A58BCB"]       # pastel, deep enough for lines
 plt.rcParams.update({"font.size": 14, "axes.labelsize": 15, "xtick.labelsize": 13, "ytick.labelsize": 13,
-                     "legend.fontsize": 12, "axes.spines.top": False, "axes.spines.right": False})
-
-
-def panel_letter(ax, s):
-    ax.text(-0.11, 1.02, f"({s})", transform=ax.transAxes, fontsize=17, fontweight="bold", va="bottom")
+                     "legend.fontsize": 11.5, "axes.spines.top": False, "axes.spines.right": False})
 
 
 def load(model, task):
     st = json.load(open(os.path.join(A.eta_dir, f"{model}_{task}.json")))
     r = st["rules"]["r1"]
-    return dict(grid=np.array(st["grid"]),
-                Lc=np.array(st["loss_grid"]["calib"]), Lt=np.array(st["loss_grid"]["test"]),
-                a=np.array(r["a"]), b=np.array(r["b"]), c=np.array(r["c"]), eta=np.array(r["eta"]),
-                r1_t=np.array(st["regret"]["tables"]["r1"]["loss"]),
-                orac_t=np.array(st["regret"]["grid_min_test"]))
+    return dict(grid=np.array(st["grid"]), Lc=np.array(st["loss_grid"]["calib"]),
+                a=np.array(r["a"]), b=np.array(r["b"]), c=np.array(r["c"]), eta=np.array(r["eta"]))
 
 
-fig, axes = plt.subplots(len(A.models), 2, figsize=(14, 5.6 * len(A.models)), squeeze=False)
-letters = iter("abcdefgh")
-for row, model in zip(axes, A.models):
-    D = {t: load(model, t) for t in A.tasks}
-
-    # left: example heads -- interior / near-0 / near-1 eta*, picked by how much eta matters
-    ax = row[0]; d = D[A.example_task]; g = d["grid"]
-    e = d["eta"][1:]; Lc = d["Lc"][1:]
-    span = (Lc.max(-1) - Lc.min(-1)) / Lc.min(-1)
-    picks = []
-    for lo, hi in [(0.3, 0.7), (-0.01, 0.01), (0.99, 1.01)]:
-        idx = np.argwhere((e >= lo) & (e <= hi))
-        if len(idx):
-            picks.append(tuple(idx[np.argmax(span[tuple(idx.T)])]))
-    xs = np.linspace(0, 1, 201)
-    for (l, h), cc in zip(picks, HEAD):
-        L = Lc[l, h]; ref = L.min()
-        a, b, c = d["a"][1:][l, h], d["b"][1:][l, h], d["c"][1:][l, h]
-        f = lambda t: ((1 - t) ** 2 * a + t ** 2 * b + 2 * t * (1 - t) * c) * (L[0] / a) / ref
-        ax.plot(g, L / ref, "o", color=cc, ms=6, alpha=0.9)
-        ax.plot(xs, f(xs), "-", color=cc, lw=2.4,
-                label=f"layer {l + 1}, head {h}: $\\eta^*$ = {e[l, h]:.2f}")
-        ax.plot([e[l, h]], [f(e[l, h])], "*", color=cc, ms=20, mec="#333", mew=0.8, zorder=5)
-    ax.plot([], [], "o", color="#999", ms=6, label="measured")
-    ax.plot([], [], "-", color="#999", lw=2.4, label="rule-1 quadratic")
-    ax.set_xlabel("$\\eta$"); ax.set_ylabel("output error / min over $\\eta$")
-    ax.legend(frameon=False, fontsize=11.5, loc="upper center")
-    ax.set_ylim(top=ax.get_ylim()[1] * 1.12)
-    ax.text(0.97, 0.6, f"{NAME[model]}\n{A.example_task}", transform=ax.transAxes, ha="right", va="center",
-            fontsize=13, color="#444")
-    ax.grid(alpha=0.3); panel_letter(ax, next(letters))
-
-    # right: held-out error, one shared eta vs rule 1 per head, relative to the per-head oracle
-    ax = row[1]
-    for t, d in D.items():
-        orac = d["orac_t"][1:].mean()
-        shared = d["Lt"][1:].mean((0, 1))
-        ax.plot(d["grid"], 100 * (shared / orac - 1), "-", color=COL[t], lw=2.6, label=t)
-        ax.plot([d["eta"][1:].mean()], [100 * (d["r1_t"][1:].mean() / orac - 1)], "*", color=COL[t],
-                ms=22, mec="#333", mew=0.8, zorder=5)
-    ax.plot([], [], "*", color="#bbb", ms=16, mec="#333", mew=0.8, label="rule 1, per head")
-    ax.axhline(0, color="#333", lw=0.8, ls=":")
-    ax.set_xlabel("shared $\\eta$  (rule 1: mean $\\eta^*$)"); ax.set_ylabel("excess output error (%)")
-    ax.legend(frameon=False, loc="upper center")
-    ax.text(0.97, 0.05 if model.endswith("qwen-7b") else 0.9, NAME[model], transform=ax.transAxes,
-            ha="right", fontsize=13, color="#444")
-    ax.grid(alpha=0.3); panel_letter(ax, next(letters))
-
-fig.tight_layout(h_pad=2.5, w_pad=3)
+ncol = len(A.layer_fracs)
+fig, axes = plt.subplots(len(A.models), ncol, figsize=(4.3 * ncol, 4.6 * len(A.models)), squeeze=False)
+xs = np.linspace(0, 1, 201)
+for r, (row, model) in enumerate(zip(axes, A.models)):
+    d = load(model, A.task); g = d["grid"]
+    nl, nh = d["eta"].shape
+    # layers spread over the depth; layer 0 is dense in the harness and has no records
+    layers = sorted({min(nl - 1, max(1, int(round(f * (nl - 1))))) for f in A.layer_fracs})
+    for ci, (ax, li) in enumerate(zip(row, layers)):
+        for k, h in enumerate(range(min(A.heads, nh))):
+            L = d["Lc"][li, h]; ref = L.min()
+            a, b, c = d["a"][li, h], d["b"][li, h], d["c"][li, h]
+            # rule 1's quadratic in a, b, c, scaled to L at eta = 0 (both are sums
+            # of squared errors; L is normalised by the dense output energy)
+            # plotted as % above the head's best measured error over the grid
+            f = lambda t: 100 * (((1 - t) ** 2 * a + t ** 2 * b + 2 * t * (1 - t) * c) * (L[0] / a) / ref - 1)
+            e = d["eta"][li, h]
+            ax.plot(g, 100 * (L / ref - 1), "o", color=HEADC[k], ms=5, alpha=0.85)
+            ax.plot(xs, f(xs), "-", color=HEADC[k], lw=2.2)
+            ax.plot([e], [f(e)], "*", color=HEADC[k], ms=17, mec="#333", mew=0.7, zorder=5)
+        ax.text(0.5, 1.02, f"layer {li}", transform=ax.transAxes, ha="center", va="bottom", fontsize=14)
+        ax.set_xticks([0, 0.25, 0.5, 0.75, 1]); ax.set_xticklabels(["0", ".25", ".5", ".75", "1"])
+        ax.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(4, integer=True))
+        ax.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda v, _: f"{v:.0f}%"))
+        ax.axhline(0, color="#333", lw=0.8, ls=":")
+        ax.grid(alpha=0.3)
+        if r == len(A.models) - 1:
+            ax.set_xlabel("$\\eta$")
+        if ci == 0:
+            ax.set_ylabel(f"{NAME[model]}\nerror above head's best")
+    for ax in row[len(layers):]:
+        ax.axis("off")
+# shared key: head colours, then the marker types
+fig.legend(handles=[matplotlib.lines.Line2D([], [], ls="-", lw=3, color=HEADC[k], label=f"KV head {k}")
+                    for k in range(A.heads)] + [matplotlib.lines.Line2D([], [], marker="o", ls="", color="#888", ms=6, label="measured"),
+                    matplotlib.lines.Line2D([], [], ls="-", color="#888", lw=2.2, label="rule-1 quadratic (from $\\eta$=0, 1)"),
+                    matplotlib.lines.Line2D([], [], marker="*", ls="", color="#bbb", mec="#333", ms=15, label="rule-1 $\\eta^*$")],
+           loc="lower center", ncol=A.heads + 3, frameon=False, fontsize=14, bbox_to_anchor=(0.5, -0.05))
+fig.tight_layout(h_pad=2.0, w_pad=1.5)
 os.makedirs(os.path.dirname(A.out), exist_ok=True)
 for ext in ("png", "pdf"):
     fig.savefig(f"{A.out}.{ext}", dpi=200, bbox_inches="tight")
