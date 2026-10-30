@@ -5,12 +5,13 @@ times of the timed round, written by FreeKV's source/pred.py --tbt_out) and
 plots, per model:
   left   mean ms per decode step (first step excluded, as pred.py's Avg TBT)
   middle ms per step vs decode position, smoothed over 256 steps
-  right  time to set eta for ONE sequence of that length: the fixed-eta arm
-         sweeps the grid {0, .25, .5, .75, 1}, i.e. decodes the sequence once
-         per eta (5 x its measured decode time); rule 1 decodes it once, plus
-         the cost of finding eta* (time_rule1_find.py: generating the 4
-         calibration traces + endpoint errors and the closed form), which is
-         paid once per (model, task) and charged here to a single sequence
+  right  ms per decode step to set eta for ONE sequence of that length: the
+         fixed-eta arm sweeps the grid {0, .25, .5, .75, 1}, i.e. decodes the
+         sequence once per eta (5 x its measured ms/step); rule 1 decodes it
+         once, plus the cost of finding eta* (time_rule1_find.py: generating
+         the 4 calibration traces + endpoint errors and the closed form)
+         divided over that sequence's decode steps -- it is paid once per
+         (model, task), so this is its worst case
 
   python analysis/plot_latency_rule1.py [--suffix _g256] [--out ...]
 """
@@ -86,39 +87,40 @@ ax1.set_title(f"{NAME.get(m0, m0)}: per-step decode time over the generation", f
 ax1.legend(fontsize=8); ax1.grid(alpha=0.3)
 
 
-# ---- per-sequence cost of the two ways to set eta (one 16K-token decode)
+# ---- decode time per step of the two ways to set eta, for one sequence
 GRID = ["0.0", "0.25", "0.5", "0.75", "1.0"]
-print(f"{'model':<16}{'sweep 5 etas':>14}{'rule-1 decode':>15}{'find eta*':>11}   (s per sequence)")
+print(f"{'model':<16}{'sweep 5 etas':>14}{'rule-1 decode':>15}{'gen traces':>12}{'eta* calc':>11}   (ms / decode step)")
 w2 = 0.36
 seq = {}
 for j, m in enumerate(A.models):
     if (m, "oval_fix") not in data or (m, "oval_r1") not in data:
         continue
-    T = {a: float(np.sum(data[(m, a)]["tbt_ms"][1:])) / 1e3 for a in ("oval_fix", "oval_r1")}
+    tb = {a: np.asarray(data[(m, a)]["tbt_ms"][1:], float) for a in ("oval_fix", "oval_r1")}
+    n = len(tb["oval_r1"])                        # decode steps of the sequence
     ff = os.path.join(A.dir, f"{m}_{A.find_task}_r1_find.json")
     fd = json.load(open(ff)) if os.path.exists(ff) else None
-    gen, comp = (fd["gen_s"] or 0.0, fd["compute_s"] + fd["load_s"]) if fd else (0.0, 0.0)
-    sweep = len(GRID) * T["oval_fix"]
+    gen, comp = ((fd["gen_s"] or 0.0) * 1e3 / n, (fd["compute_s"] + fd["load_s"]) * 1e3 / n) if fd else (0.0, 0.0)
+    fix, r1d = tb["oval_fix"].mean(), tb["oval_r1"].mean()
     for k in range(len(GRID)):                    # one segment per eta plugged in
-        ax2.bar(j - w2 / 2, T["oval_fix"] / 60, w2, bottom=k * T["oval_fix"] / 60, color=COL["oval_fix"],
-                edgecolor="white", label="fixed eta: sweep, one decode per eta" if (j, k) == (0, 0) else None)
-    ax2.bar(j + w2 / 2, T["oval_r1"] / 60, w2, color=COL["oval_r1"], edgecolor="white",
-            label="rule 1: one decode" if j == 0 else None)
-    ax2.bar(j + w2 / 2, gen / 60, w2, bottom=T["oval_r1"] / 60, color=COL["oval_r1"], alpha=0.45,
-            edgecolor="white", label="rule 1: find eta*, generate 4 calib traces" if j == 0 else None)
-    ax2.bar(j + w2 / 2, comp / 60, w2, bottom=(T["oval_r1"] + gen) / 60, color=COL["oval_r1"], alpha=0.45,
-            hatch="//", edgecolor="white", label="rule 1: find eta*, endpoint errors + closed form" if j == 0 else None)
-    r1 = T["oval_r1"] + gen + comp
-    ax2.text(j - w2 / 2, sweep / 60, f"{sweep / 60:.0f} min", ha="center", va="bottom", fontsize=8)
-    ax2.text(j + w2 / 2, r1 / 60, f"{r1 / 60:.0f} min", ha="center", va="bottom", fontsize=8)
-    seq[m] = (sweep, T["oval_r1"], gen + comp)
-    print(f"{m:<16}{sweep:>14.0f}{T['oval_r1']:>15.0f}{gen + comp:>11.0f}"
-          f"   sweep/rule1 = {sweep / r1:.2f}x first sequence, -> {sweep / T['oval_r1']:.2f}x amortised")
+        ax2.bar(j - w2 / 2, fix, w2, bottom=k * fix, color=COL["oval_fix"], edgecolor="white",
+                label="fixed eta: sweep, one decode per eta (5)" if (j, k) == (0, 0) else None)
+    ax2.bar(j + w2 / 2, r1d, w2, color=COL["oval_r1"], edgecolor="white",
+            label="rule 1: decode" if j == 0 else None)
+    ax2.bar(j + w2 / 2, gen, w2, bottom=r1d, color=COL["oval_r1"], alpha=0.45, edgecolor="white",
+            label="rule 1 eta*: generate 4 calib traces" if j == 0 else None)
+    ax2.bar(j + w2 / 2, comp, w2, bottom=r1d + gen, color=COL["oval_r1"], alpha=0.45, hatch="//",
+            edgecolor="white", label="rule 1 eta*: endpoint errors + closed form" if j == 0 else None)
+    sw, r1 = len(GRID) * fix, r1d + gen + comp
+    ax2.text(j - w2 / 2, sw, f"{sw:.0f}", ha="center", va="bottom", fontsize=8)
+    ax2.text(j + w2 / 2, r1, f"{r1:.0f}", ha="center", va="bottom", fontsize=8)
+    seq[m] = sw
+    print(f"{m:<16}{sw:>14.1f}{r1d:>15.1f}{gen:>12.1f}{comp:>11.1f}"
+          f"   sweep/rule1 = {sw / r1:.2f}x (eta* on one sequence), {sw / r1d:.2f}x (eta* amortised)")
 ax2.set_xticks(range(len(A.models))); ax2.set_xticklabels([NAME.get(m, m) for m in A.models])
-ax2.set_ylabel("minutes for one sequence")
-ax2.set_ylim(0, max(v[0] for v in seq.values()) / 60 * 1.45)
-ax2.set_title(f"Setting eta for one {ntok[-1]}-token sequence\n"
-              "eta* is found once per (model, task), reused after", fontsize=10)
+ax2.set_ylabel("ms per decode step")
+ax2.set_ylim(0, max(seq.values()) * 1.45)
+ax2.set_title(f"Setting eta: decode time, {ntok[-1]}-token sequence\n"
+              "eta* cost spread over this one sequence", fontsize=10)
 ax2.legend(fontsize=7.5, loc="upper left"); ax2.grid(axis="y", alpha=0.3)
 
 fig.tight_layout()

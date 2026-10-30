@@ -322,19 +322,20 @@ per page, and the per-step scoring and attention never read it, so the
 rule-1 and fixed-eta arms agree within run-to-run noise (+0.6% / -0.6%).
 OVAL is ~12% above FreeKV (the rank-8 record build and scoring).
 
-**Per sequence, a sweep costs ~5x.** Setting eta by sweeping means plugging
-each of the 5 grid values {0, .25, .5, .75, 1} in, i.e. decoding the sequence
-5 times. Rule 1 decodes it once, plus the cost of finding eta*: generating
-the 4 calibration traces (6144 tokens each, dense HF decode) and computing
-the endpoint errors, a, b, c and the closed form on them
+**Per sequence, a sweep costs ~5x in decode time.** Setting eta by sweeping
+means plugging each of the 5 grid values {0, .25, .5, .75, 1} in, i.e.
+decoding the sequence 5 times. Rule 1 decodes it once, plus the cost of
+finding eta*: generating the 4 calibration traces (6144 tokens each, dense HF
+decode) and computing the endpoint errors, a, b, c and the closed form on them
 (`analysis/time_rule1_find.py`, AIME24, A6000; it reproduces the deployed
-tables to the 4-decimal rounding). Right panel of the figure, one
-16384-token sequence:
+tables to the 4-decimal rounding). Right panel of the figure, in ms per decode
+step of one 16384-token sequence, with the whole eta* cost divided over that
+sequence's decode steps:
 
-| model | sweep (5 decodes) | rule 1 decode | find eta* (traces + compute) | sweep / rule 1 |
-|---|---|---|---|---|
-| qwen-7b | 55 min | 11 min | 18 min (12.3 + 5.7) | 1.9x on the first sequence, -> 5.0x |
-| llama-8b | 64 min | 13 min | 27 min (13.8 + 12.8) | 1.6x on the first sequence, -> 5.0x |
+| model | sweep (5 x decode) | rule 1 decode | + eta*: traces | + eta*: compute | rule 1 total | sweep / rule 1 |
+|---|---|---|---|---|---|---|
+| qwen-7b | 200.9 | 40.4 | 44.9 | 20.9 | 106.2 | 1.9x, -> 5.0x amortised |
+| llama-8b | 234.7 | 46.7 | 50.7 | 47.1 | 144.5 | 1.6x, -> 5.0x amortised |
 
 eta* is found once per (model, task) and reused by every later sequence, so
 the finding cost is charged in full to a single sequence above and the
