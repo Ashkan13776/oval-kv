@@ -15,7 +15,7 @@ in. Arms with only one coordinate are reported as such rather than guessed at.
 
 kv_retrieval is EXCLUDED from the mean: FullKV scores 0.0 on it with degenerate
 output on this model, so the task has no headroom and cannot rank selection
-quality (notes/finding-kv-retr.md).
+quality (docs/archive/finding-kv-retr.md).
 """
 import glob
 import json
@@ -64,7 +64,7 @@ ARMS = [
 # as a ceiling line rather than a plotted method.
 FULLKV = ("full", "", "")
 # All 11 tasks. kv_retrieval was previously excluded on the grounds that FullKV
-# scored 0.0 on it; that was the tuple-KV cache bug (notes/freekv-port.md).
+# scored 0.0 on it; that was the tuple-KV cache bug (docs/freekv-port.md).
 # With the cache fixed FullKV scores 56.0 there -- the largest headroom on the
 # benchmark -- so excluding it was dropping the one cell that separates methods.
 TASKS = ["passkey", "number_string", "kv_retrieval", "longdialogue_qa_eng",

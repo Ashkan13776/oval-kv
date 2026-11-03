@@ -55,7 +55,7 @@ LOCKS summaries, 97 GB holds roughly 800K tokens; the paper's 143.7 GB H200
 holds ~1.3M.
 
 **Measured impact: 4 records out of 550** exceed ~800K, all in
-`longbook_qa_chn` (see notes/length-stats.md). All 4 also exceed the model's
+`longbook_qa_chn` (see length-stats.md). All 4 also exceed the model's
 own 1M native window (`seq_length=1048576`), so they required truncation on the
 paper's hardware as well. We truncate them slightly harder (~780K vs ~1M).
 That is 4/50 records in 1 of 11 tasks — under 1% of the 11-task Avg, against a

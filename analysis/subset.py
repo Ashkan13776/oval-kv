@@ -16,7 +16,7 @@ records" is a biased sample. Measured across the shipped data:
 
 Using first-50 scored kv-retr at 60.0 against the paper's 28.0 — above the
 paper's own FullKV reference, which is impossible for a method attending ~2%
-of tokens. See notes/finding-kv-retr.md.
+of tokens. See docs/archive/finding-kv-retr.md.
 
 The paper's phrase is a "seeded subset of 50 records per task"
 (tab_infinitebench_main.tex:3). A seeded RANDOM draw is the only reading

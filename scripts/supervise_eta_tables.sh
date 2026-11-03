@@ -16,19 +16,20 @@ DATASETS="${DATASETS:-MATH50 AIME24 GPQA50c}"
 SEEDS="${SEEDS:-42 43 44 45 46 47 48 49}"
 RULES="${RULES:-r1}"
 TABLES="${TABLES:-$KV_ROOT/results/eta_rules/tables}"
+VRANK="${VRANK:-8}"
 GPUS="${GPUS:-0 1 2 3}"
-LOG="$KV_ROOT/logs/eta_rules"; HB="$LOG/supervisor.log"
+LOG="$KV_ROOT/logs/eta_rules"; HB="$LOG/supervisor_vr${VRANK}.log"
 mkdir -p "$LOG"
 
-exec 9>"$LOG/.supervisor_eta.lock"
+exec 9>"$LOG/.supervisor_eta_vr${VRANK}.lock"
 flock -n 9 || { echo "another eta-table supervisor holds the lock; exiting"; exit 0; }
 
 say () { echo "[$(date -Iseconds)] $*" | tee -a "$HB"; }
 todo () { $KV_PY "$KV_ROOT/analysis/eta_rules_queue.py" --models $MODELS --datasets $DATASETS \
-            --seeds $SEEDS --rules $RULES --tables_dir "$TABLES" --root "$KV_ROOT/results/codec" --count; }
+            --seeds $SEEDS --rules $RULES --tables_dir "$TABLES" --vrank "$VRANK" --root "$KV_ROOT/results/codec" --count; }
 done_n () { $KV_PY "$KV_ROOT/analysis/eta_rules_queue.py" --models $MODELS --datasets $DATASETS \
-            --seeds $SEEDS --rules $RULES --tables_dir "$TABLES" --root "$KV_ROOT/results/codec" --complete; }
-total_records () { cat "$KV_ROOT"/results/codec/*-spec_ret/*_etab*.jsonl 2>/dev/null | grep -c . ; return 0; }
+            --seeds $SEEDS --rules $RULES --tables_dir "$TABLES" --vrank "$VRANK" --root "$KV_ROOT/results/codec" --complete; }
+total_records () { cat "$KV_ROOT"/results/codec/*-spec_ret/*_etab*_vr"$VRANK"_*.jsonl 2>/dev/null | grep -c . ; return 0; }
 PRED_PAT="^${KV_PY} -u -m eval.reasoning.pred .*--eta_table"
 
 say "eta-table supervisor up: $(todo) seed-cells to run, $(done_n) complete"
@@ -43,10 +44,10 @@ while :; do
   fi
   before=$(total_records)
   say "launching eta-table sweep ($left seed-cells to go, $(done_n) complete)"
-  MODELS="$MODELS" DATASETS="$DATASETS" SEEDS="$SEEDS" RULES="$RULES" TABLES="$TABLES" \
+  MODELS="$MODELS" DATASETS="$DATASETS" SEEDS="$SEEDS" RULES="$RULES" TABLES="$TABLES" VRANK="$VRANK" \
     GPUS="$GPUS" SLOTS="${SLOTS:-2}" MINFREE="${MINFREE:-20000}" SETTLE="${SETTLE:-90}" \
     KV_ROOT="$KV_ROOT" KV_PY="$KV_PY" \
-    "$KV_ROOT/scripts/eta_table_sweep.sh" >> "$LOG/sweep_run.log" 2>&1 &
+    "$KV_ROOT/scripts/eta_table_sweep.sh" >> "$LOG/sweep_run_vr${VRANK}.log" 2>&1 &
   SWEEP_PID=$!
   waiting_since=0
   while kill -0 "$SWEEP_PID" 2>/dev/null; do

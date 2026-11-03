@@ -1,5 +1,9 @@
 # Running the long-reasoning codec sweep on a second machine
 
+> **Historical.** This describes the keys-only eta-grid sweep. For the current
+> run (full pipeline) follow [full-pipeline.md](full-pipeline.md); the
+> split-by-model rules below still apply.
+
 This splits the sweep by MODEL. Each model writes to its own directory under
 `results/codec/`, so two machines never touch the same file and the results
 merge by copying directories.

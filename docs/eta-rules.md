@@ -11,6 +11,10 @@ the fixed-eta qwen cells (MATH50 0.25 / AIME24 1.0 / GPQA50c 0.25,
 `..._eta{E}_q0_recon1_vr8_vpca`) and an **offline** fine-grid optimum per head
 on held-out calibration data.
 
+The results below use values at rank 8. The full pipeline uses rank-16 values
+and recalibrates rule 1 at that rank (`--vrank 16`, tables in
+`results/eta_rules/vr16/tables/`): see [full-pipeline.md](full-pipeline.md).
+
 Code: `oval/eta_rules.py` (rule 1, pure math), `analysis/eta_rules_calibrate.py`
 (measurement and the table), `analysis/eta_rules_queue.py` +
 `scripts/eta_table_sweep.sh` + `scripts/supervise_eta_tables.sh` (harness

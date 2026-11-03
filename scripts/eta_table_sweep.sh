@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Harness cells for eta rule 1: one cell per per-(layer, KV head) eta table
 # per (model, dataset), k seeds each, protocol identical to the
-# value-codec cells (keys rank 8 + --oval_recon, values PCA rank 8), with
+# value-codec cells (keys rank 8 + --oval_recon, values PCA rank VRANK), with
 # --eta_table <json> in place of --eta.
 #
 # Sibling of codec_reasoning_sweep.sh: same scheduler (SLOTS per GPU, MINFREE
@@ -17,6 +17,8 @@
 #   SEEDS      default "42 43 44 45 46 47 48 49"
 #   RULES      default "r1"
 #   TABLES     default $KV_ROOT/results/eta_rules/tables
+#   VRANK      value PCA rank, default 8 (the full pipeline uses 16 with
+#              tables calibrated at that rank: results/eta_rules/vr16/tables)
 #   GPUS, SLOTS, MINFREE, SETTLE   scheduler
 set -u
 KV_ROOT="${KV_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
@@ -34,13 +36,14 @@ DATASETS="${DATASETS:-MATH50 AIME24 GPQA50c}"
 SEEDS="${SEEDS:-42 43 44 45 46 47 48 49}"
 RULES="${RULES:-r1}"
 TABLES="${TABLES:-$KV_ROOT/results/eta_rules/tables}"
+VRANK="${VRANK:-8}"
 GPUS="${GPUS:-0 1 2 3}"
 LOG="$KV_ROOT/logs/eta_rules"; OUT="$KV_ROOT/results/codec"
 mkdir -p "$LOG" "$OUT"
-Q="$LOG/jobs.txt"
+Q="$LOG/jobs_vr${VRANK}.txt"
 
 $KV_PY "$KV_ROOT/analysis/eta_rules_queue.py" --models $MODELS --datasets $DATASETS --seeds $SEEDS \
-    --rules $RULES --tables_dir "$TABLES" --root "$OUT" --write "$Q" || exit 1
+    --rules $RULES --tables_dir "$TABLES" --vrank "$VRANK" --root "$OUT" --write "$Q" || exit 1
 echo "=== $(wc -l < "$Q") seed-cells queued  $(date -Iseconds)"
 
 run_job () {
@@ -54,8 +57,8 @@ run_job () {
       --budget 2048 --sink 512 --recent 512 --page_size 32 \
       --seed "$s" --out_root_dir "$OUT" \
       --method spec_ret --page_rep oval --eta_table "$tab" --oval_rank 8 --oval_recon \
-      --oval_vrank 8 --vbasis pca \
-      > "$LOG/cell_${m}_${d}_s${s}_etab${h}.log" 2>&1
+      --oval_vrank "$VRANK" --vbasis pca \
+      > "$LOG/cell_${m}_${d}_s${s}_etab${h}_vr${VRANK}.log" 2>&1
   echo "=== DONE  $m/$d/s$s/etab$h exit=$? $(date -Iseconds)"
 }
 

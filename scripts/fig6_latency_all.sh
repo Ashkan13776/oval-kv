@@ -13,7 +13,7 @@
 #    arkvale/torch_cpy/cuda_cpy only -- ShadowKV, InfiniGen, RaaS and
 #    RazorAttention are in the paper's Fig 6 but not in the artifact.
 #  * spec_ret required a fix to their thread-pool handoff (see
-#    notes/freekv-port.md); without it FreeKV's arm emits corrupted text.
+#    docs/freekv-port.md); without it FreeKV's arm emits corrupted text.
 #
 # BUDGET: the perf path and the accuracy path use OPPOSITE conventions for
 # --budget. Here sink/window are carved OUT of the budget:

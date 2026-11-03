@@ -15,7 +15,7 @@ everything except the model:
   * 11 tasks, math_calc excluded (as in the LOCKS paper's Table 1)
   * seeded RANDOM 50 records per task, seed 42 -- NOT first-n. The .jsonl files
     are pre-sorted (kv_retrieval by needle position), so first-n is badly
-    biased; see notes/finding-kv-retr.md.
+    biased; see docs/archive/finding-kv-retr.md.
   * InfiniteBench reference prompt templates and per-task max_new_tokens
   * middle-truncation, head half + tail half
   * official InfiniteBench scorers, run unmodified on the dumped predictions
