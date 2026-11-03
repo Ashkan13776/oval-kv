@@ -3,7 +3,7 @@
 Rule 1 needs, per (layer, KV head), the sums a = sum ||D0||^2, b = sum ||D1||^2,
 c = sum D0.D1 of the output errors at the two endpoints eta = 0 and eta = 1,
 over the calibration windows (analysis/eta_rules_calibrate.py, stats stage).
-The stats stage also evaluates the 21-point grid and rules 2-6, so its wall
+The stats stage also evaluates the 21-point grid on both splits, so its wall
 time overstates rule 1; this script runs ONLY the rule-1 part on the same
 captured calibration traces (logs/eta_rules/capture, the first ncalib traces),
 checks that the resulting table equals the deployed one, and records
@@ -59,7 +59,7 @@ def endpoint_terms(q, K, V, L, qpos, Wh, Gh):
     return (D0 * D0).sum((-1, -2)).double(), (D1 * D1).sum((-1, -2)).double(), (D0 * D1).sum((-1, -2)).double()
 
 
-w, nl, nh, nkv, hd, Dm, g, Wh, Gh, Gi = C.model_weights(args, dev)
+w, nl, nh, nkv, hd, Dm, g, Wh, Gh = C.model_weights(args, dev)
 calib = C.problems(args)[:args.ncalib]
 a = torch.zeros(nl, nkv, dtype=torch.float64, device=dev); b = torch.zeros_like(a); c = torch.zeros_like(a)
 load_s = compute_s = 0.0

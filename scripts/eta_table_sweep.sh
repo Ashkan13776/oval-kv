@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Harness cells for the eta-rule study: one cell per distinct per-(layer, KV
-# head) eta table per (model, dataset), k seeds each, protocol identical to the
+# Harness cells for eta rule 1: one cell per per-(layer, KV head) eta table
+# per (model, dataset), k seeds each, protocol identical to the
 # value-codec cells (keys rank 8 + --oval_recon, values PCA rank 8), with
 # --eta_table <json> in place of --eta.
 #
@@ -15,7 +15,7 @@
 #   MODELS     default "ds-r1-qwen-7b ds-r1-llama-8b"
 #   DATASETS   default "MATH50 AIME24 GPQA50c"   (queue order; MATH50 first)
 #   SEEDS      default "42 43 44 45 46 47 48 49"
-#   RULES      default "r1 r2 r3 r4 r5 r6"
+#   RULES      default "r1"
 #   TABLES     default $KV_ROOT/results/eta_rules/tables
 #   GPUS, SLOTS, MINFREE, SETTLE   scheduler
 set -u
@@ -32,7 +32,7 @@ export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 MODELS="${MODELS:-ds-r1-qwen-7b ds-r1-llama-8b}"
 DATASETS="${DATASETS:-MATH50 AIME24 GPQA50c}"
 SEEDS="${SEEDS:-42 43 44 45 46 47 48 49}"
-RULES="${RULES:-r1 r2 r3 r4 r5 r6}"
+RULES="${RULES:-r1}"
 TABLES="${TABLES:-$KV_ROOT/results/eta_rules/tables}"
 GPUS="${GPUS:-0 1 2 3}"
 LOG="$KV_ROOT/logs/eta_rules"; OUT="$KV_ROOT/results/codec"

@@ -1,5 +1,5 @@
-"""Offline calibration of the six closed-form eta rules, per (model, task),
-per (layer, KV head). See docs/eta-rules.md for the definitions.
+"""Offline calibration of eta rule 1, per (model, task), per (layer, KV head).
+See docs/eta-rules.md for the definitions.
 
 Stages (each resumable; outputs are never overwritten without --overwrite):
 
@@ -9,14 +9,11 @@ Stages (each resumable; outputs are never overwritten without --overwrite):
            their own positions), and the model's o_proj weights.
              -> CAPTURE_DIR/<model>_<task>_p<idx>.pt,  CAPTURE_DIR/<model>_oproj.pt
   stats    GPU. From the captures: the actual retrieval loss L(eta) on a fine
-           grid per (layer, head) for the calibration and the test split; the
-           rule 1/2/3/4/5 inputs and etas; per-page features and targets for
-           rule 6.      -> OUT/<model>_<task>.json, OUT/<model>_<task>_pages.npz
-  rules    CPU. Fit rule 6 within each model (its own calibration pages, all
-           tasks pooled; the cross-model fit is recorded as the variant r6x)
-           and write every rule's deployable eta table.
-             -> OUT/tables/<model>_<task>_<rule>.json  (+ tables_variants/)
-  regret   GPU. Evaluate every table on the TEST split with the harness's own
+           grid per (layer, head) for the calibration and the test split, and
+           rule 1's endpoint sums a, b, c and eta.   -> OUT/<model>_<task>.json
+  rules    CPU. Write rule 1's deployable eta table from the stats file.
+             -> OUT/tables/<model>_<task>_r1.json
+  regret   GPU. Evaluate the table on the TEST split with the harness's own
            per-head build and report the offline regret vs the per-head grid
            optimum. -> OUT/<model>_<task>.json (adds "regret")
 
@@ -47,14 +44,7 @@ MODEL2PATH = {
 }
 TASK2FILE = {"MATH50": "math50.jsonl", "AIME24": "aime24.jsonl", "GPQA50c": "gpqa50c.jsonl"}
 TASK2FIELD = {"MATH50": "problem", "AIME24": "problem", "GPQA50c": "question"}
-RULES = ["r1", "r2", "r3", "r4", "r5", "r6"]
-# Recorded alternatives: variant name -> (deployed rule, key of its eta in the
-# stats file). Written to tables_variants/; the launcher queues r3u, r4w and
-# r6x on MATH50 after the six deployed rules (docs/eta-rules.md, Decisions).
-VARIANTS = {"r3u": ("r3", "eta_unbounded"),        # rule 3 without the +-0.25 bound
-            "r4w": ("r4", "eta_mass_weighted"),    # rule 4 with attention-mass page weights
-            "r6w": ("r6", "eta_mass_weighted"),    # rule 6, mass-weighted aggregation
-            "r6x": ("r6", "eta_cross_model")}      # rule 6 fitted on the OTHER model's pages
+RULES = ["r1"]
 MODELS = ["ds-r1-qwen-7b", "ds-r1-llama-8b"]
 TASKS = ["MATH50", "AIME24", "GPQA50c"]
 
@@ -64,7 +54,7 @@ def parse():
     ap.add_argument("stage", choices=["capture", "stats", "rules", "regret"])
     ap.add_argument("--model", default=None)
     ap.add_argument("--task", default=None)
-    ap.add_argument("--models", nargs="+", default=MODELS, help="rules stage: models to pair")
+    ap.add_argument("--models", nargs="+", default=MODELS, help="rules stage: models")
     ap.add_argument("--tasks", nargs="+", default=TASKS)
     ap.add_argument("--model_path", default=None, help="HF path override (tests)")
     ap.add_argument("--dataset_file", default=None, help="jsonl override (tests)")
@@ -87,11 +77,7 @@ def parse():
     ap.add_argument("--rank", type=int, default=8)
     ap.add_argument("--vrank", type=int, default=8)
     ap.add_argument("--ngrid", type=int, default=21)
-    ap.add_argument("--eta0", type=float, default=0.5, help="rule 3 reference eta")
-    ap.add_argument("--delta", type=float, default=0.25, help="rule 3 bound")
-    ap.add_argument("--gap_tol", type=float, default=1e-6, help="rule 3 eigengap tolerance (x lambda_1)")
     ap.add_argument("--layers", default=None, help="subset like 0-2 or 0,5,9 (smoke tests)")
-    ap.add_argument("--rule6_ridge", type=float, default=1e-3)
     ap.add_argument("--overwrite", action="store_true")
     ap.add_argument("--tag", default="", help="suffix for output names (smoke tests)")
     return ap.parse_args()
@@ -230,11 +216,6 @@ class Acc:
         self.d2 = {"calib": z(ngrid), "test": z(ngrid)}         # sum ||Delta_eta||^2 on the grid
         self.nq = {"calib": z(), "test": z()}
         self.a, self.b, self.c = z(), z(), z()                  # rule 1
-        self.r3_num, self.r3_den, self.r3_g2 = z(), z(), z()    # rule 3 (sums over queries)
-        self.r3_pages, self.r3_deg = z(), z()
-        self.r5_num, self.r5_den, self.r5_deg, self.r5_pages = z(), z(), z(), z()
-        self.r4_b, self.r4_ab, self.r4_wb, self.r4_wab, self.r4_zero = z(), z(), z(), z(), z()
-        self.pages = []                                         # rule 6 rows
 
 
 def page_layout(L, args):
@@ -289,31 +270,7 @@ def select_pages(qw, mu, basis, coef, H, g, budget_pages):
     return mask.permute(1, 0, 2).contiguous()                                  # [H, nq, P]
 
 
-def thin_svd_rows(X, rel_tol=1e-12):
-    """X = U S V^T for X [.., n, d] with n <= d via the n x n Gram (batched
-    32 x 32 eigh is fast on every device; batched SVD of 32 x 128 is not).
-    Directions with S <= rel_tol * S_max (the centring null direction) get
-    S = 0 and a zero row in V^T, which keeps X = U S V^T exact and makes every
-    reduced-coordinate quantity vanish there."""
-    lam, U = torch.linalg.eigh(X @ X.transpose(-1, -2))
-    lam, U = lam.flip(-1), U.flip(-1)
-    S = lam.clamp_min(0).sqrt()
-    keep = S > rel_tol * S[..., :1]
-    S = torch.where(keep, S, torch.zeros_like(S))
-    Vt = (U.transpose(-1, -2) @ X) / torch.where(keep, S, torch.ones_like(S))[..., None]
-    Vt = Vt * keep[..., None].to(Vt.dtype)
-    return U, S, Vt
-
-
-def jac_apply(p_pg, Vp, o, z):
-    """J_p(q) z for every (page, q-head, query): J[:, t] = p_t (v_t - o).
-    p_pg [H, g, nq, P, page]; Vp [H, P, page, d]; o [H, g, nq, d]; z [H, P, g, nq, page]
-    -> [H, g, nq, P, d]"""
-    pz = p_pg * z.permute(0, 2, 3, 1, 4)                                        # [H, g, nq, P, page]
-    return torch.einsum('hgqpt,hptd->hgqpd', pz, Vp) - o[:, :, :, None, :] * pz.sum(-1, keepdim=True)
-
-
-def window_stats(acc, split, li, q, K, V, L, qpos, Wh, Gh, Gi, grid, args, rule_tables=None):
+def window_stats(acc, split, li, q, K, V, L, qpos, Wh, Gh, grid, args, rule_tables=None):
     """All measurements for one (trace, window, layer). q [H, g, nq, d] float32,
     K, V [H, L, d] float32. rule_tables: {name: eta [H]} evaluated on top of the
     grid (regret stage)."""
@@ -344,18 +301,18 @@ def window_stats(acc, split, li, q, K, V, L, qpos, Wh, Gh, Gi, grid, args, rule_
         sel = select_pages(q, mu, bs, cf, H, g, budget_pages)
         oh = retrieval_loss_terms(q, K, V, L, qpos, Khat, Vhat, sel, args)
         delta = u - group_out(Wh, oh)                                            # [H, nq, D]
-        return delta, bs, sel
+        return delta
 
     deltas = {}
     for gi, eta in enumerate(grid):
-        delta, bs, _ = loss_at(float(eta))
+        delta = loss_at(float(eta))
         acc.d2[split][li, :, gi] += (delta * delta).sum((-1, -2)).double().cpu().numpy()
         if eta in (0.0, 1.0):
             deltas[eta] = delta
     if rule_tables is not None:
         out = {}
         for name, eta_h in rule_tables.items():
-            delta, _, _ = loss_at(torch.as_tensor(eta_h, dtype=torch.float64))
+            delta = loss_at(torch.as_tensor(eta_h, dtype=torch.float64))
             out[name] = (delta * delta).sum((-1, -2)).double().cpu().numpy()
         return out
     if split != "calib":
@@ -365,74 +322,6 @@ def window_stats(acc, split, li, q, K, V, L, qpos, Wh, Gh, Gi, grid, args, rule_
     acc.a[li] += (D0 * D0).sum((-1, -2)).double().cpu().numpy()
     acc.b[li] += (D1 * D1).sum((-1, -2)).double().cpu().numpy()
     acc.c[li] += (D0 * D1).sum((-1, -2)).double().cpu().numpy()
-    # ---- per-page matrices in reduced coordinates: X = U S Vt (row space of X)
-    X = Kp[0].permute(2, 0, 1, 3).float()                                        # [H, P, page, d]
-    X = X - X.mean(-2, keepdim=True)
-    Y = Vp[0].permute(2, 0, 1, 3).float(); Y = Y - Y.mean(-2, keepdim=True)
-    U, S, Vt = thin_svd_rows(X.double())                                          # U [H,P,page,n], S [H,P,n], Vt [H,P,n,d]
-    n = S.shape[-1]
-    Z = Y.double() @ Gh.double()[:, None]                                         # [H, P, page, d]
-    Mo = Z @ Z.transpose(-1, -2)                                                  # [H, P, page, page]
-    A_red = torch.diag_embed(S * S); A_red = R.unit_trace(A_red)
-    C_red = (S[..., :, None] * (U.transpose(-1, -2) @ Mo @ U) * S[..., None, :]); C_red = R.unit_trace(C_red)
-    # attention on the pages (dense), used by the Jacobian of every rule below
-    p_pg = p[..., lo:hi].reshape(H, g, nq, P, args.page)                          # [H, g, nq, P, page]
-    mass = p_pg.sum(-1).mean((1, 2))                                              # [H, P] mean page attention mass
-    qt = torch.einsum('hpnd,hgqd->hpgqn', Vt.float(), q)                           # V^T q  [H, P, g, nq, n]
-    # ---- rule 4 and rule 6 features (query-free)
-    r = min(args.rank, n - 1)
-    a4, b4 = R.rule4_sacrifices(A_red, C_red, r)                                  # [H, P]
-    acc.r4_b[li] += b4.sum(-1).cpu().numpy(); acc.r4_ab[li] += (a4 + b4).sum(-1).cpu().numpy()
-    m64 = mass.double()
-    acc.r4_wb[li] += (m64 * b4).sum(-1).cpu().numpy(); acc.r4_wab[li] += (m64 * (a4 + b4)).sum(-1).cpu().numpy()
-    acc.r4_zero[li] += ((a4 + b4) <= 0).sum(-1).cpu().numpy()
-    F6 = R.rule6_features(A_red, C_red, r)                                        # [H, P, 3]
-    # ---- rule 3: linearised error through the eigenspace at eta0
-    P0, P0p, gap, deg3 = R.projector_derivative(A_red, C_red, args.eta0, r, args.gap_tol)   # [H, P, n, n]
-    keep3 = (~deg3).float()[:, :, None, None, None]                                # drop degenerate pages
-    I = torch.eye(n, dtype=torch.float64, device=dev)
-    zg = torch.einsum('hpnm,hpgqm->hpgqn', (U * S[..., None, :]) @ (I - P0), qt.double()) * s
-    zh = torch.einsum('hpnm,hpgqm->hpgqn', (U * S[..., None, :]) @ P0p, qt.double()) * s
-    Vp_h = Vp[0].permute(2, 0, 1, 3).float()                                      # [H, P, page, d]
-    G3 = jac_apply(p_pg, Vp_h, o, (zg.float() * keep3)).sum(3)                    # [H, g, nq, d]  sum over pages
-    H3 = jac_apply(p_pg, Vp_h, o, (zh.float() * keep3)).sum(3)
-    gq, hq = group_out(Wh, G3), group_out(Wh, H3)                                 # [H, nq, D]
-    acc.r3_num[li] += (gq * hq).sum((-1, -2)).double().cpu().numpy()
-    acc.r3_den[li] += (hq * hq).sum((-1, -2)).double().cpu().numpy()
-    acc.r3_g2[li] += (gq * gq).sum((-1, -2)).double().cpu().numpy()
-    acc.r3_pages[li] += P; acc.r3_deg[li] += deg3.sum(-1).cpu().numpy()
-    # ---- rule 5: T = (1/d) X^T E_q[H_p(q)] X,  H_p(q) = sum_i J_i^T G_i J_i  (reduced: S U^T Hbar U S / d)
-    Hbar = torch.zeros(H, P, args.page, args.page, dtype=torch.float64, device=dev)
-    for i in range(g):
-        Vc = Vp_h[:, :, None] - o[:, i][:, None, :, None, :]                      # [H, P, nq, page, d]
-        M = (Vc @ Gi[:, i][:, None, None]) @ Vc.transpose(-1, -2)                 # [H, P, nq, page, page]
-        pp = p_pg[:, i].permute(0, 2, 1, 3)                                       # [H, P, nq, page]
-        Hbar += (pp[..., :, None] * pp[..., None, :] * M).sum(2).double()
-    Hbar /= (g * nq)
-    T_red = (S[..., :, None] * (U.transpose(-1, -2) @ Hbar @ U) * S[..., None, :]) / d
-    n5, d5 = R.rule5_terms(T_red, A_red, C_red)
-    acc.r5_num[li] += n5.sum(-1).cpu().numpy(); acc.r5_den[li] += d5.sum(-1).cpu().numpy()
-    acc.r5_deg[li] += (d5 <= 1e-12).sum(-1).cpu().numpy(); acc.r5_pages[li] += P
-    # ---- rule 6 targets: per-page first-order loss on the grid, argmin
-    e_grid = torch.zeros(H, P, len(grid), dtype=torch.float64, device=dev)
-    for gi, eta in enumerate(grid):
-        bs = PB.build_summary(Kp, Vp, Gh, float(eta), args.rank)[1]
-        B = bs[0].permute(1, 0, 2, 3).double()                                    # [H, P, d, r]
-        Bt = Vt @ B                                                               # reduced basis [H, P, n, r]
-        Pe = Bt @ Bt.transpose(-1, -2)
-        z = torch.einsum('hpnm,hpgqm->hpgqn', (U * S[..., None, :]) @ (I - Pe), qt.double()) * s
-        E = jac_apply(p_pg, Vp_h, o, z.float())                                   # [H, g, nq, P, d]
-        eu = torch.einsum('mhgd,hgqpd->hpqm', Wh, E)                               # [H, P, nq, D]
-        e_grid[..., gi] = (eu * eu).sum((-1, -2)).double() / nq
-    tgt = torch.as_tensor(grid, dtype=torch.float64, device=dev)[e_grid.argmin(-1)]      # [H, P]
-    wpg = e_grid.mean(-1)                                                          # [H, P] loss scale
-    wpg = wpg / wpg.sum(-1, keepdim=True).clamp_min(1e-300)                        # per-head normalised
-    for h in range(H):
-        acc.pages.append(np.concatenate([
-            np.full((P, 1), li), np.full((P, 1), h), F6[h].cpu().numpy(), tgt[h].cpu().numpy()[:, None],
-            wpg[h].cpu().numpy()[:, None], mass[h].double().cpu().numpy()[:, None],
-            a4[h].cpu().numpy()[:, None], b4[h].cpu().numpy()[:, None],
-            (e_grid[h].min(-1).values / e_grid[h].max(-1).values.clamp_min(1e-300)).cpu().numpy()[:, None]], 1))
     return None
 
 
@@ -446,8 +335,7 @@ def model_weights(args, dev):
     g = nh // nkv
     Wh = [wt.float().to(dev).view(D, nkv, g, hd) for wt in w["o_proj"]]           # [D, H, g, d]
     Gh = [PB.publish_metric(wt.float().to(dev), nkv, hd, g) for wt in w["o_proj"]]
-    Gi = [torch.einsum('mhgd,mhge->hgde', W, W) for W in Wh]                       # per q-head W_i^T W_i
-    return w, nl, nh, nkv, hd, D, g, Wh, Gh, Gi
+    return w, nl, nh, nkv, hd, D, g, Wh, Gh
 
 
 def stats_file(args):
@@ -461,10 +349,10 @@ def stage_stats(args):
     if os.path.exists(out_json) and not args.overwrite:
         log(f"stats: {out_json} exists; skipping (pass --overwrite to recompute)")
         return
-    w, nl, nh, nkv, hd, D, g, Wh, Gh, Gi = model_weights(args, dev)
+    w, nl, nh, nkv, hd, D, g, Wh, Gh = model_weights(args, dev)
     layers = layer_subset(args.layers, nl)
-    if args.ngrid % 2 == 0 or args.ngrid < 3:
-        raise SystemExit("--ngrid must be odd and >= 3 so that 0, 1/2 and 1 are grid points (rule 2)")
+    if args.ngrid < 2:
+        raise SystemExit("--ngrid must be >= 2 so that 0 and 1 are grid points (rule 1)")
     grid = [round(i / (args.ngrid - 1), 6) for i in range(args.ngrid)]
     acc = Acc(nl, nkv, len(grid))
     probs = problems(args)
@@ -480,25 +368,14 @@ def stage_stats(args):
             for li in layers:
                 K = cap["K"][li, :, :L].float().to(dev); V = cap["V"][li, :, :L].float().to(dev)
                 q = cap["Q"][li, wi].float().to(dev).permute(1, 0, 2).reshape(nkv, g, cap["nq"], hd)
-                window_stats(acc, split, li, q, K, V, L, qpos, Wh[li], Gh[li], Gi[li], grid, args)
+                window_stats(acc, split, li, q, K, V, L, qpos, Wh[li], Gh[li], grid, args)
             log(f"stats: {args.model}/{args.task} p{pidx} ({split}) window L={L} done, {time.time() - t0:.0f}s")
         del cap
-    # ---- per-(layer, head) rules from the accumulators
+    # ---- rule 1 per (layer, head) from the accumulators
     L_grid = {sp: acc.d2[sp] / np.maximum(acc.u2[sp][..., None], 1e-300) for sp in ("calib", "test")}
     eta1, deg1 = R.rule1_endpoint(acc.a, acc.b, acc.c)
-    gi = {e: grid.index(e) for e in (0.0, 0.5, 1.0)}
-    eta2, deg2 = R.rule2_quadratic(L_grid["calib"][..., gi[0.0]], L_grid["calib"][..., gi[0.5]], L_grid["calib"][..., gi[1.0]])
-    eta3b, deg3 = R.rule3_step(acc.r3_num, acc.r3_den, args.eta0, delta=args.delta, gnorm=torch.as_tensor(acc.r3_g2))
-    eta3u, _ = R.rule3_step(acc.r3_num, acc.r3_den, args.eta0, gnorm=torch.as_tensor(acc.r3_g2))
-    eta4, deg4 = _ratio(acc.r4_b, acc.r4_ab)                 # rule4_eta's sum form, on the sums
-    eta4w, deg4w = _ratio(acc.r4_wb, acc.r4_wab)
-    eta5, deg5 = _ratio(acc.r5_num, acc.r5_den, clip=True)
     best_calib = np.array(grid)[L_grid["calib"].argmin(-1)]
     best_test = np.array(grid)[L_grid["test"].argmin(-1)]
-    pages = np.concatenate(acc.pages, 0) if acc.pages else np.zeros((0, 11))
-    np.savez_compressed(out_json.replace(".json", "_pages.npz"), pages=pages,
-                        columns=np.array(["layer", "head", "f_logba", "f_rho", "f_dgamma", "target", "weight",
-                                          "mass", "a", "b", "emin_over_emax"]))
     res = {
         "model": args.model, "task": args.task, "created": now(),
         "config": {k: v for k, v in vars(args).items() if k not in ("stage",)},
@@ -511,30 +388,11 @@ def stage_stats(args):
         "rules": {
             "r1": {"eta": eta1.numpy().tolist(), "degenerate": deg1.numpy().tolist(),
                    "a": acc.a.tolist(), "b": acc.b.tolist(), "c": acc.c.tolist(), "default": 0.5},
-            "r2": {"eta": eta2.numpy().tolist(), "degenerate": deg2.numpy().tolist(),
-                   "L0": L_grid["calib"][..., gi[0.0]].tolist(), "Lm": L_grid["calib"][..., gi[0.5]].tolist(),
-                   "L1": L_grid["calib"][..., gi[1.0]].tolist()},
-            "r3": {"eta": eta3b.numpy().tolist(), "eta_unbounded": eta3u.numpy().tolist(),
-                   "degenerate": deg3.numpy().tolist(), "num": acc.r3_num.tolist(), "den": acc.r3_den.tolist(),
-                   "g2": acc.r3_g2.tolist(), "pages": acc.r3_pages.tolist(), "pages_closed_gap": acc.r3_deg.tolist(),
-                   "eta0": args.eta0, "delta": args.delta, "deployed": "bounded"},
-            "r4": {"eta": eta4.tolist(), "eta_mass_weighted": eta4w.tolist(), "degenerate": deg4.tolist(),
-                   "sum_b": acc.r4_b.tolist(), "sum_ab": acc.r4_ab.tolist(), "sum_wb": acc.r4_wb.tolist(),
-                   "sum_wab": acc.r4_wab.tolist(), "pages_ab_zero": acc.r4_zero.tolist(), "weights": "uniform"},
-            "r5": {"eta": eta5.tolist(), "degenerate": deg5.tolist(), "num": acc.r5_num.tolist(),
-                   "den": acc.r5_den.tolist(), "pages": acc.r5_pages.tolist(), "pages_C_eq_A": acc.r5_deg.tolist()},
         },
     }
     json.dump(res, open(out_json, "w"))
-    log(f"stats: wrote {out_json} ({len(pages)} page rows) in {time.time() - t0:.0f}s")
+    log(f"stats: wrote {out_json} in {time.time() - t0:.0f}s")
     _print_eta_summary(res)
-
-
-def _ratio(num, den, clip=True, default=0.5):
-    num, den = np.asarray(num, float), np.asarray(den, float)
-    deg = den <= 0
-    eta = np.where(deg, default, num / np.where(deg, 1.0, den))
-    return (np.clip(eta, 0, 1) if clip else eta), deg
 
 
 def _print_eta_summary(res):
@@ -546,14 +404,14 @@ def _print_eta_summary(res):
 
 
 # =========================================================================
-# rules: rule 6 cross-model fit, table files
+# rules: the deployable table file
 # =========================================================================
-def table_dir(args, variant=False):
-    return os.path.join(args.out, "tables_variants" if variant else "tables")
+def table_dir(args):
+    return os.path.join(args.out, "tables")
 
 
-def write_table(args, model, task, rule, eta, info, variant=False):
-    d = table_dir(args, variant); os.makedirs(d, exist_ok=True)
+def write_table(args, model, task, rule, eta, info):
+    d = table_dir(args); os.makedirs(d, exist_ok=True)
     eta = [[round(float(v), 4) for v in row] for row in eta]
     path = os.path.join(d, f"{model}_{task}_{rule}{args.tag}.json")
     h = PB.eta_table_hash(eta)
@@ -563,18 +421,11 @@ def write_table(args, model, task, rule, eta, info, variant=False):
             return path, h
         if not args.overwrite:
             raise SystemExit(f"{path} exists with a different table (hash {old.get('hash')} vs {h}); --overwrite to replace")
-    json.dump({"model": model, "task": task, "rule": rule, "deploy": not variant, "hash": h,
+    json.dump({"model": model, "task": task, "rule": rule, "deploy": True, "hash": h,
                "n_layers": len(eta), "n_kv_heads": len(eta[0]), "eta": eta, "created": now(),
                "source": f"{model}_{task}{args.tag}.json",
                **info}, open(path, "w"), indent=1)
     return path, h
-
-
-def load_pages(args, model, task):
-    f = os.path.join(args.out, f"{model}_{task}{args.tag}_pages.npz")
-    if not os.path.exists(f):
-        return None
-    z = np.load(f); return z["pages"]
 
 
 def stage_rules(args):
@@ -586,96 +437,11 @@ def stage_rules(args):
                 stats[(m, t)] = json.load(open(f))
     if not stats:
         raise SystemExit("rules: no stats files found")
-
-    # ---- rule 6 fits. The per-page targets are OFFLINE first-order losses on
-    # the calibration traces (seed 7, traces 1-4), never accuracy, so a fit on
-    # the model's own calibration pages is held out from everything it is
-    # evaluated on exactly as rules 1-5 are (they estimate nl x H free numbers
-    # from the same traces; rule 6 estimates 4). Deployed: ONE fit per model on
-    # all of its tasks' calibration pages. Recorded (r6x): the fit on the OTHER
-    # model(s)' pages, which answers the separate cross-architecture transfer
-    # question without confounding the deployed rule with it.
-    def fit_on(models, tasks):
-        rows = [load_pages(args, mm, tt) for mm in models for tt in tasks]
-        rows = [r for r in rows if r is not None and len(r)]
-        if not rows:
-            return None, 0
-        tr = np.concatenate(rows, 0)
-        tr = tr[tr[:, 0] > 0]                                   # layer 0 is never retrieved
-        return R.rule6_fit(tr[:, 2:5], tr[:, 5], tr[:, 6], ridge=args.rule6_ridge), int(len(tr))
-
-    def aggregate(beta, pg, nl, H):
-        """Per-(layer, head) uniform and attention-mass-weighted means of the
-        per-page predictions over the head's calibration pages."""
-        pred = R.rule6_predict(beta, torch.as_tensor(pg[:, 2:5])).numpy()
-        eta_u = np.full((nl, H), 0.5); eta_w = np.full((nl, H), 0.5); cnt = np.zeros((nl, H), int)
-        for li in range(nl):
-            for h in range(H):
-                sel = (pg[:, 0] == li) & (pg[:, 1] == h)
-                cnt[li, h] = sel.sum()
-                if sel.any():
-                    eta_u[li, h] = pred[sel].mean()
-                    wm = pg[sel, 7]
-                    eta_w[li, h] = (pred[sel] * wm).sum() / wm.sum() if wm.sum() > 0 else pred[sel].mean()
-        return eta_u, eta_w, cnt
-
-    fits = {}
-    for m in args.models:
-        beta_in, n_in = fit_on([m], args.tasks)
-        others = [o for o in args.models if o != m]
-        beta_x, n_x = fit_on(others, args.tasks)
-        fits[m] = {"within": (beta_in, n_in), "cross": (beta_x, n_x), "others": others}
-        if beta_in is not None:
-            log(f"rules: rule 6 within-model fit for {m}: {n_in} pages, beta {[round(b, 4) for b in beta_in.tolist()]}")
-        if beta_x is not None:
-            log(f"rules: rule 6 cross-model fit for {m} (trained on {others}): {n_x} pages, "
-                f"beta {[round(b, 4) for b in beta_x.tolist()]}")
-        else:
-            log(f"rules: rule 6 cross-model variant r6x for {m} skipped (no other model's pages)")
-    rule6_file = os.path.join(args.out, f"rule6_fit{args.tag}.json")
-    r6 = {}
-    for (m, t), st in stats.items():
-        beta, n_tr = fits[m]["within"]
-        if beta is None:
-            raise SystemExit(f"rules: no page rows for {m} (need {m}_*_pages.npz)")
-        pg = load_pages(args, m, t)
-        nl, H = st["n_layers"], st["n_kv_heads"]
-        eta_u, eta_w, cnt = aggregate(beta, pg, nl, H)
-        tasks_in = [tt for tt in args.tasks if load_pages(args, m, tt) is not None]
-        entry = {"eta": eta_u.tolist(), "eta_mass_weighted": eta_w.tolist(),
-                 "degenerate": (cnt == 0).tolist(), "pages": cnt.tolist(),
-                 "beta": beta.tolist(), "train": "within-model", "train_models": [m],
-                 "train_tasks": tasks_in, "train_rows": n_tr,
-                 "aggregation": "uniform mean of per-page sigmoid predictions",
-                 "eta_cross_model": None, "beta_cross_model": None, "cross_train_models": fits[m]["others"]}
-        beta_x, n_x = fits[m]["cross"]
-        if beta_x is not None:
-            eta_xu, _, _ = aggregate(beta_x, pg, nl, H)
-            entry.update({"eta_cross_model": eta_xu.tolist(), "beta_cross_model": beta_x.tolist(),
-                          "cross_train_rows": n_x})
-        st["rules"]["r6"] = entry
-        r6[f"{m}_{t}"] = {"deployed": {"train": "within-model", "train_models": [m], "train_tasks": tasks_in,
-                                       "train_rows": n_tr, "beta": beta.tolist()},
-                          "r6x": None if beta_x is None else
-                                 {"train": "cross-model", "train_models": fits[m]["others"],
-                                  "train_tasks": args.tasks, "train_rows": n_x, "beta": beta_x.tolist()}}
-        json.dump(st, open(os.path.join(args.out, f"{m}_{t}{args.tag}.json"), "w"))
-    json.dump({"created": now(), "ridge": args.rule6_ridge, "features": ["log((b+eps)/(a+eps))", "rho", "gamma_C-gamma_A"],
-               "fits": r6}, open(rule6_file, "w"), indent=1)
-    log(f"rules: rule 6 fits -> {rule6_file}")
-    # ---- table files
     for (m, t), st in stats.items():
         for rule in RULES:
             rr = st["rules"][rule]
             p, h = write_table(args, m, t, rule, rr["eta"], {"degenerate_count": int(np.sum(rr["degenerate"]))})
             log(f"rules: {m}/{t} {rule} -> {os.path.basename(p)} hash {h}")
-        for vname, (rule, key) in VARIANTS.items():
-            eta_v = st["rules"][rule].get(key)
-            if eta_v is None:
-                continue
-            p, h = write_table(args, m, t, vname, eta_v, {"variant_of": rule, "variant_key": key}, variant=True)
-            log(f"rules: {m}/{t} {vname} (variant of {rule}) -> {os.path.basename(p)} hash {h}"
-                + ("  == deployed table" if h == PB.eta_table_hash(st["rules"][rule]["eta"]) else ""))
         _print_eta_summary(st)
 
 
@@ -685,12 +451,12 @@ def stage_rules(args):
 def stage_regret(args):
     dev = torch.device(args.device)
     f = stats_file(args); st = json.load(open(f))
-    w, nl, nh, nkv, hd, D, g, Wh, Gh, Gi = model_weights(args, dev)
+    w, nl, nh, nkv, hd, D, g, Wh, Gh = model_weights(args, dev)
     layers = st["layers_done"]
     grid = st["grid"]
     tables = {}
-    for rule in RULES + list(VARIANTS):
-        p = os.path.join(table_dir(args, rule in VARIANTS), f"{args.model}_{args.task}_{rule}{args.tag}.json")
+    for rule in RULES:
+        p = os.path.join(table_dir(args), f"{args.model}_{args.task}_{rule}{args.tag}.json")
         if os.path.exists(p):
             tables[rule] = np.array(json.load(open(p))["eta"])
     tables["calib_grid_opt"] = np.array(st["best_grid_eta"]["calib"])
@@ -705,7 +471,7 @@ def stage_regret(args):
             for li in layers:
                 K = cap["K"][li, :, :L].float().to(dev); V = cap["V"][li, :, :L].float().to(dev)
                 q = cap["Q"][li, wi].float().to(dev).permute(1, 0, 2).reshape(nkv, g, cap["nq"], hd)
-                out = window_stats(acc, "test", li, q, K, V, L, qpos, Wh[li], Gh[li], Gi[li], grid, args,
+                out = window_stats(acc, "test", li, q, K, V, L, qpos, Wh[li], Gh[li], grid, args,
                                    rule_tables={k: v[li] for k, v in tables.items()})
                 for k in out:
                     d2[k][li] += out[k]

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Keep the eta-table sweep running until every cell is complete.
+# Keep the rule-1 eta-table sweep running until every cell is complete.
 #
 # Sibling of supervise_sweep.sh with the same guards -- an flock so only one
 # instance ever launches a sweep, the "launch produced no new records" strike
@@ -14,7 +14,7 @@ KV_PY="${KV_PY:-python}"
 MODELS="${MODELS:-ds-r1-qwen-7b ds-r1-llama-8b}"
 DATASETS="${DATASETS:-MATH50 AIME24 GPQA50c}"
 SEEDS="${SEEDS:-42 43 44 45 46 47 48 49}"
-RULES="${RULES:-r1 r2 r3 r4 r5 r6}"
+RULES="${RULES:-r1}"
 TABLES="${TABLES:-$KV_ROOT/results/eta_rules/tables}"
 GPUS="${GPUS:-0 1 2 3}"
 LOG="$KV_ROOT/logs/eta_rules"; HB="$LOG/supervisor.log"

@@ -84,7 +84,7 @@ def build_summary(paged_k, paged_v, Gh, eta, rank, qvar=None):
     # Tensor.__rtruediv__, i.e. tr.reciprocal() * float32(1-eta), so the
     # table path forms the same reciprocal and multiplies it by the float64
     # entries cast to float32 at the same point (verified bitwise in
-    # analysis/test_eta_rules.py, check 7). Heads whose entry is exactly 0
+    # analysis/test_eta_rules.py, check 2). Heads whose entry is exactly 0
     # take the plain-PCA branch (Xw = X) instead of an identity whitening, so
     # they match the scalar eta=0 path exactly too.
     eta_t = None
