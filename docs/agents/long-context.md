@@ -1,4 +1,4 @@
-# Brief: transfer OVAL's pieces to long-context understanding
+# Brief: transfer OVAL's pieces to long context (LongBench v2 and LongGenBench)
 
 Read [docs/agents/README.md](README.md) first: survey, then confirm the
 configuration with the user, then run. In this brief the confirmation step
@@ -27,8 +27,10 @@ reasoning only** (R1-distilled models, MATH50 / AIME24 / GPQA50c):
 
 The long-context numbers in `results/paper_tables.md` (README Table 2) are
 retrieval only: exact keys and values, `eta*` = best of five shared etas per
-cell. Your job is to bring pieces 2-4 to long-context understanding and
-measure the full pipeline there, on the paper's three long-context models:
+cell. Your job is to bring pieces 2-4 to long context and measure the full
+pipeline there, **on both benchmarks of Table 2 -- LongBench v2 (long-context
+understanding) and LongGenBench (long generation) -- and all three of the
+paper's long-context models** (confirmed by the user, 2026-11-03):
 
 | harness name | HF model |
 |---|---|
@@ -88,9 +90,13 @@ measure the full pipeline there, on the paper's three long-context models:
    re-run in the same harness as a control or taken from the paper (the
    14B LongBench v2 cell once needed within-harness controls:
    `scripts/lb2_controls.sh`).
-4. **Which benchmarks.** LongBench v2 is long-context understanding and is
-   the default. LongGenBench (long generation) is the other half of the
-   paper's Table 2; propose whether to include it.
+4. **The two benchmarks differ in regime, so propose calibration for each.**
+   LongBench v2 is a long prefill (up to 64K) and a short greedy answer;
+   LongGenBench generates up to 16K tokens with sampling (temperature 0.95,
+   top-p 0.95), much like the reasoning traces rule 1 was built on. A rule-1
+   table per (model, benchmark) is the default. Also propose how many
+   sampling seeds LongGenBench gets (the paper's protocol and the cost
+   decide).
 5. **A driver**, `scripts/long_context_pipeline.sh`, in the style of
    `scripts/full_pipeline.sh` (resumable, gates on free GPU memory, one
    step per stage), and a doc, `docs/6-long-context.md`, written as piece 6
@@ -100,12 +106,13 @@ measure the full pipeline there, on the paper's three long-context models:
 
 | setting | proposed |
 |---|---|
-| benchmark | LongBench v2, all 503 questions, Overall + Short / Medium / Long |
-| models | the three above |
-| retrieval | `--method spec_ret --page_rep oval --oval_rank 8`, avgSM, spec_ret 2 / 0.8, sink 128, recent 128, budget 1792, page 32, greedy, 64K truncation, bf16 records |
-| keys | `--oval_recon` |
+| benchmarks | LongBench v2, all 503 questions, Overall + Short / Medium / Long; LongGenBench, CR and CR x Acc |
+| models | the three above, on both benchmarks |
+| retrieval, LongBench v2 | `--method spec_ret --page_rep oval --oval_rank 8`, avgSM, spec_ret 2 / 0.8, sink 128, recent 128, budget 1792, page 32, greedy, 64K truncation, bf16 records (the paper's protocol, `scripts/lb2_eta_sweep.sh`) |
+| retrieval, LongGenBench | as above but sink 512, recent 512, spec_ret correction 0.9, temperature 0.95, top-p 0.95, 16K generation (the paper's protocol) |
+| keys | `--oval_recon` (scoring rank = reconstruction rank = 8) |
 | values | `--oval_vrank 16 --vbasis pca` (pending check 2) |
-| eta | `--eta_table` from rule 1 calibrated on held-out long-context data with rank-16 values (pending design 1) |
+| eta | `--eta_table` from rule 1, one table per (model, benchmark), calibrated on held-out data with rank-16 values (pending designs 1 and 4) |
 | reference | the paper's retrieval-only numbers (`results/paper_tables.md`), unless the user asks for a re-run |
 
 ## Machine and cost
