@@ -43,7 +43,7 @@ exact values.
 | key reconstruction rank, scoring fixed at 8 | `_recon1_cr{1,4,8,16,32}-` | qwen-7b | `key_rank_decoupled_qwen7b.md`, [docs/2-key-compression.md](../../docs/2-key-compression.md) |
 | value PCA rank | `_recon1_vr{1,4,8,16,32}_vpca-` (fixed eta) | qwen-7b | `value_rank_qwen7b.md`, [docs/3-value-compression.md](../../docs/3-value-compression.md) |
 | per-head eta, rule 1, values rank 8 | `_etab<hash>_q0_recon1_vr8_vpca-` | qwen-7b, llama-8b | `results/eta_rules/table.md`, [docs/4-per-head-eta.md](../../docs/4-per-head-eta.md) |
-| **full pipeline**, values rank 16 | `_etab<hash>_q0_recon1_vr16_vpca-` | to be run | `results/eta_rules/vr16/table.md`, [docs/5-full-pipeline.md](../../docs/5-full-pipeline.md) |
+| **full pipeline**, values rank 16 | `_etab<hash>_q0_recon1_vr16_vpca-` | to be run | `results/eta_rules/vr16/table_<model>.md`, [docs/5-full-pipeline.md](../../docs/5-full-pipeline.md) |
 
 `latency_memory_probe.json`: decode latency and record-slab bytes vs key rank
 (qwen-7b, 16K context), used in docs/2-key-compression.md.

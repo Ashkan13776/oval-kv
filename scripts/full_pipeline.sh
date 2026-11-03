@@ -13,7 +13,8 @@
 #   2. stats     rule 1's endpoint errors at eta = 0 and 1         [GPU, CALIB_GPU]
 #   3. rules     per-(layer, KV head) eta tables -> results/eta_rules/vr<VRANK>/tables
 #   4. sweep     supervised harness cells, k seeds x tasks x models [all GPUS]
-#   5. score     results/eta_rules/vr<VRANK>/table.md
+#   5. score     results/eta_rules/vr<VRANK>/table_<models>.md (one file per model set,
+#                so agents running different models never write the same file)
 #
 #   MODELS="ds-r1-qwen-7b ds-r1-llama-8b" GPUS="0 1 2 3" ./scripts/full_pipeline.sh
 #   MODELS=ds-r1-qwen-14b GPUS="0 1" SLOTS=1 MINFREE=40000 ./scripts/full_pipeline.sh
@@ -70,8 +71,9 @@ if want sweep; then
 fi
 
 if want score; then
+  TAB="$OUT/table_$(echo $MODELS | tr ' ' '+').md"
   $KV_PY analysis/eta_rules_table.py --models $MODELS --datasets $DATASETS --vrank "$VRANK" \
-      --eta_dir "$OUT" --out "$OUT/table.md" >> "$HB" 2>&1
-  say "scored -> $OUT/table.md"
+      --eta_dir "$OUT" --out "$TAB" >> "$HB" 2>&1
+  say "scored -> $TAB"
 fi
 say "DONE ($STEPS)"

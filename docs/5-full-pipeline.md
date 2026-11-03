@@ -28,16 +28,10 @@ per model**.
 
 ## Who runs what
 
-Split by model. Each model writes only its own files (see "What to commit"),
-so machines never touch the same file.
-
-| model | machine | status |
-|---|---|---|
-| `ds-r1-qwen-7b` | to be assigned (a machine with free 48GB GPUs) | not started |
-| `ds-r1-llama-8b` | same as qwen-7b | not started |
-| `ds-r1-qwen-14b` | separate machine (needs ~40GB free per cell) | not started |
-
-Update this table in your first commit when you start, and again when done.
+One agent per model, each with its own brief and status section in
+[docs/agents/](agents/README.md): `reasoning-qwen7b.md`,
+`reasoning-llama8b.md`, `reasoning-qwen14b.md`. Each model writes only its
+own files (see "What to commit"), so machines never touch the same file.
 
 ## Steps
 
@@ -80,7 +74,7 @@ subset.
 | `stats` | rule 1's endpoint errors (eta = 0, 1) on traces 1-4, with rank-16 values | `results/eta_rules/vr16/<model>_<task>.json` | minutes per (model, task) |
 | `rules` | eta* = clip((a-c)/(a+b-2c)) per (layer, KV head) | `results/eta_rules/vr16/tables/<model>_<task>_r1.json` | seconds |
 | `sweep` | supervised harness cells until all 24 per model are complete | `results/reasoning/<model>-spec_ret/*_etab<hash>_q0_recon1_vr16_vpca-*.jsonl` | 7B/8B: 3-5 h (MATH50), 7-8 h (AIME24, GPQA50c) per cell |
-| `score` | avg@8 / pass@8 and eta* statistics per (model, task) | `results/eta_rules/vr16/table.md` | seconds |
+| `score` | avg@8 / pass@8 and eta* statistics per (model, task) | `results/eta_rules/vr16/table_<model>.md` | seconds |
 
 The sweep gates on free GPU memory (`MINFREE`), so it waits rather than
 crashing if another user holds the GPUs; `logs/eta_rules/supervisor_vr16.log`
@@ -103,9 +97,9 @@ Push to `main` as you go (rebase first: `git pull --rebase`). Commit only:
 
 - `results/eta_rules/vr16/<model>_*.json` and `results/eta_rules/vr16/tables/<model>_*` (the tables the cells used),
 - `results/reasoning/<model>-spec_ret/*_vr16_vpca-*.jsonl` files whose tag is `etab<hash>` (complete seeds only),
-- `results/eta_rules/vr16/table.md` once your model is complete (regenerate with
-  `STEPS=score MODELS="<all finished models>" ./scripts/full_pipeline.sh`),
-- your row of the status table above.
+- `results/eta_rules/vr16/table_<model>.md` once your model is complete
+  (`STEPS=score MODELS=<model> ./scripts/full_pipeline.sh`),
+- the Status section of your brief in `docs/agents/`.
 
 Never commit `logs/` or the captures, and do not edit another model's files.
 

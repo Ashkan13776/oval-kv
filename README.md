@@ -36,6 +36,9 @@ combines them.
 | 4 | per-head eta | choose eta per (layer, KV head) with rule 1, a closed form fitted on calibration traces (`--eta_table`) | [docs/4-per-head-eta.md](docs/4-per-head-eta.md) |
 | 5 | **full pipeline** | all four together on long reasoning (MATH50, AIME24, GPQA50c; R1-Qwen-7B, R1-Llama-8B, R1-Qwen-14B; k = 8) -- **next run** | [docs/5-full-pipeline.md](docs/5-full-pipeline.md), `scripts/full_pipeline.sh` |
 
+Pieces 2-4 exist on long reasoning only; on long context (LongBench v2,
+LongGenBench) only retrieval has been run, and transferring the rest is
+under way. Agents: start at [docs/agents/README.md](docs/agents/README.md).
 [docs/README.md](docs/README.md) is the full map. The paper tables under
 "Results" below are piece 1 alone (exact keys and values, best of five etas).
 

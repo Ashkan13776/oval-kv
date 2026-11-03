@@ -19,7 +19,11 @@ four complementary ways, each tested on its own before they are combined:
 | 2 | key compression | [2-key-compression.md](2-key-compression.md) | `--oval_recon` (`--oval_recon_rank R`) | done: rank 8 = exact keys (k = 8, qwen-7b) |
 | 3 | value compression | [3-value-compression.md](3-value-compression.md) | `--oval_vrank R --vbasis pca` | done: rank 16 and 8 = lossless (k = 8, qwen-7b) |
 | 4 | per-head eta | [4-per-head-eta.md](4-per-head-eta.md) | `--eta_table <json>` | done at value rank 8 (qwen-7b, llama-8b): rule 1 >= the hand-picked eta |
-| 5 | **full pipeline** | [5-full-pipeline.md](5-full-pipeline.md) | all of the above, values rank 16 | **to run**: instructions and assignments |
+| 5 | **full pipeline** | [5-full-pipeline.md](5-full-pipeline.md) | all of the above, values rank 16 | **to run** on long reasoning (one agent per model) |
+| 6 | long context | [agents/long-context.md](agents/long-context.md) | pieces 2-4 transferred to LongBench v2 | **to design and run**; so far retrieval only (the paper's Table 2) |
+
+**Agents start at [agents/README.md](agents/README.md)**: survey the repo, confirm the
+configuration with the user, then run. One brief per agent.
 
 ## Supporting docs
 
