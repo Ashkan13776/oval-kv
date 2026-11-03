@@ -23,7 +23,7 @@
 # NOTE on spec_ret: the CUDA perf path (source/pred.py) has a genuine race on
 # this hardware -- same config twice gives different corruption. It is NOT used
 # here: accuracy/ is pure PyTorch and never imports freekv_cpp. Verified by
-# grepping the import graph; see docs/freekv-port.md.
+# grepping the import graph; see docs/harness/freekv-port.md.
 #
 # Resumable: pred.py skips a (model, dataset, eta, seed) cell whose output
 # .jsonl already exists.

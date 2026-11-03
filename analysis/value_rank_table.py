@@ -27,7 +27,7 @@ NPROB = {"MATH50": 50, "AIME24": 30, "GPQA50c": 50}
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--model", default="ds-r1-qwen-7b")
-ap.add_argument("--root", default=str(ROOT / "results/codec"))
+ap.add_argument("--root", default=str(ROOT / "results/reasoning"))
 ap.add_argument("--etamap", nargs="+", default=["MATH50:0.25", "AIME24:1.0", "GPQA50c:0.25"],
                 help="key eta per dataset")
 ap.add_argument("--ranks", type=int, nargs="+", default=[32, 16, 8, 4, 1])

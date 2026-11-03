@@ -4,14 +4,14 @@
 # value-compression cells (keys rank 8 + --oval_recon, values PCA rank VRANK), with
 # --eta_table <json> in place of --eta.
 #
-# Sibling of codec_reasoning_sweep.sh: same scheduler (SLOTS per GPU, MINFREE
+# Sibling of oval_reasoning_sweep.sh: same scheduler (SLOTS per GPU, MINFREE
 # gate, SETTLE), same per-seed completeness rule, its OWN queue file and logs,
 # so it never touches the keys-only sweep's queue. The queue is built by
 # analysis/eta_rules_queue.py, which matches the output tag exactly
 # (..._etab<hash>_q0_recon1_vr8_vpca-pQ2) so eta-table cells and fixed-eta
 # cells are never counted as each other.
 #
-#   KV_ROOT, KV_PY, FREEKV_DIR   as in codec_reasoning_sweep.sh
+#   KV_ROOT, KV_PY, FREEKV_DIR   as in oval_reasoning_sweep.sh
 #   MODELS     default "ds-r1-qwen-7b ds-r1-llama-8b"
 #   DATASETS   default "MATH50 AIME24 GPQA50c"   (queue order; MATH50 first)
 #   SEEDS      default "42 43 44 45 46 47 48 49"
@@ -38,7 +38,7 @@ RULES="${RULES:-r1}"
 TABLES="${TABLES:-$KV_ROOT/results/eta_rules/tables}"
 VRANK="${VRANK:-8}"
 GPUS="${GPUS:-0 1 2 3}"
-LOG="$KV_ROOT/logs/eta_rules"; OUT="$KV_ROOT/results/codec"
+LOG="$KV_ROOT/logs/eta_rules"; OUT="$KV_ROOT/results/reasoning"
 mkdir -p "$LOG" "$OUT"
 Q="$LOG/jobs_vr${VRANK}.txt"
 

@@ -170,12 +170,12 @@ index e4bd935..2a51ecf 100644
 +    parser.add_argument("--oval_rank", type=int, default=8,
 +                        help="OVAL basis rank")
 +    parser.add_argument("--oval_recon", action="store_true",
-+                        help="Use the OVAL records as a KEY CODEC: selected pages are "
++                        help="Use the OVAL records as the KEY STORE: selected pages are "
 +                             "reconstructed as mu + coef @ basis^T instead of read from "
 +                             "the full key cache. Selection is unchanged. Values, sink "
 +                             "and recent tokens stay exact.")
 +    parser.add_argument("--oval_vrank", type=int, default=None,
-+                        help="VALUE CODEC rank. When set, each page also stores an "
++                        help="OVAL VALUE COMPRESSION rank. When set, each page also stores an "
 +                             "output-aware rank-r value record and selected pages' "
 +                             "values are reconstructed from it instead of read from the "
 +                             "value cache. Sink and recent stay exact. Unset = values exact.")
@@ -227,11 +227,11 @@ index e4bd935..2a51ecf 100644
 +                        out_path += (f"_r{config.get('oval_rank', 8)}"
 +                                     f"_{_etag}"
 +                                     f"_q{int(os.environ.get('OVAL_QUANT', '1') != '0')}")
-+                        # A codec run and a selection-only run differ ONLY in this
++                        # A key-compression run and a selection-only run differ ONLY in this
 +                        # flag; without it in the path they overwrite each other.
 +                        if config.get("oval_recon"):
 +                            out_path += "_recon1"
-+                        # value codec rank: a values-exact run and a value-codec
++                        # value compression rank: a values-exact run and a value-compression
 +                        # run otherwise share every other tag
 +                        if config.get("oval_vrank") is not None:
 +                            out_path += f"_vr{int(config['oval_vrank'])}"
@@ -790,13 +790,13 @@ index 32ac2af..1c4a27c 100644
 -    sel_k = torch.gather(k, dim=1, index=sel_token_indices)
 -    sel_v = torch.gather(v, dim=1, index=sel_token_indices)
 +    if _use_oval and getattr(self, "oval_recon", False):
-+        # KEY CODEC. The records that drive selection are also the only copy of
++        # OVAL KEY COMPRESSION. The records that drive selection are also the only copy of
 +        # the keys: rebuild the selected pages as mu + coef @ basis^T instead of
 +        # reading the full key cache. Values, sink and recent tokens are exact,
 +        # exactly as in every baseline. Reconstructing only the SELECTED pages
 +        # is equivalent to storing every page compressed -- attention never
 +        # touches an unselected page -- so this is faithful, not an approximation
-+        # of the codec.
++        # of the compression.
 +        _bi = torch.arange(sel_page_indices.shape[0],
 +                           device=sel_page_indices.device)[:, None, None]
 +        _hi = torch.arange(sel_page_indices.shape[1],
@@ -811,10 +811,10 @@ index 32ac2af..1c4a27c 100644
 +        sel_k = _khat.reshape(_khat.shape[0], _khat.shape[1], -1, head_dim) \
 +                     .permute(0, 2, 1, 3).contiguous()
 +    elif _rep == "q4key":
-+        # KEY CODEC, quantisation flavour. The 4-bit copy that drives selection
++        # OVAL KEY COMPRESSION, quantisation flavour. The 4-bit copy that drives selection
 +        # is also the only copy of the paged keys, so attention must run on the
 +        # dequantised keys -- not on the exact ones. Scoring from the quantised
-+        # keys while attending with fp16 would charge this arm codec memory and
++        # keys while attending with fp16 would charge this arm compressed-key memory and
 +        # hand it uncompressed-key accuracy, which is the direct comparison
 +        # against OVAL's record and has to be like for like.
 +        _ek = torch.gather(k, dim=1, index=sel_token_indices)   # [b, P*page, H, d]
@@ -830,7 +830,7 @@ index 32ac2af..1c4a27c 100644
 +    else:
 +        sel_k = torch.gather(k, dim=1, index=sel_token_indices)
 +    if _use_oval and getattr(self, "oval_vrank", None) is not None:
-+        # VALUE CODEC, mirroring the key codec above: the selected pages' values
++        # OVAL VALUE COMPRESSION, mirroring the key compression above: the selected pages' values
 +        # are rebuilt from their output-aware value records. Sink and recent
 +        # stay exact, as for keys.
 +        _bi = torch.arange(sel_page_indices.shape[0],
@@ -1090,7 +1090,7 @@ index 7e50cbb..f75ba18 100644
 +                # build_summary clamps the rank to min(rank, page_size-1, d)
 +                # because centring costs one degree of freedom. Allocating the
 +                # UNCLAMPED rank leaves the surplus basis/coef columns as
-+                # torch.empty garbage, which _score and the codec then read --
++                # torch.empty garbage, which _score and the reconstruction then read --
 +                # so clamp the allocation to the same effective rank.
 +                module.oval_rank = min(int(config.get("oval_rank", 8)),
 +                                      module.page_size - 1, module.head_dim)
@@ -1113,7 +1113,7 @@ index 7e50cbb..f75ba18 100644
 +                    module.oval_Gh = _oval_metric(
 +                        module.o_proj.weight, num_dyn_attn_heads, module.head_dim, None
 +                    ).to(_dev)
-+                # VALUE codec: its own output-aware record with its own eta_V and
++                # OVAL VALUE compression: its own output-aware record with its own eta_V and
 +                # rank, built in the SAME G metric as the keys (G^{1/2} from this
 +                # layer's o_proj). Same clamp as the keys: centring costs one dof.
 +                _vr = config.get("oval_vrank", None)

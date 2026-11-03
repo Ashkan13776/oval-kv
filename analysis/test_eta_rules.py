@@ -134,13 +134,13 @@ with tempfile.TemporaryDirectory() as td:
     CAL.stage_rules(ns)                                    # same table, no --overwrite: no error, not rewritten
     check("4 re-running with an unchanged table is a no-op", os.path.getmtime(os.path.join(out, "tables", "mA_T1_r1.json")) == mt)
     # queue builder on the synthetic dataset (patch a copy: NPROB knows only the real datasets)
-    codec = os.path.join(td, "codec"); os.makedirs(codec)
+    cells = os.path.join(td, "cells"); os.makedirs(cells)
     qpy = os.path.join(td, "q.py")
     open(qpy, "w").write(open(ROOT / "analysis/eta_rules_queue.py").read()
                          .replace('NPROB = {"MATH50": 50, "AIME24": 30, "GPQA50c": 50}', 'NPROB = {"T1": 1}')
                          .replace("from paths import ROOT", f"ROOT = __import__('pathlib').Path({str(ROOT)!r})"))
     r = subprocess.run([sys.executable, qpy, "--models", "mA", "mB", "--datasets", "T1", "--seeds", "1", "2",
-                        "--tables_dir", os.path.join(out, "tables"), "--root", codec, "--count"],
+                        "--tables_dir", os.path.join(out, "tables"), "--root", cells, "--count"],
                        capture_output=True, text=True)
     check("4 queue: 2 models x 2 seeds = 4 seed-cells", r.stdout.strip() == "4", r.stdout + r.stderr)
 

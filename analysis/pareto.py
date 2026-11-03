@@ -22,7 +22,7 @@ cost nothing, i.e. optimistic. They are plotted with a distinct marker.
 import json, glob, re, os, sys
 import numpy as np
 
-D = "/home/shahbaa/kv-compression/results/freekv/codec"
+D = os.environ.get("PARETO_CELLS", "results/pareto_cells")   # raw Pareto cells: see docs/pareto-baselines.md
 MODEL, DS = "ds-r1-qwen-7b", "MATH50"
 PAT = r"\\boxed{((?:[^{}]|\{[^{}]*\})*)}"
 d_head, m_page = 128, 32

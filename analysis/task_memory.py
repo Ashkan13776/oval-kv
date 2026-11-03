@@ -28,7 +28,7 @@ import argparse, glob, json, re
 from pathlib import Path
 
 ap = argparse.ArgumentParser()
-ap.add_argument("--root", default="/home/shahbaa/oval-kv/results/codec")
+ap.add_argument("--root", default="/home/shahbaa/oval-kv/results/reasoning")
 ap.add_argument("--model", default="ds-r1-llama-8b")
 ap.add_argument("--layers", type=int, default=32)
 ap.add_argument("--kv_heads", type=int, default=8)

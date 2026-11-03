@@ -26,10 +26,10 @@ flock -n 9 || { echo "another eta-table supervisor holds the lock; exiting"; exi
 
 say () { echo "[$(date -Iseconds)] $*" | tee -a "$HB"; }
 todo () { $KV_PY "$KV_ROOT/analysis/eta_rules_queue.py" --models $MODELS --datasets $DATASETS \
-            --seeds $SEEDS --rules $RULES --tables_dir "$TABLES" --vrank "$VRANK" --root "$KV_ROOT/results/codec" --count; }
+            --seeds $SEEDS --rules $RULES --tables_dir "$TABLES" --vrank "$VRANK" --root "$KV_ROOT/results/reasoning" --count; }
 done_n () { $KV_PY "$KV_ROOT/analysis/eta_rules_queue.py" --models $MODELS --datasets $DATASETS \
-            --seeds $SEEDS --rules $RULES --tables_dir "$TABLES" --vrank "$VRANK" --root "$KV_ROOT/results/codec" --complete; }
-total_records () { cat "$KV_ROOT"/results/codec/*-spec_ret/*_etab*_vr"$VRANK"_*.jsonl 2>/dev/null | grep -c . ; return 0; }
+            --seeds $SEEDS --rules $RULES --tables_dir "$TABLES" --vrank "$VRANK" --root "$KV_ROOT/results/reasoning" --complete; }
+total_records () { cat "$KV_ROOT"/results/reasoning/*-spec_ret/*_etab*_vr"$VRANK"_*.jsonl 2>/dev/null | grep -c . ; return 0; }
 PRED_PAT="^${KV_PY} -u -m eval.reasoning.pred .*--eta_table"
 
 say "eta-table supervisor up: $(todo) seed-cells to run, $(done_n) complete"

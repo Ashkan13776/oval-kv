@@ -2,7 +2,7 @@
 # Keep the keys-only OVAL sweep running until every cell is complete.
 #
 # WHY THIS EXISTS, rather than chaining sweeps:
-# codec_reasoning_sweep.sh uses ONE fixed queue file, truncates it at startup
+# oval_reasoning_sweep.sh uses ONE fixed queue file, truncates it at startup
 # (`: > "$Q"`) and consumes it with `sed -i '1d'`. Two overlapping sweeps
 # therefore destroy each other's queue. This supervisor holds an flock and is
 # the only thing allowed to launch a sweep, so that can never happen.
@@ -17,7 +17,7 @@ M="${MODEL:-ds-r1-qwen-14b}"
 DATASETS="${DATASETS:-MATH50 AIME24 GPQA50c}"
 ETAS="${ETAS:-0.0 0.25 0.5 0.75 1.0}"
 SEEDS="${SEEDS:-42 43 44 45 46 47 48 49}"
-RES="$KV_ROOT/results/codec/${M}-spec_ret"
+RES="$KV_ROOT/results/reasoning/${M}-spec_ret"
 # VRANK mode: ETAS is the VALUE eta, the key eta comes per dataset from ETAMAP
 ETAMAP="${ETAMAP:-MATH50:0.25 AIME24:1.0 GPQA50c:0.25}"
 keta_of () { local kv; for kv in $ETAMAP; do [ "${kv%%:*}" = "$1" ] && echo "${kv#*:}"; done; }
@@ -89,7 +89,7 @@ while :; do
   say "launching sweep ($done_n/$TARGET complete, $(( TARGET - done_n )) to go)"
   MODEL="$M" DATASETS="$DATASETS" ETAS="$ETAS" SEEDS="$SEEDS" VRANK="${VRANK:-}" ETAMAP="$ETAMAP" VBASIS="$VBASIS" \
     GPUS="${GPUS:-0 1}" KV_ROOT="$KV_ROOT" KV_PY="${KV_PY:-python}" \
-    "$KV_ROOT/scripts/codec_reasoning_sweep.sh" \
+    "$KV_ROOT/scripts/oval_reasoning_sweep.sh" \
     >> "$KV_ROOT/logs/sweep_run.log" 2>&1 &
   SWEEP_PID=$!
 
@@ -143,7 +143,7 @@ while :; do
     say "sweep exited producing NO new records (strike $fails/3)"
     if [ "$fails" -ge 3 ]; then
       say "ABORT: three launches in a row computed nothing. Not burning the queue."
-      say "       check \$KV_ROOT/logs/codec_${M}_*.log for the per-cell error."
+      say "       check \$KV_ROOT/logs/oval_${M}_*.log for the per-cell error."
       exit 1
     fi
     sleep 60

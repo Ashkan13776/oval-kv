@@ -1,0 +1,239 @@
+{
+ "created": "2026-10-22T08:46:24",
+ "ridge": 0.001,
+ "features": [
+  "log((b+eps)/(a+eps))",
+  "rho",
+  "gamma_C-gamma_A"
+ ],
+ "fits": {
+  "ds-r1-qwen-7b_MATH50": {
+   "deployed": {
+    "train": "within-model",
+    "train_models": [
+     "ds-r1-qwen-7b"
+    ],
+    "train_tasks": [
+     "MATH50",
+     "AIME24",
+     "GPQA50c"
+    ],
+    "train_rows": 514188,
+    "beta": [
+     0.883008927639703,
+     0.20802817804468118,
+     -1.54707176897001,
+     -1.570849852853373
+    ]
+   },
+   "r6x": {
+    "train": "cross-model",
+    "train_models": [
+     "ds-r1-llama-8b"
+    ],
+    "train_tasks": [
+     "MATH50",
+     "AIME24",
+     "GPQA50c"
+    ],
+    "train_rows": 1179240,
+    "beta": [
+     0.35262056048608303,
+     -0.4637360172666663,
+     -0.3408202826417858,
+     -0.1393940952511484
+    ]
+   }
+  },
+  "ds-r1-qwen-7b_AIME24": {
+   "deployed": {
+    "train": "within-model",
+    "train_models": [
+     "ds-r1-qwen-7b"
+    ],
+    "train_tasks": [
+     "MATH50",
+     "AIME24",
+     "GPQA50c"
+    ],
+    "train_rows": 514188,
+    "beta": [
+     0.883008927639703,
+     0.20802817804468118,
+     -1.54707176897001,
+     -1.570849852853373
+    ]
+   },
+   "r6x": {
+    "train": "cross-model",
+    "train_models": [
+     "ds-r1-llama-8b"
+    ],
+    "train_tasks": [
+     "MATH50",
+     "AIME24",
+     "GPQA50c"
+    ],
+    "train_rows": 1179240,
+    "beta": [
+     0.35262056048608303,
+     -0.4637360172666663,
+     -0.3408202826417858,
+     -0.1393940952511484
+    ]
+   }
+  },
+  "ds-r1-qwen-7b_GPQA50c": {
+   "deployed": {
+    "train": "within-model",
+    "train_models": [
+     "ds-r1-qwen-7b"
+    ],
+    "train_tasks": [
+     "MATH50",
+     "AIME24",
+     "GPQA50c"
+    ],
+    "train_rows": 514188,
+    "beta": [
+     0.883008927639703,
+     0.20802817804468118,
+     -1.54707176897001,
+     -1.570849852853373
+    ]
+   },
+   "r6x": {
+    "train": "cross-model",
+    "train_models": [
+     "ds-r1-llama-8b"
+    ],
+    "train_tasks": [
+     "MATH50",
+     "AIME24",
+     "GPQA50c"
+    ],
+    "train_rows": 1179240,
+    "beta": [
+     0.35262056048608303,
+     -0.4637360172666663,
+     -0.3408202826417858,
+     -0.1393940952511484
+    ]
+   }
+  },
+  "ds-r1-llama-8b_MATH50": {
+   "deployed": {
+    "train": "within-model",
+    "train_models": [
+     "ds-r1-llama-8b"
+    ],
+    "train_tasks": [
+     "MATH50",
+     "AIME24",
+     "GPQA50c"
+    ],
+    "train_rows": 1179240,
+    "beta": [
+     0.35262056048608303,
+     -0.4637360172666663,
+     -0.3408202826417858,
+     -0.1393940952511484
+    ]
+   },
+   "r6x": {
+    "train": "cross-model",
+    "train_models": [
+     "ds-r1-qwen-7b"
+    ],
+    "train_tasks": [
+     "MATH50",
+     "AIME24",
+     "GPQA50c"
+    ],
+    "train_rows": 514188,
+    "beta": [
+     0.883008927639703,
+     0.20802817804468118,
+     -1.54707176897001,
+     -1.570849852853373
+    ]
+   }
+  },
+  "ds-r1-llama-8b_AIME24": {
+   "deployed": {
+    "train": "within-model",
+    "train_models": [
+     "ds-r1-llama-8b"
+    ],
+    "train_tasks": [
+     "MATH50",
+     "AIME24",
+     "GPQA50c"
+    ],
+    "train_rows": 1179240,
+    "beta": [
+     0.35262056048608303,
+     -0.4637360172666663,
+     -0.3408202826417858,
+     -0.1393940952511484
+    ]
+   },
+   "r6x": {
+    "train": "cross-model",
+    "train_models": [
+     "ds-r1-qwen-7b"
+    ],
+    "train_tasks": [
+     "MATH50",
+     "AIME24",
+     "GPQA50c"
+    ],
+    "train_rows": 514188,
+    "beta": [
+     0.883008927639703,
+     0.20802817804468118,
+     -1.54707176897001,
+     -1.570849852853373
+    ]
+   }
+  },
+  "ds-r1-llama-8b_GPQA50c": {
+   "deployed": {
+    "train": "within-model",
+    "train_models": [
+     "ds-r1-llama-8b"
+    ],
+    "train_tasks": [
+     "MATH50",
+     "AIME24",
+     "GPQA50c"
+    ],
+    "train_rows": 1179240,
+    "beta": [
+     0.35262056048608303,
+     -0.4637360172666663,
+     -0.3408202826417858,
+     -0.1393940952511484
+    ]
+   },
+   "r6x": {
+    "train": "cross-model",
+    "train_models": [
+     "ds-r1-qwen-7b"
+    ],
+    "train_tasks": [
+     "MATH50",
+     "AIME24",
+     "GPQA50c"
+    ],
+    "train_rows": 514188,
+    "beta": [
+     0.883008927639703,
+     0.20802817804468118,
+     -1.54707176897001,
+     -1.570849852853373
+    ]
+   }
+  }
+ }
+}

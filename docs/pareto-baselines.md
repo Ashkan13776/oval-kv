@@ -361,6 +361,12 @@ OVAL reconstruction path. Effect:
 
 The superseded cells are kept in `results/_superseded/`, not deleted.
 
+**Where the raw cells are.** The 26-arm cells were run on machine C and are
+not committed to this repo (only the figure and `results/figures/pareto_math50_b2048.txt`).
+The analysis scripts (`analysis/pareto.py`, `paired.py`, `front.py`,
+`plot_pareto.py`) read them from `$PARETO_CELLS/<model>/` (default
+`results/pareto_cells/`); point it at the run directory to regenerate.
+
 Two notes on scope. Every other arm was checked for the same fault and is
 consistent: Centroid, ShadowKV, RocketKV, Loki, SparQ and InfLLM are
 index-only, they attend with exact keys and are charged exact-key memory.

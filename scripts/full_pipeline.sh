@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # The complete OVAL configuration on long reasoning, end to end, for one or
-# more models. Read docs/full-pipeline.md first.
+# more models. Read docs/5-full-pipeline.md first.
 #
 #   retrieval  OVAL page scoring with the rank-8 key records (avgSM, spec_ret)
 #   keys       selected pages rebuilt from the rank-8 key records  (--oval_recon)

@@ -20,7 +20,7 @@ MM   = 2*d*B                                  # 512
 OVL  = (d*r + pg*r + d)*B                     # 2816
 OVLQ = r*(d//2+2) + pg*(r+2) + d+2            # 978
 RES  = budget//pg                             # resident pages for RaaS
-R="/home/shahbaa/oval-kv/results/codec/ds-r1-llama-8b-spec_ret"
+R="/home/shahbaa/oval-kv/results/reasoning/ds-r1-llama-8b-spec_ret"
 NEXP={"MATH50":50,"AIME24":30,"GPQA50c":50}
 
 print(f"llama-8b | {L}L x {NKV}kv, d={d}, page={pg}, rank={r} | per page per kv head: "

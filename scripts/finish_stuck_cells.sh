@@ -15,7 +15,7 @@ FREEKV_DIR="${FREEKV_DIR:-$KV_ROOT/third_party/FreeKV}"
 cd "$FREEKV_DIR/accuracy" || exit 1
 export PYTHONUNBUFFERED=1 OVAL_QUANT=0 KVC_MAX_TOKENS=32768
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
-G="${GPU:-0}"; OUT="$KV_ROOT/results/codec"; L="$KV_ROOT/logs"
+G="${GPU:-0}"; OUT="$KV_ROOT/results/reasoning"; L="$KV_ROOT/logs"
 
 run () {  # run <dataset> <seed> <eta>
   local d=$1 s=$2 e=$3

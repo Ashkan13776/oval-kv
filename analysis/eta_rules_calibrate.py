@@ -1,5 +1,5 @@
 """Offline calibration of eta rule 1, per (model, task), per (layer, KV head).
-See docs/eta-rules.md for the definitions.
+See docs/4-per-head-eta.md for the definitions.
 
 Stages (each resumable; outputs are never overwritten without --overwrite):
 

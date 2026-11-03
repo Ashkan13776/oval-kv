@@ -16,7 +16,7 @@ from paths import ROOT
 PAT = r"\\boxed{((?:[^{}]|\{[^{}]*\})*)}"
 
 ap = argparse.ArgumentParser()
-ap.add_argument("--root", default=str(ROOT / "results/codec"))
+ap.add_argument("--root", default=str(ROOT / "results/reasoning"))
 ap.add_argument("--models", nargs="+",
                 default=["ds-r1-qwen-7b", "ds-r1-llama-8b", "ds-r1-qwen-14b"])
 ap.add_argument("--datasets", nargs="+", default=["MATH50", "AIME24", "GPQA50c"])

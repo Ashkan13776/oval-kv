@@ -5,9 +5,9 @@ pages), fp16. Every arm keeps the full V cache and attends the same number of
 tokens; they differ in the per-page DIGEST they must store to choose, and OVAL
 additionally replaces the keys themselves with its record.
 """
-import json, glob, re, sys
+import json, glob, os, re, sys
 import numpy as np
-D = "/home/shahbaa/kv-compression/results/freekv/codec/ds-r1-qwen-7b"
+D = os.environ.get("PARETO_CELLS", "results/pareto_cells") + "/ds-r1-qwen-7b"   # raw Pareto cells: see docs/pareto-baselines.md
 PAT = r"\\boxed{((?:[^{}]|\{[^{}]*\})*)}"
 d, m, NP = 128, 32, 110
 B_K = d * m * 2            # exact keys per page

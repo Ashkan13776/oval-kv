@@ -8,7 +8,7 @@ cache shrinks). Fixed-window arms (StreamingLLM, sliding window) and the
 PyramidKV budget schedule are excluded -- the windows make no selection at all,
 and a budget schedule is orthogonal, layerable onto any scorer here. So is
 OVAL Retv. no-spec., which differs from OVAL Retv. only in FreeKV's
-speculative retrieval (docs/speculative-retrieval.md), a latency mechanism
+speculative retrieval (docs/harness/speculative-retrieval.md), a latency mechanism
 rather than a scoring rule. All of their results stay on disk;
 analysis/front.py prints the full table.
 
@@ -30,7 +30,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from matplotlib.lines import Line2D
 
-D = "results/freekv/codec/ds-r1-qwen-7b"
+D = os.environ.get("PARETO_CELLS", "results/pareto_cells") + "/ds-r1-qwen-7b"   # raw Pareto cells: see docs/pareto-baselines.md
 PAT = r"\\boxed{((?:[^{}]|\{[^{}]*\})*)}"
 
 # ---------------------------------------------------------------- memory model
@@ -125,7 +125,7 @@ def memory(tag, fam, exact, digest, budget):
                  because the cache genuinely shrinks. Capped at L_REF.
     retrieval  : the whole cache stays resident, so K and V for every token,
                  plus the per-page digest it stores to decide what to attend.
-    codec      : as retrieval, except the PAGED keys are replaced by the record
+    OVAL Retv.+Comp. : as retrieval, except the PAGED keys are replaced by the record
                  (`exact=False`). The sink and recent keys are not paged and
                  stay exact -- charging zero for them would be a discount the
                  method does not earn.

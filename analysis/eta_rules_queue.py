@@ -5,7 +5,7 @@ identified by the content hash the harness puts in the output filename
 (`_etab<hash>`, see oval/page_basis.py::eta_table_hash).
 
 A seed is queued only if its .jsonl holds fewer records than the dataset has
-problems (the same per-seed completeness rule as scripts/codec_reasoning_sweep.sh),
+problems (the same per-seed completeness rule as scripts/oval_reasoning_sweep.sh),
 so the builder is safe to re-run at any time. Order: datasets in the given
 order (MATH50 first: cheapest), then models, then seeds.
 
@@ -26,7 +26,7 @@ ap.add_argument("--datasets", nargs="+", default=["MATH50", "AIME24", "GPQA50c"]
 ap.add_argument("--seeds", nargs="+", type=int, default=list(range(42, 50)))
 ap.add_argument("--rules", nargs="+", default=["r1"])
 ap.add_argument("--tables_dir", default=str(ROOT / "results/eta_rules/tables"))
-ap.add_argument("--root", default=str(ROOT / "results/codec"))
+ap.add_argument("--root", default=str(ROOT / "results/reasoning"))
 ap.add_argument("--rank", type=int, default=8)
 ap.add_argument("--vrank", type=int, default=8)
 ap.add_argument("--write", default=None, help="write the job lines here (model|dataset|seed|hash|table)")

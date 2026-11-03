@@ -5,14 +5,14 @@ Everything is read from the calibration stats (results/eta_rules/<model>_<task>.
 on a 21-point grid, on the calibration traces (1-4) and the held-out traces
 (5-6); `rules.r1` holds the endpoint sums a, b, c and the chosen eta*.
 L_h(eta) = sum_q ||Delta_h(q)||^2 / sum_q ||u_h(q)||^2, Delta_h the KV head's
-residual-stream error vs dense attention (docs/eta-rules.md).
+residual-stream error vs dense attention (docs/4-per-head-eta.md).
 
 One row per model, one panel per layer (spread over the depth), the first
 --heads KV heads of each: measured L(eta) on the calibration split as % above
 the head's minimum over eta (dots), rule 1's quadratic
 f(eta) = (1-eta)^2 a + eta^2 b + 2 eta (1-eta) c built from the two endpoints
 only (line, same scale), and its eta* (star). No titles; the caption is in
-docs/eta-rules.md.
+docs/4-per-head-eta.md.
 
   python analysis/plot_eta_rule1.py [--out results/eta_rules/figures/eta_rule1_error]
 """

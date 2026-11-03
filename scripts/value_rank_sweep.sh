@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Value-codec rank sweep (results/codec/value_rank_qwen7b.md, docs/value-codec.md).
+# OVAL value compression: rank sweep (results/reasoning/value_rank_qwen7b.md, docs/3-value-compression.md).
 #   keys:   rank 8 for scoring and reconstruction (--oval_recon), eta fixed per
 #           dataset by ETAMAP -- identical to the keys-only OVAL compression protocol
 #   values: plain PCA (--vbasis pca) at each rank in VRANKS; no value eta
