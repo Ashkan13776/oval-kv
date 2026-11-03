@@ -8,7 +8,121 @@ configuration with the user, then run.
 _Owned by the agent running this brief. Update it at each step: survey
 report, confirmed configuration (with date), progress, results, deviations._
 
-- not started
+### 2026-11-03 14:30: calibration done, sweep running
+
+**Rule 1 at value rank 16** (`results/eta_rules/vr16/`, endpoints only, 6 seed-7
+traces per task, 4 calibrate). Layers >= 1, 248 (layer, KV head) entries, 0
+degenerate in every table:
+
+| task | hash | eta mean / median | at0 / at1 | vs vr8 table: corr, mean abs diff | vr8 mean / at1 | test-split error L(0) / L(1), vr16 (vr8) |
+|---|---|---|---|---|---|---|
+| MATH50 | `6fbcdc9f` | 0.841 / 1.000 | 0.05 / 0.60 | 0.969, 0.031 | 0.869 / 0.65 | 1.90% / 1.42% (2.13 / 1.64) |
+| AIME24 | `85d84e24` | 0.710 / 0.839 | 0.09 / 0.36 | 0.963, 0.068 | 0.774 / 0.47 | 1.38% / 1.28% (1.60 / 1.47) |
+| GPQA50c | `cda5c9d0` | 0.770 / 0.911 | 0.08 / 0.44 | 0.969, 0.048 | 0.815 / 0.52 | 2.22% / 1.99% (2.60 / 2.32) |
+
+The tables are close to the rank-8 ones, as the brief expected, but shifted
+consistently toward lower eta. The share of heads at eta = 1 falls by 5-11
+points. The output error is 11-15% lower at both endpoints, since the values
+are better. Calibration wall time: about 21 min of capture plus about 20 min
+of stats per task. The stats step is not "minutes" as
+`docs/5-full-pipeline.md` says.
+
+**Sweep.** Started 14:10. Every cell failed within about 12 s at the first
+launch: flashinfer's JIT build of the `norm` op picked up the base conda's
+`x86_64-conda-linux-gnu-cc`, inherited through `CC`/`CXX`, which fails on
+`::timespec_get`. I stopped the sweep before any result was written, set
+`CC=/usr/bin/gcc CXX=/usr/bin/g++` (gcc 11.4), pre-built the `norm` and `rope`
+JIT ops (the only flashinfer ops the harness uses), and relaunched with
+`STEPS="sweep score"` at 14:29. The first file is
+`MATH50-...-oval_r8_etab6fbcdc9f_q0_recon1_vr16_vpca-pQ2-llb0-pQcs0.9-skl1-t0.6-topp0.95-Mg16384.jsonl`,
+which has the correct tags. Progress: 0/24 seed-cells complete.
+
+### 2026-11-03: configuration confirmed by the user
+
+- The configuration in "Proposed configuration" below, unchanged.
+  Keys rank 8 for scoring and reconstruction. Values PCA rank 16. Rule-1 eta
+  per (layer, KV head), recalibrated at value rank 16 from the endpoints only
+  (`--ngrid 2`, no regret stage).
+- **No fixed-eta baseline**; per the user it exists elsewhere. Open question 2
+  is answered "no".
+- Machine: 4 x RTX A6000 48 GB, `GPUS="0 1 2 3" SLOTS=2 MINFREE=20000`,
+  calibration on GPU 0. Disk freed to 104 GB at the user's request.
+- Env `ovalkv`: python 3.11, torch 2.8.0+cu128, transformers 4.45.2,
+  flash-attn 2.8.3, flashinfer 0.2.4 (JIT), CUDA 12.8 nvcc in the env,
+  `TORCH_CUDA_ARCH_LIST=8.6`. `setup.sh` ran clean. Both unit-test suites pass.
+- Command: `MODELS=ds-r1-llama-8b GPUS="0 1 2 3" SLOTS=2 MINFREE=20000 ./scripts/full_pipeline.sh`.
+
+### 2026-11-03: survey (step 1)
+
+**The four pieces.** OVAL stores a rank-r record (`mu`, basis `B`, coefficients
+`C`) of every 32-token page per KV head. Its basis comes from
+`M_eta = (1-eta) key PCA + eta output term (W_O metric)`.
+1. *Retrieval*: score each page by the logsumexp of its rank-8 reconstructed
+   logits, combine over GQA with avgSM, and attend the top 2048 tokens (plus
+   sink 512 and recent 512, which the harness adds on top). FreeKV spec_ret
+   stays unchanged. Flags: `--method spec_ret --page_rep oval --oval_rank 8 --eta E`.
+   Tags: `oval_r8_eta<E>`, `q0` (bf16 records, `OVAL_QUANT=0`).
+2. *Key compression*: the selected pages' keys are rebuilt from the same
+   rank-8 records, so the records are the key store. Flag: `--oval_recon`,
+   tag `_recon1`. Evidence (qwen-7b): rank 8 is no different from exact keys.
+3. *Value compression*: the selected pages' values are rebuilt from per-page
+   plain-PCA records. Flags: `--oval_vrank 16 --vbasis pca`, tag `_vr16_vpca`.
+   Evidence (qwen-7b): ranks 16 and 8 are within noise of lossless.
+4. *Per-head eta*: rule 1, `eta* = clip((a-c)/(a+b-2c))`, computed from the
+   output errors at eta = 0 and 1 per (layer, KV head). The errors are
+   measured on seed-7 calibration traces (4 calibrate, 2 test), with the
+   method's own sparse attention, including the value reconstruction. Flag:
+   `--eta_table <json>`, tag `etab<8-hex content hash>` in place of `eta<E>`.
+   The full pipeline recalibrates at value rank 16.
+
+The full pipeline turns on all four:
+`..._oval_r8_etab<hash>_q0_recon1_vr16_vpca-pQ2-llb0-pQcs0.9-skl1-t0.6-topp0.95-Mg16384[-seedS].jsonl`.
+`scripts/full_pipeline.sh` runs capture, then stats (`--vrank 16 --ngrid 2`),
+then rules (writing `results/eta_rules/vr16/tables`), then the sweep
+(`supervise_eta_tables.sh` and `eta_table_sweep.sh`, `jobs_vr16.txt`), then
+score.
+
+**On disk for ds-r1-llama-8b.** Eta sweep with keys rebuilt and exact values:
+`_eta{0.0..1.0}_q0_recon1`, 15 cells x 8 seeds, all complete. Best shared eta
+is 0.75 / 0.75 / 0.25. Rule 1 at value rank 8: `etab{ee278def,735fb9c7,0649aee7}_..._vr8_vpca`,
+8/8 seeds each. Its stats used `ngrid 21` with a regret block. Nothing exists
+at vr16, and `results/eta_rules/vr16/` does not exist. Calibration captures
+are not in git.
+
+**CPU checks on this machine.** `test_eta_rules.py` printed "all checks passed".
+`test_page_basis.py` passed checks 1-11. A queue dry-run against the rank-8
+tables reports 24/24 complete, as it should. Against the empty vr16 tables it
+reports 3 tables missing.
+
+**Inconsistent or unclear (not worked around):**
+- Per-cell time: this brief and `harness/parallel-runs.md` give 2.9 / 5.3 / 5.4 h.
+  `5-full-pipeline.md` gives 3-5 h for MATH50 and 7-8 h for AIME24 and GPQA50c.
+- The full pipeline calibrates with `--ngrid 2`. The rank-8 llama/qwen stats
+  used `ngrid 21` with the `regret` stage, so the vr16 table will have no
+  regret column. Rule 1's table is the same either way, since it uses only
+  the endpoints.
+- `docs/2-key-compression.md`, `results/reasoning/README.md` (`cr<R>`) and
+  `scripts/oval_recon_rank_sweep.sh` use `--oval_recon_rank`, but
+  `patches/freekv.patch` defines no such flag. That script would fail at
+  argparse. It does not affect this run (reconstruction rank = scoring rank = 8).
+- The queue and supervisor treat missing tables as "0 seed-cells to run", so
+  the supervisor would log ALL COMPLETE. `full_pipeline.sh` does not pass
+  `--require_all`. The step-2 check catches this.
+- In `supervise_eta_tables.sh`, the stall restart uses `pkill -f "^$KV_PY -u -m eval.reasoning.pred .*--eta_table"`.
+  That pattern matches across the whole machine, so it would also kill another
+  agent's eta-table cells running on the same machine with the same interpreter.
+  The same applies to the `pgrep` "ours" count. Two checkouts are safe only on
+  separate machines or separate interpreters.
+- A fixed-eta baseline at vr16 for llama needs a `BASE_ETA` entry in the shared
+  `analysis/eta_rules_table.py`. Its cells (`_eta<E>_q0_recon1_vr16_vpca`) are
+  not in "Files you own".
+- `docs/5-full-pipeline.md` describes the stats stage's cost as "minutes".
+  This machine has no measurement yet.
+
+**Machine (this one).** 4 x RTX A6000 48 GB, all idle. 128 CPU, 251 GB RAM.
+**Root disk: 16 GB free (100% used). Too little for the run** (see the proposal).
+No env with the harness pins (transformers 4.45.2, flash-attn, flashinfer 0.2.4).
+The model weights are not cached.
 
 ## The task
 
