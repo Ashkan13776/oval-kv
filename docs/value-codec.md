@@ -1,6 +1,6 @@
-# Value codec: compressing values as well as keys
+# OVAL value compression: compressing values as well as keys
 
-The key codec (`--oval_recon`) rebuilds the selected pages' keys from their
+OVAL key compression (`--oval_recon`) rebuilds the selected pages' keys from their
 rank-8 records. This study also replaces their **values** with a low-rank
 record, so both halves of the paged cache are compressed. Sink and recent
 tokens stay exact for both, as in every baseline.
@@ -14,7 +14,7 @@ pass@k. One cell per (dataset, value rank).
 |---|---|
 | keys | rank 8 for scoring and reconstruction; eta fixed per dataset: MATH50 0.25, AIME24 1.0, GPQA50c 0.25 |
 | values | plain PCA of the centred page values (`--vbasis pca`), ranks 1, 4, 8, 16, 32 |
-| protocol | identical to the keys-only codec runs: B=2048, sink/recent 512, page 32, avgSM, spec_ret 2 / 0.9, T=0.6, top-p 0.95, max_gen 16384, bf16 records |
+| protocol | identical to the keys-only OVAL compression runs: B=2048, sink/recent 512, page 32, avgSM, spec_ret 2 / 0.9, T=0.6, top-p 0.95, max_gen 16384, bf16 records |
 
 **Rank 64 is not run.** A centred 32-token page has rank at most 31, so a
 request for 32 or 64 clamps to 31 and reconstructs exactly (0.3% residual in
@@ -38,7 +38,7 @@ Against the lossless rank-32 reference from the same sweep, **values compress to
 rank 8 at no measurable cost on any task**; rank 4 costs about 8 points on
 AIME24 (significant) and nothing measurable on MATH50 or GPQA50c; rank 1 fails
 on all three. Value compression does not explain the AIME24 gap to dense --
-that gap is there with lossless values, so it comes from the key codec.
+that gap is there with lossless values, so it comes from the OVAL key compression.
 
 ## The value record
 
@@ -86,7 +86,7 @@ decode is too peaked for the first-order term to matter.
   no record from any of them (the longest normal machine-wide gap is ~8 min),
   rather than only logging.
 - **Glob collisions.** Every `..._recon1*` glob (sweep, supervisor, scorer)
-  would have mixed value-codec cells into keys-only cells. All now match the
+  would have mixed value-compression cells into keys-only cells. All now match the
   tag exactly (`_recon1-pQ2` vs `_recon1_vr16_vpca-pQ2`).
 
 A resumed cell re-seeds at restart, so problems after a resume are drawn from a

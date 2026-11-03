@@ -1,10 +1,10 @@
-# Value codec rank sweep -- ds-r1-qwen-7b, k=8
+# OVAL value compression: rank sweep -- ds-r1-qwen-7b, k=8
 
 Keys and values both compressed on the selected pages. Keys: rank 8 for
 scoring and reconstruction (`--oval_rank 8 --oval_recon`), key eta fixed per
 task (MATH50 0.25, AIME24 1.0, GPQA50c 0.25). Values: plain PCA of the centred
 page values (`--oval_vrank R --vbasis pca`), R in {32, 16, 8, 4, 1}. Sink and
-recent tokens exact. Protocol otherwise identical to every codec cell (B=2048,
+recent tokens exact. Protocol otherwise identical to every OVAL compression cell (B=2048,
 sink/recent 512, page 32, avgSM, spec_ret 2 / 0.9, T=0.6, top-p 0.95,
 max_gen 16384, bf16 records, seeds 42-49). Method and derivation:
 [`docs/value-codec.md`](../../docs/value-codec.md).
@@ -52,14 +52,14 @@ PCA rank 1              8   50    21.75    46.00   -14.50 [-20.50, -8.50] *  -16
   column (`_cr8`, exact values) comes from the decoupled-rank ablation run on
   a different stack (torch 2.5.1/cu121 vs 2.8/cu128); it sits 1-5 points above
   even the lossless rank-32 run, so that column carries stack/seed noise of
-  that size and should not be read as a value-codec effect.
+  that size and should not be read as a value-compression effect.
 - **Rank 16 and rank 8 are free.** Within noise of lossless on all three tasks
   (largest gap -2.50, every CI includes 0).
 - **Rank 4 costs on AIME24 only:** -7.92 [-14.17, -2.50]. MATH50 -1.00 and
   GPQA50c -2.75 are not distinguishable from 0. AIME24 has the longest traces,
   so the largest share of attention goes through compressed pages.
 - **Rank 1 fails everywhere:** -9.75 / -26.67 / -14.50.
-- **The AIME24 gap to dense is the key codec's, not the value codec's.** Dense
+- **The AIME24 gap to dense is the key compression's, not the value compression's.** Dense
   is 55.00 / 83.33 (machine A); lossless values still give 47.92.
 - n=50 (30 for AIME24) problems x 8 seeds; the CIs are paired over problems,
   which removes problem difficulty. Several ranks are compared, so treat a

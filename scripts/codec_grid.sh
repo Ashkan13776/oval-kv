@@ -9,7 +9,7 @@
 # compressed -- attention never touches an unselected page.
 #
 # Config is the paper's reasoning protocol, identical in every cell. Rank and
-# the codec on/off flag are the ONLY things that vary.
+# the reconstruction on/off flag are the ONLY things that vary.
 #
 # eval.reasoning.pred resumes: a complete cell exits at once, a partial one
 # continues from where it stopped.

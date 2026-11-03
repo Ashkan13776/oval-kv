@@ -5,7 +5,7 @@ coefficient eta (`oval/page_basis.py::build_summary`). The main method sets
 eta **per (layer, KV head)** with a closed-form rule (rule 1) fitted offline
 on a few calibration traces, instead of sweeping a shared eta on accuracy.
 Evaluated on `ds-r1-qwen-7b` and `ds-r1-llama-8b`, MATH50 / AIME24 / GPQA50c,
-k = 8 seeds, in the value-codec configuration (keys rank 8 scored and
+k = 8 seeds, in the OVAL value-compression configuration (keys rank 8 scored and
 reconstructed, values plain PCA rank 8, FreeKV spec_ret protocol), against
 the fixed-eta qwen cells (MATH50 0.25 / AIME24 1.0 / GPQA50c 0.25,
 `..._eta{E}_q0_recon1_vr8_vpca`) and an **offline** fine-grid optimum per head
@@ -243,7 +243,7 @@ from later sequences.
 
 Caveats:
 
-- The perf engine has no kernel for the key/value codec, so the OVAL arms
+- The perf engine has no kernel for the OVAL key/value reconstruction, so the OVAL arms
   recall EXACT KV for the selected pages; these numbers time selection, not
   reconstruction.
 - At 16K context the full cache fits on one A6000 and full attention is the

@@ -1,4 +1,4 @@
-"""avg@k and pass@k for the long-reasoning codec grid.
+"""avg@k and pass@k for the long-reasoning OVAL grid.
 
 avg@k  = accuracy averaged over the k sampled generations.
 pass@k = fraction of problems solved by AT LEAST ONE of the k generations.
@@ -23,7 +23,7 @@ ap.add_argument("--datasets", nargs="+", default=["MATH50", "AIME24", "GPQA50c"]
 ap.add_argument("--etas", nargs="+", default=["0.0", "0.25", "0.5", "0.75", "1.0"])
 ap.add_argument("--rank", type=int, default=8)
 ap.add_argument("--vrank", type=int, default=None,
-                help="value-codec rank (cells tagged _vr<r>_veta<e>); --etas are then the "
+                help="value-compression rank (cells tagged _vr<r>_veta<e>); --etas are then the "
                      "VALUE etas and the key eta per dataset comes from --etamap")
 ap.add_argument("--vbasis", default="pca", choices=["pca", "oval"],
                 help="with --vrank: pca = plain value PCA (one row per dataset), "
@@ -75,7 +75,7 @@ for model in A.models:
         lines = [report("dense (FullKV)", f"{A.root}/{model}-full/{ds}-*.jsonl", nexp)]
         for e in (["pca"] if A.vrank is not None and A.vbasis == "pca" else A.etas):
             if A.vrank is None:
-                ke, vt, label = e, "", f"codec r={A.rank} eta={e}"
+                ke, vt, label = e, "", f"OVAL r={A.rank} eta={e}"
             else:
                 ke = KETA[ds]
                 vt = f"_vr{A.vrank}_vpca" if e == "pca" else f"_vr{A.vrank}_veta{e}"

@@ -24,7 +24,7 @@ Implementation: [`oval/page_basis.py`](oval/page_basis.py).
 
 ## Start here: current method and the next run
 
-The method has grown from a retrieval digest into a full cache codec. The
+The method has grown from a retrieval digest into full KV-cache compression. The
 current configuration combines four pieces, each tested on its own first:
 
 | piece | setting | details |
@@ -38,7 +38,7 @@ current configuration combines four pieces, each tested on its own first:
 AIME24, GPQA50c; R1-Qwen-7B, R1-Llama-8B, R1-Qwen-14B; k = 8). Instructions,
 assignments and what to commit: [`docs/full-pipeline.md`](docs/full-pipeline.md);
 one command: `scripts/full_pipeline.sh`. The tables in "Results" below predate
-the codec and use a fixed eta with exact keys and values.
+OVAL compression and use a fixed eta with exact keys and values.
 
 ## What this repo contains
 
@@ -132,8 +132,8 @@ single fixed configuration.
 
 In these tables OVAL replaces only the page *digest* used for selection: the
 retrieved pages are attended with their **original** keys and values, so they
-measure retrieval quality, not cache compression. (The key and value codecs
+measure retrieval quality, not cache compression. (The OVAL key and value compression
 and per-head eta are the newer configuration; see "Start here".) Using the rank-8 basis to *approximate* attention
 instead costs 20.1% relative error in the attention output (it captures 76% of
 centred-key energy), while the same basis retains 99.6% of true top-32
-attention mass for ranking: a good index, a poor codec.
+attention mass for ranking: a good index, a poor reconstruction.

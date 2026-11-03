@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Keep the codec sweep running until every cell is complete.
+# Keep the keys-only OVAL sweep running until every cell is complete.
 #
 # WHY THIS EXISTS, rather than chaining sweeps:
 # codec_reasoning_sweep.sh uses ONE fixed queue file, truncates it at startup

@@ -1,4 +1,4 @@
-# Decoupling the scoring rank from the codec rank -- ds-r1-qwen-7b
+# Decoupling the scoring rank from the reconstruction rank -- ds-r1-qwen-7b
 
 The OVAL record does two jobs at once: it **scores** pages (which to attend)
 and, under `--oval_recon`, it **reconstructs** the keys of the pages that win.
@@ -73,7 +73,7 @@ Paired against the rank-8 arm (same seeds), avg@8:
 **Rank 8 is the right operating point on all three tasks.** Every arm above it
 -- including exact reconstruction -- is statistically indistinguishable from
 rank 8 (six comparisons, all p >= 0.34). Exact keys buy nothing over the rank-8
-codec, which is the strongest form of the claim that the codec is not what is
+reconstruction, which is the strongest form of the claim that reconstruction is not what is
 costing accuracy.
 
 **Below rank 8 the penalty scales with task difficulty**, and steeply:

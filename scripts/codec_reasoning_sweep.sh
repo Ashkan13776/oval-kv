@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Long-reasoning sweep for the OVAL key codec: eta x seed grid at rank 8.
+# Long-reasoning sweep for OVAL key compression: eta x seed grid at rank 8.
 #
 # Produces avg@k / pass@k over k seeds for
 #   dense    FullKV                                     (DENSE=1)
@@ -12,7 +12,7 @@
 # scheduler, and never lets two processes write the same .jsonl.
 #
 # Config is the paper's reasoning protocol and is identical in every cell;
-# eta, seed and the codec flag are the only things that vary.
+# eta, seed and the reconstruction flag are the only things that vary.
 #
 #   KV_ROOT      repo root            (default: this script's parent)
 #   KV_PY        python to use        (default: python)
@@ -48,9 +48,9 @@ ETAS="${ETAS:-0.0 0.25 0.5 0.75 1.0}"
 SEEDS="${SEEDS:-42 43 44 45 46 47 48 49}"
 GPUS="${GPUS:-0 1 2 3}"
 NSEED=$(echo $SEEDS | wc -w)
-# value codec: tags the output path _vr<r> and the per-cell logs. The codec glob
+# value compression: tags the output path _vr<r> and the per-cell logs. The keys-only glob
 # below matches the tag EXACTLY (..._recon1${VTAG}-pQ2), so a values-exact cell
-# and a value-codec cell are never counted as each other.
+# and a value-compression cell are never counted as each other.
 VRANK="${VRANK:-}"
 VBASIS="${VBASIS:-pca}"
 [ -n "$VRANK" ] && [ "$VBASIS" = "pca" ] && ETAS="pca"   # one cell per dataset

@@ -10,7 +10,7 @@ Checks, in order of what would silently corrupt results:
   5. G = W^T W is summed over the right GQA group
   6. logsumexp scorer reproduces the exact page mass when rank == page_size
   7. the rank clamp fires
-Value codec (build_value_summary):
+OVAL value compression (build_value_summary):
   8. plain PCA (Gh=None, the configuration being swept) == Eckart-Young on the
      centred values, every rank swept, and eta is ignored
   9. full rank (page-1) reconstructs exactly; a rank-64 request clamps to 31
@@ -95,7 +95,7 @@ print(f"6. rank=page-1 scorer vs exact lse    : {(approx.double()-exact).abs().m
 _, bs4, _ = build_summary(K, V, None, 0.0, page)      # over-rank request
 print(f"7. rank clamped {page} -> {bs4.shape[-1]:<21}: {'OK' if bs4.shape[-1]==page-1 else 'NOT CLAMPED'}")
 
-# ---- value codec --------------------------------------------------------
+# ---- value compression --------------------------------------------------------
 Yv = V * torch.logspace(0, -2, hd).double()               # anisotropic values
 Yc = Yv.permute(0,1,3,2,4) - Yv.permute(0,1,3,2,4).mean(3, keepdim=True)
 def vrec(rec): nu, Dm, T = (t.double() for t in rec); return T @ Dm.transpose(-1,-2) + nu.unsqueeze(-2)

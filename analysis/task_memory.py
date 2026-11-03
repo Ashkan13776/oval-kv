@@ -1,4 +1,4 @@
-"""Per-task projected persistent KV storage for the OVAL key codec.
+"""Per-task projected persistent KV storage for the OVAL key compression.
 
 Computed from the ACTUAL sequence lengths of the evaluation runs (input_len +
 output_len of every generation on disk), not from a fixed context example.
@@ -11,7 +11,7 @@ Procedure, per generation:
   retainedK  = (seq - npages*page) * d * B * L * Hkv
                ^ sink + recent + ANY incomplete trailing page; when
                  seq < sink+recent+page this is the whole sequence and the
-                 codec never activates (summary = 0).
+                 compression never activates (summary = 0).
   denseK     = seq * d * B * L * Hkv ;  denseV = denseK
   V_total    = denseV   (values are never compressed; retained values are
                          already inside denseV -- counted once, not added again)

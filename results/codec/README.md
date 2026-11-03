@@ -1,4 +1,4 @@
-# OVAL records as a key codec — rank sweep
+# OVAL records as the key store — rank sweep
 
 Normally the records only **select** pages, and pages surviving top-k are
 attended with original keys. With `--oval_recon` the selected pages are instead
@@ -10,7 +10,7 @@ every page compressed — attention never touches an unselected page.
 Reproduce: `scripts/codec_grid.sh`. Config is the paper's reasoning protocol,
 identical in every cell (B=2048, sink/recent 512, page 32, avgSM,
 spec_ret_steps 2, corr 0.9, T=0.6, top-p 0.95, max_gen 16384, seed 42). Rank
-and the codec on/off flag are the only things that vary.
+and the reconstruction on/off flag are the only things that vary.
 
 ## Accuracy — ds-r1-qwen-7b / MATH50, single seed
 
@@ -18,16 +18,16 @@ and the codec on/off flag are the only things that vary.
 |---|---|---|---|---|---|
 | dense (FullKV) | 72% | 0.0% | 422.6 MiB | 1.00× | — |
 | selection-only r=8 | 72% | 0.0% | 422.6 MiB | 1.00× | 54.1 |
-| codec r=1 | 66% | 51.7% | 29.7 MiB | 14.22× | 58.1 |
-| codec r=4 | 66% | 34.4% | 79.2 MiB | 5.33× | 59.8 |
-| codec r=8 | 70% | 20.7% | 145.3 MiB | 2.91× | 59.4 |
-| codec r=16 | 74% | 6.6% | 277.3 MiB | 1.52× | 59.3 |
-| codec r=32→31 | 76% | 0.0% | 525.0 MiB | 0.81× | 59.6 |
+| OVAL recon r=1 | 66% | 51.7% | 29.7 MiB | 14.22× | 58.1 |
+| OVAL recon r=4 | 66% | 34.4% | 79.2 MiB | 5.33× | 59.8 |
+| OVAL recon r=8 | 70% | 20.7% | 145.3 MiB | 2.91× | 59.4 |
+| OVAL recon r=16 | 74% | 6.6% | 277.3 MiB | 1.52× | 59.3 |
+| OVAL recon r=32→31 | 76% | 0.0% | 525.0 MiB | 0.81× | 59.6 |
 
 **Read the trend, not the cells.** At n=50 one problem is 2 points, and
 pairwise McNemar over these arms gives p ≥ 0.5 everywhere — including
-`selection-only r8 (72%)` vs `codec r8 (70%)`, which is 3 problems flipping one
-way and 2 the other. r=16 and r=32 scoring above dense is noise, not the codec
+`selection-only r8 (72%)` vs `OVAL recon r8 (70%)`, which is 3 problems flipping one
+way and 2 the other. r=16 and r=32 scoring above dense is noise, not OVAL compression
 beating exact keys. The *trend* is resolvable: Pearson r = 0.922 against
 log2(rank), permutation p = 0.012, and it tracks the measured reconstruction
 error. `analysis/score_codec.py` reports it this way by construction.
@@ -36,7 +36,7 @@ error. `analysis/score_codec.py` reports it this way by construction.
 
 58–60 ms/token across a 31× range of rank (16K context, 497 resident pages).
 The reconstruction GEMM is not the cost — materialising the selected pages is,
-and that happens either way. The codec costs ~10% over selection-only
+and that happens either way. OVAL compression costs ~10% over selection-only
 (54.1 → 59.4 ms), which is the price of not reading exact keys.
 
 ## Memory: break-even is rank ~25
@@ -63,12 +63,12 @@ Measured on the same captured decode keys, same metric, all 28 layers
 
 At matched error, plain int4 quantization gives 2.3× more compression than
 rank-16; int8 gives more compression *and* 20× lower error. **As a standalone
-codec, low-rank is dominated by scalar quantization.** It only becomes
+compressor, low-rank is dominated by scalar quantization.** It only becomes
 competitive stacked with the record packing (4.65× at 8.2%), and even then it
 draws with int4 rather than beating it.
 
 The defensible claim is therefore narrow: the basis is an excellent *index* and
-a mediocre *codec*. At rank 1 it still ranks 98.1% of true top-32 attention
+a mediocre *compressor*. At rank 1 it still ranks 98.1% of true top-32 attention
 mass while reconstructing keys at 51.7% error — selection needs almost no rank.
 Using the records as the cache removes the objection that they are extra state
 (at r=8 they *are* the keys, at 2.91× / 8.38× packed), but the compression

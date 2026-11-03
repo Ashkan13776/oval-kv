@@ -2,7 +2,7 @@
 
 Per (model, task): the rule-1 row (its per-(layer, KV head) table, identified
 by the content hash in the harness filename), plus the existing
-fixed-eta value-codec cell as a baseline where it exists (qwen: MATH50 eta
+fixed-eta value-compression cell as a baseline where it exists (qwen: MATH50 eta
 0.25, AIME24 1.0, GPQA50c 0.25 at the same values rank).
 
 Columns: eta_hat distribution over layers >= 1 (mean, std, min, median, max,

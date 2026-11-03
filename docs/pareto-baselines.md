@@ -312,14 +312,14 @@ is the dense mean.
 | dense | `L_REF * TOK` keys + `L_REF * TOK` values |
 | eviction | `min(L_REF, N_EXACT + budget) * TOK * 2` -- the cache genuinely shrinks |
 | retrieval | all keys + all values + `N_PAGED * digest` |
-| codec (OVAL Retv.+Comp., 4-bit keys) | as retrieval, but the PAGED keys are replaced by the record; sink and recent keys stay exact |
+| OVAL Retv.+Comp. (4-bit keys) | as retrieval, but the PAGED keys are replaced by the record; sink and recent keys stay exact |
 
 Two corrections this definition fixed, both of which had been wrong:
 
 - The old model used `NPAGE = 110` (3520 tokens), a number that matched no
   measurement, and used it simultaneously as "whole sequence" and as "number of
   paged pages" -- which are different quantities.
-- The codec arms were charged **zero** exact keys across the whole sequence.
+- The OVAL Retv.+Comp. arms were charged **zero** exact keys across the whole sequence.
   Sink and recent are never paged, so their keys stay exact; the old model
   handed OVAL and 4-bit keys a 256 KiB discount neither earns. OVAL Retv.+Comp.
   moves 1182 -> 1426 KiB, 4-bit keys 1155 -> 1405 KiB.
@@ -343,12 +343,12 @@ As first written, `q4key` **scored** pages with 4-bit quantised keys but then
 **attended with the exact fp16 keys** (the reconstruction path in
 `dynamic_attention.py` fired only for `page_rep == "oab"`; every other arm fell
 through to `torch.gather` on the real key cache). It was nevertheless charged
-codec memory -- 1405 KiB, as though the 4-bit copy were the only one it kept.
+compressed-key memory -- 1405 KiB, as though the 4-bit copy were the only one it kept.
 
 A method cannot attend with keys it does not store. The arm was getting
-codec-level memory together with uncompressed-key accuracy, which is precisely
+compressed-key memory together with uncompressed-key accuracy, which is precisely
 the pairing the memory axis is supposed to price. OVAL Retv.+Comp. is a true
-codec: it attends with its reconstruction and absorbs that error.
+compression: it attends with its reconstruction and absorbs that error.
 
 Fixed by dequantising the selected pages and attending on those, mirroring the
 OVAL reconstruction path. Effect:
@@ -356,7 +356,7 @@ OVAL reconstruction path. Effect:
 | | avg@8 |
 | --- | --- |
 | before (scored 4-bit, attended fp16) | 72.75% |
-| after (true codec, attends 4-bit) | 70.25% |
+| after (true compression, attends 4-bit) | 70.25% |
 | cost of making it honest | **-2.50** |
 
 The superseded cells are kept in `results/_superseded/`, not deleted.

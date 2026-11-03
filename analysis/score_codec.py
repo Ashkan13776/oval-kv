@@ -1,4 +1,4 @@
-"""Score the codec rank grid, with the harness's own grader logic.
+"""Score the OVAL reconstruction-rank grid, with the harness's own grader logic.
 
 n is 30-50 per cell, so a single rank cell is NOT resolvable: one problem is
 2-3 points, and pairwise McNemar over these arms returns p >= 0.5 throughout.

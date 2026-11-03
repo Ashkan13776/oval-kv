@@ -2,7 +2,7 @@
 
 Measured on real decode state from a reasoning trace: post-RoPE keys and values
 from the cache, the last NQ queries re-rotated at their own positions, and each
-layer's o_proj. Keys stay exact, so only the value codec moves the output. The
+layer's o_proj. Keys stay exact, so only value compression moves the output. The
 metric is the relative error of  u = sum_i W_i o_i,  the attention block's
 contribution to the residual stream -- the quantity the derivation in
 oval/page_basis.py::build_value_summary minimises -- and, for reference, the

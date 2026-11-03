@@ -10,21 +10,21 @@ Run on machine C (2 x RTX PRO 6000 Blackwell 97GB) via
 
 | dataset | arm | k | avg@k | pass@k |
 |---|---|---|---|---|
-| MATH50 | codec eta=0.0 | 8 | 68.25 | 76.00 |
-| MATH50 | codec eta=0.25 | 8 | **69.25** | 76.00 |
-| MATH50 | codec eta=0.5 | 8 | 67.50 | 76.00 |
-| MATH50 | codec eta=0.75 | 8 | 67.00 | 72.00 |
-| MATH50 | codec eta=1.0 | 8 | 67.25 | 74.00 |
-| AIME24 | codec eta=0.0 | 8 | 65.00 | 83.33 |
-| AIME24 | codec eta=0.25 | 8 | 63.75 | 83.33 |
-| AIME24 | codec eta=0.5 | 8 | 58.75 | 80.00 |
-| AIME24 | codec eta=0.75 | 8 | 59.58 | 76.67 |
-| AIME24 | codec eta=1.0 | 8 | **65.42** | 83.33 |
-| GPQA50c | codec eta=0.0 | 8 | **54.00** | 88.00 |
-| GPQA50c | codec eta=0.25 | 8 | 53.50 | 78.00 |
-| GPQA50c | codec eta=0.5 | 8 | 51.50 | 76.00 |
-| GPQA50c | codec eta=0.75 | 8 | 50.75 | 88.00 |
-| GPQA50c | codec eta=1.0 | 8 | 52.25 | 76.00 |
+| MATH50 | OVAL eta=0.0 | 8 | 68.25 | 76.00 |
+| MATH50 | OVAL eta=0.25 | 8 | **69.25** | 76.00 |
+| MATH50 | OVAL eta=0.5 | 8 | 67.50 | 76.00 |
+| MATH50 | OVAL eta=0.75 | 8 | 67.00 | 72.00 |
+| MATH50 | OVAL eta=1.0 | 8 | 67.25 | 74.00 |
+| AIME24 | OVAL eta=0.0 | 8 | 65.00 | 83.33 |
+| AIME24 | OVAL eta=0.25 | 8 | 63.75 | 83.33 |
+| AIME24 | OVAL eta=0.5 | 8 | 58.75 | 80.00 |
+| AIME24 | OVAL eta=0.75 | 8 | 59.58 | 76.67 |
+| AIME24 | OVAL eta=1.0 | 8 | **65.42** | 83.33 |
+| GPQA50c | OVAL eta=0.0 | 8 | **54.00** | 88.00 |
+| GPQA50c | OVAL eta=0.25 | 8 | 53.50 | 78.00 |
+| GPQA50c | OVAL eta=0.5 | 8 | 51.50 | 76.00 |
+| GPQA50c | OVAL eta=0.75 | 8 | 50.75 | 88.00 |
+| GPQA50c | OVAL eta=1.0 | 8 | 52.25 | 76.00 |
 
 pass@k is only comparable at equal k; every row here is k=8.
 

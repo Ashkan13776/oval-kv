@@ -1,4 +1,4 @@
-# Running the long-reasoning codec sweep on a second machine
+# Running the long-reasoning OVAL sweep on a second machine
 
 > **Historical.** This describes the keys-only eta-grid sweep. For the current
 > run (full pipeline) follow [full-pipeline.md](full-pipeline.md); the
@@ -188,7 +188,7 @@ Those are the values to BEAT or refute, not to assume.
 
 ## Protocol, for reference
 
-Identical in every cell; only eta, seed and the codec flag vary.
+Identical in every cell; only eta, seed and the reconstruction flag vary.
 
 ```
 --GQA_policy avgSM --spec_ret_steps 2 --spec_ret_corr 0.9
@@ -197,6 +197,6 @@ Identical in every cell; only eta, seed and the codec flag vary.
 --page_rep oval --oval_rank 8 [--oval_recon]
 ```
 
-`--oval_recon` is the codec: selected pages are rebuilt from the records
+`--oval_recon` turns on OVAL key compression: selected pages are rebuilt from the records
 instead of read from the key cache. Without it the records only drive
 selection and the full KV stays resident.

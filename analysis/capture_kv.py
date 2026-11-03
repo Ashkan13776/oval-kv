@@ -1,8 +1,8 @@
 """Capture real decode-time K/V/Q from a reasoning trace, all layers.
 
-The codec analyses need keys as they actually are during long generation, not
+The OVAL compression analyses need keys as they actually are during long generation, not
 prefill keys from a summarisation prompt: reasoning decode keys are markedly
-more low-rank, and measuring on the wrong ones misstates the codec badly.
+more low-rank, and measuring on the wrong ones misstates the reconstruction error badly.
 
 One layer is not enough either -- end-to-end accuracy is gated by the WORST
 layers, and the per-layer spread is wide (at rank 8, 9% on the best layer and

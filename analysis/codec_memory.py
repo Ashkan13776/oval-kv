@@ -1,4 +1,4 @@
-"""Exact bytes of the OVAL key codec vs the raw key cache.
+"""Exact bytes of the OVAL key compression vs the raw key cache.
 
 Closed form, so nothing is estimated: a page's record is basis (d x r) +
 coefficients (page x r) + centroid (d). Verified against the slab allocation a
@@ -61,7 +61,7 @@ for r in A.ranks:
 
 cross = (pg * d - d) / (d + pg)
 print(f"\nBreak-even rank for the keys alone: {cross:.1f} (record == raw page);")
-print("above it the bfloat16 codec EXPANDS the key store.")
+print("above it the bfloat16 record EXPANDS the key store.")
 print("* rank clamped to page_size-1 (centring costs one degree of freedom);")
 print("  at that rank the reconstruction is exact.")
 print("\nValues are never compressed by a KEY basis, which caps whole-cache")

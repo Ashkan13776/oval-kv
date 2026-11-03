@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Value-codec rank sweep (results/codec/value_rank_qwen7b.md, docs/value-codec.md).
 #   keys:   rank 8 for scoring and reconstruction (--oval_recon), eta fixed per
-#           dataset by ETAMAP -- identical to the keys-only codec protocol
+#           dataset by ETAMAP -- identical to the keys-only OVAL compression protocol
 #   values: plain PCA (--vbasis pca) at each rank in VRANKS; no value eta
 #   k = 8 seeds per cell. Rank 64 is not run: at page size 32 a centred page
 #   has rank <= 31, so 32 and 64 both clamp to 31 (lossless) and are identical.

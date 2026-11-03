@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Decoupled-rank ablation: SCORING rank fixed, RECONSTRUCTION rank swept.
 #
-# --oval_rank sets the scoring rank; --oval_recon_rank sets the codec rank.
+# --oval_rank sets the scoring rank; --oval_recon_rank sets the reconstruction rank.
 # Records are stored at max(score, recon) and the basis is eigenvalue-ordered,
 # so each consumer takes an exact top-r truncation of the stored record
 # (verified: truncating rank-32 to top-8 is bit-identical to building at 8).

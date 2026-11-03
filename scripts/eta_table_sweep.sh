@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # Harness cells for eta rule 1: one cell per per-(layer, KV head) eta table
 # per (model, dataset), k seeds each, protocol identical to the
-# value-codec cells (keys rank 8 + --oval_recon, values PCA rank VRANK), with
+# value-compression cells (keys rank 8 + --oval_recon, values PCA rank VRANK), with
 # --eta_table <json> in place of --eta.
 #
 # Sibling of codec_reasoning_sweep.sh: same scheduler (SLOTS per GPU, MINFREE
 # gate, SETTLE), same per-seed completeness rule, its OWN queue file and logs,
-# so it never touches the codec sweep's queue. The queue is built by
+# so it never touches the keys-only sweep's queue. The queue is built by
 # analysis/eta_rules_queue.py, which matches the output tag exactly
 # (..._etab<hash>_q0_recon1_vr8_vpca-pQ2) so eta-table cells and fixed-eta
 # cells are never counted as each other.

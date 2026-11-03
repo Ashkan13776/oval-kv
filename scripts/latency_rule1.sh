@@ -24,7 +24,7 @@
 # eta enters only the page-record build at page creation; the per-step scoring
 # kernel and attention never read it, so oval_fix vs oval_r1 isolates that cost.
 # The accuracy runs also rebuild the selected keys and values from rank-8
-# records (key/value codec); the perf engine has no kernel for that, so these
+# records (OVAL key/value compression); the perf engine has no kernel for that, so these
 # arms recall exact KV for the selected pages.
 #
 #   GPU=0 ./scripts/latency_rule1.sh             # all arms, both models

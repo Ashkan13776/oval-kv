@@ -7,14 +7,14 @@ record, so the summary IS the key store rather than an addition to it.
 | dataset | arm | k | avg@k | pass@k |
 |---|---|---|---|---|
 | MATH50 | dense (FullKV) | 8 | 70.75 | 78.00 |
-| MATH50 | codec eta=0.0 | 8 | 71.75 | 78.00 |
-| MATH50 | codec eta=0.25 | 8 | 71.75 | 78.00 |
+| MATH50 | OVAL eta=0.0 | 8 | 71.75 | 78.00 |
+| MATH50 | OVAL eta=0.25 | 8 | 71.75 | 78.00 |
 | AIME24 | dense (FullKV) | 8 | 55.00 | 83.33 |
-| AIME24 | codec eta=0.0 | 8 | 47.08 | 70.00 |
-| AIME24 | codec eta=0.5 | 8 | 49.58 | 70.00 |
+| AIME24 | OVAL eta=0.0 | 8 | 47.08 | 70.00 |
+| AIME24 | OVAL eta=0.5 | 8 | 49.58 | 70.00 |
 | GPQA50c | dense (FullKV) | 8 | 34.75 | 64.00 |
-| GPQA50c | codec eta=0.0 | 7 | 38.57 | 72.00 |
-| GPQA50c | codec eta=0.25 | 8 | 38.25 | 80.00 |
+| GPQA50c | OVAL eta=0.0 | 7 | 38.57 | 72.00 |
+| GPQA50c | OVAL eta=0.25 | 8 | 38.25 | 80.00 |
 
 ## The published eta* does not reproduce
 

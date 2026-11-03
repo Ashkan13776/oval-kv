@@ -6,7 +6,7 @@
 # counter, the 45-minute stall restart that kills only OUR harness processes
 # (pattern anchored on the interpreter path and --eta_table) -- but its own
 # lock, queue, logs and record glob (*_etab*), so it never interferes with the
-# codec supervisor. Completeness is decided by analysis/eta_rules_queue.py,
+# keys-only sweep supervisor. Completeness is decided by analysis/eta_rules_queue.py,
 # the same code that builds the queue.
 set -u
 KV_ROOT="${KV_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"

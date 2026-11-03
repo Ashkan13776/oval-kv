@@ -1,10 +1,17 @@
 # Docs index
 
+**Terminology.** There is one method, OVAL: retrieval with the page records
+and, optionally, rebuilding the selected keys and values from them. There is
+no separate "codec" method. Some paths still say `codec` (`results/codec/`,
+`scripts/codec_*.sh`, `analysis/*codec*.py`, `docs/value-codec.md`) only
+because result files and running scripts depend on those names; write
+"OVAL" (or "OVAL key / value compression") in anything new.
+
 ## Current
 
 | doc | what |
 |---|---|
-| [full-pipeline.md](full-pipeline.md) | **the next run**: retrieval + key codec + value codec + per-head eta, step-by-step instructions and assignments |
+| [full-pipeline.md](full-pipeline.md) | **the next run**: OVAL retrieval + key compression + value compression + per-head eta, step-by-step instructions and assignments |
 | [eta-rules.md](eta-rules.md) | rule 1: per-(layer, KV head) eta in closed form, calibration, results at value rank 8, latency, figures |
 | [value-codec.md](value-codec.md) | value compression by per-page PCA, the rank sweep |
 | [speculative-retrieval.md](speculative-retrieval.md) | FreeKV's spec_ret mechanism that every reasoning cell uses |

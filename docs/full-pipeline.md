@@ -5,6 +5,13 @@ current task for every agent working on long reasoning. Earlier experiments
 each tested one component in isolation; this run evaluates all of them
 together, and nothing should be extrapolated from the isolated runs.
 
+**Terminology.** There is one method, OVAL: retrieval with the page records
+and, optionally, rebuilding the selected keys and values from them. There is
+no separate "codec" method. Some paths still say `codec` (`results/codec/`,
+`scripts/codec_*.sh`, `analysis/*codec*.py`, `docs/value-codec.md`) only
+because result files and running scripts depend on those names; write
+"OVAL" (or "OVAL key / value compression") in anything new.
+
 ## The configuration
 
 | component | setting | flag(s) | evidence it works alone |
@@ -13,7 +20,7 @@ together, and nothing should be extrapolated from the isolated runs.
 | keys | selected pages rebuilt from the rank-8 key records (records ARE the key store) | `--oval_recon` | `results/codec/recon_rank_qwen7b.md` |
 | values | selected pages rebuilt from rank-16 plain-PCA value records | `--oval_vrank 16 --vbasis pca` | `results/codec/value_rank_qwen7b.md`, `docs/value-codec.md` |
 | eta | one per (layer, KV head), rule 1, **calibrated with rank-16 values** | `--eta_table results/eta_rules/vr16/tables/<model>_<task>_r1.json` | `docs/eta-rules.md` (calibrated at value rank 8) |
-| protocol | B = 2048, sink 512, recent 512, page 32, T = 0.6, top-p 0.95, max_gen 16384, spec_ret 2 / 0.9, bf16 records, seeds 42-49 | as in every codec cell | |
+| protocol | B = 2048, sink 512, recent 512, page 32, T = 0.6, top-p 0.95, max_gen 16384, spec_ret 2 / 0.9, bf16 records, seeds 42-49 | as in every OVAL compression cell | |
 
 Why eta is recalibrated: rule 1 picks the eta that minimises the method's own
 output error, and that error includes the value reconstruction. The existing
@@ -116,7 +123,7 @@ disk:
 
 | reference | files |
 |---|---|
-| keys-only codec, fixed eta, exact values | llama-8b, qwen-14b: `results/codec/<model>-spec_ret/*_eta<E>_q0_recon1-*.jsonl` (5 etas); qwen-7b: summary only, `results/codec/reasoning_k8_qwen7b.md` (its cells are not in the repo) |
+| OVAL keys-only compression, fixed eta, exact values | llama-8b, qwen-14b: `results/codec/<model>-spec_ret/*_eta<E>_q0_recon1-*.jsonl` (5 etas); qwen-7b: summary only, `results/codec/reasoning_k8_qwen7b.md` (its cells are not in the repo) |
 | rule 1 at value rank 8 | `results/eta_rules/table.md` (qwen-7b, llama-8b) |
 | FullKV and baselines | `results/paper_tables.md` (paper numbers; do not re-run dense) |
 
