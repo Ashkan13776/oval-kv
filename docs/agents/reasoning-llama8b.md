@@ -8,6 +8,15 @@ configuration with the user, then run.
 _Owned by the agent running this brief. Update it at each step: survey
 report, confirmed configuration (with date), progress, results, deviations._
 
+### 2026-11-04: follow-up confirmed by the user — value rank 32
+
+After the vr16 run, the full pipeline is re-run with `VRANK=32`. The harness
+clamps 32 to 31, so values are lossless. Rule 1 is recalibrated at value rank
+32 from the same seed-7 captures. Everything else is unchanged. It starts
+automatically when the vr16 pipeline ends cleanly (`logs/chain_vr32.sh`).
+Outputs: `results/eta_rules/vr32/`, `*_etab<hash>_q0_recon1_vr32_vpca-*.jsonl`,
+`results/eta_rules/vr32/table_ds-r1-llama-8b.md`.
+
 ### 2026-11-04 15:00: MATH50 and AIME24 complete, GPQA50c running
 
 16/24 seed-cells complete, no failures or restarts since the 14:29 relaunch.
