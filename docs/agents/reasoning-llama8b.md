@@ -8,6 +8,18 @@ configuration with the user, then run.
 _Owned by the agent running this brief. Update it at each step: survey
 report, confirmed configuration (with date), progress, results, deviations._
 
+### 2026-11-04 15:00: MATH50 and AIME24 complete, GPQA50c running
+
+16/24 seed-cells complete, no failures or restarts since the 14:29 relaunch.
+With 8 cells running together, cells took about 7.5 h (MATH50) and 10.5-14 h
+(AIME24), well above the brief's 2.9 / 5.3 h.
+
+| task | k | n | avg@8 | pass@8 | vs rule 1 at value rank 8 (avg@8, paired 95% CI) |
+|---|---|---|---|---|---|
+| MATH50 | 8 | 50 | 65.75 | 76.00 | -0.50 [-2.50, +1.50] (66.25 / 76.00) |
+| AIME24 | 8 | 30 | 47.08 | 76.67 | -1.25 [-7.92, +5.00] (48.33 / 83.33) |
+| GPQA50c | running | | | | |
+
 ### 2026-11-03 14:30: calibration done, sweep running
 
 **Rule 1 at value rank 16** (`results/eta_rules/vr16/`, endpoints only, 6 seed-7
