@@ -122,6 +122,68 @@ spent its three strikes, no partial files were written, pre-warmed the JIT
 once, and relaunched with the documented exports. Nothing about the
 configuration changed.
 
+### 2026-11-04 -- COMPLETE: all 24 seed-cells run and scored
+
+Sweep ran 2026-11-03 13:48 to 2026-11-04 15:05 (**25.3 h wall**) for 24
+seed-cells, 8 concurrent on 4 x A6000. No OOM, no traceback in any cell log,
+no supervisor stall. MATH50's 8 cells took ~4.5 h, AIME24 ~18 h, GPQA50c ~24 h.
+Full table: [`results/eta_rules/vr16/table_ds-r1-qwen-7b.md`](../../results/eta_rules/vr16/table_ds-r1-qwen-7b.md).
+
+| task | k | avg@8 | pass@8 | baseline avg@8 (fixed eta) | vs baseline (95% CI) |
+|---|---|---|---|---|---|
+| MATH50 | 8 | 70.50 | 76.00 | 71.75 (0.25) | -1.25 [-3.50, +1.00] |
+| AIME24 | 8 | 48.75 | 70.00 | 48.75 (1.0) | +0.00 [-4.58, +4.17] |
+| GPQA50c | 8 | 35.00 | 62.00 | 34.00 (0.25) | +1.00 [-2.50, +4.50] |
+
+**Finding.** In the full configuration, rule 1 is **indistinguishable from a
+hand-picked fixed eta** on all three tasks: -1.25 / +0.00 / +1.00 avg@8, no CI
+excluding zero, mean absolute difference 0.75 points. The honest claim is
+parity, not improvement -- rule 1 buys you the hand-picked eta's accuracy
+without the 5-eta sweep (the latency argument in docs/4 stands: 2.8-4.3x
+cheaper than the oracle), but it does not beat it.
+
+**This is weaker than rule 1 looked at value rank 8** (`results/eta_rules/table.md`:
++0.50 / +4.58 / +1.00). The AIME24 result is the one that moved: +4.58 at rank-8
+values, +0.00 here. Both are inside their CIs of each other and the rank-8
+AIME24 interval already included 0 ([-2.50, +12.50]), so the most defensible
+reading is that the rank-8 AIME24 gain was noise that has now regressed to the
+mean, not that rank-16 values hurt rule 1. Nothing here should be reported as
+rule 1 beating a tuned eta in the full pipeline.
+
+A second detail worth not over-reading: AIME24 pass@8 is 70.00 against the
+baseline's 76.67 at identical avg@8, i.e. the same mean accuracy spread over
+fewer distinct solved problems. On 30 problems that is 2 problems; it is not
+separately significant and no pass@k CI is computed.
+
+Per-head eta remains genuinely per-head (not a blurred constant): over layers
+>= 1, 33-41% of (layer, KV head) entries clip to 0 and 10-11% to 1, with
+within-layer spreads as wide as 0.00 to 1.00.
+
+**Deviations from the confirmed configuration:** none in the protocol. Two
+operational deviations, both recorded above: calibration was run task-by-task
+with captures deleted after each task's stats (disk), and the first sweep
+launch failed on a missing `ninja`/`nvcc` PATH and was relaunched (see the
+2026-11-03 entry). A duplicate supervisor briefly ran on 2026-11-03 after I
+deleted the flock lock file before relaunching; it was caught within ~10 min,
+all running cells were verified to hold distinct seeds (no file was written by
+two processes), everything was stopped and one supervisor restarted with the
+lock left in place. No result file was affected.
+
+**Repo issue still open (shared file, not mine to edit):**
+`results/reasoning/README.md`'s worked filename example pairs the rank-8 table
+hash `71b9668a` with `_vr16_vpca` -- the combination `docs/5-full-pipeline.md`
+forbids, and the string its step-2 check tells an agent to look for. It should
+be a placeholder hash.
+
+**Next (user-directed, 2026-11-04): value rank 32 ablation.** At page size 32 a
+centred page has rank <= 31, so `--oval_vrank 32` clamps and reconstructs
+values exactly: this is the **lossless-values** arm (pieces 1 + 2 + 4 with
+piece 3 off), not a higher-compression one. Confirmed by the user with full
+recalibration of rule 1 at vrank 32. Matched fixed-eta `_vr32_vpca` baselines
+for all three tasks are already on disk. These files
+(`results/eta_rules/vr32/*`, `*_vr32_vpca-*.jsonl`) are outside the "Files you
+own" list below and are committed as a user-directed addition to this brief.
+
 ## The task
 
 Run OVAL's full pipeline -- all four pieces together -- on long reasoning for
