@@ -8,6 +8,30 @@ configuration with the user, then run.
 _Owned by the agent running this brief. Update it at each step: survey
 report, confirmed configuration (with date), progress, results, deviations._
 
+### 2026-11-05 12:00: vr32 calibration done, sweep running
+
+Rule 1 has been recalibrated at value rank 32. The harness clamps that to 31,
+so values are lossless. Outputs are in `results/eta_rules/vr32/`. All three
+tables have 0/248 degenerate entries.
+
+| task | hash | eta mean / median | at0 / at1 | vr16 mean / at1 |
+|---|---|---|---|---|
+| MATH50 | `67e36f28` | 0.832 / 1.000 | 0.05 / 0.56 | 0.841 / 0.60 |
+| AIME24 | `f82bc63c` | 0.694 / 0.815 | 0.10 / 0.35 | 0.710 / 0.36 |
+| GPQA50c | `130f512f` | 0.758 / 0.877 | 0.08 / 0.42 | 0.770 / 0.44 |
+
+As the value rank goes up, the tables keep moving slightly toward lower eta.
+From rank 16 to rank 32 the shift is smaller than from rank 8 to rank 16.
+
+The stats step took 1.8 / 3.5 / 3.1 h per task, against about 20 min at rank
+16. From about 09:30 another user's training job has also been on all four
+GPUs, using about 11 GB on each. The queue has 24 seed-cells. The sweep
+started at 11:52, and the first file has the correct tags:
+`MATH50-...-oval_r8_etab67e36f28_q0_recon1_vr32_vpca-...-Mg16384.jsonl`.
+With the other job's memory on each GPU, the `MINFREE=20000` guard allows
+only one cell per GPU, so 4 cells run at once instead of 8. The sweep will
+take roughly twice as long until that job ends.
+
 ### 2026-11-05 03:30: vr16 complete; vr32 calibration started
 
 All 24/24 vr16 seed-cells are complete, with no failures since the 14:29 relaunch.
