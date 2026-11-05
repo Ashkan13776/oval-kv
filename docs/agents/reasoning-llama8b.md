@@ -8,6 +8,26 @@ configuration with the user, then run.
 _Owned by the agent running this brief. Update it at each step: survey
 report, confirmed configuration (with date), progress, results, deviations._
 
+### 2026-11-05 03:30: vr16 complete; vr32 calibration started
+
+All 24/24 vr16 seed-cells are complete, with no failures since the 14:29 relaunch.
+The scored table is `results/eta_rules/vr16/table_ds-r1-llama-8b.md`. GPQA50c
+cells took about 13-16 h with 8 cells running together.
+
+| task | k | n | avg@8 | pass@8 | vs rule 1 at value rank 8 (avg@8, paired 95% CI) |
+|---|---|---|---|---|---|
+| MATH50 | 8 | 50 | 65.75 | 76.00 | -0.50 [-2.50, +1.50] (66.25 / 76.00) |
+| AIME24 | 8 | 30 | 47.08 | 76.67 | -1.25 [-7.92, +5.00] (48.33 / 83.33) |
+| GPQA50c | 8 | 50 | 36.50 | 72.00 | -1.00 [-5.75, +3.75] (37.50 / 68.00) |
+
+Values at rank 16 give no measurable gain over rank 8 on any task. Every
+difference is within noise. The value error at rank 8 is not what limits
+accuracy at this budget.
+
+The vr32 pipeline started automatically at 03:30. It recalibrates rule 1 at
+value rank 32 (clamped to 31) from the same captures, so the capture step is
+skipped.
+
 ### 2026-11-04: follow-up confirmed by the user — value rank 32
 
 After the vr16 run, the full pipeline is re-run with `VRANK=32`. The harness
