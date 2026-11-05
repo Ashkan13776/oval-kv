@@ -8,7 +8,43 @@ configuration with the user, then run.
 _Owned by the agent running this brief. Update it at each step: survey
 report, confirmed configuration (with date), progress, results, deviations._
 
-- not started
+**2026-11-05: configuration confirmed by the user; running.**
+
+### Confirmed configuration (2026-11-05)
+
+- ds-r1-qwen-14b; MATH50, AIME24, GPQA50c; seeds 42-49 (24 seed-cells); T 0.6, top-p 0.95, max_gen 16384.
+- `--method spec_ret --page_rep oval --oval_rank 8 --oval_recon --oval_vrank 16 --vbasis pca --eta_table results/eta_rules/vr16/tables/ds-r1-qwen-14b_<task>_r1.json`, avgSM, spec_ret 2 / 0.9, budget 2048, sink 512, recent 512, page 32, skl1, `OVAL_QUANT=0`.
+- Rule 1 calibrated at value rank 16 (`--vrank 16 --ngrid 2`), 6 seed-7 traces per task, 4 of them calibrate.
+- Machine C (`mint00`, 2 x RTX PRO 6000 Blackwell 97 GB), env `freekv` (torch 2.8.0+cu128), `TORCH_CUDA_ARCH_LIST=12.0`. Both GPUs used: calibration split across GPU 0 (MATH50, GPQA50c) and GPU 1 (AIME24), then `full_pipeline.sh` with `GPUS="0 1" SLOTS=1 MINFREE=40000` for rules, sweep and score.
+- No separate pre-check: MATH50 seeds 42/43 run first and are checked (tag, accuracy against the eta sweep).
+- **No fixed-eta baseline** (the user's decision).
+- Harness refreshed before the run: the stale `third_party/FreeKV` tree was stashed and `./setup.sh` re-applied the current patch.
+
+### Survey report
+
+OVAL keeps a rank-r record (mean, basis, coefficients) of every 32-token KV page per KV head and uses it four ways:
+
+| # | piece | what it does | flag(s) | filename tag | evidence alone |
+|---|---|---|---|---|---|
+| 1 | retrieval | score each page by the logsumexp of its logits rebuilt in a rank-8 basis of `M_eta` (key PCA at eta 0, output-aware at eta 1); FreeKV's avgSM / top-k / spec_ret do the rest | `--method spec_ret --page_rep oval --oval_rank 8 --eta E` | `oval_r8_eta<E>` | eta sweeps on 3 models; no single eta wins |
+| 2 | key compression | selected pages' keys rebuilt from the same rank-8 records (`mu + C B^T`); sink/recent exact | `--oval_recon` | `_recon1` (`cr<R>` if recon rank differs) | qwen-7b k=8: rank 8 = exact keys |
+| 3 | value compression | selected pages' values rebuilt from per-page plain PCA records | `--oval_vrank 16 --vbasis pca` | `_vr16_vpca` | qwen-7b k=8: rank 16 and 8 within noise of lossless |
+| 4 | per-head eta | rule 1: from the output errors at eta 0 and 1 on 4 seed-7 calibration traces, `eta* = clip((a-c)/(a+b-2c))` per (layer, KV head) | `--eta_table <json>` | `_etab<8-hex hash>` replacing `_eta<E>` | qwen-7b/llama-8b at value rank 8: >= fixed eta, n.s. |
+
+Full pipeline = all four in one harness call; rule 1 is recalibrated with rank-16 values because its loss includes the value reconstruction. `scripts/full_pipeline.sh`: capture -> stats (`--vrank 16 --ngrid 2`) -> rules -> supervised sweep (`supervise_eta_tables.sh` / `eta_table_sweep.sh`, queue from `eta_rules_queue.py`) -> score. Expected cell name: `<task>-...-oval_r8_etab<hash>_q0_recon1_vr16_vpca-pQ2-...-seed<S>.jsonl`.
+
+**On disk for ds-r1-qwen-14b:** the 120-cell eta sweep (`_eta{0,0.25,0.5,0.75,1.0}_q0_recon1`, exact values). No value-compression cells, no rule-1 stats/tables, no calibration captures. Weights are cached on machine C (28 GB). CPU checks: `test_eta_rules.py` and `test_page_basis.py` pass; queue dry-run reports the 3 qwen-14b tables missing, as expected.
+
+**Inconsistencies / things to fix before running:**
+
+1. **The installed harness on machine C is stale.** `third_party/FreeKV` carries an older patch: `eval/util.py` has no `--eta_table` / `--oval_vrank`. The current `patches/freekv.patch` applies cleanly to the pinned commit (checked in a scratch worktree). Needs `./setup.sh` re-run on a reset tree; the only local-only edit there (o1 -> reasoning dataset path in `pred.py`) is redundant with the symlink `setup.sh` creates.
+2. **Slots at 14B conflict.** `docs/harness/parallel-runs.md` says run one 14B cell at a time on machine C (`GPUS="0"`): 3 cells died with `CUDA error: the launch timed out` while two ran concurrently. The brief says two per 80 GB+ card and estimates its 4 days with two cells at a time. Neither card drives a display, so it is not a display watchdog; the cause is unknown.
+3. Capture time for 14B: the brief says ~45 min per task under "Machine and cost" and ~25 min under "Notes".
+4. The brief calls the per-cell times "measured on machine C"; `parallel-runs.md` says machine A.
+5. `docs/5-full-pipeline.md` still says "nothing run yet", but qwen-7b is complete (commit 1b7ba64). That's a shared doc, so I have not edited it.
+6. `full_pipeline.sh` runs all calibration on one GPU (`CALIB_GPU`), so a second GPU sits idle for the whole calibration.
+7. The supervisor's lock, queue (`logs/eta_rules/jobs_vr16.txt`), record count and stall `pkill` pattern are per checkout and per value rank, not per model. That's safe only while one model runs from this checkout, which is the case here.
+8. Old logs under `logs/` still carry the `codec_` prefix and `results/codec/` paths. They are local only and never committed.
 
 ## The task
 
