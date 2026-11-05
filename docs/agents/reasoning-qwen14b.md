@@ -8,7 +8,30 @@ configuration with the user, then run.
 _Owned by the agent running this brief. Update it at each step: survey
 report, confirmed configuration (with date), progress, results, deviations._
 
-**2026-11-05: configuration confirmed by the user; running.**
+**2026-11-05 15:13: calibration done; sweep running (0/24 seed-cells complete, MATH50 s42/s43 in progress).**
+
+### Progress
+
+| step | result |
+|---|---|
+| capture | 18 seed-7 traces, 6144 tokens each; ~200 s per trace on an unshared GPU |
+| stats (`--vrank 16 --ngrid 2`) | ~28 min per task at 14B (~95 s per query window) |
+| rules | MATH50 `2851b0ec`, AIME24 `3b5da3dd`, GPQA50c `8db7317a`; **degenerate 0/376 each** |
+| sweep | started 15:13; filenames carry `_etab<hash>_q0_recon1_vr16_vpca` (checked) |
+
+Rule 1 eta* (layers 1-47 x 8 KV heads):
+
+| task | mean | median | at 0 | at 1 |
+|---|---|---|---|---|
+| MATH50 | 0.695 | 0.792 | 8% | 26% |
+| AIME24 | 0.589 | 0.617 | 10% | 16% |
+| GPQA50c | 0.629 | 0.673 | 9% | 19% |
+
+### Deviations and incidents (none change the confirmed configuration)
+
+- **GPU 1 is shared** with another user's jobs (from 12:53: a `lerobot-train` run, later a policy server and an Isaac Sim eval). AIME24 capture ran ~2x slower and its stats ~10x slower there, so AIME24 stats was killed and re-run on GPU 0. The stats file is written only at the end, so nothing partial was kept. Sweep cells on GPU 1 may run slower while those jobs are active.
+- **`CUDA_HOME`:** following docs/5's setup (`CUDA_HOME` = the harness env) broke flashinfer's JIT build on machine C, because the `freekv` env has no `nvcc`. The first two cells died at startup (exit 1, no records). The fix is `CUDA_HOME` = the `pyg310` env (CUDA 12.8 nvcc, as `docs/harness/freekv-port.md` says), with `TORCH_CUDA_ARCH_LIST=12.0`.
+- **Supervisor lock:** after the supervisor was killed, an orphaned `sleep` child kept `.supervisor_eta_vr16.lock`. The relaunched supervisor exited 0 ("another supervisor holds the lock"), and `full_pipeline.sh` then went on to score and wrote an empty table, which was deleted. This is a shared-script gotcha: `full_pipeline.sh` treats "lock held" as success.
 
 ### Confirmed configuration (2026-11-05)
 
