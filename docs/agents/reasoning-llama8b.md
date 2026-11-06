@@ -8,15 +8,16 @@ configuration with the user, then run.
 _Owned by the agent running this brief. Update it at each step: survey
 report, confirmed configuration (with date), progress, results, deviations._
 
-### 2026-11-06 09:15: vr32 MATH50 complete
+### 2026-11-06 16:30: vr32 MATH50 and AIME24 complete, GPQA50c running
 
-9 of 24 seed-cells are complete: all 8 MATH50 seeds and AIME24 seed 42. The
-other user's job left the GPUs at about 14:50 on Nov 5, and 8 cells have run
-at once since then.
+16 of 24 seed-cells are complete. The other user's job left the GPUs at about
+14:50 on Nov 5, and 8 cells have run at once since then.
 
 | task | k | n | avg@8 | pass@8 | vs vr16 (avg@8, paired 95% CI) | vs vr8 |
 |---|---|---|---|---|---|---|
 | MATH50 | 8 | 50 | 66.25 | 76.00 | +0.50 [-2.00, +3.50] | 0.00 [-3.25, +3.50] |
+| AIME24 | 8 | 30 | 45.00 | 80.00 | -2.08 [-9.58, +5.00] | -3.33 [-10.00, +3.75] |
+| GPQA50c | running | | | | | |
 
 ### 2026-11-05 12:00: vr32 calibration done, sweep running
 
