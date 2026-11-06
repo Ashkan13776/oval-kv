@@ -8,6 +8,16 @@ configuration with the user, then run.
 _Owned by the agent running this brief. Update it at each step: survey
 report, confirmed configuration (with date), progress, results, deviations._
 
+### 2026-11-06 09:15: vr32 MATH50 complete
+
+9 of 24 seed-cells are complete: all 8 MATH50 seeds and AIME24 seed 42. The
+other user's job left the GPUs at about 14:50 on Nov 5, and 8 cells have run
+at once since then.
+
+| task | k | n | avg@8 | pass@8 | vs vr16 (avg@8, paired 95% CI) | vs vr8 |
+|---|---|---|---|---|---|---|
+| MATH50 | 8 | 50 | 66.25 | 76.00 | +0.50 [-2.00, +3.50] | 0.00 [-3.25, +3.50] |
+
 ### 2026-11-05 12:00: vr32 calibration done, sweep running
 
 Rule 1 has been recalibrated at value rank 32. The harness clamps that to 31,
