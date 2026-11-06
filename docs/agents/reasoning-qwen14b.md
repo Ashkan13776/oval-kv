@@ -8,7 +8,7 @@ configuration with the user, then run.
 _Owned by the agent running this brief. Update it at each step: survey
 report, confirmed configuration (with date), progress, results, deviations._
 
-**2026-11-05 15:13: calibration done; sweep running (0/24 seed-cells complete, MATH50 s42/s43 in progress).**
+**2026-11-05 18:30: sweep running, 1/24 seed-cells complete.** First check passed: MATH50 seed 42 = 68.0 (eta-sweep seed 42 at five etas, exact values: 64-68; their avg@8 67.0-69.3). Cell time 3 h 15 min (MATH50, GPU 0).
 
 ### Progress
 
