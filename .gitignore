@@ -13,3 +13,7 @@ __pycache__/
 logs_*.log
 run_sweep.sh
 run_recon_rank.sh
+vision/logs/
+vision/queue/
+vision/runs/smoke_*/
+vision/runs/diag_*/
