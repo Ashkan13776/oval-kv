@@ -8,7 +8,7 @@ configuration with the user, then run.
 _Owned by the agent running this brief. Update it at each step: survey
 report, confirmed configuration (with date), progress, results, deviations._
 
-**2026-11-06 04:40: sweep running, 8/24 seed-cells complete. MATH50 is finished, avg@8 = 69.25** (seeds 42-49: 68 / 72 / 68 / 66 / 70 / 74 / 68 / 68). That's in line with the eta-sweep avg@8 of 67.0-69.3; the final avg@8 / pass@8 come from the score step. AIME24 seeds 42 and 43 are running, on GPU 1 since 04:18 and on GPU 0 since 04:36. MATH50 cells took 3.0-3.3 h on either GPU. The finish ETA will be revised once the first AIME24 cell's time is known.
+**2026-11-06 10:25: sweep running, 10/24 seed-cells complete.** MATH50 is finished, avg@8 = 69.25, pass@8 = 76.0 (seeds 42-49: 68 / 72 / 68 / 66 / 70 / 74 / 68 / 68). That matches the best fixed eta (0.25: 69.25 / 76.0). AIME24 has 2/8 done: seed 42 = 60.0 and seed 43 = 63.3, against the eta-sweep avg@8 of 58.75-65.42. Seeds 44 (GPU 0) and 45 (GPU 1) are running. Cell times: MATH50 3.0-3.3 h, AIME24 5.5-6.1 h, on either GPU. Expected finish is late Sat 2026-11-07, pending the first GPQA50c cell time.
 
 ### Progress
 
