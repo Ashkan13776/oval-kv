@@ -8,7 +8,7 @@ OVAL bases keep). Visual pages: the video span of 20 Video-MME videos (64
 frames; pages fully inside the span). Text pages: one ~10K-token LongBench v2
 document fed to the same model with the same chat template, no video.
 
-    python vision/page_spectra.py         # -> figures/page_spectra.pdf, results/vision/page_spectra.json
+    python vision/page_spectra.py         # -> results/vision/page_spectra.{json,npz}; plot with vision/plot_spectra.py
 """
 import json, os, sys
 
@@ -27,7 +27,9 @@ OUT_PDF = os.path.join(HERE, "..", "figures", "page_spectra.pdf")
 def energy(pages, r):
     """pages [N, page, d] float32 -> fraction of centered energy in the top r directions [N]."""
     x = pages - pages.mean(1, keepdim=True)
-    s2 = torch.linalg.svdvals(x) ** 2
+    # squared singular values = eigenvalues of the page x page Gram (batched svd of
+    # 32 x 128 has no fast CUDA path; 32 x 32 eigvalsh does)
+    s2 = torch.linalg.eigvalsh(x @ x.transpose(-1, -2)).flip(-1).clamp_min(0)
     return (s2[:, :r].sum(-1) / s2.sum(-1).clamp_min(1e-30)).cpu().numpy()
 
 
@@ -91,18 +93,7 @@ def main():
     json.dump(res, open(OUT_JSON, "w"), indent=1)
     np.savez_compressed(OUT_JSON.replace(".json", ".npz"), vis_key=vk, vis_value=vv, text_key=tk, text_value=tv)
     print(json.dumps(res, indent=1))
-    import matplotlib; matplotlib.use("Agg")
-    import matplotlib.pyplot as plt
-    fig, axs = plt.subplots(1, 2, figsize=(7.0, 2.6), sharey=False)
-    for ax, (lab, a, b) in zip(axs, [(f"keys, rank {RK}", vk, tk), (f"values, rank {RV_}", vv, tv)]):
-        bp = ax.boxplot([a, b], labels=["video pages", "text pages"], widths=0.5, showfliers=False,
-                        patch_artist=True, medianprops=dict(color="black"))
-        for patch, c in zip(bp["boxes"], ["#E8806F", "#5F6B7D"]):
-            patch.set_facecolor(c); patch.set_alpha(0.55)
-        ax.scatter([1, 2], [a.mean(), b.mean()], marker="D", color="black", s=14, zorder=3)
-        ax.set_title(lab, fontsize=10); ax.set_ylabel("energy captured per page"); ax.grid(alpha=0.3)
-    fig.tight_layout(); os.makedirs(os.path.dirname(OUT_PDF), exist_ok=True); fig.savefig(OUT_PDF)
-
+    print("plot: python3 vision/plot_spectra.py")
 
 if __name__ == "__main__":
     main()

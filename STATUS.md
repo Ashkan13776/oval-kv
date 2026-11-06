@@ -135,8 +135,28 @@ All on the first 100 Long questions (`--durations long --limit 100`), 64 frames.
   helper swapped in at load time).
 - Observation: rank-16 value PCA leaves **25-35%** relative error on video pages
   (layers 1-27, calibration clips) — see the page-spectra figure.
-- **Gate C** — pending (needs the calibrated table).
-- **Gate D** — running (FullKV, 32 frames, stream, same 100 questions).
+- **eta_h calibration.** 6 YouTube clips (2-3 min) from LLaVA-Video-178K
+  `2_3_m_youtube_v0_1` archive 98, none in Video-MME (LongVideoBench is gated);
+  query-agnostic prefill (system + 64 frames + time instruction), 3 windows x 96
+  prefill queries ending at T, T-1024, T-2048; r = 8, r_v = 16, sink/recent 128,
+  budget 1792; clips 1-4 fit, 5-6 held out. Table `results/vision/eta/tables/
+  llava-video-7b_VCAL_r1.json` (hash 42bf0455): eta_h mean 0.663, median 0.711,
+  5% of heads at 0, 13% at 1 (layers >= 1). Held-out output error: rule 0.0369 vs
+  per-head 21-point grid optimum 0.0363 (regret 0.00061, 1.7%).
+- **Gate C — PASS (mechanics).** OVAL full (table above), 50 first Long questions:
+  no NaN / empty answers, 18.9 s per question (shared GPU), peak 18.1 GB, no
+  allocator retries. On these 50: OVAL full 52.0, FullKV-64 54.0, FullKV-32 54.0
+  (query-agnostic); question-in-prompt FullKV-64 56.0. Same answer as FullKV-64:
+  OVAL 43/50, FullKV-32 39/50. Paired over 17 videos: OVAL - FullKV-64 -2.0
+  [-8.3, +4.1]; OVAL - FullKV-32 -2.0 [-14.3, +8.2]; FullKV-32 - FullKV-64 +0.0
+  [-9.8, +10.0] (50 questions cannot separate these).
+- **Gate D — done.** FullKV, 32 frames, query-agnostic, first 100 Long: 50.0
+  (FullKV-64: 52.0 on the same 100); 84/100 same answer as FullKV-64.
+- **Value reconstruction error, rank-16 PCA (relative, pooled per layer, mean over
+  28 layers):** video pages 30.6% (6 calibration clips, video span only; r_v = 8:
+  52.3%), text pages 32.0% (LongBench v2 item 0, 20 pages; r_v = 8: 55.2%). Video
+  pages are slightly more compressible, but the gap is small; the page-spectra
+  figure (20 videos, 10K-token document) is running.
 
 ## Commands
 
@@ -146,3 +166,26 @@ python vision/frames.py --chunks 1 ... 20            # frame cache
 CUDA_VISIBLE_DEVICES=g python vision/run_videomme.py --protocol {official,prompt,stream} \
     --frames 64 --durations long --limit 100 --out vision/runs/<name> <harness flags>
 ```
+
+## Page spectra (`vision/page_spectra.py`, plot `vision/plot_spectra.py`)
+
+20 Video-MME videos (spread over short/medium/long), 64 frames, video-span pages,
+layers 1-27, all KV heads (905,040 pages) vs a 10,240-token LongBench v2 document
+(66fcffd9..., 33,696 pages). Centred energy captured per page, mean [IQR]:
+
+| | video pages | text pages |
+|---|---|---|
+| keys, rank 8 | 0.747 [0.713, 0.779] | 0.732 [0.699, 0.763] |
+| values, rank 16 | 0.902 [0.884, 0.920] | 0.889 [0.871, 0.909] |
+
+Video pages are more low-rank than text pages, but only by ~1.5 points, well
+inside the page-to-page spread. `figures/page_spectra.pdf` exists; whether it
+belongs in the paper is the user's call (the brief: skip it if video is not more
+low-rank — it is, marginally).
+
+## Run plan (queue `vision/queue/jobs.txt`, one job per GPU, `vision/worker.sh`)
+
+Long split first for rows 1, 2, 2b, 3; then short+medium for rows 1, 2, 3, 2b; then
+rows 4 FreeKV, 5 Quest, 6 4-bit keys, 7 OVAL keys-as-basis (same eta table, exact
+values) on all 2,700; then question-in-prompt FullKV-64 (official, unpatched) for
+the comparison with the published 63.3. Estimated ~21 h on the shared GPUs.
