@@ -8,7 +8,7 @@ configuration with the user, then run.
 _Owned by the agent running this brief. Update it at each step: survey
 report, confirmed configuration (with date), progress, results, deviations._
 
-**2026-11-05 18:30: sweep running, 1/24 seed-cells complete.** First check passed: MATH50 seed 42 = 68.0 (eta-sweep seed 42 at five etas, exact values: 64-68; their avg@8 67.0-69.3). Cell time 3 h 15 min (MATH50, GPU 0).
+**2026-11-06 04:20: sweep running, 7/24 seed-cells complete.** MATH50 seeds 42-47 and 49 are done: 68 / 72 / 68 / 66 / 70 / 68 / 68 (mean 68.6), in line with the eta-sweep avg@8 of 67.0-69.3. Seed 48 is running on GPU 0, and AIME24 seed 42 started on GPU 1 at 04:18. MATH50 cells take 3.0-3.3 h on either GPU. The finish ETA will be revised once the first AIME24 cell's time is known.
 
 ### Progress
 
