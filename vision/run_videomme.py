@@ -85,6 +85,7 @@ def build_parser():
     ap.add_argument("--nshards", type=int, default=1)
     ap.add_argument("--out", required=True)
     ap.add_argument("--max_new_tokens", type=int, default=16)
+    ap.add_argument("--file_tag", default="", help="suffix of the shard file (keeps split phases apart)")
     ap.add_argument("--qids", nargs="+", default=None, help="diagnostics: only these question ids")
     ap.add_argument("--only_cached", action="store_true", help="smoke tests: skip videos not yet in the frame cache")
     return ap
@@ -230,7 +231,7 @@ def main():
         df = df[df.question_id.isin(args.qids)]
     df = df.iloc[args.shard::args.nshards]
     os.makedirs(args.out, exist_ok=True)
-    fn = os.path.join(args.out, f"shard{args.shard}of{args.nshards}.jsonl")
+    fn = os.path.join(args.out, f"shard{args.shard}of{args.nshards}{args.file_tag}.jsonl")
     done = set()
     if os.path.exists(fn):
         for l in open(fn):

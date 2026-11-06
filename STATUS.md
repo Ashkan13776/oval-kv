@@ -178,14 +178,32 @@ layers 1-27, all KV heads (905,040 pages) vs a 10,240-token LongBench v2 documen
 | keys, rank 8 | 0.747 [0.713, 0.779] | 0.732 [0.699, 0.763] |
 | values, rank 16 | 0.902 [0.884, 0.920] | 0.889 [0.871, 0.909] |
 
-Video pages are more low-rank than text pages, but only by ~1.5 points, well
-inside the page-to-page spread. `figures/page_spectra.pdf` exists; whether it
-belongs in the paper is the user's call (the brief: skip it if video is not more
-low-rank — it is, marginally).
+Video pages are about as compressible as text pages (video ahead by ~1.5 points,
+well inside the page-to-page spread). **Use (user decision 2026-11-06):** supplement
+figure, framed as "visual pages are as compressible as text, so text-tuned ranks
+transfer". No video-specific claim.
 
-## Run plan (queue `vision/queue/jobs.txt`, one job per GPU, `vision/worker.sh`)
+## Run plan (user decisions 2026-11-06; queue `vision/queue/jobs.txt`, one job per GPU)
 
-Long split first for rows 1, 2, 2b, 3; then short+medium for rows 1, 2, 3, 2b; then
-rows 4 FreeKV, 5 Quest, 6 4-bit keys, 7 OVAL keys-as-basis (same eta table, exact
-values) on all 2,700; then question-in-prompt FullKV-64 (official, unpatched) for
-the comparison with the published 63.3. Estimated ~21 h on the shared GPUs.
+Baselines are rerun in our harness (as the video-KV papers do); no external numbers.
+Rows, all query-agnostic, budget 2048 attended (1792 selected + 128 sink + 128 recent),
+text-paper long-context settings (tau 0.8, avgSM, spec_ret_steps 2, page 32):
+
+| row | method | flags |
+|---|---|---|
+| 1 / 2b / 2 | FullKV, 64 / 44 / 32 frames | `--method full` |
+| 3 | OVAL full | `spec_ret, oval, r 8, --oval_recon, --oval_vrank 16 --vbasis pca, --eta_table` (42bf0455) |
+| 7 | OVAL keys-as-basis | as 3 without value compression (exact values), same table |
+| 4 | FreeKV | `spec_ret, quest` |
+| 5 | Quest | `quest, quest` |
+| 6 | 4-bit keys | `quest, q4key` (attends with dequantized keys) |
+| 8 | SnapKV (dagger) | `quest, snapkv`: pages scored once from the last W = 32 prefill queries (the end of the video prefill), then frozen; run without eviction, so an upper bound |
+| 9 | Sliding window | `--budget 0 --sink 128 --recent 1920`, no selection |
+| 10 | ArkVale | `--method arkv --page_rep arkv` |
+| 11 | RaaS | `--method raas` (alpha 1e-4, harness default) |
+
+Order: 2-question smoke tests of rows 8-11; Long split for every row; then
+Short+Medium for every row (`--file_tag _sm`); then question-in-prompt FullKV-64
+(unpatched) on all 2,700 for the comparison with the published 63.3. Memory per
+row: `vision/memory.py` (Fig. 2 accounting; eviction rows charged their retained
+2048 tokens).
