@@ -201,7 +201,21 @@ def build_value_summary(paged_k, paged_v, Gh, Ghi, eta, rank, eps=1e-30):
     n, d = Y.shape[-2], Y.shape[-1]
     r = min(rank, n - 1, d)                                # centring costs one dof
 
-    Z = Y if Gh is None else Y @ Gh.float()                # Y G^{1/2}  (Gh symmetric)
+    if Gh is None:
+        # Plain PCA in the token domain, the same m x m trick as the key basis:
+        # the top-r eigenvectors of the d x d Gram Y^T Y are U = Y^T W diag(lam)^{-1/2},
+        # (lam, W) the top-r eigenpairs of the m x m Gram Y Y^T (same nonzero
+        # eigenvalues). T = Y U, D = U, so the reconstruction 1 nu^T + T D^T is
+        # the same projection. Batched d x d eigh has no fast CUDA path: on a 13K
+        # prefill (~430 pages x 4 heads per layer) it took ~7-11 s per layer.
+        lam, W = torch.linalg.eigh(Y @ Y.transpose(-1, -2))   # ascending, m x m
+        lam_r = lam[..., -r:]
+        keep = (lam_r > lam[..., -1:].clamp_min(0) * 1e-10).unsqueeze(-2)
+        U = (Y.transpose(-1, -2) @ W[..., -r:]) / lam_r.clamp_min(1e-30).sqrt().unsqueeze(-2)
+        U = U * keep.to(U.dtype)
+        return nu.to(dt), U.to(dt), (Y @ U).to(dt)
+
+    Z = Y @ Gh.float()                                     # Y G^{1/2}  (Gh symmetric)
     M = Z.transpose(-1, -2) @ Z                            # M_rec
     if eta > 0.0 and Gh is not None:
         X = paged_k.permute(0, 1, 3, 2, 4).float()

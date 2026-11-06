@@ -58,9 +58,11 @@ def doc_to_text(doc):
 def load_frames(vid, frames):
     d = os.path.join(CACHE, f"{vid}_n{N_CACHE}")
     meta = json.load(open(os.path.join(d, "meta.json")))
-    step = N_CACHE // frames
-    assert N_CACHE % frames == 0
-    sel = list(range(0, N_CACHE, step))
+    if N_CACHE % frames == 0:            # N/2 = every other cached frame
+        sel = list(range(0, N_CACHE, N_CACHE // frames))
+    else:                                # e.g. 44: as uniform as the 64-frame grid allows
+        sel = sorted(set(np.round(np.linspace(0, N_CACHE - 1, frames)).astype(int).tolist()))
+        assert len(sel) == frames
     raw = [open(os.path.join(d, f"{i:03d}.png"), "rb").read() for i in sel]
     fh = hashlib.sha1(b"".join(raw)).hexdigest()[:16]
     arr = np.stack([np.array(Image.open(os.path.join(d, f"{i:03d}.png")).convert("RGB")) for i in sel])
@@ -115,10 +117,6 @@ def patch_harness(args, tok, model):
     util.AutoTokenizer.from_pretrained = staticmethod(lambda *a, **k: tok)
     util.AutoModelForCausalLM.from_pretrained = staticmethod(lambda *a, **k: model)
     util.GenerationConfig.from_pretrained = staticmethod(lambda *a, **k: _Gen())
-    # Value PCA in the token domain (same projection, ~1000x faster on a 13K prefill;
-    # oval.py itself is not modified). See vision/fast_vpca.py.
-    import fast_vpca
-    fast_vpca.install()
     # The harness dispatches on config.model_type; LLaVA-Video's LM is a stock Qwen2.
     model.config.model_type = "qwen2"
     try:

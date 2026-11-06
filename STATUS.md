@@ -61,15 +61,23 @@ frame → **13,440 visual tokens** per sample. N/2 = frames[::2] of the same cac
 
 ## Deviations from the brief (decided before any accuracy number)
 
-- **Question streamed through the decode path (`--protocol stream`).** In this
-  harness the prefill is dense for every rule, and Video-MME's answer is one
-  letter, produced by the prefill's last position. With the question inside the
-  prompt every row would answer from the full exact cache. So the prefill holds
-  system prompt + video + time instruction ("cache the video, ask later"); the
+- **Query-agnostic protocol (`--protocol stream`; user decision 2026-11-06).** The
+  context is cached before the question is known, as in KVzip, SCBench, ReKV and
+  InfiniPot-V. In this harness the prefill is dense for every rule, and
+  Video-MME's answer is one letter produced by the prefill's last position, so
+  with the question inside the prompt every row would answer from the full exact
+  cache. The prefill holds system prompt + video + time instruction; the
   question/options/post-prompt (~80-120 tokens) and the answer go one token at a
   time through the decode path, i.e. through page selection and the compressed
-  pages. Same for every row. Under FullKV this is mathematically the same
-  computation as the standard protocol (checked in Gate B).
+  pages. Same for every row. Under FullKV this is mathematically the standard
+  computation; the 97/100 agreement analysis (Gate B, stream) goes to the supplement.
+- **Question-in-prompt FullKV-64** (lmms-eval protocol, unpatched) is reported
+  separately against the published 63.3, not as a protocol row.
+- **No latency numbers from this machine** (GPUs shared with another user's training).
+- **Value rank stays r_v = 16 for vision.** Extra row: FullKV at 44 frames (target
+  ~68% of FullKV-64 memory, the memory of the keys-only rows), run right after
+  row 2. 44 frames = `round(linspace(0, 63, 44))` of the 64-frame cache; 32 frames =
+  every other cached frame.
 - **lmms-eval used for its task definition, not as the runner.** Prompt
   (`videomme_doc_to_text`, llava_vid post-prompt "The best answer is:"), sampling
   (`force_sample`, time instruction, conv template `qwen_1_5`), greedy,
@@ -113,6 +121,18 @@ All on the first 100 Long questions (`--durations long --limit 100`), 64 frames.
   differ by <= 4.1e-4 relative (below bf16 rounding), value error identical to
   4 digits, 7 ms instead of 6.7 s per layer. Decode steps after the first take
   ~0.1 s, as for FreeKV. Reasoning runs never hit this (prompts fit in the sink).
+- **Moved into `oval/page_basis.py` (user decision 2026-11-06).** `build_value_summary`
+  with `Gh = None` now computes plain value PCA from the m x m token Gram (the key
+  basis's trick); the output-aware branch (`Gh` given) is unchanged. Check against
+  the previous file (`git show HEAD:oval/page_basis.py`) on text pages from
+  LongBench v2 (`python vision/check_vpca.py`: first 128 + 20x32 tokens of
+  LongBench-v2 item 0 through LLaVA-Video's LM, 28 layers x 4 KV heads x 20 pages,
+  CPU): page means bit-identical, rebuilt values differ by <= 2.1e-4 relative
+  (r_v = 8 and 16), value error identical to 4 digits -> PASS.
+  `analysis/test_page_basis.py` and `analysis/test_eta_rules.py` pass. Installed into
+  the harness; every row from row 2b on runs this `oval.py` (rows 1, 2 and the gates
+  before it do not touch the value basis, except Gate C, which used the identical
+  helper swapped in at load time).
 - Observation: rank-16 value PCA leaves **25-35%** relative error on video pages
   (layers 1-27, calibration clips) — see the page-spectra figure.
 - **Gate C** — pending (needs the calibrated table).
