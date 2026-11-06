@@ -163,8 +163,13 @@ def answer(doc, args, tok, model, proc, step_updater, eos_ids):
     from llava.constants import IMAGE_TOKEN_INDEX
     ids, pix, hashes = build_inputs(doc, args, tok, model, proc)
     t0 = time.time()
+    # SigLIP (~0.8 GB) lives on the GPU only while it encodes the frames; the LM prefill
+    # then has that headroom (the GPUs are shared). Same computation, same features.
+    vt = model.get_vision_tower()
+    vt.to("cuda:0")
     _, _, _, _, emb, _ = model.prepare_inputs_labels_for_multimodal(ids, None, None, None, None, [pix],
                                                                      modalities=["video"])
+    vt.to("cpu"); torch.cuda.empty_cache()
     p = int((ids[0] == IMAGE_TOKEN_INDEX).nonzero()[0])
     n_vis = emb.shape[1] - (ids.shape[1] - 1)
     kctx = build_inputs.n_ctx_text
@@ -248,7 +253,19 @@ def main():
                 continue
             doc = r.to_dict()
             doc["options"] = list(doc["options"])
-            text, info = answer(doc, args, tok, model, proc, step_updater, eos_ids)
+            # The GPUs are shared with another user's training, whose memory moves between
+            # ~11 and ~29 GB; on OOM, free everything, wait, and redo this question from scratch.
+            for attempt in range(31):
+                try:
+                    text, info = answer(doc, args, tok, model, proc, step_updater, eos_ids)
+                    break
+                except torch.OutOfMemoryError:
+                    if attempt == 30:
+                        raise
+                    torch.cuda.empty_cache()
+                    print(f"{doc['question_id']}: CUDA OOM (shared GPU), retry {attempt + 1} in 60 s", flush=True)
+                    time.sleep(60)
+            info["oom_retries"] = attempt
             pred = extract_letter(text)
             rec = dict(question_id=doc["question_id"], videoID=doc["videoID"], duration=doc["duration"],
                        task_type=doc["task_type"], answer=doc["answer"], output=text, pred=pred,
