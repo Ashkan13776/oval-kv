@@ -184,6 +184,75 @@ for all three tasks are already on disk. These files
 (`results/eta_rules/vr32/*`, `*_vr32_vpca-*.jsonl`) are outside the "Files you
 own" list below and are committed as a user-directed addition to this brief.
 
+### 2026-11-06 -- lossless-values ablation COMPLETE (user-directed, value rank 32)
+
+Sweep ran 2026-11-04 16:31 to 2026-11-05 17:02 (**24.5 h wall**), 24/24
+seed-cells, no OOM, no traceback, no supervisor stall. Rule 1 recalibrated at
+vrank 32 first (capture + stats per task, captures deleted after each).
+Table: [`results/eta_rules/vr32/table_ds-r1-qwen-7b.md`](../../results/eta_rules/vr32/table_ds-r1-qwen-7b.md).
+
+**What this arm is.** At page size 32 a centred page has rank <= 31, so
+`--oval_vrank 32` clamps to 31 and reconstructs values exactly (bf16 record
+rounding only; `docs/3-value-compression.md`, `test_page_basis.py` check 7).
+It is therefore the **lossless-values** arm -- OVAL retrieval + key
+compression + per-head eta with piece 3 effectively off -- not a
+higher-compression one. It is not "the full pipeline at rank 32".
+
+| task | k | avg@8 | pass@8 | baseline avg@8 (fixed eta) | vs baseline (95% CI) |
+|---|---|---|---|---|---|
+| MATH50 | 8 | 71.00 | 76.00 | 70.50 (0.25) | +0.50 [-1.25, +2.25] |
+| AIME24 | 8 | 48.75 | 80.00 | 47.92 (1.0) | +0.83 [-5.00, +6.67] |
+| GPQA50c | 8 | 38.50 | 74.00 | 36.25 (0.25) | +2.25 [-2.50, +6.50] |
+
+**Rule 1 vs a hand-picked eta, across all three value ranks** (avg@8 delta;
+rank 8 from `results/eta_rules/table.md`, rank 16 from the run above):
+
+| task | values rank 8 | values rank 16 | values rank 32 (lossless) |
+|---|---|---|---|
+| MATH50 | +0.50 | -1.25 | +0.50 |
+| AIME24 | +4.58 | +0.00 | +0.83 |
+| GPQA50c | +1.00 | +1.00 | +2.25 |
+
+**Conclusion, over 72 seed-cells at three value ranks: rule 1 is
+indistinguishable from a hand-picked fixed eta.** Not one of the nine
+comparisons has a CI excluding zero; the nine deltas average +1.05 points and
+scatter either side of zero with no trend in value rank. The defensible claim
+is **parity** -- rule 1 reaches the tuned eta's accuracy without the 5-eta
+sweep, which is the latency argument in docs/4 (2.8-4.3x cheaper than the
+oracle) -- not that it is more accurate.
+
+**What the ablation settled.** Removing value-reconstruction error entirely
+does not restore the large rank-8 AIME24 gain (+4.58 at rank 8, +0.00 at rank
+16, +0.83 lossless). So rank-16 value compression was *not* what cost rule 1
+that advantage; the rank-8 AIME24 result is best read as noise that regressed
+to the mean, as its own CI already allowed ([-2.50, +12.50]). This was
+recorded as a prediction before the sweep launched, from the vr32 etas being
+much closer to the vr16 etas (MATH50 0.442 vs 0.463) than either is to vr8.
+
+Rule 1's chosen etas barely move between rank 16 and lossless, consistent with
+rank-16 values already capturing nearly all the value energy:
+
+| task | eta mean/med @ vr16 | @ vr32 | hash vr16 / vr32 |
+|---|---|---|---|
+| MATH50 | 0.463 / 0.544 | 0.442 / 0.526 | `0c99a26a` / `7a67d8c0` |
+| AIME24 | 0.389 / 0.327 | 0.368 / 0.274 | `fa1b4e40` / `33e48c69` |
+| GPQA50c | 0.392 / 0.367 | 0.367 / 0.303 | `86e2340d` / `3b7dd38a` |
+
+**One secondary observation, not significant.** AIME24 pass@8 is 80.00 with
+lossless values vs 70.00 at rank 16, at near-identical avg@8 -- the same mean
+accuracy spread over more distinct solved problems. GPQA50c shows the same
+direction (74.00 vs 62.00). On 30 and 50 problems these are 3 and 6 problems,
+no pass@k CI is computed, and avg@8 is the headline metric; but if anything in
+the paper rests on pass@k, the value rank is where to look.
+
+All nine eta tables across the three ranks hash differently, so no cell ever
+ran with a table calibrated at the wrong value rank (checked before launch).
+
+**Files committed for this ablation** (outside the "Files you own" list below,
+added at the user's direction on 2026-11-04): `results/eta_rules/vr32/*`,
+`results/reasoning/ds-r1-qwen-7b-spec_ret/*_vr32_vpca-*.jsonl` with the
+`etab` tags above, and this Status section. No shared doc was edited.
+
 ## The task
 
 Run OVAL's full pipeline -- all four pieces together -- on long reasoning for
