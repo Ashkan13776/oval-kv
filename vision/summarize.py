@@ -21,6 +21,7 @@ from compare import load
 RUNS = [  # (label, dir, latex label)
     ("FullKV, N frames", "row1_full_n64", "FullKV ($N$)"),
     ("FullKV, N/2 frames", "row2_full_n32", "FullKV ($N/2$)"),
+    ("FullKV, 44 frames", "row2b_full_n44", "FullKV (44 fr.)"),
     ("4-bit keys", "row6_q4key_n64", "4-bit keys"),
     ("FreeKV", "row4_freekv_n64", "FreeKV"),
     ("Quest", "row5_quest_n64", "Quest"),
@@ -49,7 +50,9 @@ def main():
             rows[lab] = (load(p), p, tex)
     common = set.intersection(*[set(r[0]) for r in rows.values()]) if rows else set()
     ref = None
-    lines = ["# Video-MME (no subtitles), LLaVA-Video-7B-Qwen2, stream protocol", "",
+    lines = ["# Video-MME (no subtitles), LLaVA-Video-7B-Qwen2, query-agnostic protocol", "",
+             "Context (system prompt, 64 frames, time instruction) is cached before the question; "
+             "the question and answer go through the decode path (as in KVzip, SCBench, ReKV, InfiniPot-V).", "",
              f"Questions scored in every row: {len(common)} of 2700.", "",
              "| Row | Frames | Visual tokens | Short | Medium | Long | Overall | KV memory (% FullKV-N, per layer) | model |",
              "|---|---|---|---|---|---|---|---|---|"]
