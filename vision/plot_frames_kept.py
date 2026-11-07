@@ -4,7 +4,7 @@ OVAL's page selection keeps. -> results/figures/videomme_frames_kept.pdf
 Reads results/vision/token_selection.npz (per-video retention, written by
 vision/token_selection.py) and the PNG frame cache in $VMME_ROOT/frames.
 
-    python vision/plot_frames_kept.py                    # single column: 3.4in, 6 cols, all 64
+    python vision/plot_frames_kept.py                    # single column: 3.4 x 4.1in, 8 cols, all 64
     python vision/plot_frames_kept.py --cols 8 --width 7 # two-column width
     python vision/plot_frames_kept.py --cols 4 --every 2 # bigger tiles, every other frame
                                                          # (NB: --every 2 drops frames 1 and 63,
@@ -36,7 +36,7 @@ CMAP = LinearSegmentedColormap.from_list("coral", ["#FFF4F1", "#F3B3A5", "#E8806
 ap = argparse.ArgumentParser()
 ap.add_argument("--video", default=None)
 ap.add_argument("--list", action="store_true")
-ap.add_argument("--cols", type=int, default=6)
+ap.add_argument("--cols", type=int, default=8)
 ap.add_argument("--width", type=float, default=3.4, help="figure width in inches (3.4 = single column)")
 ap.add_argument("--every", type=int, default=1, help="show every Nth frame")
 ap.add_argument("--dpi", type=int, default=400)
