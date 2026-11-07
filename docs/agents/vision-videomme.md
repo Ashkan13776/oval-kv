@@ -17,6 +17,71 @@ _Owned by the agent running this brief. Update at each step._
   78 jobs remain in [vision/jobs_remaining.txt](../../vision/jobs_remaining.txt).
   First machine stopped; all remaining jobs belong to the next agent.
 
+### 2026-11-06/07, second machine (`mint04`) -- setup + survey
+
+**Hardware.** 4 x NVIDIA RTX A6000, 49,140 MiB each, driver 535.309.01 /
+CUDA 12.2. Free at survey: GPU0 48,666 / GPU1 45,231 / GPU2 48,666 / GPU3
+48,666 MiB -- one other user (`thrashc`) holds 3.4 GB on GPU1 only. This is
+**much freer than the first machine** (which had 27-29 GB taken per card and
+OOMed); at ~20 GB peak per job, four concurrent jobs fit comfortably.
+**GPU type is the same as the first machine (RTX A6000)**, so by the brief's
+own rule the partial rows 4 and 5 do *not* need rerunning and no hardware is
+mixed inside a row.
+
+**Disk.** One filesystem (`/`, 3.5 TB) shared with other users, **28 GB free**
+after I reclaimed my own regenerable files. This is the binding constraint, not
+GPU. Measured, not estimated: frame cache **10.6 MiB per video -> 9.3 GiB for
+900 videos** (chunk 01: 30 videos, 318 MB); model weights 15.0 GiB; the 20
+video chunks are 94.1 GiB total (largest 4.98 GiB). Peak during the frame build
+is ~19 GiB, and ~24 GiB is resident afterwards, leaving ~4 GiB. To stay inside
+that I build the **frame cache before downloading the model** -- they never need
+to be resident at the same time. No experiment setting is affected.
+
+**Environment (deviation, documented).** There is no `ovalkv` env on this
+machine; the only suitable env is `freekv`: **torch 2.5.1+cu121**,
+transformers 4.45.2, flash-attn 2.7.4.post1, flashinfer 0.2.4. STATUS.md
+documents the first machine as torch 2.8.0+cu128 / flash-attn 2.8.3. Building a
+matching env would cost 8-12 GB of disk that is not available. `vision/env.sh`
+is therefore pointed at `freekv` (the brief explicitly allows editing it);
+**this edit is local and deliberately not committed**, since it would break the
+first machine. The equivalence check in the brief is exactly the gate for this:
+`frames_sha1` / `pixels_sha1` / `ids_sha1` must match, and answer agreement is
+reported. No flags, ranks, budgets or the eta table were changed.
+
+**Things in the docs that are wrong or need a line added:**
+
+1. **`pip install decord timm==0.9.16` silently upgrades torch.** Run as written
+   it pulled **torch 2.14.1+cu130**, which does not run on a CUDA 12.2 driver
+   ("NVIDIA driver on your system is too old"); CUDA stopped initialising in the
+   env. Repaired with
+   `pip install --index-url https://download.pytorch.org/whl/cu121 torch==2.5.1+cu121 torchvision==0.20.1+cu121`.
+   The brief should pin torch or add `--no-deps` here. (My error for running it
+   unpinned, but the instruction as written causes it.)
+2. **`frames.py` peak disk is ~2x a chunk, not the cache size.** `do_chunk`
+   extracts every mp4 of the zip into a tmpdir under `$VMME_ROOT` and only then
+   deletes the zip, so zip + extracted mp4s (~10 GiB) coexist. The brief's
+   "~101 GB in total ... the frame cache is ~9 GB" is true but reads as if 9 GB
+   is the requirement. Worth stating for machines near the disk limit.
+3. **"the 20 zips, ~101 GB"**: the repo actually holds 20 video chunks totalling
+   **94.1 GiB**, plus a `subtitle.zip` (0.01 GiB) that this protocol does not
+   use. Minor.
+4. `docs/agents/README.md` is the reasoning-era page: its reading list (the five
+   piece docs, `results/reasoning/README.md`, `scripts/full_pipeline.sh`) is for
+   the long-reasoning agents, and its Step 2 tells the agent to propose a
+   configuration -- already confirmed here. The vision brief + `STATUS.md` are
+   the operative documents. Not wrong, just not aimed at this task.
+
+**Setup done on this machine:** worktree `~/oval-vision` on branch `vision`
+(main untouched, separate worktree); `setup.sh` applied `patches/freekv.patch`
+cleanly and installed the branch's token-domain `oval/page_basis.py` as
+`third_party/FreeKV/accuracy/kvc/patch/oval.py` (verified); LLaVA-NeXT at
+`bce12e47` (`pip install --no-deps -e`) and lmms-eval at `d45b4ad5`; decord
+0.6.0, timm 0.9.16; Video-MME annotations fetched. Frame cache building
+(chunk 01 done, 02-20 running).
+
+**Next:** finish the frame cache, download the model, run the 20-question
+equivalence check, report hash match + answer agreement, then the queue.
+
 ## Where things stand (Long split = 900 questions)
 
 | row | run dir (`vision/runs/`) | Long | Short+Medium |
