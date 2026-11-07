@@ -15,6 +15,7 @@ _Owned by the agent running this brief. Update at each step._
 - 2026-11-06: paused on the first machine (4x RTX A6000 shared with another
   user's training; repeated CUDA OOM). Long split done for 5 of 12 rows;
   78 jobs remain in [vision/jobs_remaining.txt](../../vision/jobs_remaining.txt).
+  First machine stopped; all remaining jobs belong to the next agent.
 
 ## Where things stand (Long split = 900 questions)
 
@@ -73,10 +74,9 @@ delete them; never run the same (row, split, shard) on two machines at once.
    `pixels_sha1` and `ids_sha1` must match on all 20; if any differs, stop and
    report. Answers may differ on a few low-margin questions across GPU types
    (bf16; 3/100 flips with margins < 0.25 between protocols on the first
-   machine). Report the agreement to the user. If the GPU type differs from
-   the first machine's (RTX A6000), ask the user whether to rerun the partial
-   rows 4 and 5 from scratch rather than mixing hardware inside a row; every
-   answer line records `host` and `gpu` from now on.
+   machine). Report the agreement to the user. The new machine has the same
+   hardware (RTX A6000; user, 2026-11-06), so the partial rows 4 and 5 are
+   continued, not rerun. Every answer line records `host` and `gpu` from now on.
 
 ## Running the remaining jobs
 
@@ -109,7 +109,9 @@ column, and a dagger on SnapKV (run without eviction, an upper bound).
 Then the same for all 2,700 questions, and the question-in-prompt FullKV-64
 overall vs the published 63.3, reported separately from the protocol rows.
 
-Open question for the user (not yet answered): budget-1024 runs of OVAL full
-and FreeKV on the Long split. The first-machine preliminary finding was
-FullKV-32 vs FullKV-64 on Long = -0.7 [-2.9, +1.4], i.e. frames barely matter
-at this length.
+No budget-1024 runs (user, 2026-11-06). For context, the first-machine
+preliminary finding was FullKV-32 vs FullKV-64 on Long = -0.7 [-2.9, +1.4],
+i.e. frames barely matter at this length.
+
+The first machine is stopped and runs nothing (user, 2026-11-06); this agent
+owns all remaining jobs.
