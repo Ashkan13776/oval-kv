@@ -8,10 +8,9 @@ vision/token_selection.py) and the PNG frame cache in $VMME_ROOT/frames.
     python vision/plot_frames_kept.py --video <id>    # a specific videoID
     python vision/plot_frames_kept.py --list          # which videos are available
 
-Frames are shown at full colour in proportion to their retention and washed out
-toward the page background when the selector drops them; the border carries the
-same number on a one-hue ramp. The bar strip under the grid is the per-frame
-retention against the uniform share the budget allows.
+Frames keep their colour in proportion to their retention and wash out toward
+the page when the selector drops them; the border and the per-tile label carry
+the same number. No title and no axes -- the script prints a caption instead.
 Runs with any python that has numpy + matplotlib + PIL.
 """
 import argparse, json, os
@@ -29,10 +28,12 @@ VMME = os.environ.get("VMME_ROOT", os.path.expanduser("~/vmme"))
 OUT = os.path.join(HERE, "..", "results", "figures", "videomme_frames_kept.pdf")
 CMAP = LinearSegmentedColormap.from_list("coral", ["#FFF4F1", "#F3B3A5", "#E8806F", "#A8412F", "#5C1C13"])
 NCOL = 8
+WIDTH = 9.0          # generous, so each 384x384 frame is barely downsampled in the raster
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--video", default=None)
 ap.add_argument("--list", action="store_true")
+ap.add_argument("--dpi", type=int, default=300)
 ap.add_argument("--out", default=OUT)
 a = ap.parse_args()
 
@@ -55,52 +56,41 @@ if not os.path.isdir(cache):
 nrow = int(np.ceil(nf / NCOL))
 vmax = float(r.max())
 norm = Normalize(0, vmax)
-# tiles are square: height follows the tile width so no vertical slack is left over
-tile = 7.2 / (NCOL + 0.45)
-fig = plt.figure(figsize=(7.2, nrow * tile + 1.55))
-# explicit margins: tight_layout fights a gridspec whose colorbar spans rows
-gs = fig.add_gridspec(nrow + 1, NCOL + 1, height_ratios=[1] * nrow + [0.80],
-                      width_ratios=[1] * NCOL + [0.035], hspace=0.06, wspace=0.06,
-                      left=0.055, right=0.885, top=0.945, bottom=0.075)
+tile = WIDTH / (NCOL + 0.30)
+fig = plt.figure(figsize=(WIDTH, nrow * tile + 0.08))
+# explicit margins: tight_layout fights a gridspec whose colorbar spans every row
+gs = fig.add_gridspec(nrow, NCOL + 1, width_ratios=[1] * NCOL + [0.030],
+                      hspace=0.035, wspace=0.035,
+                      left=0.005, right=0.932, top=0.995, bottom=0.005)
 
 for i in range(nf):
     ax = fig.add_subplot(gs[i // NCOL, i % NCOL])
     img = np.asarray(Image.open(os.path.join(cache, f"{i:03d}.png")).convert("RGB"), float) / 255
     keep = r[i] / vmax if vmax > 0 else 0.0
-    # wash dropped frames toward white; kept frames stay at full colour
-    alpha = 0.22 + 0.78 * keep
-    ax.imshow(np.clip(img * alpha + (1 - alpha), 0, 1))
+    # wash dropped frames toward white; the floor keeps them legible, and the
+    # border plus the label carry the exact value
+    alpha = 0.30 + 0.70 * keep
+    ax.imshow(np.clip(img * alpha + (1 - alpha), 0, 1), interpolation="lanczos")
     for s in ax.spines.values():
-        s.set_edgecolor(CMAP(norm(r[i]))); s.set_linewidth(2.0)
+        s.set_edgecolor(CMAP(norm(r[i]))); s.set_linewidth(2.4)
     ax.set_xticks([]); ax.set_yticks([])
-    ax.text(0.04, 0.96, f"{i}", transform=ax.transAxes, fontsize=5.5, va="top", ha="left",
-            color="white", bbox=dict(boxstyle="square,pad=0.12", fc="#00000088", ec="none"))
-    ax.text(0.96, 0.04, f"{r[i]*100:.0f}%", transform=ax.transAxes, fontsize=5.5, va="bottom",
-            ha="right", color="white", bbox=dict(boxstyle="square,pad=0.12", fc="#00000088", ec="none"))
+    ax.text(0.035, 0.965, f"{i}", transform=ax.transAxes, fontsize=6.5, va="top", ha="left",
+            color="white", bbox=dict(boxstyle="square,pad=0.14", fc="#000000AA", ec="none"))
+    ax.text(0.965, 0.035, f"{r[i]*100:.0f}%", transform=ax.transAxes, fontsize=6.5, va="bottom",
+            ha="right", color="white", bbox=dict(boxstyle="square,pad=0.14", fc="#000000AA", ec="none"))
 
-cax = fig.add_subplot(gs[:nrow, NCOL])
+cax = fig.add_subplot(gs[:, NCOL])
 cb = fig.colorbar(ScalarMappable(norm=norm, cmap=CMAP), cax=cax)
-cb.set_label("fraction of the frame's tokens kept", fontsize=7.5)
-cb.ax.tick_params(labelsize=7)
+cb.set_label("fraction of the frame's tokens kept", fontsize=8)
+cb.ax.tick_params(labelsize=7.5)
 
-axb = fig.add_subplot(gs[nrow, :NCOL])
-axb.bar(np.arange(nf), r * 100, width=0.86, color=[CMAP(norm(x)) for x in r])
-axb.axhline(uniform * 100, color="#5F6B7D", lw=1, ls="--", alpha=0.85,
-            label=f"uniform share ({uniform*100:.0f}%)")
-axb.set_xlim(-0.6, nf - 0.4)
-axb.set_xlabel(f"frame index (0 = start of video, {nf - 1} = end)", fontsize=8)
-axb.set_ylabel("kept (%)", fontsize=8)
-axb.tick_params(labelsize=7)
-axb.grid(alpha=0.3, axis="y")
-axb.set_axisbelow(True)
-for s in ("top", "right"):
-    axb.spines[s].set_visible(False)
-axb.legend(fontsize=7, frameon=False, loc="upper center")
-
-fig.suptitle(f"What OVAL keeps of {vid}: {nf} sampled frames, budget {meta['budget']} of "
-             f"{meta['videos'][ids.index(vid)]['n_visual']} visual tokens",
-             fontsize=9, color="#333333", y=0.985)
 os.makedirs(os.path.dirname(os.path.abspath(a.out)), exist_ok=True)
 fig.savefig(a.out)
-fig.savefig(os.path.splitext(a.out)[0] + ".png", dpi=200)
+fig.savefig(os.path.splitext(a.out)[0] + ".png", dpi=a.dpi)
 print("wrote", os.path.abspath(a.out))
+print("caption: The %d frames sampled from Video-MME video %s, shaded by the fraction of each "
+      "frame's visual tokens that OVAL's page selection keeps (border and label give the same "
+      "value; a uniform selection would keep %.0f%% of every frame). Query-agnostic protocol, "
+      "budget %d of %d visual tokens, rank-8 key records, per-head eta table %s."
+      % (nf, vid, uniform * 100, meta["budget"],
+         meta["videos"][ids.index(vid)]["n_visual"], meta["eta_table_hash"]))
