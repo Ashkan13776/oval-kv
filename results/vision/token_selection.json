@@ -1,0 +1,64 @@
+{
+ "model": "lmms-lab/LLaVA-Video-7B-Qwen2",
+ "page": 32,
+ "rank": 8,
+ "budget": 1792,
+ "page_budget": 56,
+ "sink": 128,
+ "recent": 128,
+ "frames": 64,
+ "eta_table_hash": "42bf0455",
+ "n_videos": 6,
+ "videos": [
+  {
+   "videoID": "TGom0uiW130",
+   "question_id": "601-1",
+   "T": 14160,
+   "n_visual": 13440,
+   "n_streamed": 113,
+   "pages": 419
+  },
+  {
+   "videoID": "7MFKy7DJsCY",
+   "question_id": "660-1",
+   "T": 14176,
+   "n_visual": 13440,
+   "n_streamed": 134,
+   "pages": 419
+  },
+  {
+   "videoID": "AkHbB9GuCkE",
+   "question_id": "720-1",
+   "T": 14158,
+   "n_visual": 13440,
+   "n_streamed": 124,
+   "pages": 419
+  },
+  {
+   "videoID": "0iED5BojTMI",
+   "question_id": "780-1",
+   "T": 14116,
+   "n_visual": 13440,
+   "n_streamed": 78,
+   "pages": 419
+  },
+  {
+   "videoID": "y9Fne3oUwX4",
+   "question_id": "840-1",
+   "T": 14130,
+   "n_visual": 13440,
+   "n_streamed": 82,
+   "pages": 419
+  },
+  {
+   "videoID": "5KlS-p5eYH8",
+   "question_id": "900-1",
+   "T": 14168,
+   "n_visual": 13440,
+   "n_streamed": 130,
+   "pages": 419
+  }
+ ],
+ "mean_retention": 0.1342873213294675,
+ "note": "per-frame retention of OVAL page selection, layers >= 1; scored with the current query on dense states (see module docstring)"
+}
