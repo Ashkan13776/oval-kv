@@ -79,8 +79,49 @@ cleanly and installed the branch's token-domain `oval/page_basis.py` as
 0.6.0, timm 0.9.16; Video-MME annotations fetched. Frame cache building
 (chunk 01 done, 02-20 running).
 
-**Next:** finish the frame cache, download the model, run the 20-question
-equivalence check, report hash match + answer agreement, then the queue.
+### 2026-11-07 -- equivalence check PASSED (exact), queue started
+
+Data ready: frame cache **900/900 videos, 8.8 GB** (measured 10.6 MiB/video),
+model 15.0 GB, 3.9 GB disk free.
+
+**Equivalence check (20 questions, `vision/runs/diag_newmachine`, GPU 0,
+`--method full --protocol stream`), vs `row1_full_n64` from the first machine:**
+
+| check | result |
+|---|---|
+| `frames_sha1` / `pixels_sha1` / `ids_sha1` | **identical on all 20** |
+| same answer letter | **20 / 20** |
+| same generated text | **20 / 20** |
+| OOM / allocator retries | 0 / 0 |
+
+This is **stronger than the brief anticipated** (it allows a few bf16 ties to
+flip across GPU types): the two machines agree bit-for-bit on the generated
+text despite **torch 2.5.1+cu121 here vs 2.8.0+cu128 on the first machine**.
+The environment deviation recorded on 2026-11-06 is therefore validated
+empirically, not merely argued. Both machines are RTX A6000, so rows 4 and 5
+are continued rather than rerun (user, 2026-11-06).
+
+Run characteristics here: prefill 14,043 tokens (13,440 visual -- matches
+STATUS.md), peak 16.9 GB, **median 6.9 s per question** vs 12-19 s on the
+first machine, because the GPUs are essentially free. host/gpu are recorded on
+every answer line (`mint04` / `NVIDIA RTX A6000`).
+
+**One more environment incident, fixed.** After the torch repair the SigLIP
+conv died with `cuDNN error: CUDNN_STATUS_NOT_INITIALIZED`: the earlier
+accidental torch 2.14 install had left a **parallel CUDA-13 library set**
+(`nvidia-cublas 13.1.1.3`, `nvidia-cudnn-cu13`, ...) beside the cu12 ones,
+shadowing cuDNN. Removing the cu13 packages then stripped shared files from the
+cu12 packages (same `nvidia/` directories), so the cu12 set was force-
+reinstalled at torch 2.5.1's pinned versions. Verified: cuDNN 9.1.0, conv2d OK,
+flash-attn / flashinfer / decord / timm / llava all import. Anyone repeating
+this setup should install decord and timm with a torch pin or `--no-deps` and
+avoid the whole sequence.
+
+**Queue started** with the brief's command: `vision/jobs_remaining.txt` copied
+to `vision/queue/jobs.txt`, four workers (one job per GPU). 78 jobs: 26 Long,
+48 Short+Medium, 4 question-in-prompt. At 6.9 s per question the Long split
+(26 shard-jobs x ~225 questions) is ~3 h and the whole queue ~14-16 h.
+jsonl files are committed to `vision` after each finished row.
 
 ## Where things stand (Long split = 900 questions)
 
