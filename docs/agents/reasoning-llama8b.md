@@ -8,16 +8,32 @@ configuration with the user, then run.
 _Owned by the agent running this brief. Update it at each step: survey
 report, confirmed configuration (with date), progress, results, deviations._
 
-### 2026-11-06 16:30: vr32 MATH50 and AIME24 complete, GPQA50c running
+### 2026-11-07 03:40: vr32 complete; summary of value ranks 8 / 16 / 32
 
-16 of 24 seed-cells are complete. The other user's job left the GPUs at about
-14:50 on Nov 5, and 8 cells have run at once since then.
+All 24 of 24 vr32 seed-cells are complete with no failures. The scored table is
+`results/eta_rules/vr32/table_ds-r1-llama-8b.md`.
 
-| task | k | n | avg@8 | pass@8 | vs vr16 (avg@8, paired 95% CI) | vs vr8 |
-|---|---|---|---|---|---|---|
-| MATH50 | 8 | 50 | 66.25 | 76.00 | +0.50 [-2.00, +3.50] | 0.00 [-3.25, +3.50] |
-| AIME24 | 8 | 30 | 45.00 | 80.00 | -2.08 [-9.58, +5.00] | -3.33 [-10.00, +3.75] |
-| GPQA50c | running | | | | | |
+avg@8 / pass@8, k = 8. In every row, rule 1 is recalibrated at that value rank.
+
+| task | vr8 | vr16 | vr32 (lossless) | vr32 - vr16 (paired 95% CI) | vr32 - vr8 |
+|---|---|---|---|---|---|
+| MATH50 | 66.25 / 76.00 | 65.75 / 76.00 | 66.25 / 76.00 | +0.50 [-2.00, +3.50] | 0.00 [-3.25, +3.50] |
+| AIME24 | 48.33 / 83.33 | 47.08 / 76.67 | 45.00 / 80.00 | -2.08 [-9.58, +5.00] | -3.33 [-10.00, +3.75] |
+| GPQA50c | 37.50 / 68.00 | 36.50 / 72.00 | 35.50 / 72.00 | -1.00 [-5.75, +3.75] | -2.00 [-6.50, +2.75] |
+
+**Conclusion.** For R1-Distill-Llama-8B at budget 2048, value rank has no
+measurable effect on accuracy. Lossless values (rank 31) are no better than
+PCA rank 8 on any task, and every CI includes 0. Rank-8 values are therefore
+enough, and the accuracy gap to dense attention, if there is one, comes from
+retrieval or key compression rather than from values.
+
+AIME24 and GPQA50c show a small, non-significant downward drift as the value
+rank rises. With n = 30 and 50 problems, this is consistent with noise.
+
+### 2026-11-06 16:30: vr32 MATH50 and AIME24 complete
+
+16 of 24 seed-cells were complete. The other user's job left the GPUs at about
+14:50 on Nov 5, and 8 cells ran at once from then on.
 
 ### 2026-11-05 12:00: vr32 calibration done, sweep running
 
