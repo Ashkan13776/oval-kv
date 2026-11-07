@@ -70,6 +70,7 @@ def main():
 
     ret = np.zeros((nl, A.frames))      # frame tokens kept, per (layer, frame)
     den_f = np.zeros(A.frames)          # frame tokens offered, summed over decisions
+    per_video = []                      # [n_videos, frames] retention, pooled over layers
     meta = []
     for vi, (_, r) in enumerate(picks.iterrows()):
         doc = r.to_dict(); doc["options"] = list(doc["options"])
@@ -116,6 +117,7 @@ def main():
             W[i, f] = c
         tf = W.sum(0)
 
+        vret = np.zeros(A.frames); vden = np.zeros(A.frames)
         for li in range(1, nl):
             K = pkv[li][0][0].float(); V = pkv[li][1][0].float()        # [H, T, d]
             Kp = K[:, lo:hi].reshape(nkv, P, PAGE, hd).permute(1, 2, 0, 3)[None].contiguous()
@@ -131,8 +133,11 @@ def main():
             cnt = sel.cpu().numpy().sum(axis=(0, 1)).astype(float)      # per page, over nq x H
             # tokens of each frame that were inside a kept page, over all decisions
             ret[li] += cnt @ W
+            vret += cnt @ W
+            vden += nq * nkv * tf
             if li == 1: den_f += nq * nkv * tf
             del K, V, Kp, Vp, mu, bs, cf, sc, sel
+        per_video.append(vret / np.maximum(vden, 1))
         meta.append(dict(videoID=doc["videoID"], question_id=doc["question_id"], T=int(T),
                          n_visual=int(n_vis), n_streamed=int(nq), pages=int(P)))
         print(f"[{vi+1}/{len(picks)}] {doc['videoID']} T={T} pages={P} streamed={nq} "
@@ -149,7 +154,9 @@ def main():
                     "scored with the current query on dense states (see module docstring)")
     os.makedirs(os.path.dirname(OUT_JSON), exist_ok=True)
     json.dump(res, open(OUT_JSON, "w"), indent=1)
-    np.savez_compressed(OUT_JSON.replace(".json", ".npz"), retention=frac)
+    np.savez_compressed(OUT_JSON.replace(".json", ".npz"), retention=frac,
+                        per_video=np.array(per_video),
+                        video_ids=np.array([m["videoID"] for m in meta]))
     print(json.dumps({k: v for k, v in res.items() if k != "videos"}, indent=1))
     print("plot: python3 vision/plot_token_selection.py")
 
