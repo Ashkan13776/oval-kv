@@ -24,7 +24,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import run_videomme as RV
 
-CAL_DIR = "/home/shahbaa/vmme/calib"
+CAL_DIR = os.path.join(os.environ.get("VMME_ROOT", os.path.expanduser("~/vmme")), "calib")
 CAP_DIR = os.path.join(HERE, "..", "logs", "eta_rules", "capture")
 MODEL, TASK = "llava-video-7b", "VCAL"
 SINK, RECENT, PAGE, NQ, NWIN, STRIDE, N = 128, 128, 32, 96, 3, 1024, 64

@@ -21,7 +21,7 @@ force_sample, time instruction, conv template qwen_1_5, post prompt
     python vision/run_videomme.py --protocol stream --frames 64 --out DIR \
         --method spec_ret --page_rep oval ... (any harness flag)
 """
-import argparse, hashlib, importlib.util, json, os, sys, time
+import argparse, hashlib, importlib.util, json, os, socket, sys, time
 
 import numpy as np
 import torch
@@ -34,8 +34,9 @@ sys.path.insert(0, FK)
 sys.path.insert(0, HERE)
 
 MODEL = "lmms-lab/LLaVA-Video-7B-Qwen2"
-ANN = "/home/shahbaa/vmme/videomme/test-00000-of-00001.parquet"
-CACHE = "/home/shahbaa/vmme/frames"
+VMME_ROOT = os.environ.get("VMME_ROOT", os.path.expanduser("~/vmme"))
+ANN = os.path.join(VMME_ROOT, "videomme/test-00000-of-00001.parquet")
+CACHE = os.path.join(VMME_ROOT, "frames")
 N_CACHE = 64
 
 _spec = importlib.util.spec_from_file_location(
@@ -266,6 +267,7 @@ def main():
                     print(f"{doc['question_id']}: CUDA OOM (shared GPU), retry {attempt + 1} in 60 s", flush=True)
                     time.sleep(60)
             info["oom_retries"] = attempt
+            info["host"], info["gpu"] = socket.gethostname(), torch.cuda.get_device_name()
             pred = extract_letter(text)
             rec = dict(question_id=doc["question_id"], videoID=doc["videoID"], duration=doc["duration"],
                        task_type=doc["task_type"], answer=doc["answer"], output=text, pred=pred,

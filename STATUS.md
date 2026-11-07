@@ -1,7 +1,12 @@
 # OVAL on a video LLM (Video-MME) — status
 
 Branch `vision` of oval-kv, working tree `~/oval-vision`. Everything for this
-experiment lives in `vision/`; nothing in `oval/` or `patches/` is changed.
+experiment lives in `vision/`. One change outside it: the value PCA in `oval/page_basis.py`
+now runs in the token domain (same projection, user decision 2; verified by
+`vision/check_vpca.py`). `patches/` is unchanged.
+
+**Paused 2026-11-06 (shared-GPU OOM). To resume, on this or another machine:
+[docs/agents/vision-videomme.md](docs/agents/vision-videomme.md).**
 Environment: `source vision/env.sh` (the `ovalkv` conda env: torch 2.8.0+cu128,
 transformers 4.45.2, flash-attn 2.8.3, flashinfer 0.2.4 JIT), plus LLaVA-NeXT
 (`bce12e4`, `pip install --no-deps -e`), decord, timm 0.9.16. Hardware: 4x RTX

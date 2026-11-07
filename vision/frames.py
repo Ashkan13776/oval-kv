@@ -15,7 +15,7 @@ from concurrent.futures import ProcessPoolExecutor
 import numpy as np
 from PIL import Image
 
-ROOT = "/home/shahbaa/vmme"
+ROOT = os.environ.get("VMME_ROOT", os.path.expanduser("~/vmme"))
 CACHE = os.path.join(ROOT, "frames")
 SIZE = 384
 

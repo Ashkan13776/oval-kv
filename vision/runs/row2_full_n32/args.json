@@ -42,10 +42,11 @@
   "long"
  ],
  "limit": null,
- "shard": 1,
+ "shard": 3,
  "nshards": 4,
  "out": "vision/runs/row2_full_n32",
  "max_new_tokens": 16,
+ "file_tag": "",
  "qids": null,
  "only_cached": false
 }
