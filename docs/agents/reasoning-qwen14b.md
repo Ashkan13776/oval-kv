@@ -8,7 +8,7 @@ configuration with the user, then run.
 _Owned by the agent running this brief. Update it at each step: survey
 report, confirmed configuration (with date), progress, results, deviations._
 
-**2026-11-06 10:25: sweep running, 10/24 seed-cells complete.** MATH50 is finished, avg@8 = 69.25, pass@8 = 76.0 (seeds 42-49: 68 / 72 / 68 / 66 / 70 / 74 / 68 / 68). That matches the best fixed eta (0.25: 69.25 / 76.0). AIME24 has 2/8 done: seed 42 = 60.0 and seed 43 = 63.3, against the eta-sweep avg@8 of 58.75-65.42. Seeds 44 (GPU 0) and 45 (GPU 1) are running. Cell times: MATH50 3.0-3.3 h, AIME24 5.5-6.1 h, on either GPU. Expected finish is late Sat 2026-11-07, pending the first GPQA50c cell time.
+**2026-11-07 05:00: sweep running, 16/24 seed-cells complete. MATH50 and AIME24 are finished.** MATH50 avg@8 / pass@8 = 69.25 / 76.0 (best fixed eta 0.25: 69.25 / 76.0). AIME24 = 62.08 / 83.33, from seeds 42-49 scoring 60.0 / 63.3 / 60.0 / 56.7 / 66.7 / 70.0 / 66.7 / 53.3. The fixed-eta range is 58.75-65.42 / 76.67-83.33, so AIME24 is mid-range and inside seed noise. These are interim scores from the repo's PAT regex; the score step writes the final table. GPQA50c seeds 42 (GPU 0, 04:01) and 43 (GPU 1, 04:51) are running. Cell times: MATH50 3.0-3.3 h, AIME24 5.5-6.2 h; GPQA50c looks like ~7 h on early pace. Expected finish is around midday Sun 2026-11-08.
 
 ### Progress
 
