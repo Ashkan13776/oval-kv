@@ -8,6 +8,7 @@ Four agents, one brief each. Read this page first, then your brief.
 | [reasoning-llama8b.md](reasoning-llama8b.md) | full pipeline on long reasoning | R1-Distill-Llama-8B |
 | [reasoning-qwen14b.md](reasoning-qwen14b.md) | full pipeline on long reasoning | R1-Distill-Qwen-14B |
 | [long-context.md](long-context.md) | transfer pieces 2-4 to long-context understanding, then run the full pipeline there | Llama-3.1-8B, Qwen-2.5-7B, Qwen-2.5-14B (Instruct) |
+| [vision-videomme.md](vision-videomme.md) | finish the Video-MME runs (branch `vision`) | LLaVA-Video-7B-Qwen2 |
 
 ## The protocol every agent follows
 
