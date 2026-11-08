@@ -1,4 +1,5 @@
-"""LVBench (C2) with LLaVA-Video-7B-Qwen2: vision/run_videomme.py's model loading, harness patch,
+"""LVBench (C2) with LLaVA-Video-7B-Qwen2 (and, with --bench videomme, Video-MME exactly as
+vision/run_videomme.py, for the C5 selection maps): vision/run_videomme.py's model loading, harness patch,
 stream protocol and answer() unchanged; only the question source (scripts/revision/C/lvbench.py),
 the prompt text (lmms-eval lvbench_doc_to_text) and the frame cache ($LVB_ROOT/frames, built
 with vision/frames.py's extract: 64 frames, 384x384) differ. The llava_vid time instruction is
@@ -24,14 +25,21 @@ def _bi(*a, **k):                              # capture the prompt ids (positio
 
 RV.build_inputs = _bi
 
-RV.CACHE = os.path.join(LVB.LVB_ROOT, "frames")
-_TEXT = {}
-RV.doc_to_text = lambda doc: doc["text"]
 
 
 def main():
-    args = RV.build_parser().parse_args()
-    df = LVB.load_docs()
+    ap = RV.build_parser()
+    ap.add_argument("--bench", default="lvbench", choices=["lvbench", "videomme"])
+    args = ap.parse_args()
+    if args.bench == "lvbench":
+        RV.CACHE = os.path.join(LVB.LVB_ROOT, "frames")
+        RV.doc_to_text = lambda doc: doc["text"]
+        df = LVB.load_docs()
+    else:                    # Video-MME exactly as vision/run_videomme.py (C5 selection maps on Long)
+        import pandas as pd
+        df = pd.read_parquet(RV.ANN)
+        df = df[df.duration.isin(args.durations)].reset_index(drop=True)
+        df["group"], df["task_type"], df["time_reference"], df["duration_minutes"] = df.duration, df.task_type, "", 0.0
     if args.limit:
         df = df.iloc[:args.limit]
     if args.qids:
@@ -51,6 +59,8 @@ def main():
             if r.question_id in done:
                 continue
             doc = r.to_dict()
+            if args.bench == "videomme":
+                doc["options"] = list(doc["options"])
             while not os.path.exists(os.path.join(RV.CACHE, f"{doc['videoID']}_n{RV.N_CACHE}", "meta.json")):
                 time.sleep(30)
             sellog.start()          # the dense prefill never reaches the page-selection call
