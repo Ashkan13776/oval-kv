@@ -10,7 +10,43 @@ _Owned by the agent running this brief. Update it at each step: survey
 report, design proposal, confirmed configuration (with date), progress,
 results, deviations._
 
-- not started
+**2026-11-08: survey done; design proposal sent to the user and awaiting confirmation. No GPU job has run.**
+
+### Survey report
+
+**OVAL in one paragraph.** Every 32-token page of the paged KV cache keeps, per KV head, a rank-r record: a mean, a basis and coefficients. The four pieces use that record in four ways:
+
+| piece | what it does | harness flag(s) | filename tag | evidence so far |
+|---|---|---|---|---|
+| 1. retrieval | scores pages by the logsumexp of logits rebuilt in a rank-8 basis of `M_eta` (key PCA at eta 0, output-aware at eta 1); FreeKV's avgSM / top-k / spec_ret do the rest | `--method spec_ret --page_rep oval --oval_rank 8 --eta E` | `oval_r8_eta<E>_q0` | Tables 1-2 (paper), including long context |
+| 2. key compression | selected pages' keys are rebuilt from the same rank-8 record instead of read from the cache | `--oval_recon` | `_recon1` | reasoning only |
+| 3. value compression | selected pages' values are rebuilt from a per-page PCA record | `--oval_vrank R --vbasis pca` | `_vr<R>_vpca` | reasoning only (Qwen-7B: ranks 8/16 within noise of exact) |
+| 4. per-head eta | rule 1, `eta* = clip((a-c)/(a+b-2c), 0, 1)` per (layer, KV head), from the output errors at eta 0 and 1 on held-out traces | `--eta_table <json>` | `_etab<hash>` | reasoning only |
+
+Sink and recent tokens always stay exact. **Prefill is dense** in the harness. Pages are built when decoding starts, and selection and reconstruction act only on decode steps.
+
+**Long-context harness.**
+- `eval.LongBench2.pred`: 503 questions; middle-truncation to `model2maxlen` = 65536; greedy; up to 128 new tokens (answers are about 10). It resumes by `_id`, but drops empty outputs, which then re-run on every resume.
+- `eval.LongGenBench.pred`: `Dataset_short.json`, 400 items (Week / Floor / Menu Week / Block x 100), prompts of about 430 words, `max_gen 16000`, a sampling stop string, and `append_to_json` per record.
+- The paper protocol is in the brief. Note that "B = 2048" means 128+128+1792 for LongBench v2 and 512+512+1024 (the default `--budget`) for LongGenBench. The reasoning runs used 512+512+2048.
+- All the `--oval_*` / `--eta_table` flags reach both pred scripts through `eval/util.py`, but they have never been run there.
+
+**On disk (machine C).**
+- The weights of all three models are cached, as are LongBench v2, LongBench v1 (`data.zip`) and the LongBench-Pro card.
+- There are no long-context outputs, captures or eta tables for any of these models. The paper's raw generations are on another machine.
+- The rule-1 code splits cleanly:
+  - `stage_stats` / `window_stats` only need captures holding (K, V, Q at window positions).
+  - `stage_capture` is reasoning-specific: it uses the dataset files, the `<think>` prompt, and `generate()` with T 0.6, top-p 0.95 for 6144 tokens.
+
+**Inconsistencies and gaps found:**
+1. **Values PCA rank 32 is lossless.** A centred 32-token page has rank <= 31. `build_value_summary` clamps `r = min(rank, n-1, d)`, so `--oval_vrank 32` rebuilds the values exactly up to bf16 rounding (docs/3 calls it "the lossless reference"). Its record (mean + 31 basis vectors + coefficients) is also larger than the raw page. The brief proposes rank 16; the agreed setting is rank 32. This needs a decision (see the proposal).
+2. **LongGenBench sampling is unseeded.** `eval/LongGenBench/pred.py` never calls `torch.manual_seed`. `--seed` only adds `-seed<S>` to the filename, so "seeds" are neither reproducible nor distinct by construction. The reasoning pred seeds properly.
+3. **LongGenBench has no resume.** `append_to_json` re-reads and re-writes the whole list on every record. A restart appends duplicates; the scorer docstring says "last 400 records" for this reason. `--data_from` / `--data_idx_to` shards land in `res-test/`.
+4. **LongGenBench top-p.** The brief says top-p 0.95, but FreeKV's own command has no `--top_p` (default 1.0). Nothing in the repo records which one Table 2's OVAL cells used.
+5. **No LongGenBench scoring in the repo.** `analysis/score_accuracy.py` says it scores LongGenBench but contains only the LongBench v2 loop, and `all_tables.py` has no LongGenBench accuracy table. CR x Acc needs the Qwen3-32B judge under vLLM (`eval/LongGenBench/eval.py`). vLLM is not installed in `freekv`, Qwen3-32B is not cached (~65 GB), and the disk has 198 GB free (97% used).
+6. **64K calibration captures do not fit.** One capture holds K and V for every layer: 3.8 GB (Qwen-7B), 8.6 GB (Llama-8B) or 12.9 GB (Qwen-14B) per prompt. `stage_capture` also runs a full-logits forward (64K x 152K vocab, about 20 GB). Long-context calibration must stream capture into stats per prompt rather than save captures.
+7. **LongBench v2 pred.** `--data_from` references an undefined `data` (NameError). `--out_root_dir` is ignored (the output root is hard-coded). `lb2_eta_sweep.sh` deletes partial files although pred already resumes by `_id`. The brief's "append pitfall" applies only when two different runs share a path.
+8. **The rule-1 regime differs.** In LongBench v2 only about 10 decode steps per question see compressed pages, and they attend to about 60K tokens. Reasoning calibration took windows of generated tokens at 2-6K context. Calibration queries should therefore be decode-time queries at the full prompt length.
 
 ## Where things stand
 
