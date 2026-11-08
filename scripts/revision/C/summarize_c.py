@@ -14,7 +14,8 @@ Every arm is paired against both FullKV references (64 and 32 frames). SnapKV is
 
 Breakdowns: Video-MME by duration; LVBench by question_type (a question with several types
 counts in each, as LVBench reports) and by video type.
-Outputs: <out>.md, <out>_acc.csv, <out>_paired.csv, <out>.tex.
+Outputs: <out>.md, <out>_acc.csv, <out>_paired.csv (use --out results/revision/C/tables/<name>),
+and ../latex/<name>.tex next to the tables dir. Two decimals, as in the paper; no medals.
 """
 import argparse, csv, glob, json, os
 from collections import defaultdict
@@ -112,7 +113,7 @@ def main():
               "|---|" + "---|" * len(ks)]
         for d in rows:
             L.append(f"| {meta[d][0]} | " + " | ".join(
-                f"{acc[d, k][0][0]:.1f} [{acc[d, k][0][1]:.1f}, {acc[d, k][0][2]:.1f}]" for k in ks) + " |")
+                f"{acc[d, k][0][0]:.2f} [{acc[d, k][0][1]:.2f}, {acc[d, k][0][2]:.2f}]" for k in ks) + " |")
         for ref in REFS:
             if ref not in rows:
                 continue
@@ -122,7 +123,7 @@ def main():
                 if d == ref:
                     continue
                 L.append(f"| {meta[d][0]} | " + " | ".join(
-                    "{:+.1f} [{:+.1f}, {:+.1f}]{}".format(*paired[d, ref, k],
+                    "{:+.2f} [{:+.2f}, {:+.2f}]{}".format(*paired[d, ref, k],
                     "*" if paired[d, ref, k][1] > 0 or paired[d, ref, k][2] < 0 else "") for k in ks) + " |")
     L += ["", "†: SnapKV is reported, never ranked."]
     os.makedirs(os.path.dirname(a.out) or ".", exist_ok=True)
@@ -140,11 +141,13 @@ def main():
     tex = ["\\begin{tabular}{l|" + "c" * len(ks) + "}", "\\toprule",
            "\\textbf{Method} & " + " & ".join(k[1].capitalize() for k in ks) + " \\\\", "\\midrule"]
     for d in rows:
-        tex.append(meta[d][1] + " & " + " & ".join(f"{acc[d, k][0][0]:.1f}" for k in ks) + " \\\\")
+        tex.append(meta[d][1] + " & " + " & ".join(f"{acc[d, k][0][0]:.2f}" for k in ks) + " \\\\")
         if d == "full_n32" or (d == "full_n64" and "full_n32" not in rows):
             tex.append("\\midrule")
     tex += ["\\bottomrule", "\\end{tabular}"]
-    open(a.out + ".tex", "w").write("\n".join(tex) + "\n")
+    td = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(a.out))), "latex")
+    os.makedirs(td, exist_ok=True)
+    open(os.path.join(td, os.path.basename(a.out) + ".tex"), "w").write("\n".join(tex) + "\n")
     print("\n".join(L))
 
 
