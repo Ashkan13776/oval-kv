@@ -130,7 +130,7 @@ def stream_text(tok, doc_text):
 
 @torch.no_grad()
 def answer(doc, args, tok, model, step_updater, eos_ids):
-    ep = QP.emb_path(doc["videoID"], args.bench, args.frames)
+    ep = QP.emb_path(doc["videoID"], args.bench, args.frames, args.vz)
     while not os.path.exists(ep):          # the vision side (qwen_prep.py) may still be running
         time.sleep(30)
     c = torch.load(ep, weights_only=True)
@@ -173,7 +173,7 @@ def answer(doc, args, tok, model, step_updater, eos_ids):
                 n_visual=c["n_visual"], resized_hw=c["resized_hw"], prefill_len=L, n_stream=len(stream),
                 n_gen=len(gen), margin=margin, sec_prefill=t_prefill, sec=time.time() - t0,
                 peak_gb=torch.cuda.max_memory_allocated() / 2**30, alloc_retries=ms.get("num_alloc_retries", 0))
-    if sl is not None:                     # per temporal group (2 frames each), not per frame
+    if sl is not None and not args.vz:     # pruned (VisionZip) sequences are not uniform per frame; per temporal group (2 frames each), not per frame
         info["sellog"] = dict(sl, frame_unit="qwen temporal group (frames 2g, 2g+1)")
     return text, info
 
@@ -184,6 +184,7 @@ def main():
         if a.dest == "protocol":
             a.required, a.default = False, "stream"
     ap.add_argument("--bench", default="videomme", choices=["videomme", "lvbench"])
+    ap.add_argument("--vz", type=float, default=0.0, help="C3 VisionZip retention: read the pruned embeddings")
     args = ap.parse_args()
     import qwen_docs
     df = qwen_docs.load_docs(args)

@@ -55,9 +55,10 @@ def frame_dir(vid, src):
     return os.path.join(base, "frames_qwen", f"{vid}_n{N}")
 
 
-def emb_path(vid, src, frames=N):
+def emb_path(vid, src, frames=N, vz=0.0):
     base = ROOT if src == "videomme" else os.environ.get("LVB_ROOT", os.path.expanduser("~/lvbench"))
-    return os.path.join(base, "qwen_emb", f"{vid}.pt" if frames == N else f"{vid}_n{frames}.pt")
+    name = vid + ("" if frames == N else f"_n{frames}") + (f"_vz{round(vz * 100)}" if vz else "")
+    return os.path.join(base, "qwen_emb", name + ".pt")
 
 
 def extract(vid, src):
@@ -116,8 +117,8 @@ def processor_inputs(proc, fr, meta, text=None, add_generation_prompt=True):
 
 
 @torch.no_grad()
-def prep(vid, src, proc, model, frames=N):
-    out = emb_path(vid, src, frames)
+def prep(vid, src, proc, model, frames=N, vz=0.0):
+    out = emb_path(vid, src, frames, vz)
     if os.path.exists(out):
         return "cached"
     fr, meta, fh = extract(vid, src)
@@ -137,15 +138,29 @@ def prep(vid, src, proc, model, frames=N):
     spg = inp["second_per_grid_ts"]
     ph = hashlib.sha1(inp["pixel_values_videos"].float().numpy().tobytes()).hexdigest()[:16]
     emb = model.model.embed_tokens(ids)
-    vis = model.visual(pv, grid_thw=thw)
+    if vz:                                  # C3 VisionZip (scripts/revision/C/visionzip.py)
+        import visionzip as VZ
+        vis, vz_score, vz_key = VZ.qwen_visual_with_scores(model.visual, pv, thw)
+    else:
+        vis = model.visual(pv, grid_thw=thw)
     mask = ids[0] == model.config.video_token_id
     assert int(mask.sum()) == vis.shape[0], (int(mask.sum()), vis.shape)
     emb[0, mask] = vis.to(emb.dtype)
     pos, delta = model.get_rope_index(ids, None, thw, torch.tensor(spg), torch.ones_like(ids))
     pos = pos[:, 0].to(torch.int32).cpu()                                 # (3, L)
-    nxt = int(pos.max()) + 1
+    nxt = int(pos.max()) + 1                 # unpruned next position, as upstream VisionZip (rope_deltas)
+    n_full = int(mask.sum())
+    if vz:
+        keep, kv = VZ.select_merge(vz_score, vz_key, vis.to(emb.dtype), vz)
+        vpos = mask.nonzero(as_tuple=True)[0]
+        emb[0, vpos[keep]] = kv
+        sk = torch.ones(ids.shape[1], dtype=torch.bool, device=ids.device)
+        sk[vpos] = False; sk[vpos[keep]] = True
+        emb, ids, pos = emb[:, sk], ids[:, sk], pos[:, sk.cpu()]
+        mask = ids[0] == model.config.video_token_id
     os.makedirs(os.path.dirname(out), exist_ok=True)
     torch.save(dict(emb=emb[0].cpu(), pos=pos, next_pos=nxt, ids=ids[0].cpu(), n_visual=int(mask.sum()),
+                    n_visual_unpruned=n_full, vz=vz,
                     grid_thw=thw[0].tolist(), second_per_grid_ts=float(spg[0]), resized_hw=meta["resized_hw"],
                     frames_sha1=fh, pixels_sha1=ph,
                     ids_sha1=hashlib.sha1(ids.cpu().numpy().tobytes()).hexdigest()[:16],
@@ -162,6 +177,7 @@ if __name__ == "__main__":
     ap.add_argument("--shard", type=int, default=0)
     ap.add_argument("--nshards", type=int, default=1)
     ap.add_argument("--frames", type=int, default=N)
+    ap.add_argument("--vz", type=float, default=0.0, help="VisionZip retention (0.5, 0.25); 0 = off")
     ap.add_argument("--frames_only", type=int, default=0, help="CPU only: extract the frame cache with this many workers")
     a = ap.parse_args()
     vids = a.vids or open(a.vid_file).read().split()
@@ -181,6 +197,6 @@ if __name__ == "__main__":
     for v in vids:
         t0 = time.time()
         try:
-            print(v, prep(v, a.src, proc, model, a.frames), f"{time.time() - t0:.1f}s", flush=True)
+            print(v, prep(v, a.src, proc, model, a.frames, a.vz), f"{time.time() - t0:.1f}s", flush=True)
         except FileNotFoundError as e:
             print(v, "MISSING", e, flush=True)
