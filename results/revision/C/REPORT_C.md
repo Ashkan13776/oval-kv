@@ -132,6 +132,27 @@ The timing questions are rerun inside the full runs; tables use the full-run sha
   streamed as decode tokens): 100 / 100 identical output strings, 51.0% both.
 - Runs: `runs/c1_qwen25vl/sanity_{stream_full,prompt_hf,hfstream}_n64`.
 
+## C5: analysis
+
+**eta_h on video** (`scripts/revision/C/c5_eta_heatmap.py`, no GPU; figure
+`figures/c5_eta_heatmaps.pdf` + `.csv`, pairs `tables/c5_eta_pairs.csv`). All five tables are
+28 layers x 4 KV heads; statistics over layers >= 1.
+
+| table | median eta_h | at 0 | at 1 |
+|---|---|---|---|
+| R1-Distill Qwen-7B, MATH500 (vr16, 0c99a26a) | 0.54 | 33% | 11% |
+| R1-Distill Qwen-7B, AIME24 (vr16) | 0.33 | 41% | 11% |
+| R1-Distill Qwen-7B, GPQA (vr16) | 0.37 | 39% | 10% |
+| LLaVA-Video-7B-Qwen2, video (42bf0455) | 0.71 | 5% | 13% |
+| Qwen2.5-VL-7B, video (486493e2) | 0.43 | 15% | 0% |
+
+Pearson r over heads: the three reasoning tables agree with each other (0.81-0.87). LLaVA-Video
+vs the reasoning tables: 0.26-0.32, mean eta +0.20 to +0.27. Qwen2.5-VL vs reasoning: -0.06 to
+0.02, mean shift -0.06 to +0.01. LLaVA-Video vs Qwen2.5-VL: 0.03.
+One sentence: visual prefill moves eta_h; the per-head pattern of the reasoning tables does not
+carry over to either video table, and for LLaVA-Video (same LM family as R1-Distill Qwen-7B)
+it shifts eta_h up by about 0.2-0.27 and nearly removes heads at eta 0.
+
 ## Open questions
 
 1. **"20 videos" for the reproduction.** I use the first 20 Long videos (601-620),

@@ -1,0 +1,11 @@
+table_a,table_b,pearson_r,mean_b_minus_a,mean_abs_diff
+"Qwen-7B reasoning, MATH500","Qwen-7B reasoning, AIME24",0.866,-0.074,0.122
+"Qwen-7B reasoning, MATH500","Qwen-7B reasoning, GPQA",0.814,-0.071,0.139
+"Qwen-7B reasoning, MATH500","LLaVA-Video-7B, video",0.315,+0.200,0.357
+"Qwen-7B reasoning, MATH500","Qwen2.5-VL-7B, video",-0.028,-0.062,0.404
+"Qwen-7B reasoning, AIME24","Qwen-7B reasoning, GPQA",0.870,+0.003,0.102
+"Qwen-7B reasoning, AIME24","LLaVA-Video-7B, video",0.310,+0.274,0.380
+"Qwen-7B reasoning, AIME24","Qwen2.5-VL-7B, video",-0.061,+0.012,0.395
+"Qwen-7B reasoning, GPQA","LLaVA-Video-7B, video",0.263,+0.271,0.394
+"Qwen-7B reasoning, GPQA","Qwen2.5-VL-7B, video",0.015,+0.009,0.381
+"LLaVA-Video-7B, video","Qwen2.5-VL-7B, video",0.028,-0.262,0.347
