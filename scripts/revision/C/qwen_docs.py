@@ -20,4 +20,4 @@ def load_docs(args):
         df["group"] = df.duration
         return df
     import lvbench
-    return lvbench.load_docs()
+    return lvbench.load_docs(args)

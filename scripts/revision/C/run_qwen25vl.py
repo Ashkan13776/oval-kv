@@ -128,7 +128,10 @@ def stream_text(tok, doc_text):
 
 @torch.no_grad()
 def answer(doc, args, tok, model, step_updater, eos_ids):
-    c = torch.load(QP.emb_path(doc["videoID"], args.bench), weights_only=True)
+    ep = QP.emb_path(doc["videoID"], args.bench, args.frames)
+    while not os.path.exists(ep):          # the vision side (qwen_prep.py) may still be running
+        time.sleep(30)
+    c = torch.load(ep, weights_only=True)
     emb = c["emb"][None].to("cuda:0")
     L = emb.shape[1]
     MRope.prefill_cos, MRope.prefill_sin = mrope_cos_sin(c["pos"], theta=MRope.theta)
@@ -202,7 +205,8 @@ def main():
             pred = RV.extract_letter(text)
             rec = dict(question_id=doc["question_id"], videoID=doc["videoID"], group=doc.get("group"),
                        task_type=doc.get("task_type"), answer=doc["answer"], output=text, pred=pred,
-                       score=float(pred.lower() == str(doc["answer"]).lower()), **info)
+                       score=float(pred.lower() == str(doc["answer"]).lower()),
+                       **{k: doc[k] for k in ("time_reference", "duration_minutes") if k in doc}, **info)
             f.write(json.dumps(rec) + "\n"); f.flush()
             print(doc["question_id"], repr(text), doc["answer"], f"{info['sec']:.1f}s", flush=True)
 

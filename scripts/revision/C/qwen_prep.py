@@ -55,9 +55,9 @@ def frame_dir(vid, src):
     return os.path.join(base, "frames_qwen", f"{vid}_n{N}")
 
 
-def emb_path(vid, src):
+def emb_path(vid, src, frames=N):
     base = ROOT if src == "videomme" else os.environ.get("LVB_ROOT", os.path.expanduser("~/lvbench"))
-    return os.path.join(base, "qwen_emb", f"{vid}.pt")
+    return os.path.join(base, "qwen_emb", f"{vid}.pt" if frames == N else f"{vid}_n{frames}.pt")
 
 
 def extract(vid, src):
@@ -74,14 +74,17 @@ def extract(vid, src):
         h, w = fr.shape[2:]
         rh, rw = smart_resize(h, w)
         fr = TF.resize(fr, [rh, rw], interpolation=InterpolationMode.BICUBIC, antialias=True)
-        tmp = d + ".tmp"; os.makedirs(tmp, exist_ok=True)
+        tmp = d + f".tmp{os.getpid()}"; os.makedirs(tmp, exist_ok=True)     # per process: concurrent jobs may race
         for i, f in enumerate(fr):
             Image.fromarray(f.permute(1, 2, 0).numpy()).save(os.path.join(tmp, f"{i:03d}.png"), compress_level=1)
         meta = dict(video_id=vid, n=N, total_frames=total, fps=fps, video_time=total / fps, frame_idx=idx,
                     orig_hw=[int(h), int(w)], resized_hw=[rh, rw],
                     sample_fps=N / max(total, 1e-6) * fps)          # qwen_vl_utils' sample_fps
         json.dump(meta, open(os.path.join(tmp, "meta.json"), "w"))
-        os.rename(tmp, d)
+        try:
+            os.rename(tmp, d)
+        except OSError:                      # another process finished the same video first
+            import shutil; shutil.rmtree(tmp, ignore_errors=True)
     meta = json.load(open(os.path.join(d, "meta.json")))
     raw = [open(os.path.join(d, f"{i:03d}.png"), "rb").read() for i in range(N)]
     fh = hashlib.sha1(b"".join(raw)).hexdigest()[:16]
@@ -113,11 +116,18 @@ def processor_inputs(proc, fr, meta, text=None, add_generation_prompt=True):
 
 
 @torch.no_grad()
-def prep(vid, src, proc, model):
-    out = emb_path(vid, src)
+def prep(vid, src, proc, model, frames=N):
+    out = emb_path(vid, src, frames)
     if os.path.exists(out):
         return "cached"
     fr, meta, fh = extract(vid, src)
+    if frames != N:          # N/2 (Tab. 5 row 2): every other cached frame; fps metadata scaled to match
+        step = N // frames
+        assert N % frames == 0
+        fr = fr[::step]
+        meta = dict(meta, sample_fps=meta["sample_fps"] / step)
+        raw = [open(os.path.join(frame_dir(vid, src), f"{i:03d}.png"), "rb").read() for i in range(0, N, step)]
+        fh = hashlib.sha1(b"".join(raw)).hexdigest()[:16]
     prompt, inp = processor_inputs(proc, fr, meta, text="", add_generation_prompt=False)
     ids = inp["input_ids"][0]
     vend = int((ids == model.config.vision_end_token_id).nonzero()[0])
@@ -139,8 +149,8 @@ def prep(vid, src, proc, model):
                     grid_thw=thw[0].tolist(), second_per_grid_ts=float(spg[0]), resized_hw=meta["resized_hw"],
                     frames_sha1=fh, pixels_sha1=ph,
                     ids_sha1=hashlib.sha1(ids.cpu().numpy().tobytes()).hexdigest()[:16],
-                    created=time.strftime("%Y-%m-%d %H:%M:%S")), out + ".tmp")
-    os.rename(out + ".tmp", out)
+                    created=time.strftime("%Y-%m-%d %H:%M:%S")), out + f".tmp{os.getpid()}")
+    os.replace(out + f".tmp{os.getpid()}", out)
     return f"ok n_visual={int(mask.sum())} hw={meta['resized_hw']} L={ids.shape[1]}"
 
 
@@ -151,13 +161,26 @@ if __name__ == "__main__":
     ap.add_argument("--src", default="videomme", choices=["videomme", "lvbench"])
     ap.add_argument("--shard", type=int, default=0)
     ap.add_argument("--nshards", type=int, default=1)
+    ap.add_argument("--frames", type=int, default=N)
+    ap.add_argument("--frames_only", type=int, default=0, help="CPU only: extract the frame cache with this many workers")
     a = ap.parse_args()
     vids = a.vids or open(a.vid_file).read().split()
     vids = vids[a.shard::a.nshards]
+    if a.frames_only:
+        from concurrent.futures import ProcessPoolExecutor
+        def _one(v):
+            try:
+                extract(v, a.src); return v, "ok"
+            except Exception as e:
+                return v, f"ERR {e!r}"
+        with ProcessPoolExecutor(a.frames_only) as ex:
+            res = list(ex.map(_one, vids))
+        print(f"{len(res)} videos, errors: {[r for r in res if r[1] != 'ok']}", flush=True)
+        sys.exit(0)
     proc, model = load_model()
     for v in vids:
         t0 = time.time()
         try:
-            print(v, prep(v, a.src, proc, model), f"{time.time() - t0:.1f}s", flush=True)
+            print(v, prep(v, a.src, proc, model, a.frames), f"{time.time() - t0:.1f}s", flush=True)
         except FileNotFoundError as e:
             print(v, "MISSING", e, flush=True)

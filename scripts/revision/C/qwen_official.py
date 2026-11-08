@@ -112,7 +112,8 @@ def main():
             pred = mcq.extract_mcq_answer(text, choices=["A", "B", "C", "D"])
             rec = dict(question_id=doc["question_id"], videoID=doc["videoID"], group=doc.get("group"),
                        task_type=doc.get("task_type"), answer=doc["answer"], output=text, pred=pred,
-                       score=float(pred.lower() == str(doc["answer"]).lower()), **info)
+                       score=float(pred.lower() == str(doc["answer"]).lower()),
+                       **{k: doc[k] for k in ("time_reference", "duration_minutes") if k in doc}, **info)
             f.write(json.dumps(rec) + "\n"); f.flush()
             print(doc["question_id"], repr(text), doc["answer"], f"{info['sec']:.1f}s", flush=True)
 

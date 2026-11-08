@@ -46,9 +46,8 @@ def run():
     nl, nh, nkv = len(lm.layers), model.config.num_attention_heads, model.config.num_key_value_heads
     hd = model.config.hidden_size // nh; g = nh // nkv; D = model.config.hidden_size
     dev = torch.device("cuda:0")
-    Wh = {li: lm.layers[li].self_attn.o_proj.weight.float().view(D, nkv, g, hd) for li in LAYERS}
-    ERC.PB = ERC.PB if hasattr(ERC, "PB") else None
-    Gh = {li: ERC.PB.publish_metric(lm.layers[li].self_attn.o_proj.weight.float(), nkv, hd, g) for li in LAYERS}
+    Wh = {li: lm.layers[li].self_attn.o_proj.weight.detach().float().view(D, nkv, g, hd) for li in LAYERS}
+    Gh = {li: ERC.PB.publish_metric(lm.layers[li].self_attn.o_proj.weight.detach().float(), nkv, hd, g) for li in LAYERS}
     for v in sorted(glob.glob(os.path.join(SRC, "**", "*.mp4"), recursive=True)):
         name = os.path.basename(v)
         fo = os.path.join(OUT, name + ".json")
@@ -139,6 +138,7 @@ def match():
 
 
 if __name__ == "__main__":
+    torch.set_grad_enabled(False)
     ap = argparse.ArgumentParser()
     ap.add_argument("--run", action="store_true")
     ap.add_argument("--match", action="store_true")

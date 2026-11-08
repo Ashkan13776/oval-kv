@@ -10,7 +10,19 @@ Branch `revision-c` (cut from `vision` at `bb7ce66`), machine **mint06**. Brief:
 
 ## Discrepancies
 
-- (none yet)
+1. **The six eta calibration clips were not recorded.** STATUS.md says only "6 YouTube clips from
+   LLaVA-Video-178K `2_3_m_youtube_v0_1` archive 98" (34 clips). `llava-video-7b_VCAL.json`
+   has no clip names. I recovered them exactly (`scripts/revision/C/identify_calib.py`):
+   - re-ran the LLaVA capture and the endpoint stats on every candidate (layers 2, 14, 26);
+   - searched the subsets that match the per-clip window signature in the json.
+
+   Exactly one subset per split reproduces the committed pooled losses, with deviation 0.0
+   (`calib_clip_identification.txt`; runner-up subsets are 5-9% off):
+   - calibrate: `ytb_-lYWmYJ2gsY`, `ytb_GzuT7VIBK4Y`, `ytb_RP5mput8V9A`, `ytb_XkNYStGhGQ8`
+   - test: `ytb_gWn_9tVg_-Q`, `ytb_swo-I2Bl3zY`
+
+   That is their ASCII sort order, as `sorted(glob)` in `vision/calibrate_capture.py`.
+   The Qwen2.5-VL table uses the same six clips in the same order.
 
 ## Progress
 
