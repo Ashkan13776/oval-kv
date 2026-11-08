@@ -37,7 +37,8 @@ Usage (repo root, harness env):
   python analysis/eta_rules_calibrate_lc.py stats --model qwen-2.5-chat-7b --bench LongBench2
   python analysis/eta_rules_calibrate_lc.py stats --model qwen-2.5-chat-7b --bench LongGenBench
   python analysis/eta_rules_calibrate_lc.py rules --models qwen-2.5-chat-7b --benches LongBench2 LongGenBench
-Outputs: results/long_context/eta_rules/<model>_<bench>.json, .../tables/<model>_<bench>_r1.json
+Outputs (the driver passes --out results/long_context/eta_rules/kr<K>_vr<V>):
+  <out>/<model>_<bench>.json, <out>/tables/<model>_<bench>_r1.json
 """
 import argparse, json, math, os, sys, time
 from pathlib import Path
@@ -269,7 +270,7 @@ def rank_check_window(li, q, K, V, L, qpos, Wh, Gh, args, eta=0.5):
 
 
 def ckpt_path(args):
-    return os.path.join(args.ckpt_dir, f"{args.model}_{args.bench}{args.tag}.pt")
+    return os.path.join(args.ckpt_dir, f"{args.model}_{args.bench}_kr{args.rank}_vr{args.vrank}{args.tag}.pt")
 
 
 def stage_stats(args):
