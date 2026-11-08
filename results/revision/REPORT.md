@@ -37,10 +37,14 @@ Qwen-7B, AIME24 problem 0, seed 42, OVAL Tab. 1 configuration, one A6000: 4,418 
 | Llama-8B r_v=16 calibration | running on GPU 1 |
 | A1 disjoint calibration (MATH500, AIME24; Qwen-7B, Llama-8B) | queued on GPU 1 after the Llama calibration; problems in `A/calib_data/MANIFEST.json` |
 | A3 Llama-8B -> A1 -> A2 (MATH500 row) -> B decodes | chained (`scripts/revision/chain.sh`) |
+| A5 F2/F3 in the OVAL setting (r=8, r_v=16, 21-point grid) | queued on GPU 1 after the A calibrations (`scripts/revision/a5_grid_vr16.sh`); also re-checks the Tab. 1 table hashes for Qwen-7B |
 | A4 | not started; needs the stack check |
 | C1-C3, C5 | parked (see Open questions) |
 
-## A5 results
+## Placement in the paper (author decision)
+All revision results go to the supplementary, not the main paper: decode tables, figures and the budget curve. All figures are produced in the OVAL setting (rank-8 keys, rank-16 values).
+
+## A5 results (preliminary, value rank 8; superseded by the r_v=16 grid when it completes)
 F3, the held-out output error of the rule's eta_h relative to the 21-point grid minimum (value rank 8, layers >= 1, three tasks pooled):
 
 | Model | Heads | Median | 90th percentile | Max |

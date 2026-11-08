@@ -60,10 +60,20 @@ def f1():
     return sorted(found)
 
 
+def stats_path(m, t):
+    """Prefer the OVAL-setting grid (rank-8 keys, rank-16 values) when it exists."""
+    g = ROOT / f"results/revision/A/grid_vr16/{m}_{t}.json"
+    if g.exists():
+        st = json.load(open(g))
+        if len(st["grid"]) == 21 and "regret" in st:
+            return g, 16
+    return ROOT / f"results/eta_rules/{m}_{t}.json", 8
+
+
 def f2():
     rows = []
     for m in ["ds-r1-qwen-7b", "ds-r1-llama-8b"]:
-        st = json.load(open(ROOT / f"results/eta_rules/{m}_MATH50.json"))
+        sp, vr = stats_path(m, "MATH50"); st = json.load(open(sp))
         grid = np.array(st["grid"]); test = np.array(st["loss_grid"]["test"])     # [L][H][21]
         r1 = st["rules"]["r1"]; a, b, c = (np.array(r1[k]) for k in "abc"); eta = np.array(r1["eta"])
         L, H = a.shape
@@ -85,7 +95,7 @@ def f2():
             for gi, gv in enumerate(grid):
                 rows.append([m, li, hi, float(diff[k]), gv, y[gi], yp[gi], fg[gi], fp[gi], e])
         axs[0].set_ylabel("% above minimum"); axs[0].legend(fontsize=7)
-        fig.suptitle(f"{NICE[m]}, MATH500, value rank 8", fontsize=9)
+        fig.suptitle(f"{NICE[m]}, MATH500, rank-8 keys, value rank {vr}", fontsize=9)
         fig.tight_layout(); fig.savefig(OUT / f"F2_eta_fit_{m}_MATH50.pdf"); plt.close(fig)
     with open(OUT / "F2_eta_fit.csv", "w", newline="") as fh:
         w = csv.writer(fh)
@@ -98,7 +108,7 @@ def f3():
     for ax, m in zip(axs, ["ds-r1-qwen-7b", "ds-r1-llama-8b"]):
         vals = []
         for t in TASKS:
-            st = json.load(open(ROOT / f"results/eta_rules/{m}_{t}.json"))
+            sp, vr = stats_path(m, t); st = json.load(open(sp))
             loss = np.array(st["regret"]["tables"]["r1"]["loss"]); gmin = np.array(st["regret"]["grid_min_test"])
             rel = (loss - gmin) / gmin
             for li in range(1, rel.shape[0]):
@@ -107,7 +117,7 @@ def f3():
         v = np.array(vals)
         ax.hist(v, bins=40, color="0.35")
         ax.set_xlabel("held-out error of $\\eta_h$ above the grid minimum (%)"); ax.set_ylabel("KV heads")
-        ax.set_title(f"{NICE[m]} (3 tasks, value rank 8)\nmedian {np.median(v):.2f}%, "
+        ax.set_title(f"{NICE[m]} (3 tasks, value rank {vr})\nmedian {np.median(v):.2f}%, "
                      f"90th percentile {np.percentile(v, 90):.2f}%", fontsize=8)
     fig.tight_layout(); fig.savefig(OUT / "F3_eta_regret_hist.pdf"); plt.close(fig)
     with open(OUT / "F3_eta_regret_hist.csv", "w", newline="") as fh:
