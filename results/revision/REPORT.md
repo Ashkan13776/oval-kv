@@ -15,6 +15,8 @@ Machine: 4x RTX A6000 (48 GB). Stack for all runs so far: torch 2.5.1+cu121, tra
    
    Tab. 5 prints 74.3 / 149.3 / 149.3 / 70.2 / 21.1. The ratios are not constant (1.40, 1.45, 1.04, 1.20), so the column was not produced by this byte model with any single scaling. Nothing in the repo reproduces it. Not yet resolved; the author's source for the column is needed.
 
+2. **Qwen-7B rule-1 cells in this repo vs. Tab. 1** (A3 reference). The repo's rule-1 OVAL runs with the deployed Tab. 1 tables (`results/reasoning/`, hashes 0c99a26a / fa1b4e40 / 86e2340d, r_v=16, budget 2048) score avg@8 70.50 / 48.75 / 35.00 and pass@8 76.00 / 70.00 / 62.00 (MATH500 / AIME24 / GPQA). Tab. 1 prints 71.75 / 47.92 / 39.50 and 78.00 / 80.00 / 76.00. The authors confirm Tab. 1 is correct. A3 differences are therefore paired against the repo run (same table, same stack family), and never against the printed numbers. `scripts/revision/score.py` labels them that way.
+
 ## Open questions
 1. **GPQA Diamond is gated** (`Idavidrein/gpqa`, HTTP 401), and there is no Hugging Face token on this machine.
    - Blocked: A1 for GPQA, the GPQA row of A2, and the pooled table.
