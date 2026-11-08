@@ -132,6 +132,25 @@ The timing questions are rerun inside the full runs; tables use the full-run sha
   streamed as decode tokens): 100 / 100 identical output strings, 51.0% both.
 - Runs: `runs/c1_qwen25vl/sanity_{stream_full,prompt_hf,hfstream}_n64`.
 
+## C2: LVBench (frames only, 64 frames, stream protocol)
+
+**LLaVA-Video timing** (first 3 questions of each of the first 20 LVBench videos = 60 per arm; the
+stream protocol re-prefills every question, so cost per question does not depend on how many
+questions a video has; GPUs shared):
+
+| arm | s / question | peak GB | extrapolated, 1,549 questions |
+|---|---|---|---|
+| FullKV-64 | 7.0 | 16.9 | 3.0 GPU-h |
+| FullKV-32 | 3.3 | 16.8 | 1.4 GPU-h |
+| Quest | 7.2 | 16.9 | 3.1 GPU-h |
+| FreeKV | 6.3 | 17.8 | 2.7 GPU-h |
+| 4-bit keys | 6.8 | 16.9 | 2.9 GPU-h |
+| SnapKV† | 5.6 | 19.5 | 2.4 GPU-h |
+| OVAL | 11.4 | 17.4 | 4.9 GPU-h |
+
+Total about 20 GPU-h (~5-6 h on 4 GPUs): no subset, all 1,549 questions, queued after C1.
+Qwen2.5-VL timing is queued (waits for the LVBench embeddings).
+
 ## C5: analysis
 
 **eta_h on video** (`scripts/revision/C/c5_eta_heatmap.py`, no GPU; figure
