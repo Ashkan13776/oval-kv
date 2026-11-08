@@ -1,0 +1,5 @@
+model,bench,arm,reference,breakdown,group,diff,lo,hi
+Qwen2.5-VL-7B,videomme,OVAL,FullKV-64,all,overall,-1.778,-2.852,-0.704
+Qwen2.5-VL-7B,videomme,OVAL,FullKV-64,duration,short,-2.556,-4.222,-1.000
+Qwen2.5-VL-7B,videomme,OVAL,FullKV-64,duration,medium,-1.556,-3.667,0.444
+Qwen2.5-VL-7B,videomme,OVAL,FullKV-64,duration,long,-1.222,-2.889,0.444

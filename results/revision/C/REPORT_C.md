@@ -31,7 +31,7 @@ Branch `revision-c` (cut from `vision` at `bb7ce66`), machine **mint06**. Brief:
 | Environment check | done (below) |
 | Env rebuild | done (stack identical to Tab. 5; `STACK.md`) |
 | Reproduce 20 Long videos of `row1_full_n64` and `row3_ovalfull_n64` | **PASS, bit-exact** (below) |
-| C1 Qwen2.5-VL-7B on Video-MME | integration tested, eta calibrated; full runs **running** (all 2,700 questions, 7 arms) |
+| C1 Qwen2.5-VL-7B on Video-MME | integration tested, eta calibrated; FullKV-64 and OVAL **complete** (2,700); FreeKV running; Quest, 4-bit keys, SnapKV, FullKV-32 queued |
 | C2 LVBench | not started |
 | C5 analysis | not started |
 | C3 video baselines | not started |
@@ -131,6 +131,18 @@ The timing questions are rerun inside the full runs; tables use the full-run sha
 - Extra check, harness stream vs HF stream (official HF model, same stored embeddings, question
   streamed as decode tokens): 100 / 100 identical output strings, 51.0% both.
 - Runs: `runs/c1_qwen25vl/sanity_{stream_full,prompt_hf,hfstream}_n64`.
+
+**Results so far (2,700 / 2,700 questions for FullKV-64 and OVAL; other arms still running).**
+Table: `tables/c1_qwen25vl_videomme.md` (+ `_acc.csv`, `_paired.csv`, `latex/c1_qwen25vl_videomme.tex`);
+it is regenerated as each arm finishes. Arms not listed are INCOMPLETE.
+
+| arm | overall | short | medium | long |
+|---|---|---|---|---|
+| FullKV-64 | 63.70 [61.85, 65.56] | 75.11 [72.22, 77.89] | 63.78 [60.67, 66.89] | 52.22 [49.00, 55.44] |
+| OVAL | 61.93 [60.00, 63.85] | 72.56 [69.67, 75.33] | 62.22 [59.00, 65.33] | 51.00 [47.67, 54.33] |
+| paired OVAL - FullKV-64 (pp) | -1.78 [-2.85, -0.70] | -2.56 [-4.22, -1.00] | -1.56 [-3.67, +0.44] | -1.22 [-2.89, +0.44] |
+
+95% CIs: bootstrap over videos (10k). The paired-vs-FullKV-32 column is added when FullKV-32 finishes.
 
 ## C2: LVBench (frames only, 64 frames, stream protocol)
 
