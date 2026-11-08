@@ -38,7 +38,7 @@ if __name__ == "__main__":
         out = f"{ROOT}/results/revision/B/runs"
         SR = ("--GQA_policy avgSM --spec_ret_steps 2 --spec_ret_corr 0.9 --temperature 0.6 --top_p 0.95 "
               "--max_gen 16384 --sink 512 --recent 512 --page_size 32 --method spec_ret")
-        for b in [4096, 1024, 512, 2048]:
+        for b in [4096, 1024, 512]:   # 2048 is Tab. 1 (author decision 2026-11-08)
             for s in SEEDS:
                 if b != 2048:
                     lines.append(ovalj("B", m, task, "oval", tab, s, budget=b, out=out))
