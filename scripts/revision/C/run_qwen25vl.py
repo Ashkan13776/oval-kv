@@ -33,6 +33,8 @@ sys.path.insert(0, os.path.join(REPO, "vision"))
 sys.path.insert(0, HERE)
 import run_videomme as RV                     # lmms-eval MCQ extractor, harness arg parser
 import qwen_prep as QP                        # paths, constants (no HF 4.51 import at module level)
+import sellog                                 # C5 selection maps (read-only proxy around torch.topk)
+VIDEO_TOKEN = 151656                          # <|video_pad|>
 
 MODEL = QP.MODEL
 SECTION = [16, 24, 24]
@@ -146,6 +148,7 @@ def answer(doc, args, tok, model, step_updater, eos_ids):
         torch.save({l: pkv[l][0][:1].cpu() for l in (1, 14, 27)}, os.environ["QWEN_DUMP_KEYS"])
     t_prefill = time.time() - t0
     pos = c["next_pos"]
+    sellog.start()                         # C5: count page selections during stream + answer (read-only)
     for t in stream:
         MRope.pos = pos
         out = model(input_ids=torch.tensor([[t]], device="cuda:0"), past_key_values=pkv, use_cache=True)
@@ -162,12 +165,16 @@ def answer(doc, args, tok, model, step_updater, eos_ids):
         out = model(input_ids=nxt, past_key_values=pkv, use_cache=True)
         pkv, pos = out.past_key_values, pos + 1
         nxt = out.logits[:, -1, :].argmax(-1, keepdim=True)
+    vis = (c["ids"] == VIDEO_TOKEN).nonzero().flatten()
+    sl = sellog.frames(args.sink, args.page_size, int(vis[0]), int(vis[-1]) + 1, n_frames=int(c["grid_thw"][0]))
     text = tok.decode(gen, skip_special_tokens=True).strip()
     ms = torch.cuda.memory_stats()
     info = dict(frames_sha1=c["frames_sha1"], pixels_sha1=c["pixels_sha1"], ids_sha1=c["ids_sha1"],
                 n_visual=c["n_visual"], resized_hw=c["resized_hw"], prefill_len=L, n_stream=len(stream),
                 n_gen=len(gen), margin=margin, sec_prefill=t_prefill, sec=time.time() - t0,
                 peak_gb=torch.cuda.max_memory_allocated() / 2**30, alloc_retries=ms.get("num_alloc_retries", 0))
+    if sl is not None:                     # per temporal group (2 frames each), not per frame
+        info["sellog"] = dict(sl, frame_unit="qwen temporal group (frames 2g, 2g+1)")
     return text, info
 
 
@@ -195,6 +202,7 @@ def main():
     json.dump(vars(args), open(os.path.join(args.out, "args.json"), "w"), indent=1)
     tok, model, path = load_lm()
     model, step_updater, eos_ids = patch_harness(args, tok, model, path)
+    sellog.install(args.budget // args.page_size)
     with open(fn, "a") as f:
         for _, r in df.iterrows():
             if r.question_id in done:
