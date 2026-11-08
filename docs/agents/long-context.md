@@ -10,7 +10,38 @@ _Owned by the agent running this brief. Update it at each step: survey
 report, design proposal, confirmed configuration (with date), progress,
 results, deviations._
 
-**2026-11-08: survey done; design proposal sent to the user and awaiting confirmation. No GPU job has run.**
+**2026-11-08 10:15: smoke run done; full configuration and cost sent to the user for confirmation.**
+
+### Decisions (user, 2026-11-08)
+
+- Goal: OVAL full-pipeline numbers for the Table 2 column, on both benchmarks and all three models.
+- Values PCA **rank 32**, chosen knowing it is lossless at page 32. Keys rank 8 for scoring and reconstruction. Per-head eta from rule 1.
+- **Full pipeline only**; no retrieval-only re-run. The paper's numbers are the reference.
+- LongGenBench uses **FreeKV's own command**: T 0.95, top-p 1.0 (default), `--max_gen 16000`, sink/recent 512, budget 1024, correction 0.9.
+- **Judge on**: Qwen3-32B under vLLM 0.11.0 (torch 2.8.0+cu128, sm_120) in a separate conda env `lgbjudge`. Weights cached (61 GB).
+- Calibration data is my choice: LongBench-Pro (English, 16k-128k) for LongBench v2, and LongGenBench `Dataset_long.json` (no prompt shared with `Dataset_short.json`) for LongGenBench.
+
+### Smoke run (cost estimate; outputs in `res-test/`, not committed)
+
+Full-pipeline flags with a fixed `--eta 0.5` (no tables yet), values rank 32; LongBench v2 first 5 questions, LongGenBench first 2 items.
+
+| model | LongBench v2 | LongGenBench | calibration, LongBench v2 (64K prompt) | calibration, LongGenBench (6144 generated) |
+|---|---|---|---|---|
+| Qwen-2.5-7B | ~7 s / question (64K) | ~27 tokens/s | 45 s / prompt | 153 s / prompt |
+| Llama-3.1-8B | ~12 s / question | ~39 tokens/s | | |
+| Qwen-2.5-14B | ~24 s / question | ~31 tokens/s | | |
+
+- **Harness was stale, now fixed.** The first smoke ran at **7.6 min per 64K question**. The time was the first decode step building every page's value record with batched 128x128 `eigh`, 3.6 s per call. Commit 59ebb97 (2026-11-07) had already switched `oval/page_basis.py` to the 32x32 token-domain form, but this machine's harness copy (`kvc/patch/oval.py`, installed by `setup.sh` on 2026-11-05) predated it. I re-installed it the same way `setup.sh` does (`install -Dm644 oval/page_basis.py .../kvc/patch/oval.py`), and the time dropped to ~7 s. Anyone running LongBench v2 with `--oval_vrank` on an older harness copy has this problem.
+- **LongGenBench early stops are the model, not OVAL.** Qwen-14B stopped early on both items (CR 10 and 8, asking "Would you like me to proceed...?"). Dense Qwen-14B on the same two items gave CR 9.6 and 100, and dense Llama-8B gave 7.7 and 40, against OVAL's 11.5 and 57.7. The behaviour is the model's plus sampling noise.
+- **Rank check (Qwen-7B, one prompt each, eta 0.5)**, relative residual-stream error, layers >= 1:
+
+| context | retrieval only | keys r4 | keys r8 | keys r16 | keys r8 + values r8 / r16 / r31 |
+|---|---|---|---|---|---|
+| LongBench v2, 64K | 2.19% | 12.4% | 7.24% | 2.91% | 8.46 / 7.58 / 7.24% |
+| LongGenBench, 6.5K | 0.70% | 5.0% | 3.13% | 1.16% | 3.73 / 3.26 / 3.13% |
+
+  Keys rank 8 error grows 2.3x from 6.5K to 64K. Retrieval alone grows 3.1x, so compression degrades no faster than retrieval itself. Values rank 31 equals exact, as expected. The full calibration repeats this on 4 + 2 prompts per model.
+
 
 ### Survey report
 

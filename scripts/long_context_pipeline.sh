@@ -1,0 +1,160 @@
+#!/usr/bin/env bash
+# Piece 6: OVAL's full pipeline on long context (docs/6-long-context.md).
+#
+#   retrieval  rank-8 OVAL page scores (avgSM / top-k / spec_ret)    --page_rep oval --oval_rank 8
+#   keys       selected pages rebuilt from the rank-8 records       --oval_recon
+#   values     selected pages rebuilt from rank-VRANK PCA records   --oval_vrank VRANK --vbasis pca
+#   eta        one per (layer, KV head), rule 1, calibrated per (model, benchmark)
+#              on held-out long-context data                       --eta_table
+#
+# Steps (each resumable; a finished job leaves logs/long_context/done/<job>.ok):
+#   1. calib   rule-1 stats per (model, benchmark), streamed     analysis/eta_rules_calibrate_lc.py stats
+#   2. rules   eta tables -> results/long_context/eta_rules/tables
+#   3. run     LongBench v2 (503 questions, the paper's protocol) and LongGenBench
+#              (400 items, FreeKV's command, seeded, LGB_SHARDS shards per model)
+#   4. judge   LongGenBench accuracy with the Qwen3-32B judge (vLLM, env $JUDGE_PY)
+#   5. score   results/long_context/table.md (+ copies of the raw outputs)
+#
+# Jobs are queued over GPUS (SLOTS per GPU), longest first; a slot is used only
+# when its GPU has MINFREE MiB free (other users' jobs share these cards).
+#
+#   KV_PY=... GPUS="0 1" scripts/long_context_pipeline.sh
+#   MODELS="qwen-2.5-chat-7b" STEPS="calib rules" scripts/long_context_pipeline.sh
+set -u
+KV_ROOT="${KV_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+KV_PY="${KV_PY:-python}"
+JUDGE_PY="${JUDGE_PY:-$HOME/.conda/envs/lgbjudge/bin/python}"
+FK="${FREEKV_DIR:-$KV_ROOT/third_party/FreeKV}/accuracy"
+MODELS="${MODELS:-qwen-2.5-chat-7b llama-3.1-chat-8b qwen-2.5-chat-14b}"
+BENCHES="${BENCHES:-LongBench2 LongGenBench}"
+VRANK="${VRANK:-32}"
+SEED="${SEED:-42}"
+LGB_SHARDS="${LGB_SHARDS:-4}"
+GPUS="${GPUS:-0 1}"
+SLOTS="${SLOTS:-1}"          # jobs per GPU (decode is latency-bound; 7B/8B fit two per 97 GB card)
+MINFREE="${MINFREE:-60000}"
+STEPS="${STEPS:-calib rules run judge score}"
+OUT="$KV_ROOT/results/long_context"
+TABLES="$OUT/eta_rules/tables"
+LOG="$KV_ROOT/logs/long_context"; DONE="$LOG/done"; HB="$LOG/pipeline.log"
+mkdir -p "$LOG" "$DONE" "$OUT"
+export HF_HOME="${HF_HOME:-$HOME/.cache/huggingface}" PYTHONUNBUFFERED=1 OVAL_QUANT=0
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True KVC_MAX_MEMORY="${KVC_MAX_MEMORY:-90GiB}"
+say () { echo "[$(date -Iseconds)] $*" | tee -a "$HB"; }
+want () { [[ " $STEPS " == *" $1 "* ]]; }
+
+OVAL="--method spec_ret --page_rep oval --oval_rank 8 --oval_recon --oval_vrank $VRANK --vbasis pca --GQA_policy avgSM --spec_ret_steps 2 --page_size 32"
+LB2_ARGS="--spec_ret_corr 0.8 --sink 128 --recent 128 --budget 1792 --out_root_dir eval/LongBench2/res"
+LGB_ARGS="--spec_ret_corr 0.9 --sink 512 --recent 512 --budget 1024 --max_gen 16000 --temperature 0.95 --seed $SEED --out_root_dir eval/LongGenBench/res"
+table () { echo "$TABLES/${1}_${2}_r1.json"; }
+
+# ---------------------------------------------------------------- jobs ----
+# job names: calib:<M>:<B>   lb2:<M>   lgb:<M>:<k>   judge:<M>
+job_cmd () {
+  local j=$1; IFS=: read -r kind M x <<< "$j"
+  case $kind in
+    calib) echo "cd $KV_ROOT && $KV_PY analysis/eta_rules_calibrate_lc.py stats --model $M --bench $x --vrank $VRANK" ;;
+    lb2)   echo "cd $FK && KVC_MAX_TOKENS=65536 $KV_PY -m eval.LongBench2.pred --model $M $OVAL --eta_table $(table $M LongBench2) $LB2_ARGS" ;;
+    lgb)   echo "cd $FK && KVC_MAX_TOKENS=32768 LGB_SHARD=$x/$LGB_SHARDS $KV_PY $KV_ROOT/scripts/long_context_lgb_pred.py --model $M $OVAL --eta_table $(table $M LongGenBench) $LGB_ARGS" ;;
+    judge) echo "cd $FK && LGB_JUDGE_TP=1 LGB_JUDGE_MAXLEN=${LGB_JUDGE_MAXLEN:-8192} $JUDGE_PY eval/LongGenBench/eval.py --data $LOG/judge/$M.jsonl --csv $LOG/judge/$M.csv" ;;
+  esac
+}
+
+gpu_free () { nvidia-smi --query-gpu=memory.free --format=csv,noheader,nounits -i "$1" | tr -d ' '; }
+
+declare -A RUNNING   # "gpu.slot" -> pid
+declare -A JOBOF     # pid -> job
+run_queue () {       # run_queue job...  (SLOTS jobs per GPU, in order)
+  local q=("$@") j g s k pid
+  for j in "${q[@]}"; do
+    [ -f "$DONE/${j//:/_}.ok" ] && { say "skip $j (done)"; continue; }
+    while :; do
+      for s in $(seq 1 "$SLOTS"); do for g in $GPUS; do
+        k="$g.$s"; pid=${RUNNING[$k]:-}
+        if [ -n "$pid" ] && ! kill -0 "$pid" 2>/dev/null; then reap "$k"; pid=""; fi
+        if [ -z "$pid" ] && [ "$(gpu_free "$g")" -ge "$MINFREE" ]; then
+          launch "$j" "$k"; sleep 60; continue 4      # let it allocate before the next free-memory check
+        fi
+      done; done
+      sleep 30
+    done
+  done
+  for k in "${!RUNNING[@]}"; do wait "${RUNNING[$k]}"; reap "$k"; done
+}
+launch () {
+  local j=$1 k=$2 lf="$LOG/${1//:/_}.log"
+  say "START $j gpu=${k%.*} slot=${k#*.}"
+  ( export CUDA_VISIBLE_DEVICES=${k%.*}; eval "$(job_cmd "$j")" >> "$lf" 2>&1; echo "rc=$?" >> "$lf" ) &
+  RUNNING[$k]=$!; JOBOF[$!]=$j
+}
+reap () {
+  local k=$1 pid=${RUNNING[$1]} j lf rc
+  j=${JOBOF[$pid]}; lf="$LOG/${j//:/_}.log"
+  rc=$(tail -1 "$lf" | sed -n 's/^rc=//p')
+  if [ "$rc" = "0" ] && verify "$j"; then touch "$DONE/${j//:/_}.ok"; say "DONE  $j gpu=${k%.*}"
+  else say "FAIL  $j gpu=${k%.*} rc=${rc:-?} (see $lf; rerun resumes)"; fi
+  unset "RUNNING[$k]"
+}
+verify () {          # a job is done only if its output is complete
+  local kind M x; IFS=: read -r kind M x <<< "$1"
+  case $kind in
+    calib) [ -s "$OUT/eta_rules/${M}_${x}.json" ] ;;
+    lgb)   grep -q "COMPLETE" "$LOG/${1//:/_}.log" ;;
+    *)     true ;;
+  esac
+}
+
+# --------------------------------------------------------------- steps ----
+if want calib; then
+  jobs=()
+  for M in $(echo $MODELS | tr ' ' '\n' | tac); do for B in $BENCHES; do jobs+=("calib:$M:$B"); done; done
+  say "calib: ${#jobs[@]} jobs on GPUs [$GPUS]"
+  run_queue "${jobs[@]}"
+fi
+
+if want rules; then
+  $KV_PY "$KV_ROOT/analysis/eta_rules_calibrate_lc.py" rules --models $MODELS --benches $BENCHES | tee -a "$HB"
+fi
+
+if want run; then
+  for M in $MODELS; do for B in $BENCHES; do
+    [ -s "$(table $M $B)" ] || { say "ABORT: missing eta table $(table $M $B)"; exit 1; }
+  done; done
+  jobs=()
+  # longest first: LongGenBench shards (16K-token generations), then LongBench v2 (64K prefills)
+  for M in $(echo $MODELS | tr ' ' '\n' | tac); do
+    [[ " $BENCHES " == *" LongGenBench "* ]] && for k in $(seq 0 $((LGB_SHARDS - 1))); do jobs+=("lgb:$M:$k"); done
+  done
+  for M in $(echo $MODELS | tr ' ' '\n' | tac); do [[ " $BENCHES " == *" LongBench2 "* ]] && jobs+=("lb2:$M"); done
+  say "run: ${#jobs[@]} jobs on GPUs [$GPUS], VRANK=$VRANK, seed $SEED"
+  run_queue "${jobs[@]}"
+fi
+
+lgb_out () {         # canonical LongGenBench output for model $1
+  ls "$FK"/eval/LongGenBench/results_short/"$1"-spec_ret-*oval_r8_etab*_recon1_vr${VRANK}_vpca*-t0.95-Mg16000.jsonl 2>/dev/null \
+    | grep -v part | head -1
+}
+
+if want judge; then
+  mkdir -p "$LOG/judge"
+  jobs=()
+  for M in $MODELS; do
+    [[ " $BENCHES " == *" LongGenBench "* ]] || continue
+    c=$(ls "$FK"/eval/LongGenBench/results_short/"$M"-spec_ret-*_vr${VRANK}_vpca*.part0of${LGB_SHARDS}.json 2>/dev/null | head -1)
+    [ -n "$c" ] || { say "judge: no LongGenBench output for $M"; continue; }
+    canon=${c/.part0of${LGB_SHARDS}.json/.jsonl}
+    [ -s "$canon" ] || (cd "$FK" && $KV_PY "$KV_ROOT/scripts/long_context_lgb_pred.py" --merge "$canon" "$LGB_SHARDS") | tee -a "$HB"
+    # the judge writes its verdicts back into the file it reads: give it a copy
+    [ -s "$LOG/judge/$M.jsonl" ] || cp "$canon" "$LOG/judge/$M.jsonl"
+    jobs+=("judge:$M")
+  done
+  MINFREE_SAVE=$MINFREE; SLOTS_SAVE=$SLOTS; MINFREE=80000; SLOTS=1   # Qwen3-32B bf16 on one card
+  run_queue "${jobs[@]}"
+  MINFREE=$MINFREE_SAVE; SLOTS=$SLOTS_SAVE
+fi
+
+if want score; then
+  $KV_PY "$KV_ROOT/analysis/score_long_context.py" --models $MODELS --vrank $VRANK --fk "$FK" \
+      --judge_dir "$LOG/judge" --out "$OUT" | tee -a "$HB"
+fi
+say "DONE ($STEPS)"
