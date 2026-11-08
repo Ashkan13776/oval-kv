@@ -153,7 +153,7 @@ One sentence: visual prefill moves eta_h; the per-head pattern of the reasoning 
 carry over to either video table, and for LLaVA-Video (same LM family as R1-Distill Qwen-7B)
 it shifts eta_h up by about 0.2-0.27 and nearly removes heads at eta 0.
 
-## C3: video baselines (design; not run yet)
+## C3: video baselines (implemented and smoke-tested; full runs not started)
 
 Official code exists for all three (cloned read-only to `~/c3src`; commits recorded at run time).
 None of it runs unmodified on our stack, so each method's core step is ported into the harness.
@@ -189,6 +189,20 @@ What is ported, and what deviates:
     the 128 sink and 128 recent.
   - Deviation: our cache holds post-RoPE keys and keeps original positions. ReKV re-applies
     contiguous RoPE, which has no M-RoPE equivalent.
+
+Implementation status (2026-11-08), every arm smoke-tested on Video-MME 601-1..3:
+- Qwen: `visionzip.py` + `qwen_prep.py --vz` (pruned embeddings: exactly 6,480 / 3,240 visual tokens),
+  run in the harness (FullKV, OVAL); `qwen_c3.py` (InfiniPot-V, ReKV) in HF on the stored prefill.
+- LLaVA: `visionzip_llava.py` (SigLIP adaptation: exactly 6,720 / 3,360 visual tokens) in the harness;
+  `llava_c3.py` (InfiniPot-V, ReKV) in HF with explicit positions.
+- Budgets: InfiniPot-V "mem" = 16/12 Qwen groups (final 6,480 visual tokens) and 32/24 LLaVA frames
+  (6,720); "2k" = 5/4 groups (2,025) and 10/8 frames (2,100). ReKV = 4 groups (1,620) and 8 frames
+  (1,680), plus 128 sink and 128 recent.
+- The HF-path arms are paired against a dense reference on the same path. For Qwen, the HF stream
+  path matched the harness FullKV 100/100. For LLaVA, the HF dense path (`hf_full`, no compression)
+  gave the harness answer on 2 of 3 smoke questions; the third flipped at margin 0.125 (bf16 kernel
+  differences). So `hf_full` is run as LLaVA's paired reference for these arms.
+- Job lines: `gen_jobs_c3.py`.
 
 ## Open questions
 
