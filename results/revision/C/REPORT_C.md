@@ -18,7 +18,7 @@ Branch `revision-c` (cut from `vision` at `bb7ce66`), machine **mint06**. Brief:
 |---|---|
 | Environment check | done (below) |
 | Env rebuild | done (stack identical to Tab. 5; `STACK.md`) |
-| Reproduce 20 Long videos of `row1_full_n64` and `row3_ovalfull_n64` | data downloading |
+| Reproduce 20 Long videos of `row1_full_n64` and `row3_ovalfull_n64` | **PASS, bit-exact** (below) |
 | C1 Qwen2.5-VL-7B on Video-MME | not started |
 | C2 LVBench | not started |
 | C5 analysis | not started |
@@ -41,6 +41,21 @@ Branch `revision-c` (cut from `vision` at `bb7ce66`), machine **mint06**. Brief:
   no Qwen2.5-VL, no LVBench). Everything is downloaded from ungated repos:
   `lmms-lab/LLaVA-Video-7B-Qwen2` (done), `lmms-lab/Video-MME` (annotations done, videos
   downloading), `Qwen/Qwen2.5-VL-7B-Instruct`, `lmms-lab/LVBench` + `zai-org/LVBench`.
+
+## Reproduction gate (2026-11-08): PASS, bit-exact
+
+Questions: the 60 questions of the first 20 Long videos (601-620). Flags: the `args.json` of the
+two Tab. 5 run dirs. Driver: `scripts/revision/C/repro.sh`. Runs:
+`results/revision/C/runs/repro_row1_full_n64`, `results/revision/C/runs/repro_row3_ovalfull_n64`.
+Comparison: `vision/compare.py`, plus margins.
+
+| arm | input hashes (frames / pixels / ids) | same letter | same text | logit margin (top-1 minus top-2) | acc. on these 60 (Tab. 5 run / here) |
+|---|---|---|---|---|---|
+| FullKV-64 (`row1_full_n64`) | identical 60/60 | 60/60 | 60/60 | identical 60/60 (max diff 0.0) | 53.33 / 53.33 |
+| OVAL (`row3_ovalfull_n64`) | identical 60/60 | 60/60 | 60/60 | identical 60/60 (max diff 0.0) | 48.33 / 48.33 |
+
+The Tab. 5 reference lines for these questions came from the first machine (no `host` field).
+The stack is the same (`STACK.md`), and the outputs agree bit for bit.
 
 ## Open questions
 
