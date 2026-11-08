@@ -1,7 +1,8 @@
 """Job lines for C3 (video baselines), both models, both benchmarks -> stdout.
     python scripts/revision/C/gen_jobs_c3.py timing|full --model qwen|llava --bench videomme|lvbench [--arms ...]
 Arms:
-  vz50_full / vz25_full   VisionZip 50% / 25%, then FullKV (Qwen: pruned embeddings, harness)
+  vz50_full / vz25_full   VisionZip 50% / 25%, then FullKV (Qwen: pruned embeddings; LLaVA: our SigLIP
+                          adaptation, visionzip_llava.py; both in the harness)
   vz50_oval               OVAL (budget 2048) on the VisionZip-50% cache
   infinipot_mem           InfiniPot-V, cache ~ OVAL's KV bytes (~50% of the visual tokens):
                           Qwen block 16 / compress 12 groups (6,480 tok); LLaVA 32 / 24 frames (6,720)
@@ -29,7 +30,10 @@ if a.model == "qwen":
             "rekv": f"{QC} --method rekv --topk 4 --sink 128 --recent 128"}
 else:
     LC = f"python scripts/revision/C/llava_c3.py --bench {a.bench} {C1.H} --frames 64"
-    ARMS = {"infinipot_mem": f"{LC} --c3 infinipot --block 32 --compress 24",
+    LH = f"python scripts/revision/C/run_lvbench_llava.py --bench {a.bench} --protocol stream {C1.H}"
+    ARMS = {"vz50_full": f"{LH} {C1.ARMS['full_n64']} --vz 0.5", "vz25_full": f"{LH} {C1.ARMS['full_n64']} --vz 0.25",
+            "vz50_oval": f"{LH} {C1.ARMS['oval_n64'].replace(C1.QT, LT)} --vz 0.5",
+            "infinipot_mem": f"{LC} --c3 infinipot --block 32 --compress 24",
             "infinipot_2k": f"{LC} --c3 infinipot --block 10 --compress 8",
             "rekv": f"{LC} --c3 rekv --topk 8",
             "hf_full": f"{LC} --c3 infinipot --block 64 --compress 48"}

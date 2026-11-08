@@ -30,6 +30,7 @@ RV.build_inputs = _bi
 def main():
     ap = RV.build_parser()
     ap.add_argument("--bench", default="lvbench", choices=["lvbench", "videomme"])
+    ap.add_argument("--vz", type=float, default=0.0, help="C3 VisionZip retention (0.5, 0.25); 0 = off")
     args = ap.parse_args()
     if args.bench == "lvbench":
         RV.CACHE = os.path.join(LVB.LVB_ROOT, "frames")
@@ -50,6 +51,9 @@ def main():
     done = set(json.loads(l)["question_id"] for l in open(fn) if l.endswith("\n")) if os.path.exists(fn) else set()
     json.dump(vars(args), open(os.path.join(args.out, "args.json"), "w"), indent=1)
     tok, model, proc = RV.load_llava(args)
+    if args.vz:
+        import visionzip_llava
+        visionzip_llava.install(model, args.vz)
     step_updater, eos_ids = None, None
     if args.protocol != "official":
         model, step_updater, eos_ids = RV.patch_harness(args, tok, model)
@@ -67,7 +71,7 @@ def main():
             text, info = RV.answer(doc, args, tok, model, proc, step_updater, eos_ids)
             p = int((_CAP["ids"][0] == IMAGE_TOKEN_INDEX).nonzero()[0])
             sl = sellog.frames(args.sink, args.page_size, p, p + info["n_visual"], n_frames=args.frames)
-            if sl is not None:
+            if sl is not None and not args.vz:     # pruned sequences are not uniform per frame
                 info["sellog"] = dict(sl, frame_unit="frame")
             info["host"], info["gpu"] = socket.gethostname(), torch.cuda.get_device_name()
             pred = RV.extract_letter(text)
