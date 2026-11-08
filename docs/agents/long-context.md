@@ -10,7 +10,43 @@ _Owned by the agent running this brief. Update it at each step: survey
 report, design proposal, confirmed configuration (with date), progress,
 results, deviations._
 
-**2026-11-08 10:15: smoke run done; full configuration and cost sent to the user for confirmation.**
+**2026-11-08 14:40: running.** Keys rank 16 and values rank 32; eta tables at kr16/vr32 for all 3 models x 2 benchmarks (`results/long_context/eta_rules/kr16_vr32/`). LongGenBench now runs at **top-p 0.95** (see below). Runs restarted 14:34.
+
+### LongGenBench: top-p 1.0 vs 0.95 (why the protocol changed)
+
+The first LongGenBench pass used FreeKV's README command: T 0.95, no `--top_p`, so top-p 1.0. After 3 h, Qwen-14B's CR was ~20 against the paper's 64-66. The checks below were run on matched items with the same per-item seeds:
+
+| Qwen-14B, 16 Week items | mean CR |
+|---|---|
+| OVAL full pipeline, top-p 1.0 | 16.7 |
+| dense, top-p 1.0 (27 items: OVAL 20.8, dense 20.9) | 22.4 |
+| **dense, top-p 0.95** | **49.4** |
+
+- **Scoring was ruled out.** Distinct "Week N" entries anywhere in the text equal what `parse_blocks` counts. The judge script, run on a smoke file, gives the same CR as `score_long_context.py`.
+- **OVAL was ruled out.** It matches dense on matched items. 11 of the first 16 outputs are token-identical to dense, because every page is selected below ~2K tokens of context.
+- **Top-p 1.0 was the cause.** Full-vocabulary sampling makes the model stop early ("Would you like me to proceed...?") and drift into garbage tokens. At top-p 0.95, dense writes all 52 weeks on 8 of 16 items.
+- The brief's protocol line (top-p 0.95) is therefore taken as the Table 2 protocol. All LongGenBench cells use `--top_p 0.95`, tagged `-topp0.95` in the output names. The top-p 1.0 partial outputs are kept out of results (`logs/long_context/topp1_aborted/`).
+
+### Keys rank 8 -> 16 (user, 2026-11-08 10:25)
+
+After the calibration rank check, the user moved keys to **rank 16** for scoring and reconstruction. Rank-8 calibration was stopped and set aside (`logs/long_context/kr8_aborted/`). Rank check, relative output error, layers >= 1:
+
+| model / bench | retrieval only | keys r8 | keys r16 |
+|---|---|---|---|
+| Qwen-7B LB2 | 1.2% | 4.5% | 1.9% |
+| Llama-8B LB2 | 1.2% | 4.7% | 1.9% |
+| Llama-8B LGB | 0.9% | 7.2% | 2.0% |
+| Qwen-14B LB2 | 1.7% | 7.5% | 2.5% |
+| Qwen-14B LGB | 0.7% | 2.7% | 1.0% |
+| Qwen-7B LGB | 0.7% | 3.1% | 1.1% |
+
+Rule-1 mean eta (kr16/vr32): LB2 qwen7b 0.39, llama8b 0.38, qwen14b 0.18 (61% of heads at 0); LGB qwen7b 0.51, llama8b 0.56, qwen14b 0.31. Long context pushes eta toward key PCA compared with reasoning.
+
+### Fixes along the way
+
+- **Judge env:** vLLM 0.10.1.1 pulled torch cu126 (no sm_120), so it was upgraded to 0.11.0 (cu128). `pip -U` then pulled transformers 5.22, which breaks vLLM 0.11 (`Qwen2Tokenizer has no attribute all_special_tokens_extended`); pinned `transformers==4.57.1`. Dry run with a small judge on a smoke file: OK.
+- **Calibration:** batched `eigh` failed to converge on one Qwen-7B LongGenBench page (2 (layer, window) slices). Those slices are skipped with their sums restored, and recorded in the stats file.
+- **GPU memory:** a dense control OOM'd as a third job on one card (the dense path grows its cache with `torch.cat`). The driver now gates each job type on free memory (`need_mib`).
 
 ### Decisions (user, 2026-11-08)
 
