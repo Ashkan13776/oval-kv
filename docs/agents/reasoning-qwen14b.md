@@ -8,7 +8,20 @@ configuration with the user, then run.
 _Owned by the agent running this brief. Update it at each step: survey
 report, confirmed configuration (with date), progress, results, deviations._
 
-**2026-11-07 05:00: sweep running, 16/24 seed-cells complete. MATH50 and AIME24 are finished.** MATH50 avg@8 / pass@8 = 69.25 / 76.0 (best fixed eta 0.25: 69.25 / 76.0). AIME24 = 62.08 / 83.33, from seeds 42-49 scoring 60.0 / 63.3 / 60.0 / 56.7 / 66.7 / 70.0 / 66.7 / 53.3. The fixed-eta range is 58.75-65.42 / 76.67-83.33, so AIME24 is mid-range and inside seed noise. These are interim scores from the repo's PAT regex; the score step writes the final table. GPQA50c seeds 42 (GPU 0, 04:01) and 43 (GPU 1, 04:51) are running. Cell times: MATH50 3.0-3.3 h, AIME24 5.5-6.2 h; GPQA50c looks like ~7 h on early pace. Expected finish is around midday Sun 2026-11-08.
+**2026-11-08 08:05: DONE. 24/24 seed-cells complete and scored** -> [`results/eta_rules/vr16/table_ds-r1-qwen-14b.md`](../../results/eta_rules/vr16/table_ds-r1-qwen-14b.md).
+
+### Results (full OVAL pipeline: keys rank 8 for scoring and compression, values PCA rank 16, eta per (layer, KV head) from rule 1)
+
+| task | avg@8 | pass@8 | per seed (42-49) | fixed-eta sweep, keys rank 8 + exact values: avg@8 / pass@8 range over eta 0-1 |
+|---|---|---|---|---|
+| MATH50 | **69.25** | **76.00** | 68 72 68 66 70 74 68 68 | 67.00-69.25 / 72-76 (best eta 0.25: 69.25 / 76.00) |
+| AIME24 | **62.08** | **83.33** | 60.0 63.3 60.0 56.7 66.7 70.0 66.7 53.3 | 58.75-65.42 / 76.67-83.33 (best eta 1.0: 65.42 / 83.33) |
+| GPQA50c | **50.75** | **82.00** | 54 50 48 48 52 56 52 46 | 50.75-54.00 / 76-88 (best eta 0.0: 54.00 / 88.00) |
+
+- Adding rank-16 value compression and per-head eta keeps accuracy inside the fixed-eta range on all three tasks. MATH50 ties the best fixed eta. AIME24 and GPQA50c sit 3.3 points below the best fixed eta, which is 1 problem per seed on AIME24 and 1-2 on GPQA50c. That is within seed noise: single seeds span 53-70 and 46-58.
+- GPQA50c is at the bottom of the fixed-eta avg@8 range (tied with eta 0.75). This is not significant, but it is the one place to watch if value rank is pushed lower.
+- No fixed-eta baseline at value rank 16 was run (the user's decision), so the table's `vs baseline` column is empty. The comparison above is against the earlier sweep, which used exact values. `regret` is `--` because the table script reports it only for its test split.
+- Cost: sweep 2026-11-05 15:13 -> 2026-11-08 07:59 (~65 h wall, ~126 GPU-h). Cell times: MATH50 3.0-3.3 h, AIME24 5.5-6.2 h, GPQA50c 6.0-7.0 h, the same on both GPUs. Calibration ~3 h. Every cell exited 0 after the `CUDA_HOME` fix, with no stalls or retries.
 
 ### Progress
 
@@ -17,7 +30,8 @@ report, confirmed configuration (with date), progress, results, deviations._
 | capture | 18 seed-7 traces, 6144 tokens each; ~200 s per trace on an unshared GPU |
 | stats (`--vrank 16 --ngrid 2`) | ~28 min per task at 14B (~95 s per query window) |
 | rules | MATH50 `2851b0ec`, AIME24 `3b5da3dd`, GPQA50c `8db7317a`; **degenerate 0/376 each** |
-| sweep | started 15:13; filenames carry `_etab<hash>_q0_recon1_vr16_vpca` (checked) |
+| sweep | 2026-11-05 15:13 -> 2026-11-08 07:59, 24/24 complete; filenames carry `_etab<hash>_q0_recon1_vr16_vpca` (checked) |
+| score | `results/eta_rules/vr16/table_ds-r1-qwen-14b.md` |
 
 Rule 1 eta* (layers 1-47 x 8 KV heads):
 
