@@ -1,0 +1,8 @@
+1. prefill M-RoPE == HF apply_multimodal_rotary_pos_emb (bitwise, L=12976): True
+2. decode M-RoPE (t=h=w=177) == 1-D RoPE (bitwise): True; flashinfer max |diff| 0.0156 (|q| max 3.33, bf16 ulp ~0.026)
+3. layer 1: harness cached keys vs HF post-M-RoPE keys: rel. error 3.45e-04, min per-token cosine 1.00000 -> OK
+3. layer 14: harness cached keys vs HF post-M-RoPE keys: rel. error 1.08e-02, min per-token cosine 0.98864 -> OK
+3. layer 27: harness cached keys vs HF post-M-RoPE keys: rel. error 1.14e-03, min per-token cosine 0.99969 -> OK
+4. eta=0.0: r=31 rebuilt page logits vs exact, layer 14, 405 pages: max |diff| 3.90e-04 (max |logit| 62.6) -> OK
+4. eta=0.5: r=31 rebuilt page logits vs exact, layer 14, 405 pages: max |diff| 9.48e-04 (max |logit| 62.6) -> OK
+ALL PASS
