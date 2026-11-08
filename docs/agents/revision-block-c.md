@@ -43,20 +43,34 @@ agent; do not touch them. You cannot message that agent; write everything to the
   `#cde2fb → #0d366b` (no viridis/rainbow). F1-style η heatmaps must use the same ramp as
   the reasoning F1 (`analysis/fig_eta_revision.py` on `main`).
 - Priority if time runs short (the authors want results within ~a week):
-  **C1 on Video-MME → C5 (Video-MME parts) → C3 → C2 (MLVU, see below).** Mark anything not reached as
+  **C1 on Video-MME → C2 on LVBench (both models, C1 arms) → C5 → C3.** Mark anything not reached as
   not run; never fill in.
 
-## No Hugging Face token (binding, 2026-11-08)
+## No Hugging Face token: LVBench replaces LongVideoBench (binding, 2026-11-08)
 
-There is no HF token, so gated datasets and models are unavailable. Consequences:
-- **C2 LongVideoBench is out.** Use the brief's own fallback instead: **MLVU dev, multiple-choice
-  tasks only**, same protocol, both models, the C1 arms. If MLVU is also gated or not
-  downloadable without a token, drop C2 entirely and say so at the top of REPORT_C.md.
-- **C5 evidence-position buckets are out** (they need LongVideoBench's moment annotations). Keep
-  the per-frame selection maps, the selected-fraction-vs-frame line plot and the video η heatmap.
+There is no HF token, so gated datasets are unavailable (LongVideoBench and MLVU/MVLU are
+`gated=auto`, which still needs a logged-in account). **C2 runs on LVBench instead**, checked
+ungated from mint04 on 2026-11-08:
+
+- Videos: `lmms-lab/LVBench` (`video_chunks/videos_chunk_001..014.zip`, 61.8 GB total, ungated).
+- Annotations: `zai-org/LVBench`, file `video_info.meta.jsonl` (ungated): 103 videos, about
+  one hour each, **1,549 four-way multiple-choice questions**. Each question has `uid`,
+  `question` (options inline), `answer`, `question_type` (six categories, e.g. key information
+  retrieval) and **`time_reference`** (`MM:SS-MM:SS`, the moment the question refers to).
+- Protocol unchanged (64 uniform frames, no subtitles, query-agnostic streaming, greedy bf16,
+  budget 2048 = 1792 + 128 + 128). Both models, the C1 arms (FullKV, FullKV N/2, Quest, FreeKV,
+  4-bit keys, SnapKV-dagger, OVAL) plus whatever C3 arms are working. Report overall accuracy,
+  accuracy per `question_type`, and per video-type (`type` field).
+- **C5 evidence-position analysis is back, on LVBench:** bucket questions by the midpoint of
+  `time_reference` relative to `duration_minutes` (first / middle / last third) and report
+  OVAL, FreeKV and FullKV accuracy per bucket with bootstrap CIs (resample questions). Also
+  report how many of the 64 sampled frames fall inside each question's `time_reference`
+  span: with hour-long videos many spans contain no sampled frame, so also report accuracy
+  restricted to questions whose span contains at least one sampled frame.
+- Check disk before downloading (62 GB zipped; unzip one chunk at a time if space is short).
 - Use only ungated weights (Qwen2.5-VL-7B-Instruct, LLaVA-Video-7B-Qwen2; InternVL3-8B as the
-  M-RoPE fallback). Check each download works without a token before scheduling; anything that
-  needs a token goes under "Open questions", never worked around.
+  M-RoPE fallback). Anything that turns out to need a token goes under "Open questions"; never
+  work around it. MLVU is not required.
 
 ## C4 is out of scope
 
@@ -105,7 +119,7 @@ Deliverable: Tab. 5 extended to two video LLMs, two benchmarks and three new bas
 
 If M-RoPE integration is not working after one working day, switch to InternVL3-8B (standard 1-D RoPE, Qwen2.5-7B LM, a different vision encoder) and say so in the report. Calibrate η\_h for the new model on the same six LLaVA-Video-178K clips as Sec. S4.4 (prefill captured, three windows of 96 prefill queries at T, T−1024, T−2048, 1792-token selection budget, 128 sink and recent). Before any arm, repeat the paper's sanity check: streamed dense versus question-in-prompt dense on the first 100 Long questions; report the agreement count. Arms on Video-MME (2,700 questions): FullKV, Quest, FreeKV, 4-bit keys, SnapKV† (as in Tab. 5), OVAL, plus the C3 baselines.
 
-**C2. Second benchmark: LongVideoBench** (validation split, multiple-choice, 1,337 questions, videos up to one hour), both models, all arms, same protocol. Its standard setup interleaves subtitles with the frames; run the frames-only variant and state it. Report overall accuracy and accuracy by the benchmark's duration groups. If time remains afterwards: MLVU dev, multiple-choice tasks only.
+**C2. Second benchmark: LongVideoBench — REPLACED by LVBench (see the binding section above)** (validation split, multiple-choice, 1,337 questions, videos up to one hour), both models, all arms, same protocol. Its standard setup interleaves subtitles with the frames; run the frames-only variant and state it. Report overall accuracy and accuracy by the benchmark's duration groups. If time remains afterwards: MLVU dev, multiple-choice tasks only.
 
 **C3. Video-specific baselines**, both models, both benchmarks:
 
