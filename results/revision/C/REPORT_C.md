@@ -153,6 +153,43 @@ One sentence: visual prefill moves eta_h; the per-head pattern of the reasoning 
 carry over to either video table, and for LLaVA-Video (same LM family as R1-Distill Qwen-7B)
 it shifts eta_h up by about 0.2-0.27 and nearly removes heads at eta 0.
 
+## C3: video baselines (design; not run yet)
+
+Official code exists for all three (cloned read-only to `~/c3src`; commits recorded at run time).
+None of it runs unmodified on our stack, so each method's core step is ported into the harness.
+What is ported, and what deviates:
+
+- **VisionZip** (dvlab-research/VisionZip). Upstream covers CLIP (LLaVA-1.5/NeXT) and Qwen2.5-VL
+  *images* only. Its video branch is broken (`Qwen2_5_VL/qwen2_5vl_visionzip.py:1865`), and it
+  has no SigLIP path.
+  - Ported: the Qwen2.5-VL scoring rule, applied to video tokens.
+    - Score = attention received at the last ViT block: head-mean, summed over queries, then
+      averaged over each 2x2 merge unit.
+    - Global top-k for the dominant tokens; contextual tokens fixed at 5%.
+    - Dominant fraction: 45% for the 50% arm (the README's setting) and 20% for 25%.
+    - Contextual merge: targets at a uniform stride; each remaining token joins its most
+      cosine-similar target by key; merged token = target + mean of the tokens assigned to it.
+    - M-RoPE positions of kept tokens are preserved.
+  - LLaVA-Video (SigLIP, no CLS): the same CLS-free score, taken at the encoder layer LLaVA
+    reads. This is our adaptation; the repo has no SigLIP version.
+  - Then FullKV on the pruned cache, and OVAL at budget 2048 on the 50%-pruned cache.
+- **InfiniPot-V** (aiha-lab/InfiniPot-V; needs transformers 4.57). Ported the two scores:
+  - TaR = negative cosine similarity between post-RoPE keys at the same spatial index in the
+    newest 25% of frames vs older frames; the query frames are always kept.
+  - VaN = value norm, per layer and KV head.
+  - 50/50 split; TaR picks are forced in, the rest filled by VaN.
+  - Applied during block-wise prefill (blocks of frames, compress after each block), every
+    layer, question excluded.
+- **ReKV** (Becomebright/ReKV; LLaVA-OV only, 1-D RoPE). Ported its retrieval step:
+  - One block per frame: 210 tokens for LLaVA-Video, 405 tokens (one temporal group) for Qwen.
+  - Representative key = mean key, flattened over heads; query = question tokens averaged.
+  - One dot product per layer, top-k blocks, retrieved once after the question is streamed;
+    that fixed set is then used for answering.
+  - Budget matched to 1792 tokens: 8 frames (1680) for LLaVA, 4 groups (1620) for Qwen, plus
+    the 128 sink and 128 recent.
+  - Deviation: our cache holds post-RoPE keys and keeps original positions. ReKV re-applies
+    contiguous RoPE, which has no M-RoPE equivalent.
+
 ## Open questions
 
 1. **"20 videos" for the reproduction.** I use the first 20 Long videos (601-620),
@@ -165,3 +202,11 @@ it shifts eta_h up by about 0.2-0.27 and nearly removes heads at eta 0.
 3. **Qwen2.5-VL resolution:** I fix the frame area at 420*28*28 px (min = max pixels), so every
    video lands near 13,440 visual tokens with its aspect ratio kept (12,960 for 16:9). A fixed
    784x420 resize would hit 13,440 exactly but distort the aspect ratio.
+- **InfiniPot-V budget.** The brief asks for "a memory budget matched to OVAL's measured KV
+  memory". OVAL stores every page (~50% bytes/page), so the match would let InfiniPot-V keep
+  ~50% of the tokens, a different regime from the 2048-token attention budget of every other
+  arm. Conservative option taken: run InfiniPot-V at the token count matching OVAL's KV bytes
+  (stated per arm), and if time allows, also at 2048 tokens; both labelled.
+- **ReKV and VisionZip on SigLIP/M-RoPE** are ports, not the authors' code paths (see C3);
+  arms are labelled "(our port)".
+
