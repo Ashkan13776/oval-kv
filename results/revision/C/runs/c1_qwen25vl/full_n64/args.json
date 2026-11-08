@@ -44,7 +44,7 @@
   "long"
  ],
  "limit": null,
- "shard": 0,
+ "shard": 3,
  "nshards": 4,
  "out": "results/revision/C/runs/c1_qwen25vl/full_n64",
  "max_new_tokens": 16,

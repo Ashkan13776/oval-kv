@@ -117,16 +117,20 @@ The stack is the same (`STACK.md`), and the outputs agree bit for bit.
 | FullKV-32 (N/2) | 5.8 | 15.5 | 4.3 GPU-h |
 | Quest | 8.0 | 16.9 | 6.0 GPU-h |
 | FreeKV | 11.7 | 16.9 | 8.7 GPU-h |
-| 4-bit keys | 12.3 | 16.9 | 9.2 GPU-h |
+| 4-bit keys | 12.2 | 16.9 | 9.2 GPU-h |
 | SnapKV† | 5.9 | 19.6 | 4.5 GPU-h |
-| OVAL | (timing queued) | | |
+| OVAL | 15.2 | 17.3 | 11.4 GPU-h |
 
-Total about 48 GPU-h, i.e. about 12-15 h on 4 GPUs, well under the 5-day cut. **No subset: all 2,700.**
+Total about 50 GPU-h, i.e. about 13-16 h on 4 GPUs, well under the 5-day cut. **No subset: all 2,700.**
 The timing questions are rerun inside the full runs; tables use the full-run shard files only.
 
 **Sanity check (first 100 Long questions):**
 - Streamed dense: **51.0%**.
-- Question-in-prompt dense (official HF, unpatched): running. The agreement count goes here when done.
+- Question-in-prompt dense (official HF `generate`, unpatched, question inside the prompt): **49.0%**.
+- **Agreement, streamed vs question-in-prompt: 98 / 100** predicted letters identical.
+- Extra check, harness stream vs HF stream (official HF model, same stored embeddings, question
+  streamed as decode tokens): 100 / 100 identical output strings, 51.0% both.
+- Runs: `runs/c1_qwen25vl/sanity_{stream_full,prompt_hf,hfstream}_n64`.
 
 ## Open questions
 
