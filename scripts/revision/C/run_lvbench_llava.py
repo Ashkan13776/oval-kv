@@ -12,6 +12,17 @@ sys.path.insert(0, os.path.join(HERE, "..", "..", "..", "vision")); sys.path.ins
 import torch
 import run_videomme as RV
 import lvbench as LVB
+import sellog                                  # C5 selection maps (read-only proxy around torch.topk)
+from llava.constants import IMAGE_TOKEN_INDEX
+_CAP = {}
+_build_inputs = RV.build_inputs
+
+
+def _bi(*a, **k):                              # capture the prompt ids (position of the video span)
+    r = _build_inputs(*a, **k); _CAP["ids"] = r[0]; return r
+
+
+RV.build_inputs = _bi
 
 RV.CACHE = os.path.join(LVB.LVB_ROOT, "frames")
 _TEXT = {}
@@ -34,6 +45,7 @@ def main():
     step_updater, eos_ids = None, None
     if args.protocol != "official":
         model, step_updater, eos_ids = RV.patch_harness(args, tok, model)
+        sellog.install(args.budget // args.page_size)
     with open(fn, "a") as f:
         for _, r in df.iterrows():
             if r.question_id in done:
@@ -41,7 +53,12 @@ def main():
             doc = r.to_dict()
             while not os.path.exists(os.path.join(RV.CACHE, f"{doc['videoID']}_n{RV.N_CACHE}", "meta.json")):
                 time.sleep(30)
+            sellog.start()          # the dense prefill never reaches the page-selection call
             text, info = RV.answer(doc, args, tok, model, proc, step_updater, eos_ids)
+            p = int((_CAP["ids"][0] == IMAGE_TOKEN_INDEX).nonzero()[0])
+            sl = sellog.frames(args.sink, args.page_size, p, p + info["n_visual"], n_frames=args.frames)
+            if sl is not None:
+                info["sellog"] = dict(sl, frame_unit="frame")
             info["host"], info["gpu"] = socket.gethostname(), torch.cuda.get_device_name()
             pred = RV.extract_letter(text)
             rec = dict(question_id=doc["question_id"], videoID=doc["videoID"], group=doc["group"],
