@@ -40,7 +40,10 @@ def answer(doc, args, proc, model, tok, eos_ids):
         top2 = out.scores[0][0].float().topk(2)
         info = dict(frames_sha1=fh, pixels_sha1=ph, prefill_len=inp["input_ids"].shape[1])
     else:
-        c = torch.load(QP.emb_path(doc["videoID"], args.bench), weights_only=True)
+        ep = QP.emb_path(doc["videoID"], args.bench)
+        while not os.path.exists(ep):
+            time.sleep(30)
+        c = torch.load(ep, weights_only=True)
         dev = model.device
         logits, pkv = lm_forward(model, inputs_embeds=c["emb"][None].to(dev),
                                  position_ids=c["pos"][:, None].to(dev).long())

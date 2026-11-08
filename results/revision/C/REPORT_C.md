@@ -31,7 +31,7 @@ Branch `revision-c` (cut from `vision` at `bb7ce66`), machine **mint06**. Brief:
 | Environment check | done (below) |
 | Env rebuild | done (stack identical to Tab. 5; `STACK.md`) |
 | Reproduce 20 Long videos of `row1_full_n64` and `row3_ovalfull_n64` | **PASS, bit-exact** (below) |
-| C1 Qwen2.5-VL-7B on Video-MME | not started |
+| C1 Qwen2.5-VL-7B on Video-MME | integration tested, eta calibrated; full runs **running** (all 2,700 questions, 7 arms) |
 | C2 LVBench | not started |
 | C5 analysis | not started |
 | C3 video baselines | not started |
@@ -69,8 +69,74 @@ Comparison: `vision/compare.py`, plus margins.
 The Tab. 5 reference lines for these questions came from the first machine (no `host` field).
 The stack is the same (`STACK.md`), and the outputs agree bit for bit.
 
+## C1: Qwen2.5-VL-7B-Instruct on Video-MME
+
+**Integration** (`scripts/revision/C/run_qwen25vl.py`, `qwen_prep.py`):
+- **Vision side, once per video, in the official HF stack** (transformers 4.51.3): the 64 frames
+  (same indices as the LLaVA cache), the Qwen2.5-VL processor and vision encoder, and
+  `get_rope_index`. It stores the stream-protocol prefill (system prompt + video up to
+  `<|vision_end|>`) as embeddings plus 3-D M-RoPE positions. Every arm reads the same stored
+  file, so frames and token counts are identical across arms (hashes in every answer line).
+- **Language model in the harness** (transformers 4.45): the Qwen2-architecture LM of the same
+  checkpoint, loaded as `Qwen2ForCausalLM`. The harness's RoPE helper is swapped for M-RoPE in
+  the prefill (sections 16/24/24); decode tokens use 1-D RoPE at the Qwen text position, which
+  is exact because t = h = w for text.
+- **Prompt:** lmms-eval's Qwen2.5-VL setting: system "You are a helpful assistant.", user = video + text,
+  the default `videomme_doc_to_text` post-prompt ("Answer with the option's letter from the given
+  choices directly."). There is no LLaVA time instruction; Qwen encodes time in its temporal positions.
+- **Resolution:** `max_pixels = min_pixels = 420*28*28` (fixed area, aspect kept by `smart_resize`).
+  16:9 videos become 420x756 frames, giving 32 temporal groups x 405 = **12,960 visual tokens**
+  (LLaVA-Video: 13,440). Prefill 12,976 tokens. The exact count per video is in every answer line.
+- **Unit test** (`test_mrope.py`, output `test_mrope.txt`): ALL PASS.
+  1. Prefill M-RoPE is bitwise equal to HF `apply_multimodal_rotary_pos_emb`.
+  2. Decode M-RoPE is bitwise equal to 1-D RoPE; flashinfer agrees to bf16 rounding.
+  3. The harness's cached keys match HF's post-M-RoPE keys: relative error 3e-4 / 1e-2 / 1e-3
+     at layers 1 / 14 / 27, bf16 drift.
+  4. Brief's check: page logits rebuilt at r = 31 match the exact ones, max |diff| 4e-4 to 9e-4
+     on logits up to 62.6. eta = 1 alone is not full-rank by construction, so eta 0 and 0.5
+     were tested.
+- **Harness vs HF on one video (3 questions):** same answers; margins agree to bf16
+  (e.g. 1.75 vs 1.75; 1.625 vs 1.75).
+
+**eta_h calibration** (`qwen_calibrate_capture.py`, `calib_qwen.sh`):
+- Same six clips and order as the LLaVA table, same config (3 windows x 96 prefill queries,
+  sink/recent 128, budget 1792, r 8, r_v 16, 21-point grid).
+- Queries are rotated with their own 3-D positions.
+- Table `results/revision/C/eta/tables/qwen2.5-vl-7b_VCAL_r1.json`, **hash 486493e2**.
+
+| model | eta_h mean / median (layers >= 1) | heads at 0 / at 1 | held-out output error: rule 1 / per-head grid optimum | mean regret |
+|---|---|---|---|---|
+| LLaVA-Video-7B (Tab. 5, 42bf0455) | 0.663 / 0.711 | 5% / 13% | 0.0369 / 0.0363 | 0.00061 |
+| Qwen2.5-VL-7B (486493e2) | 0.401 / 0.427 | 15% / 0% | 0.0770 / 0.0765 | 0.00056 |
+
+**Timing (20 Long videos = 60 questions per arm; GPUs shared with my own embedding jobs, so an upper bound):**
+
+| arm | s / question | peak GB | extrapolated, 2,700 questions |
+|---|---|---|---|
+| FullKV-64 | 7.9 | 16.9 | 5.9 GPU-h |
+| FullKV-32 (N/2) | 5.8 | 15.5 | 4.3 GPU-h |
+| Quest | 8.0 | 16.9 | 6.0 GPU-h |
+| FreeKV | 11.7 | 16.9 | 8.7 GPU-h |
+| 4-bit keys | 12.3 | 16.9 | 9.2 GPU-h |
+| SnapKV† | 5.9 | 19.6 | 4.5 GPU-h |
+| OVAL | (timing queued) | | |
+
+Total about 48 GPU-h, i.e. about 12-15 h on 4 GPUs, well under the 5-day cut. **No subset: all 2,700.**
+The timing questions are rerun inside the full runs; tables use the full-run shard files only.
+
+**Sanity check (first 100 Long questions):**
+- Streamed dense: **51.0%**.
+- Question-in-prompt dense (official HF, unpatched): running. The agreement count goes here when done.
+
 ## Open questions
 
 1. **"20 videos" for the reproduction.** I use the first 20 Long videos (601-620),
    which are all 60 of their questions, not 20 questions. 20 questions is what the
    earlier `diag_newmachine` check used. 60 is the stricter reading.
+2. **FullKV N/2 for Qwen2.5-VL** is included in C1, although the brief's C1 arm list omits it
+   (C2's list has it). It mirrors Tab. 5 row 2 and is cheap. N/2 is every other cached frame,
+   as in Tab. 5, with the fps metadata halved so Qwen's temporal positions stay correct
+   (16 groups, 6,480 visual tokens).
+3. **Qwen2.5-VL resolution:** I fix the frame area at 420*28*28 px (min = max pixels), so every
+   video lands near 13,440 visual tokens with its aspect ratio kept (12,960 for 16:9). A fixed
+   784x420 resize would hit 13,440 exactly but distort the aspect ratio.

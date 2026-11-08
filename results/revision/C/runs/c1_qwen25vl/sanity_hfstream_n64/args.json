@@ -1,0 +1,14 @@
+{
+ "mode": "hfstream",
+ "bench": "videomme",
+ "durations": [
+  "long"
+ ],
+ "limit": 100,
+ "qids": null,
+ "shard": 0,
+ "nshards": 1,
+ "max_new_tokens": 16,
+ "file_tag": "",
+ "out": "results/revision/C/runs/c1_qwen25vl/sanity_hfstream_n64"
+}
