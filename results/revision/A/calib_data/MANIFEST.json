@@ -1,0 +1,79 @@
+{
+ "MATH50": [
+  {
+   "replaces_inset_idx": 0,
+   "inset_id": "test/precalculus/807.json",
+   "subject": "Precalculus",
+   "level": 2,
+   "chosen_id": "test/precalculus/1105.json"
+  },
+  {
+   "replaces_inset_idx": 8,
+   "inset_id": "test/algebra/2036.json",
+   "subject": "Algebra",
+   "level": 3,
+   "chosen_id": "test/algebra/769.json"
+  },
+  {
+   "replaces_inset_idx": 17,
+   "inset_id": "test/precalculus/1199.json",
+   "subject": "Precalculus",
+   "level": 4,
+   "chosen_id": "test/precalculus/1146.json"
+  },
+  {
+   "replaces_inset_idx": 25,
+   "inset_id": "test/intermediate_algebra/1388.json",
+   "subject": "Intermediate Algebra",
+   "level": 5,
+   "chosen_id": "test/intermediate_algebra/956.json"
+  },
+  {
+   "replaces_inset_idx": 33,
+   "inset_id": "test/algebra/1072.json",
+   "subject": "Algebra",
+   "level": 4,
+   "chosen_id": "test/algebra/187.json"
+  },
+  {
+   "replaces_inset_idx": 42,
+   "inset_id": "test/algebra/2214.json",
+   "subject": "Algebra",
+   "level": 2,
+   "chosen_id": "test/algebra/2593.json"
+  }
+ ],
+ "AIME24": [
+  {
+   "source": "AIME 2023 (AI-MO/aimo-validation-aime)",
+   "row": 0,
+   "url": "https://artofproblemsolving.com/wiki/index.php/2023_AIME_I_Problems/Problem_1"
+  },
+  {
+   "source": "AIME 2023 (AI-MO/aimo-validation-aime)",
+   "row": 5,
+   "url": "https://artofproblemsolving.com/wiki/index.php/2023_AIME_I_Problems/Problem_14"
+  },
+  {
+   "source": "AIME 2023 (AI-MO/aimo-validation-aime)",
+   "row": 10,
+   "url": "https://artofproblemsolving.com/wiki/index.php/2023_AIME_I_Problems/Problem_5"
+  },
+  {
+   "source": "AIME 2023 (AI-MO/aimo-validation-aime)",
+   "row": 15,
+   "url": "https://artofproblemsolving.com/wiki/index.php/2023_AIME_II_Problems/Problem_1"
+  },
+  {
+   "source": "AIME 2023 (AI-MO/aimo-validation-aime)",
+   "row": 20,
+   "url": "https://artofproblemsolving.com/wiki/index.php/2023_AIME_II_Problems/Problem_14"
+  },
+  {
+   "source": "AIME 2023 (AI-MO/aimo-validation-aime)",
+   "row": 25,
+   "url": "https://artofproblemsolving.com/wiki/index.php/2023_AIME_II_Problems/Problem_5"
+  }
+ ],
+ "GPQA50c": "BLOCKED: Idavidrein/gpqa (GPQA Diamond) is gated; no Hugging Face token on this machine"
+}
