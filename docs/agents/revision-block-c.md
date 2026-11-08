@@ -43,8 +43,20 @@ agent; do not touch them. You cannot message that agent; write everything to the
   `#cde2fb → #0d366b` (no viridis/rainbow). F1-style η heatmaps must use the same ramp as
   the reasoning F1 (`analysis/fig_eta_revision.py` on `main`).
 - Priority if time runs short (the authors want results within ~a week):
-  **C1 on Video-MME → C5 (Video-MME parts) → C3 → C2.** Mark anything not reached as
+  **C1 on Video-MME → C5 (Video-MME parts) → C3 → C2 (MLVU, see below).** Mark anything not reached as
   not run; never fill in.
+
+## No Hugging Face token (binding, 2026-11-08)
+
+There is no HF token, so gated datasets and models are unavailable. Consequences:
+- **C2 LongVideoBench is out.** Use the brief's own fallback instead: **MLVU dev, multiple-choice
+  tasks only**, same protocol, both models, the C1 arms. If MLVU is also gated or not
+  downloadable without a token, drop C2 entirely and say so at the top of REPORT_C.md.
+- **C5 evidence-position buckets are out** (they need LongVideoBench's moment annotations). Keep
+  the per-frame selection maps, the selected-fraction-vs-frame line plot and the video η heatmap.
+- Use only ungated weights (Qwen2.5-VL-7B-Instruct, LLaVA-Video-7B-Qwen2; InternVL3-8B as the
+  M-RoPE fallback). Check each download works without a token before scheduling; anything that
+  needs a token goes under "Open questions", never worked around.
 
 ## C4 is out of scope
 
