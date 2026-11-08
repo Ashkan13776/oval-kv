@@ -4,7 +4,7 @@ Machine: 4x RTX A6000 (48 GB). Stack for all runs so far: torch 2.5.1+cu121, tra
 
 ## Discrepancies
 
-1. **Tab. 5 KV-memory column vs. `vision/memory.py`** (C4). Running the repo's byte model on the Tab. 5 run directories (`~/oval-vision/vision/runs/row*_n64`) gives, model-level including the dense layer 0:
+1. **Tab. 5 KV-memory column vs. `vision/memory.py`** (C4). *Closed 2026-11-08: the authors keep the column and will fix it themselves; C4 is out of scope.* Running the repo's byte model on the Tab. 5 run directories (`~/oval-vision/vision/runs/row*_n64`) gives, model-level including the dense layer 0:
    - FullKV 100.0%
    - OVAL 53.0% (per layer 51.3%)
    - FreeKV 103.0%
@@ -22,7 +22,7 @@ Machine: 4x RTX A6000 (48 GB). Stack for all runs so far: torch 2.5.1+cu121, tra
 2. **Llama-8B r_v=16 tables behind Tab. 1 are not on this machine**, and neither are the calibration captures for any model.
    - Llama-8B is recalibrated here with the Tab. 1 protocol (`scripts/revision/a_calib_llama_vr16.sh`, seed 7). Whether the result equals the table behind Tab. 1 cannot be checked without that table's hash.
    - For Qwen-7B and Qwen-14B, the rebuilt rule-1 tables reproduce the deployed hashes exactly (A3 below).
-3. **Block C is parked.** It needs disk (about 34 GB free; Qwen2.5-VL-7B alone is about 16 GB), access to LongVideoBench (gated, hundreds of GB), and an engineering decision on InfiniPot-V, ReKV and VisionZip. Only the GPU-free C4 check has been done.
+3. **Block C moved to mint06** (2026-11-08), run by a separate agent from `docs/agents/revision-block-c.md` on branch `revision-c`; C4 dropped. Previously parked: It needs disk (about 34 GB free; Qwen2.5-VL-7B alone is about 16 GB), access to LongVideoBench (gated, hundreds of GB), and an engineering decision on InfiniPot-V, ReKV and VisionZip. Only the GPU-free C4 check has been done.
 4. **Block B, retrieval-only arm.** It uses the same per-head AIME24 table as OVAL, so the arm differs from OVAL only in compression. No retrieval-only per-head run existed before.
 
 ## Timing (smoke test)
