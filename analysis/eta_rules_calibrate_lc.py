@@ -269,6 +269,15 @@ def rank_check_window(li, q, K, V, L, qpos, Wh, Gh, args, eta=0.5):
     return u2, res
 
 
+def _acc_layer(acc, split, li):
+    return (acc.u2[split][li].copy(), acc.d2[split][li].copy(), acc.nq[split][li].copy(),
+            acc.a[li].copy(), acc.b[li].copy(), acc.c[li].copy())
+
+
+def _acc_restore(acc, split, li, snap):
+    acc.u2[split][li], acc.d2[split][li], acc.nq[split][li], acc.a[li], acc.b[li], acc.c[li] = snap
+
+
 def ckpt_path(args):
     return os.path.join(args.ckpt_dir, f"{args.model}_{args.bench}_kr{args.rank}_vr{args.vrank}{args.tag}.pt")
 
@@ -301,9 +310,11 @@ def stage_stats(args):
     if os.path.exists(ck) and not args.overwrite:
         st = torch.load(ck, weights_only=False)
         acc, meta, rc = st["acc"], st["meta"], st["rankcheck"]
+        skipped = st.get("skipped", [])
         log(f"stats: resuming from {ck}: {len(meta)} prompts done")
     else:
         acc, meta, rc = C.Acc(nl, nkv, len(grid)), {}, []
+        skipped = []
     t0 = time.time()
     for k, (pid, prompt, kind) in enumerate(items):
         if pid in meta:
@@ -321,9 +332,22 @@ def stage_stats(args):
             for li in layers:
                 K = cap["K"][li][:, :L].float(); V = cap["V"][li][:, :L].float()
                 q = cap["Q"][li][wi].float().permute(1, 0, 2).reshape(nkv, g, args.nq, hd)
-                C.window_stats(acc, split, li, q, K, V, L, qpos, Wh[li], Gh[li], grid, args)
+                snap = _acc_layer(acc, split, li)
+                try:
+                    C.window_stats(acc, split, li, q, K, V, L, qpos, Wh[li], Gh[li], grid, args)
+                except torch.linalg.LinAlgError as e:
+                    # a page whose Gram matrix defeats the batched eigh (repeated
+                    # tokens): drop this (layer, window) whole -- restore the
+                    # layer's sums so nothing is half-counted -- and record it
+                    _acc_restore(acc, split, li, snap)
+                    skipped.append({"pid": pid, "window": int(L), "layer": int(li), "error": str(e)[:120]})
+                    log(f"stats: {pid} window L={L} layer {li}: eigh failed, (layer, window) skipped")
+                    continue
                 if do_rc:
-                    u2, e = rank_check_window(li, q, K, V, L, qpos, Wh[li], Gh[li], args)
+                    try:
+                        u2, e = rank_check_window(li, q, K, V, L, qpos, Wh[li], Gh[li], args)
+                    except torch.linalg.LinAlgError:
+                        continue
                     rck["u2"][li] += u2
                     for kk, vv in e.items():
                         rck["err"].setdefault(kk, np.zeros(nl))[li] += vv
@@ -333,7 +357,7 @@ def stage_stats(args):
                      "windows": cap["windows"], "n_dec_in_window": cap["n_dec_in_window"],
                      "capture_s": round(tcap, 1), "total_s": round(time.time() - tc, 1)}
         del cap; torch.cuda.empty_cache()
-        torch.save({"acc": acc, "meta": meta, "rankcheck": rc}, ck)
+        torch.save({"acc": acc, "meta": meta, "rankcheck": rc, "skipped": skipped}, ck)
         log(f"stats: {args.model}/{args.bench} {pid} ({split}, {kind}) T={meta[pid]['T']} windows={meta[pid]['windows']} "
             f"capture {tcap:.0f}s, total {meta[pid]['total_s']:.0f}s, {time.time() - t0:.0f}s so far")
     L_grid = {sp: acc.d2[sp] / np.maximum(acc.u2[sp][..., None], 1e-300) for sp in ("calib", "test")}
@@ -347,7 +371,7 @@ def stage_stats(args):
         "model": args.model, "task": args.bench, "bench": args.bench, "created": now(),
         "config": {k: v for k, v in vars(args).items() if k != "stage"},
         "n_layers": nl, "n_kv_heads": nkv, "n_heads": nh, "head_dim": hd, "layers_done": layers,
-        "grid": grid, "prompts": meta,
+        "grid": grid, "prompts": meta, "skipped_layer_windows": skipped,
         "loss_grid": {sp: L_grid[sp].tolist() for sp in L_grid},
         "n_queries": {sp: acc.nq[sp].tolist() for sp in acc.nq},
         "best_grid_eta": {sp: np.array(grid)[L_grid[sp].argmin(-1)].tolist() for sp in L_grid},
