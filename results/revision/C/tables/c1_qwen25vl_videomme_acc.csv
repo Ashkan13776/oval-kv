@@ -7,3 +7,7 @@ Qwen2.5-VL-7B,videomme,OVAL,all,overall,2700,61.926,60.000,63.852,True
 Qwen2.5-VL-7B,videomme,OVAL,duration,short,900,72.556,69.667,75.333,True
 Qwen2.5-VL-7B,videomme,OVAL,duration,medium,900,62.222,59.000,65.333,True
 Qwen2.5-VL-7B,videomme,OVAL,duration,long,900,51.000,47.667,54.333,True
+Qwen2.5-VL-7B,videomme,FreeKV,all,overall,2700,62.519,60.630,64.407,True
+Qwen2.5-VL-7B,videomme,FreeKV,duration,short,900,73.778,70.889,76.444,True
+Qwen2.5-VL-7B,videomme,FreeKV,duration,medium,900,61.222,57.889,64.444,True
+Qwen2.5-VL-7B,videomme,FreeKV,duration,long,900,52.556,49.333,55.778,True
