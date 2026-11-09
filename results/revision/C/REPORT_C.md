@@ -344,6 +344,12 @@ Implementation status (2026-11-08), every arm smoke-tested on Video-MME 601-1..3
   differences). So `hf_full` is run as LLaVA's paired reference for these arms.
 - Job lines: `gen_jobs_c3.py`.
 
+## Disk notes
+
+- 2026-11-09: the shared disk dropped to 60 GB free (other users). After C1 and C2 finished, the
+  Video-MME 32-frame Qwen2.5-VL embeddings (`~/vmme/qwen_emb/*_n32.pt`, 900 files, 40 GB) were deleted.
+  No pending job uses them; they are regenerated exactly by `qwen_prep.py --frames 32`.
+
 ## Open questions
 
 1. **"20 videos" for the reproduction.** I use the first 20 Long videos (601-620),
