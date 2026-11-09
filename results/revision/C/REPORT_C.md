@@ -33,7 +33,7 @@ Branch `revision-c` (cut from `vision` at `bb7ce66`), machine **mint06**. Brief:
 | Reproduce 20 Long videos of `row1_full_n64` and `row3_ovalfull_n64` | **PASS, bit-exact** (below) |
 | C1 Qwen2.5-VL-7B on Video-MME | integration tested, eta calibrated; **done**, all 7 arms x 2,700 |
 | C2 LVBench | **done**, both models, 7 arms x 1,549 |
-| C5 analysis | eta heatmaps done; evidence position done (both models); selection maps wait on sellog run |
+| C5 analysis | eta heatmaps done; evidence position and selection maps **done** (both models) |
 | C3 video baselines | implemented and smoke-tested; Video-MME timing queued |
 | C4 | out of scope (authors) |
 
@@ -292,6 +292,20 @@ Qwen2.5-VL-7B (complete; 1,547 questions):
 On Qwen2.5-VL the losses of both methods grow with evidence position (later evidence = larger
 loss); for FreeKV the middle and last thirds are significant, for OVAL none of the thirds is.
 FullKV-64: 45.13 on spans with >= 1 sampled frame vs 38.07 on spans with none.
+
+**Per-frame selection** (`c5_selection.py`; `c5_selection.md`, `figures/c5_selection_{map,line}.pdf`
++ `.csv`). OVAL decode-time page selections logged read-only during real runs (outputs verified
+bit-identical to unlogged runs), Video-MME Long, 900 / 900 questions per model. Selected fraction =
+share of a frame's pages chosen, averaged over decode steps, layers and heads. Qwen2.5-VL temporal
+groups (2 frames each) are shown at frame resolution by repetition. CIs bootstrap over videos.
+
+| model | mean, all frames | first 4 + last 4 frames | frames 4-59 | ratio ends / middle | frame 0 | frame 63 |
+|---|---|---|---|---|---|---|
+| LLaVA-Video-7B | 12.31% | 27.14% | 10.19% | 2.66 [2.62, 2.71] | 25.47% | 44.73% |
+| Qwen2.5-VL-7B | 14.10% | 24.79% | 12.58% | 1.97 [1.92, 2.02] | 36.54% | 20.64% |
+
+Selection concentrates at the ends of the video: LLaVA-Video mostly on the last frames (closest to
+the question), Qwen2.5-VL mostly on the first frames; the middle of the video gets about 10-13%.
 
 ## C3: video baselines (implemented and smoke-tested; full runs not started)
 
