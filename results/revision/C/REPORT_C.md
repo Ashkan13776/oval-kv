@@ -32,8 +32,8 @@ Branch `revision-c` (cut from `vision` at `bb7ce66`), machine **mint06**. Brief:
 | Env rebuild | done (stack identical to Tab. 5; `STACK.md`) |
 | Reproduce 20 Long videos of `row1_full_n64` and `row3_ovalfull_n64` | **PASS, bit-exact** (below) |
 | C1 Qwen2.5-VL-7B on Video-MME | integration tested, eta calibrated; **done**, all 7 arms x 2,700 |
-| C2 LVBench | LLaVA **done** (7 x 1,549); Qwen running (2 / 7 arms done) |
-| C5 analysis | eta heatmaps done; evidence position done for LLaVA (Qwen waits on C2); selection maps wait on sellog run |
+| C2 LVBench | **done**, both models, 7 arms x 1,549 |
+| C5 analysis | eta heatmaps done; evidence position done (both models); selection maps wait on sellog run |
 | C3 video baselines | implemented and smoke-tested; Video-MME timing queued |
 | C4 | out of scope (authors) |
 
@@ -222,8 +222,23 @@ methods differs significantly from FullKV-64; OVAL is the lowest of them by poin
 unlike FreeKV and 4-bit keys, is not significantly above FullKV-32. No per-question-type gap of
 any ranked method to FullKV-64 is significant.
 
-**Qwen2.5-VL-7B on LVBench: INCOMPLETE** (FullKV-64 and FullKV-32 done; Quest running; FreeKV,
-4-bit keys, SnapKV, OVAL queued).
+**Qwen2.5-VL-7B on LVBench: complete (all 7 arms x 1,549 questions).** Table:
+`tables/c2_lvbench_qwen25vl.md` (+ csv, `latex/c2_lvbench_qwen25vl.tex`).
+
+| arm | overall | paired vs FullKV-64 | paired vs FullKV-32 |
+|---|---|---|---|
+| FullKV-64 | 41.25 [39.05, 43.55] | | +2.84 [+1.04, +4.67] |
+| FullKV-32 (N/2) | 38.41 [35.86, 40.98] | -2.84 [-4.67, -1.04] | |
+| OVAL | 39.70 [37.27, 42.17] | -1.55 [-2.98, -0.12] | +1.29 [-0.44, +3.09] |
+| FreeKV | 38.48 [35.98, 41.05] | -2.78 [-4.36, -1.17] | +0.06 [-1.75, +1.89] |
+| Quest | 38.99 [36.51, 41.52] | -2.26 [-3.95, -0.59] | +0.58 [-1.18, +2.33] |
+| 4-bit keys | 40.99 [38.79, 43.30] | -0.26 [-1.57, +1.06] | +2.58 [+0.56, +4.64] |
+| SnapKV† | 36.09 [33.44, 38.84] | -5.16 [-7.36, -2.97] | -2.32 [-4.25, -0.33] |
+
+Reading: here OVAL, FreeKV and Quest are all significantly below FullKV-64; OVAL has the smallest
+gap of the three selection methods (4-bit keys, a quantization method, is not significantly below
+FullKV-64). By question type, OVAL has no significant gap to FullKV-64 in any type; FreeKV and
+Quest are significantly below on entity recognition, event understanding and reasoning.
 
 ## C5: analysis
 
@@ -262,7 +277,21 @@ LLaVA-Video-7B (complete; 1,547 questions):
 No position bucket shows a significant gap to FullKV-64. Caveat: with 64 uniformly sampled frames,
 838 / 1,547 annotated spans (54%) contain no sampled frame at all, so the bucket analysis measures
 where the question points, not whether the frames are kept. FullKV-64: 43.02 on spans with >= 1
-sampled frame vs 40.57 on spans with none. The Qwen2.5-VL part is INCOMPLETE (only FullKV-64 so far).
+sampled frame vs 40.57 on spans with none.
+
+Qwen2.5-VL-7B (complete; 1,547 questions):
+
+| arm | first third (n=708) | middle (n=520) | last third (n=319) |
+|---|---|---|---|
+| FullKV-64 | 42.94 [39.41, 46.61] | 41.92 [37.69, 46.15] | 36.68 [31.66, 42.01] |
+| FreeKV | 42.09 [38.42, 45.76] | 37.50 [33.46, 41.54] | 32.29 [27.27, 37.62] |
+| OVAL | 42.51 [38.84, 46.19] | 39.62 [35.58, 43.85] | 33.86 [28.84, 39.18] |
+| paired OVAL - FullKV-64 | -0.42 [-2.68, +1.84] | -2.31 [-4.81, +0.19] | -2.82 [-6.27, +0.31] |
+| paired FreeKV - FullKV-64 | -0.85 [-3.25, +1.69] | -4.42 [-7.31, -1.54] | -4.39 [-8.15, -0.94] |
+
+On Qwen2.5-VL the losses of both methods grow with evidence position (later evidence = larger
+loss); for FreeKV the middle and last thirds are significant, for OVAL none of the thirds is.
+FullKV-64: 45.13 on spans with >= 1 sampled frame vs 38.07 on spans with none.
 
 ## C3: video baselines (implemented and smoke-tested; full runs not started)
 

@@ -31,16 +31,20 @@ Accuracy on the 709 questions whose span contains >= 1 sampled frame (vs the 838
 
 ## Qwen2.5-VL-7B
 
-Runs: FullKV-64 1549/1549. Scored on 1547 common questions. Excluded (span annotated as None): 2 questions (3925, 5044). Span anomalies kept: {'end before start': 13, 'end after duration': 2}.
+Runs: FullKV-64 1549/1549, FreeKV 1549/1549, OVAL 1549/1549. Scored on 1547 common questions. Excluded (span annotated as None): 2 questions (3925, 5044). Span anomalies kept: {'end before start': 13, 'end after duration': 2}.
 
 | arm | first (n=708) | middle (n=520) | last (n=319) | all |
 |---|---|---|---|---|
 | FullKV-64 | 42.94 [39.41, 46.61] | 41.92 [37.69, 46.15] | 36.68 [31.66, 42.01] | 41.31 [38.85, 43.76] |
+| FreeKV | 42.09 [38.42, 45.76] | 37.50 [33.46, 41.54] | 32.29 [27.27, 37.62] | 38.53 [36.13, 40.92] |
+| OVAL | 42.51 [38.84, 46.19] | 39.62 [35.58, 43.85] | 33.86 [28.84, 39.18] | 39.75 [37.36, 42.15] |
 
 Paired difference vs FullKV-64 (pp); * = CI excludes 0
 
 | arm | first | middle | last | all |
 |---|---|---|---|---|
+| FreeKV | -0.85 [-3.25, +1.69] | -4.42 [-7.31, -1.54]* | -4.39 [-8.15, -0.94]* | -2.78 [-4.46, -1.10]* |
+| OVAL | -0.42 [-2.68, +1.84] | -2.31 [-4.81, +0.19] | -2.82 [-6.27, +0.31] | -1.55 [-3.04, -0.06]* |
 
 Sampled frames inside the span: 0 frames for 838 of 1547 questions (54.17%); median 0, max 64. Distribution: 0: 838, 1: 333, 2: 83, 3: 45, 4: 27, 5: 16, 6: 14, 7: 10 ...
 
@@ -49,4 +53,6 @@ Accuracy on the 709 questions whose span contains >= 1 sampled frame (vs the 838
 | arm | span has a frame | span has no frame |
 |---|---|---|
 | FullKV-64 | 45.13 [41.47, 48.80] | 38.07 [34.73, 41.41] |
+| FreeKV | 42.31 [38.65, 45.98] | 35.32 [32.10, 38.54] |
+| OVAL | 41.89 [38.22, 45.56] | 37.95 [34.73, 41.29] |
 
