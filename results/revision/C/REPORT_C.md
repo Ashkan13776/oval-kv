@@ -33,8 +33,8 @@ Branch `revision-c` (cut from `vision` at `bb7ce66`), machine **mint06**. Brief:
 | Reproduce 20 Long videos of `row1_full_n64` and `row3_ovalfull_n64` | **PASS, bit-exact** (below) |
 | C1 Qwen2.5-VL-7B on Video-MME | integration tested, eta calibrated; **done**, all 7 arms x 2,700 |
 | C2 LVBench | timing done (both models, no subset); LLaVA full runs running, Qwen full runs queued |
-| C5 analysis | not started |
-| C3 video baselines | not started |
+| C5 analysis | eta heatmaps done; evidence-position and selection maps wait on C2 / sellog runs |
+| C3 video baselines | implemented and smoke-tested; Video-MME timing queued |
 | C4 | out of scope (authors) |
 
 ## Environment check (2026-11-08)
