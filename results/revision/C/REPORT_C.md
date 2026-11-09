@@ -31,7 +31,7 @@ Branch `revision-c` (cut from `vision` at `bb7ce66`), machine **mint06**. Brief:
 | Environment check | done (below) |
 | Env rebuild | done (stack identical to Tab. 5; `STACK.md`) |
 | Reproduce 20 Long videos of `row1_full_n64` and `row3_ovalfull_n64` | **PASS, bit-exact** (below) |
-| C1 Qwen2.5-VL-7B on Video-MME | integration tested, eta calibrated; FullKV-64, OVAL, FreeKV **complete** (2,700); Quest running; 4-bit keys, SnapKV, FullKV-32 queued |
+| C1 Qwen2.5-VL-7B on Video-MME | integration tested, eta calibrated; 6 / 7 arms **complete** (2,700); FullKV-32 running |
 | C2 LVBench | not started |
 | C5 analysis | not started |
 | C3 video baselines | not started |
@@ -132,19 +132,30 @@ The timing questions are rerun inside the full runs; tables use the full-run sha
   streamed as decode tokens): 100 / 100 identical output strings, 51.0% both.
 - Runs: `runs/c1_qwen25vl/sanity_{stream_full,prompt_hf,hfstream}_n64`.
 
-**Results so far (2,700 / 2,700 questions for FullKV-64, OVAL and FreeKV; other arms still running).**
-Table: `tables/c1_qwen25vl_videomme.md` (+ `_acc.csv`, `_paired.csv`, `latex/c1_qwen25vl_videomme.tex`);
-it is regenerated as each arm finishes. Arms not listed are INCOMPLETE.
+**Results (2,700 / 2,700 questions for every arm below; FullKV-32 still running, INCOMPLETE).**
+Table: `tables/c1_qwen25vl_videomme.md` (+ `_acc.csv`, `_paired.csv`, `latex/c1_qwen25vl_videomme.tex`).
 
 | arm | overall | short | medium | long |
 |---|---|---|---|---|
 | FullKV-64 | 63.70 [61.85, 65.56] | 75.11 [72.22, 77.89] | 63.78 [60.67, 66.89] | 52.22 [49.00, 55.44] |
 | OVAL | 61.93 [60.00, 63.85] | 72.56 [69.67, 75.33] | 62.22 [59.00, 65.33] | 51.00 [47.67, 54.33] |
 | FreeKV | 62.52 [60.63, 64.41] | 73.78 [70.89, 76.44] | 61.22 [57.89, 64.44] | 52.56 [49.33, 55.78] |
-| paired OVAL - FullKV-64 (pp) | -1.78 [-2.85, -0.70] | -2.56 [-4.22, -1.00] | -1.56 [-3.67, +0.44] | -1.22 [-2.89, +0.44] |
-| paired FreeKV - FullKV-64 (pp) | -1.19 [-2.22, -0.11] | -1.33 [-3.00, +0.33] | -2.56 [-4.67, -0.44] | +0.33 [-1.33, +2.00] |
+| Quest | 63.04 [61.18, 64.93] | 74.22 [71.33, 77.00] | 62.22 [59.00, 65.56] | 52.67 [49.44, 55.89] |
+| 4-bit keys | 63.11 [61.26, 64.96] | 74.78 [72.00, 77.56] | 63.11 [60.00, 66.11] | 51.44 [48.11, 54.67] |
+| SnapKV† | 57.59 [55.74, 59.48] | 64.33 [61.33, 67.22] | 59.00 [55.67, 62.22] | 49.44 [46.22, 52.78] |
 
-95% CIs: bootstrap over videos (10k). The paired-vs-FullKV-32 column is added when FullKV-32 finishes.
+Paired difference vs FullKV-64 (pp, 95% CI):
+
+| arm | overall | short | medium | long |
+|---|---|---|---|---|
+| OVAL | -1.78 [-2.85, -0.70] | -2.56 [-4.22, -1.00] | -1.56 [-3.67, +0.44] | -1.22 [-2.89, +0.44] |
+| FreeKV | -1.19 [-2.22, -0.11] | -1.33 [-3.00, +0.33] | -2.56 [-4.67, -0.44] | +0.33 [-1.33, +2.00] |
+| Quest | -0.67 [-1.63, +0.33] | -0.89 [-2.56, +0.67] | -1.56 [-3.44, +0.33] | +0.44 [-1.11, +2.00] |
+| 4-bit keys | -0.59 [-1.33, +0.15] | -0.33 [-1.56, +0.89] | -0.67 [-2.00, +0.67] | -0.78 [-2.11, +0.44] |
+| SnapKV† | -6.11 [-7.59, -4.67] | -10.78 [-13.56, -8.00] | -4.78 [-7.33, -2.33] | -2.78 [-5.00, -0.56] |
+
+95% CIs: bootstrap over videos (10k). †: reported, never ranked. Paired vs FullKV-32 is added when it finishes.
+Reading: on Qwen2.5-VL-7B, OVAL is below FreeKV, Quest and 4-bit keys on Video-MME (unlike LLaVA-Video, Tab. 5).
 
 ## C2: LVBench (frames only, 64 frames, stream protocol)
 

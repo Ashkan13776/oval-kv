@@ -11,3 +11,15 @@ Qwen2.5-VL-7B,videomme,FreeKV,all,overall,2700,62.519,60.630,64.407,True
 Qwen2.5-VL-7B,videomme,FreeKV,duration,short,900,73.778,70.889,76.444,True
 Qwen2.5-VL-7B,videomme,FreeKV,duration,medium,900,61.222,57.889,64.444,True
 Qwen2.5-VL-7B,videomme,FreeKV,duration,long,900,52.556,49.333,55.778,True
+Qwen2.5-VL-7B,videomme,Quest,all,overall,2700,63.037,61.184,64.926,True
+Qwen2.5-VL-7B,videomme,Quest,duration,short,900,74.222,71.333,77.000,True
+Qwen2.5-VL-7B,videomme,Quest,duration,medium,900,62.222,59.000,65.556,True
+Qwen2.5-VL-7B,videomme,Quest,duration,long,900,52.667,49.444,55.889,True
+Qwen2.5-VL-7B,videomme,4-bit keys,all,overall,2700,63.111,61.259,64.964,True
+Qwen2.5-VL-7B,videomme,4-bit keys,duration,short,900,74.778,72.000,77.556,True
+Qwen2.5-VL-7B,videomme,4-bit keys,duration,medium,900,63.111,60.000,66.111,True
+Qwen2.5-VL-7B,videomme,4-bit keys,duration,long,900,51.444,48.111,54.667,True
+Qwen2.5-VL-7B,videomme,SnapKV†,all,overall,2700,57.593,55.741,59.481,True
+Qwen2.5-VL-7B,videomme,SnapKV†,duration,short,900,64.333,61.333,67.222,True
+Qwen2.5-VL-7B,videomme,SnapKV†,duration,medium,900,59.000,55.667,62.222,True
+Qwen2.5-VL-7B,videomme,SnapKV†,duration,long,900,49.444,46.222,52.778,True
