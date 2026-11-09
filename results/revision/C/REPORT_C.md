@@ -32,8 +32,8 @@ Branch `revision-c` (cut from `vision` at `bb7ce66`), machine **mint06**. Brief:
 | Env rebuild | done (stack identical to Tab. 5; `STACK.md`) |
 | Reproduce 20 Long videos of `row1_full_n64` and `row3_ovalfull_n64` | **PASS, bit-exact** (below) |
 | C1 Qwen2.5-VL-7B on Video-MME | integration tested, eta calibrated; **done**, all 7 arms x 2,700 |
-| C2 LVBench | timing done (both models, no subset); LLaVA full runs running, Qwen full runs queued |
-| C5 analysis | eta heatmaps done; evidence-position and selection maps wait on C2 / sellog runs |
+| C2 LVBench | LLaVA **done** (7 x 1,549); Qwen running (2 / 7 arms done) |
+| C5 analysis | eta heatmaps done; evidence position done for LLaVA (Qwen waits on C2); selection maps wait on sellog run |
 | C3 video baselines | implemented and smoke-tested; Video-MME timing queued |
 | C4 | out of scope (authors) |
 
@@ -203,6 +203,28 @@ Total about 20 GPU-h (~5-6 h on 4 GPUs): no subset, all 1,549 questions, queued 
 Total about 13 GPU-h (vision encoder precomputed, so cheaper than LLaVA): no subset, all 1,549
 questions, queued after the LLaVA C2 runs.
 
+**LLaVA-Video-7B on LVBench: complete (all 7 arms x 1,549 questions).** Table:
+`tables/c2_lvbench_llava.md` (+ `_acc.csv`, `_paired.csv`, `latex/c2_lvbench_llava.tex`), with
+breakdowns by question type and video type.
+
+| arm | overall | paired vs FullKV-64 | paired vs FullKV-32 |
+|---|---|---|---|
+| FullKV-64 | 41.64 [38.93, 44.29] | | +2.26 [+0.19, +4.22] |
+| FullKV-32 (N/2) | 39.38 [36.59, 42.13] | -2.26 [-4.22, -0.19] | |
+| OVAL | 40.87 [38.10, 43.64] | -0.77 [-2.35, +0.78] | +1.48 [-0.59, +3.54] |
+| FreeKV | 42.16 [39.31, 44.95] | +0.52 [-1.13, +2.20] | +2.78 [+0.79, +4.73] |
+| Quest | 41.32 [38.52, 44.12] | -0.32 [-1.78, +1.16] | +1.94 [-0.06, +3.85] |
+| 4-bit keys | 42.35 [39.53, 45.14] | +0.71 [-0.45, +1.92] | +2.97 [+0.85, +5.02] |
+| SnapKV† | 36.22 [33.72, 38.69] | -5.42 [-7.69, -3.05] | -3.16 [-5.40, -0.88] |
+
+95% CIs: bootstrap over videos (103 videos, 10k). Reading: none of the four ranked compressed
+methods differs significantly from FullKV-64; OVAL is the lowest of them by point estimate and,
+unlike FreeKV and 4-bit keys, is not significantly above FullKV-32. No per-question-type gap of
+any ranked method to FullKV-64 is significant.
+
+**Qwen2.5-VL-7B on LVBench: INCOMPLETE** (FullKV-64 and FullKV-32 done; Quest running; FreeKV,
+4-bit keys, SnapKV, OVAL queued).
+
 ## C5: analysis
 
 **eta_h on video** (`scripts/revision/C/c5_eta_heatmap.py`, no GPU; figure
@@ -223,6 +245,24 @@ vs the reasoning tables: 0.26-0.32, mean eta +0.20 to +0.27. Qwen2.5-VL vs reaso
 One sentence: visual prefill moves eta_h; the per-head pattern of the reasoning tables does not
 carry over to either video table, and for LLaVA-Video (same LM family as R1-Distill Qwen-7B)
 it shifts eta_h up by about 0.2-0.27 and nearly removes heads at eta 0.
+
+**Evidence position on LVBench** (`c5_evidence.py`; `c5_evidence.md`, `tables/c5_evidence_*.csv`,
+`figures/c5_evidence_buckets.pdf` + `.csv`). Bucket = midpoint of the annotated span over the video
+length, in thirds; 2 questions with spans annotated "None" excluded; CIs bootstrap over questions.
+LLaVA-Video-7B (complete; 1,547 questions):
+
+| arm | first third (n=708) | middle (n=520) | last third (n=319) |
+|---|---|---|---|
+| FullKV-64 | 44.49 [40.82, 48.16] | 40.77 [36.54, 45.00] | 36.99 [31.97, 42.32] |
+| FreeKV | 45.90 [42.23, 49.58] | 39.42 [35.19, 43.65] | 38.56 [33.23, 43.89] |
+| OVAL | 43.93 [40.25, 47.60] | 38.65 [34.42, 42.88] | 37.93 [32.60, 43.26] |
+| paired OVAL - FullKV-64 | -0.56 [-2.82, +1.69] | -2.12 [-4.42, +0.19] | +0.94 [-2.82, +4.70] |
+| paired FreeKV - FullKV-64 | +1.41 [-0.85, +3.67] | -1.35 [-3.85, +1.15] | +1.57 [-1.88, +5.02] |
+
+No position bucket shows a significant gap to FullKV-64. Caveat: with 64 uniformly sampled frames,
+838 / 1,547 annotated spans (54%) contain no sampled frame at all, so the bucket analysis measures
+where the question points, not whether the frames are kept. FullKV-64: 43.02 on spans with >= 1
+sampled frame vs 40.57 on spans with none. The Qwen2.5-VL part is INCOMPLETE (only FullKV-64 so far).
 
 ## C3: video baselines (implemented and smoke-tested; full runs not started)
 

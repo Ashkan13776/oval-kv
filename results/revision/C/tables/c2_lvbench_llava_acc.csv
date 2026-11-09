@@ -1,0 +1,92 @@
+model,bench,arm,breakdown,group,n,acc,lo,hi,complete
+LLaVA-Video-7B,lvbench,FullKV-64,all,overall,1549,41.640,38.931,44.286,True
+LLaVA-Video-7B,lvbench,FullKV-64,question type,entity recognition,677,42.688,38.550,46.704,True
+LLaVA-Video-7B,lvbench,FullKV-64,question type,event understanding,647,39.258,35.461,43.027,True
+LLaVA-Video-7B,lvbench,FullKV-64,question type,key information retrieval,291,40.550,34.859,46.617,True
+LLaVA-Video-7B,lvbench,FullKV-64,question type,reasoning,201,47.264,40.113,53.886,True
+LLaVA-Video-7B,lvbench,FullKV-64,question type,summarization,58,31.034,19.231,43.284,True
+LLaVA-Video-7B,lvbench,FullKV-64,question type,temporal grounding,220,34.545,28.037,41.423,True
+LLaVA-Video-7B,lvbench,FullKV-64,video type,cartoon,283,41.696,35.986,47.766,True
+LLaVA-Video-7B,lvbench,FullKV-64,video type,documentary,197,40.102,32.653,47.253,True
+LLaVA-Video-7B,lvbench,FullKV-64,video type,live,262,46.183,39.921,51.972,True
+LLaVA-Video-7B,lvbench,FullKV-64,video type,selfmedia,317,43.849,38.361,49.684,True
+LLaVA-Video-7B,lvbench,FullKV-64,video type,sport,240,40.417,33.065,47.480,True
+LLaVA-Video-7B,lvbench,FullKV-64,video type,tv,250,36.400,29.545,43.443,True
+LLaVA-Video-7B,lvbench,FullKV-32,all,overall,1549,39.380,36.588,42.126,True
+LLaVA-Video-7B,lvbench,FullKV-32,question type,entity recognition,677,38.996,35.015,42.751,True
+LLaVA-Video-7B,lvbench,FullKV-32,question type,event understanding,647,38.485,34.545,42.420,True
+LLaVA-Video-7B,lvbench,FullKV-32,question type,key information retrieval,291,38.144,32.852,43.706,True
+LLaVA-Video-7B,lvbench,FullKV-32,question type,reasoning,201,44.776,38.021,51.250,True
+LLaVA-Video-7B,lvbench,FullKV-32,question type,summarization,58,27.586,16.981,40.000,True
+LLaVA-Video-7B,lvbench,FullKV-32,question type,temporal grounding,220,34.545,28.319,40.476,True
+LLaVA-Video-7B,lvbench,FullKV-32,video type,cartoon,283,34.276,28.477,40.269,True
+LLaVA-Video-7B,lvbench,FullKV-32,video type,documentary,197,43.147,35.714,51.244,True
+LLaVA-Video-7B,lvbench,FullKV-32,video type,live,262,45.420,36.940,53.933,True
+LLaVA-Video-7B,lvbench,FullKV-32,video type,selfmedia,317,42.271,37.612,46.801,True
+LLaVA-Video-7B,lvbench,FullKV-32,video type,sport,240,37.083,30.328,44.000,True
+LLaVA-Video-7B,lvbench,FullKV-32,video type,tv,250,34.400,28.400,40.949,True
+LLaVA-Video-7B,lvbench,OVAL,all,overall,1549,40.865,38.098,43.644,True
+LLaVA-Video-7B,lvbench,OVAL,question type,entity recognition,677,41.211,37.053,45.231,True
+LLaVA-Video-7B,lvbench,OVAL,question type,event understanding,647,40.031,36.218,43.771,True
+LLaVA-Video-7B,lvbench,OVAL,question type,key information retrieval,291,38.832,33.618,44.251,True
+LLaVA-Video-7B,lvbench,OVAL,question type,reasoning,201,46.766,39.698,53.659,True
+LLaVA-Video-7B,lvbench,OVAL,question type,summarization,58,34.483,22.222,48.890,True
+LLaVA-Video-7B,lvbench,OVAL,question type,temporal grounding,220,35.455,28.444,42.857,True
+LLaVA-Video-7B,lvbench,OVAL,video type,cartoon,283,39.223,32.616,46.809,True
+LLaVA-Video-7B,lvbench,OVAL,video type,documentary,197,38.579,30.476,46.667,True
+LLaVA-Video-7B,lvbench,OVAL,video type,live,262,45.420,38.189,52.174,True
+LLaVA-Video-7B,lvbench,OVAL,video type,selfmedia,317,43.533,38.065,49.080,True
+LLaVA-Video-7B,lvbench,OVAL,video type,sport,240,40.417,34.220,45.865,True
+LLaVA-Video-7B,lvbench,OVAL,video type,tv,250,36.800,30.534,43.374,True
+LLaVA-Video-7B,lvbench,FreeKV,all,overall,1549,42.156,39.307,44.950,True
+LLaVA-Video-7B,lvbench,FreeKV,question type,entity recognition,677,43.131,38.831,47.248,True
+LLaVA-Video-7B,lvbench,FreeKV,question type,event understanding,647,40.031,36.000,44.071,True
+LLaVA-Video-7B,lvbench,FreeKV,question type,key information retrieval,291,41.237,35.887,46.563,True
+LLaVA-Video-7B,lvbench,FreeKV,question type,reasoning,201,47.761,40.761,54.545,True
+LLaVA-Video-7B,lvbench,FreeKV,question type,summarization,58,32.759,20.755,46.001,True
+LLaVA-Video-7B,lvbench,FreeKV,question type,temporal grounding,220,35.909,29.327,42.041,True
+LLaVA-Video-7B,lvbench,FreeKV,video type,cartoon,283,39.223,33.099,45.956,True
+LLaVA-Video-7B,lvbench,FreeKV,video type,documentary,197,40.102,32.323,48.925,True
+LLaVA-Video-7B,lvbench,FreeKV,video type,live,262,49.237,41.218,56.746,True
+LLaVA-Video-7B,lvbench,FreeKV,video type,selfmedia,317,44.479,39.490,49.544,True
+LLaVA-Video-7B,lvbench,FreeKV,video type,sport,240,44.583,38.528,50.807,True
+LLaVA-Video-7B,lvbench,FreeKV,video type,tv,250,34.400,28.270,40.650,True
+LLaVA-Video-7B,lvbench,Quest,all,overall,1549,41.317,38.522,44.120,True
+LLaVA-Video-7B,lvbench,Quest,question type,entity recognition,677,43.722,39.528,47.690,True
+LLaVA-Video-7B,lvbench,Quest,question type,event understanding,647,37.558,33.537,41.518,True
+LLaVA-Video-7B,lvbench,Quest,question type,key information retrieval,291,40.550,34.643,46.575,True
+LLaVA-Video-7B,lvbench,Quest,question type,reasoning,201,47.264,40.526,53.846,True
+LLaVA-Video-7B,lvbench,Quest,question type,summarization,58,27.586,14.815,41.818,True
+LLaVA-Video-7B,lvbench,Quest,question type,temporal grounding,220,35.000,28.879,41.122,True
+LLaVA-Video-7B,lvbench,Quest,video type,cartoon,283,40.283,34.266,47.038,True
+LLaVA-Video-7B,lvbench,Quest,video type,documentary,197,40.609,31.841,50.000,True
+LLaVA-Video-7B,lvbench,Quest,video type,live,262,47.328,39.300,54.894,True
+LLaVA-Video-7B,lvbench,Quest,video type,selfmedia,317,44.479,39.863,49.379,True
+LLaVA-Video-7B,lvbench,Quest,video type,sport,240,39.583,33.032,46.581,True
+LLaVA-Video-7B,lvbench,Quest,video type,tv,250,34.400,29.289,39.749,True
+LLaVA-Video-7B,lvbench,4-bit keys,all,overall,1549,42.350,39.529,45.141,True
+LLaVA-Video-7B,lvbench,4-bit keys,question type,entity recognition,677,42.984,38.714,47.059,True
+LLaVA-Video-7B,lvbench,4-bit keys,question type,event understanding,647,40.031,36.144,43.902,True
+LLaVA-Video-7B,lvbench,4-bit keys,question type,key information retrieval,291,41.581,36.111,47.138,True
+LLaVA-Video-7B,lvbench,4-bit keys,question type,reasoning,201,45.771,38.298,53.044,True
+LLaVA-Video-7B,lvbench,4-bit keys,question type,summarization,58,31.034,19.298,43.636,True
+LLaVA-Video-7B,lvbench,4-bit keys,question type,temporal grounding,220,35.455,28.319,42.798,True
+LLaVA-Video-7B,lvbench,4-bit keys,video type,cartoon,283,42.403,35.563,49.291,True
+LLaVA-Video-7B,lvbench,4-bit keys,video type,documentary,197,40.609,32.402,48.387,True
+LLaVA-Video-7B,lvbench,4-bit keys,video type,live,262,47.710,40.541,54.435,True
+LLaVA-Video-7B,lvbench,4-bit keys,video type,selfmedia,317,44.479,38.762,50.323,True
+LLaVA-Video-7B,lvbench,4-bit keys,video type,sport,240,40.833,34.025,47.322,True
+LLaVA-Video-7B,lvbench,4-bit keys,video type,tv,250,36.800,30.980,43.191,True
+LLaVA-Video-7B,lvbench,SnapKV†,all,overall,1549,36.217,33.722,38.689,True
+LLaVA-Video-7B,lvbench,SnapKV†,question type,entity recognition,677,35.155,31.147,39.248,True
+LLaVA-Video-7B,lvbench,SnapKV†,question type,event understanding,647,36.476,32.638,40.412,True
+LLaVA-Video-7B,lvbench,SnapKV†,question type,key information retrieval,291,35.052,30.142,40.078,True
+LLaVA-Video-7B,lvbench,SnapKV†,question type,reasoning,201,43.284,36.279,50.231,True
+LLaVA-Video-7B,lvbench,SnapKV†,question type,summarization,58,29.310,16.417,44.681,True
+LLaVA-Video-7B,lvbench,SnapKV†,question type,temporal grounding,220,32.727,26.923,38.806,True
+LLaVA-Video-7B,lvbench,SnapKV†,video type,cartoon,283,33.216,26.715,40.217,True
+LLaVA-Video-7B,lvbench,SnapKV†,video type,documentary,197,41.117,33.854,49.261,True
+LLaVA-Video-7B,lvbench,SnapKV†,video type,live,262,38.550,33.061,44.672,True
+LLaVA-Video-7B,lvbench,SnapKV†,video type,selfmedia,317,37.224,32.344,42.295,True
+LLaVA-Video-7B,lvbench,SnapKV†,video type,sport,240,37.917,32.432,44.156,True
+LLaVA-Video-7B,lvbench,SnapKV†,video type,tv,250,30.400,25.764,35.316,True

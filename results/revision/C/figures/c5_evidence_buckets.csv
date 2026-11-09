@@ -1,0 +1,17 @@
+model,arm,bucket,n,acc,lo,hi,complete
+LLaVA-Video-7B,FullKV-64,first,708,44.492,40.819,48.164,True
+LLaVA-Video-7B,FullKV-64,middle,520,40.769,36.538,45.000,True
+LLaVA-Video-7B,FullKV-64,last,319,36.991,31.975,42.320,True
+LLaVA-Video-7B,FullKV-64,all,1547,41.694,39.237,44.150,True
+LLaVA-Video-7B,FreeKV,first,708,45.904,42.232,49.576,True
+LLaVA-Video-7B,FreeKV,middle,520,39.423,35.192,43.654,True
+LLaVA-Video-7B,FreeKV,last,319,38.558,33.229,43.887,True
+LLaVA-Video-7B,FreeKV,all,1547,42.211,39.754,44.604,True
+LLaVA-Video-7B,OVAL,first,708,43.927,40.254,47.599,True
+LLaVA-Video-7B,OVAL,middle,520,38.654,34.423,42.885,True
+LLaVA-Video-7B,OVAL,last,319,37.931,32.602,43.260,True
+LLaVA-Video-7B,OVAL,all,1547,40.918,38.462,43.310,True
+Qwen2.5-VL-7B,FullKV-64,first,708,42.938,39.407,46.610,True
+Qwen2.5-VL-7B,FullKV-64,middle,520,41.923,37.692,46.154,True
+Qwen2.5-VL-7B,FullKV-64,last,319,36.677,31.661,42.006,True
+Qwen2.5-VL-7B,FullKV-64,all,1547,41.306,38.849,43.762,True
