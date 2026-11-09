@@ -371,13 +371,13 @@ embedding prep, so an upper bound).** LVBench cost = same s / question x 1,549.
 | Qwen2.5-VL | ReKV | 5.6 | 18.5 | 4.2 | 2.4 |
 | LLaVA-Video | VisionZip 50% + FullKV | 6.8 | 22.7 | 5.1 | 2.9 |
 | LLaVA-Video | VisionZip 25% + FullKV | 6.2 | 22.7 | 4.6 | 2.7 |
-| LLaVA-Video | VisionZip 50% + OVAL | rerunning (first attempt OOM: GPU shared with prep) | | ~8 (est.) | ~5 (est.) |
+| LLaVA-Video | VisionZip 50% + OVAL | 11.7 | 23.1 | 8.8 | 5.0 |
 | LLaVA-Video | InfiniPot-V, mem-matched | 8.2 | 16.9 | 6.2 | 3.5 |
 | LLaVA-Video | InfiniPot-V, 2k | 8.0 | 16.9 | 6.0 | 3.5 |
 | LLaVA-Video | ReKV | 10.0 | 17.3 | 7.5 | 4.3 |
 | LLaVA-Video | HF dense reference (`hf_full`) | 13.6 | 16.9 | 10.2 | 5.9 |
 
-Total about 115 GPU-h (~30 h on 4 GPUs), under the 5-day cut: **no subset**; all arms on all
+Total about 116 GPU-h (~30 h on 4 GPUs; the LLaVA VisionZip + OVAL timing job first hit OOM on a GPU shared with the embedding prep and was rerun alone), under the 5-day cut: **no subset**; all arms on all
 2,700 Video-MME and 1,549 LVBench questions, queued (Video-MME first). Measured mean prefill cache
 lengths match the design: Qwen InfiniPot-V mem / 2k 6,565 / 2,062, ReKV 1,843; LLaVA InfiniPot-V
 mem / 2k 7,319 / 2,699 (the final, uncompressed block plus the time instruction), ReKV 1,908.
