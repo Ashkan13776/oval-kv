@@ -1,4 +1,8 @@
 model,bench,arm,reference,breakdown,group,diff,lo,hi
+Qwen2.5-VL-7B,videomme,FullKV-32,FullKV-64,all,overall,-2.037,-3.333,-0.778
+Qwen2.5-VL-7B,videomme,FullKV-32,FullKV-64,duration,short,-2.444,-4.556,-0.333
+Qwen2.5-VL-7B,videomme,FullKV-32,FullKV-64,duration,medium,-2.667,-5.222,-0.222
+Qwen2.5-VL-7B,videomme,FullKV-32,FullKV-64,duration,long,-1.000,-3.000,1.000
 Qwen2.5-VL-7B,videomme,OVAL,FullKV-64,all,overall,-1.778,-2.852,-0.704
 Qwen2.5-VL-7B,videomme,OVAL,FullKV-64,duration,short,-2.556,-4.222,-1.000
 Qwen2.5-VL-7B,videomme,OVAL,FullKV-64,duration,medium,-1.556,-3.667,0.444
@@ -19,3 +23,27 @@ Qwen2.5-VL-7B,videomme,SnapKV†,FullKV-64,all,overall,-6.111,-7.593,-4.667
 Qwen2.5-VL-7B,videomme,SnapKV†,FullKV-64,duration,short,-10.778,-13.556,-8.000
 Qwen2.5-VL-7B,videomme,SnapKV†,FullKV-64,duration,medium,-4.778,-7.333,-2.331
 Qwen2.5-VL-7B,videomme,SnapKV†,FullKV-64,duration,long,-2.778,-5.000,-0.556
+Qwen2.5-VL-7B,videomme,FullKV-64,FullKV-32,all,overall,2.037,0.778,3.333
+Qwen2.5-VL-7B,videomme,FullKV-64,FullKV-32,duration,short,2.444,0.333,4.556
+Qwen2.5-VL-7B,videomme,FullKV-64,FullKV-32,duration,medium,2.667,0.222,5.222
+Qwen2.5-VL-7B,videomme,FullKV-64,FullKV-32,duration,long,1.000,-1.000,3.000
+Qwen2.5-VL-7B,videomme,OVAL,FullKV-32,all,overall,0.259,-1.074,1.593
+Qwen2.5-VL-7B,videomme,OVAL,FullKV-32,duration,short,-0.111,-2.000,1.778
+Qwen2.5-VL-7B,videomme,OVAL,FullKV-32,duration,medium,1.111,-1.444,3.778
+Qwen2.5-VL-7B,videomme,OVAL,FullKV-32,duration,long,-0.222,-2.444,2.111
+Qwen2.5-VL-7B,videomme,FreeKV,FullKV-32,all,overall,0.852,-0.445,2.148
+Qwen2.5-VL-7B,videomme,FreeKV,FullKV-32,duration,short,1.111,-0.889,3.000
+Qwen2.5-VL-7B,videomme,FreeKV,FullKV-32,duration,medium,0.111,-2.444,2.778
+Qwen2.5-VL-7B,videomme,FreeKV,FullKV-32,duration,long,1.333,-1.000,3.667
+Qwen2.5-VL-7B,videomme,Quest,FullKV-32,all,overall,1.370,0.074,2.631
+Qwen2.5-VL-7B,videomme,Quest,FullKV-32,duration,short,1.556,-0.444,3.556
+Qwen2.5-VL-7B,videomme,Quest,FullKV-32,duration,medium,1.111,-1.333,3.556
+Qwen2.5-VL-7B,videomme,Quest,FullKV-32,duration,long,1.444,-0.778,3.778
+Qwen2.5-VL-7B,videomme,4-bit keys,FullKV-32,all,overall,1.444,0.148,2.778
+Qwen2.5-VL-7B,videomme,4-bit keys,FullKV-32,duration,short,2.111,-0.111,4.222
+Qwen2.5-VL-7B,videomme,4-bit keys,FullKV-32,duration,medium,2.000,-0.333,4.444
+Qwen2.5-VL-7B,videomme,4-bit keys,FullKV-32,duration,long,0.222,-2.111,2.556
+Qwen2.5-VL-7B,videomme,SnapKV†,FullKV-32,all,overall,-4.074,-5.593,-2.518
+Qwen2.5-VL-7B,videomme,SnapKV†,FullKV-32,duration,short,-8.333,-11.333,-5.444
+Qwen2.5-VL-7B,videomme,SnapKV†,FullKV-32,duration,medium,-2.111,-4.889,0.667
+Qwen2.5-VL-7B,videomme,SnapKV†,FullKV-32,duration,long,-1.778,-4.111,0.556

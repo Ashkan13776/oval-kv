@@ -31,8 +31,8 @@ Branch `revision-c` (cut from `vision` at `bb7ce66`), machine **mint06**. Brief:
 | Environment check | done (below) |
 | Env rebuild | done (stack identical to Tab. 5; `STACK.md`) |
 | Reproduce 20 Long videos of `row1_full_n64` and `row3_ovalfull_n64` | **PASS, bit-exact** (below) |
-| C1 Qwen2.5-VL-7B on Video-MME | integration tested, eta calibrated; 6 / 7 arms **complete** (2,700); FullKV-32 running |
-| C2 LVBench | not started |
+| C1 Qwen2.5-VL-7B on Video-MME | integration tested, eta calibrated; **done**, all 7 arms x 2,700 |
+| C2 LVBench | timing done (both models, no subset); LLaVA full runs running, Qwen full runs queued |
 | C5 analysis | not started |
 | C3 video baselines | not started |
 | C4 | out of scope (authors) |
@@ -132,12 +132,13 @@ The timing questions are rerun inside the full runs; tables use the full-run sha
   streamed as decode tokens): 100 / 100 identical output strings, 51.0% both.
 - Runs: `runs/c1_qwen25vl/sanity_{stream_full,prompt_hf,hfstream}_n64`.
 
-**Results (2,700 / 2,700 questions for every arm below; FullKV-32 still running, INCOMPLETE).**
+**Results (all 7 arms complete, 2,700 / 2,700 questions each).**
 Table: `tables/c1_qwen25vl_videomme.md` (+ `_acc.csv`, `_paired.csv`, `latex/c1_qwen25vl_videomme.tex`).
 
 | arm | overall | short | medium | long |
 |---|---|---|---|---|
 | FullKV-64 | 63.70 [61.85, 65.56] | 75.11 [72.22, 77.89] | 63.78 [60.67, 66.89] | 52.22 [49.00, 55.44] |
+| FullKV-32 (N/2) | 61.67 [59.78, 63.59] | 72.67 [69.67, 75.56] | 61.11 [58.00, 64.11] | 51.22 [47.89, 54.56] |
 | OVAL | 61.93 [60.00, 63.85] | 72.56 [69.67, 75.33] | 62.22 [59.00, 65.33] | 51.00 [47.67, 54.33] |
 | FreeKV | 62.52 [60.63, 64.41] | 73.78 [70.89, 76.44] | 61.22 [57.89, 64.44] | 52.56 [49.33, 55.78] |
 | Quest | 63.04 [61.18, 64.93] | 74.22 [71.33, 77.00] | 62.22 [59.00, 65.56] | 52.67 [49.44, 55.89] |
@@ -148,14 +149,27 @@ Paired difference vs FullKV-64 (pp, 95% CI):
 
 | arm | overall | short | medium | long |
 |---|---|---|---|---|
+| FullKV-32 | -2.04 [-3.33, -0.78] | -2.44 [-4.56, -0.33] | -2.67 [-5.22, -0.22] | -1.00 [-3.00, +1.00] |
 | OVAL | -1.78 [-2.85, -0.70] | -2.56 [-4.22, -1.00] | -1.56 [-3.67, +0.44] | -1.22 [-2.89, +0.44] |
 | FreeKV | -1.19 [-2.22, -0.11] | -1.33 [-3.00, +0.33] | -2.56 [-4.67, -0.44] | +0.33 [-1.33, +2.00] |
 | Quest | -0.67 [-1.63, +0.33] | -0.89 [-2.56, +0.67] | -1.56 [-3.44, +0.33] | +0.44 [-1.11, +2.00] |
 | 4-bit keys | -0.59 [-1.33, +0.15] | -0.33 [-1.56, +0.89] | -0.67 [-2.00, +0.67] | -0.78 [-2.11, +0.44] |
 | SnapKV† | -6.11 [-7.59, -4.67] | -10.78 [-13.56, -8.00] | -4.78 [-7.33, -2.33] | -2.78 [-5.00, -0.56] |
 
-95% CIs: bootstrap over videos (10k). †: reported, never ranked. Paired vs FullKV-32 is added when it finishes.
-Reading: on Qwen2.5-VL-7B, OVAL is below FreeKV, Quest and 4-bit keys on Video-MME (unlike LLaVA-Video, Tab. 5).
+Paired difference vs FullKV-32 (pp, 95% CI):
+
+| arm | overall | short | medium | long |
+|---|---|---|---|---|
+| OVAL | +0.26 [-1.07, +1.59] | -0.11 [-2.00, +1.78] | +1.11 [-1.44, +3.78] | -0.22 [-2.44, +2.11] |
+| FreeKV | +0.85 [-0.45, +2.15] | +1.11 [-0.89, +3.00] | +0.11 [-2.44, +2.78] | +1.33 [-1.00, +3.67] |
+| Quest | +1.37 [+0.07, +2.63] | +1.56 [-0.44, +3.56] | +1.11 [-1.33, +3.56] | +1.44 [-0.78, +3.78] |
+| 4-bit keys | +1.44 [+0.15, +2.78] | +2.11 [-0.11, +4.22] | +2.00 [-0.33, +4.44] | +0.22 [-2.11, +2.56] |
+| SnapKV† | -4.07 [-5.59, -2.52] | -8.33 [-11.33, -5.44] | -2.11 [-4.89, +0.67] | -1.78 [-4.11, +0.56] |
+
+95% CIs: bootstrap over videos (10k). †: reported, never ranked.
+Reading: on Qwen2.5-VL-7B, OVAL is below FreeKV, Quest and 4-bit keys on Video-MME and is not
+distinguishable from FullKV-32 (unlike LLaVA-Video, Tab. 5). All differences between the four
+ranked compressed methods are within about 1.2 pp; none of their long-video gaps to FullKV-64 is significant.
 
 ## C2: LVBench (frames only, 64 frames, stream protocol)
 
@@ -174,7 +188,20 @@ questions a video has; GPUs shared):
 | OVAL | 11.4 | 17.4 | 4.9 GPU-h |
 
 Total about 20 GPU-h (~5-6 h on 4 GPUs): no subset, all 1,549 questions, queued after C1.
-Qwen2.5-VL timing is queued (waits for the LVBench embeddings).
+**Qwen2.5-VL-7B timing** (same 60 questions; 12,960 visual tokens per video; GPUs shared):
+
+| arm | s / question | peak GB | extrapolated, 1,549 questions |
+|---|---|---|---|
+| FullKV-64 | 3.6 | 16.9 | 1.5 GPU-h |
+| FullKV-32 | 2.4 | 15.5 | 1.0 GPU-h |
+| Quest | 4.1 | 16.9 | 1.7 GPU-h |
+| FreeKV | 4.7 | 16.9 | 2.0 GPU-h |
+| 4-bit keys | 5.0 | 16.9 | 2.1 GPU-h |
+| SnapKV† | 3.9 | 19.6 | 1.7 GPU-h |
+| OVAL | 6.0 | 17.3 | 2.6 GPU-h |
+
+Total about 13 GPU-h (vision encoder precomputed, so cheaper than LLaVA): no subset, all 1,549
+questions, queued after the LLaVA C2 runs.
 
 ## C5: analysis
 
