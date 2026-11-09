@@ -1,0 +1,37 @@
+model,bench,arm,breakdown,group,n,acc,lo,hi,complete
+Qwen2.5-VL-7B,videomme,FullKV-64,all,overall,2700,63.704,61.852,65.556,True
+Qwen2.5-VL-7B,videomme,FullKV-64,duration,short,900,75.111,72.222,77.889,True
+Qwen2.5-VL-7B,videomme,FullKV-64,duration,medium,900,63.778,60.667,66.889,True
+Qwen2.5-VL-7B,videomme,FullKV-64,duration,long,900,52.222,49.000,55.444,True
+Qwen2.5-VL-7B,videomme,FullKV-32,all,overall,2700,61.667,59.778,63.593,True
+Qwen2.5-VL-7B,videomme,FullKV-32,duration,short,900,72.667,69.667,75.558,True
+Qwen2.5-VL-7B,videomme,FullKV-32,duration,medium,900,61.111,58.000,64.111,True
+Qwen2.5-VL-7B,videomme,FullKV-32,duration,long,900,51.222,47.889,54.556,True
+Qwen2.5-VL-7B,videomme,OVAL,all,overall,2700,61.926,60.000,63.852,True
+Qwen2.5-VL-7B,videomme,OVAL,duration,short,900,72.556,69.667,75.333,True
+Qwen2.5-VL-7B,videomme,OVAL,duration,medium,900,62.222,59.000,65.333,True
+Qwen2.5-VL-7B,videomme,OVAL,duration,long,900,51.000,47.667,54.333,True
+Qwen2.5-VL-7B,videomme,VisionZip 50%,all,overall,2700,62.926,61.037,64.815,True
+Qwen2.5-VL-7B,videomme,VisionZip 50%,duration,short,900,74.556,71.667,77.333,True
+Qwen2.5-VL-7B,videomme,VisionZip 50%,duration,medium,900,62.333,59.222,65.333,True
+Qwen2.5-VL-7B,videomme,VisionZip 50%,duration,long,900,51.889,48.667,55.222,True
+Qwen2.5-VL-7B,videomme,VisionZip 25%,all,overall,2700,61.778,59.889,63.704,True
+Qwen2.5-VL-7B,videomme,VisionZip 25%,duration,short,900,72.444,69.556,75.333,True
+Qwen2.5-VL-7B,videomme,VisionZip 25%,duration,medium,900,60.889,57.444,64.222,True
+Qwen2.5-VL-7B,videomme,VisionZip 25%,duration,long,900,52.000,48.778,55.222,True
+Qwen2.5-VL-7B,videomme,VisionZip 50% + OVAL,all,overall,2700,61.704,59.778,63.630,True
+Qwen2.5-VL-7B,videomme,VisionZip 50% + OVAL,duration,short,900,73.556,70.667,76.333,True
+Qwen2.5-VL-7B,videomme,VisionZip 50% + OVAL,duration,medium,900,61.333,58.111,64.444,True
+Qwen2.5-VL-7B,videomme,VisionZip 50% + OVAL,duration,long,900,50.222,47.000,53.556,True
+Qwen2.5-VL-7B,videomme,InfiniPot-V (mem-matched),all,overall,2700,62.778,60.889,64.704,True
+Qwen2.5-VL-7B,videomme,InfiniPot-V (mem-matched),duration,short,900,73.222,70.333,76.111,True
+Qwen2.5-VL-7B,videomme,InfiniPot-V (mem-matched),duration,medium,900,63.444,60.331,66.556,True
+Qwen2.5-VL-7B,videomme,InfiniPot-V (mem-matched),duration,long,900,51.667,48.222,55.000,True
+Qwen2.5-VL-7B,videomme,InfiniPot-V (2k),all,overall,2700,58.630,56.704,60.519,True
+Qwen2.5-VL-7B,videomme,InfiniPot-V (2k),duration,short,900,68.000,65.000,71.000,True
+Qwen2.5-VL-7B,videomme,InfiniPot-V (2k),duration,medium,900,58.111,54.667,61.556,True
+Qwen2.5-VL-7B,videomme,InfiniPot-V (2k),duration,long,900,49.778,46.556,53.000,True
+Qwen2.5-VL-7B,videomme,ReKV,all,overall,2700,59.852,57.963,61.741,True
+Qwen2.5-VL-7B,videomme,ReKV,duration,short,900,69.667,66.778,72.556,True
+Qwen2.5-VL-7B,videomme,ReKV,duration,medium,900,57.889,54.667,61.000,True
+Qwen2.5-VL-7B,videomme,ReKV,duration,long,900,52.000,48.667,55.333,True

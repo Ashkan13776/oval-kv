@@ -30,8 +30,16 @@ ARMS = [  # (dir, label, tex)
     ("freekv_n64", "FreeKV", "FreeKV"),
     ("snapkv_n64", "SnapKV†", "SnapKV$^\\dagger$"),
     ("oval_n64", "OVAL", "\\method{}"),
+    # C3 (video baselines; "(our port)" in the report)
+    ("hf_full", "FullKV-64, HF path", "FullKV ($N$, HF path)"),
+    ("vz50_full", "VisionZip 50%", "VisionZip 50\\%"),
+    ("vz25_full", "VisionZip 25%", "VisionZip 25\\%"),
+    ("vz50_oval", "VisionZip 50% + OVAL", "VisionZip 50\\% + \\method{}"),
+    ("infinipot_mem", "InfiniPot-V (mem-matched)", "InfiniPot-V (mem.)"),
+    ("infinipot_2k", "InfiniPot-V (2k)", "InfiniPot-V (2k)"),
+    ("rekv", "ReKV", "ReKV"),
 ]
-REFS = ["full_n64", "full_n32"]
+REFS = ["full_n64", "full_n32", "hf_full"]
 TOTAL = {"videomme": 2700, "lvbench": 1549}
 
 
@@ -64,12 +72,19 @@ def groups(r, bench):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--run_root", required=True); ap.add_argument("--bench", required=True)
+    ap.add_argument("--run_root", required=True, nargs="+",
+                    help="one or more run dirs; each arm is read from the first root that has it")
+    ap.add_argument("--bench", required=True)
     ap.add_argument("--model", required=True); ap.add_argument("--out", required=True)
     ap.add_argument("--arms", nargs="+", default=[a[0] for a in ARMS])
     a = ap.parse_args()
     meta = {d: (lab, tex) for d, lab, tex in ARMS}
-    rows = {d: load(os.path.join(a.run_root, d)) for d in a.arms}
+    def find(d):
+        for root in a.run_root:
+            if glob.glob(os.path.join(root, d, "shard*.jsonl")):
+                return os.path.join(root, d)
+        return os.path.join(a.run_root[0], d)
+    rows = {d: load(find(d)) for d in a.arms}
     rows = {d: r for d, r in rows.items() if r}
     if not rows:
         print("no runs"); return
@@ -126,6 +141,8 @@ def main():
                     "{:+.2f} [{:+.2f}, {:+.2f}]{}".format(*paired[d, ref, k],
                     "*" if paired[d, ref, k][1] > 0 or paired[d, ref, k][2] < 0 else "") for k in ks) + " |")
     L += ["", "†: SnapKV is reported, never ranked."]
+    if any(d in rows for d in ("vz50_full", "vz25_full", "vz50_oval", "infinipot_mem", "infinipot_2k", "rekv")):
+        L += ["VisionZip, InfiniPot-V and ReKV are our ports (see REPORT_C.md, C3)."]
     os.makedirs(os.path.dirname(a.out) or ".", exist_ok=True)
     open(a.out + ".md", "w").write("\n".join(L) + "\n")
     with open(a.out + "_acc.csv", "w", newline="") as f:
@@ -142,7 +159,7 @@ def main():
            "\\textbf{Method} & " + " & ".join(k[1].capitalize() for k in ks) + " \\\\", "\\midrule"]
     for d in rows:
         tex.append(meta[d][1] + " & " + " & ".join(f"{acc[d, k][0][0]:.2f}" for k in ks) + " \\\\")
-        if d == "full_n32" or (d == "full_n64" and "full_n32" not in rows):
+        if d in REFS and not any(x in REFS for x in list(rows)[list(rows).index(d) + 1:]):
             tex.append("\\midrule")
     tex += ["\\bottomrule", "\\end{tabular}"]
     td = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(a.out))), "latex")

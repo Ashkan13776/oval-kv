@@ -383,6 +383,38 @@ lengths match the design: Qwen InfiniPot-V mem / 2k 6,565 / 2,062, ReKV 1,843; L
 mem / 2k 7,319 / 2,699 (the final, uncompressed block plus the time instruction), ReKV 1,908.
 The 60 timing questions are rerun inside the full runs; tables use full-run shards only.
 
+**Qwen2.5-VL-7B on Video-MME: complete (6 C3 arms x 2,700; references and OVAL from C1).**
+Table: `tables/c3_qwen25vl_videomme.md` (+ csv, `latex/c3_qwen25vl_videomme.tex`). All C3 methods
+are our ports.
+
+| arm | tokens kept / attended | overall | short | medium | long | paired vs FullKV-64 |
+|---|---|---|---|---|---|---|
+| FullKV-64 | 12,960 | 63.70 [61.85, 65.56] | 75.11 | 63.78 | 52.22 | |
+| FullKV-32 | 6,480 | 61.67 [59.78, 63.59] | 72.67 | 61.11 | 51.22 | -2.04 [-3.33, -0.78] |
+| VisionZip 50% | 6,480 | 62.93 [61.04, 64.81] | 74.56 | 62.33 | 51.89 | -0.78 [-1.63, +0.04] |
+| InfiniPot-V (mem-matched) | 6,480 | 62.78 [60.89, 64.70] | 73.22 | 63.44 | 51.67 | -0.93 [-1.81, -0.04] |
+| VisionZip 25% | 3,240 | 61.78 [59.89, 63.70] | 72.44 | 60.89 | 52.00 | -1.93 [-3.07, -0.81] |
+| OVAL | attends 1,792 / step | 61.93 [60.00, 63.85] | 72.56 | 62.22 | 51.00 | -1.78 [-2.85, -0.70] |
+| VisionZip 50% + OVAL | attends 1,792 of 6,480 | 61.70 [59.78, 63.63] | 73.56 | 61.33 | 50.22 | -2.00 [-3.07, -0.93] |
+| ReKV | 1,620 + 256 | 59.85 [57.96, 61.74] | 69.67 | 57.89 | 52.00 | -3.85 [-5.26, -2.48] |
+| InfiniPot-V (2k) | 2,025 | 58.63 [56.70, 60.52] | 68.00 | 58.11 | 49.78 | -5.07 [-6.44, -3.70] |
+
+Visual tokens (Qwen2.5-VL, 64 frames = 12,960). Per-duration CIs and the vs-FullKV-32 pairs are in
+the table files. Budget-matched pairs (`pair_arms.py`, same bootstrap):
+
+| pair | overall | short | medium | long |
+|---|---|---|---|---|
+| OVAL - ReKV | +2.07 [+0.74, +3.44] | +2.89 [+0.56, +5.22] | +4.33 [+1.67, +6.89] | -1.00 [-3.00, +1.00] |
+| OVAL - InfiniPot-V (2k) | +3.30 [+2.04, +4.63] | +4.56 [+2.44, +6.67] | +4.11 [+1.44, +6.67] | +1.22 [-0.89, +3.22] |
+| OVAL - InfiniPot-V (mem-matched) | -0.85 [-1.89, +0.15] | -0.67 [-2.33, +1.00] | -1.22 [-3.11, +0.67] | -0.67 [-2.33, +1.00] |
+| OVAL - VisionZip 50% | -1.00 [-2.07, +0.07] | -2.00 [-3.78, -0.33] | -0.11 [-2.11, +1.89] | -0.89 [-2.67, +0.89] |
+| VisionZip 50% + OVAL - VisionZip 50% | -1.22 [-2.19, -0.26] | | | |
+
+Reading: at a ~2k-token budget OVAL is significantly above both ported ~2k baselines (ReKV, InfiniPot-V 2k)
+overall, short and medium; on Long none of these differences is significant. The 50%-token methods
+(VisionZip 50%, InfiniPot-V mem-matched) are not significantly different from OVAL overall. Stacking
+OVAL on the VisionZip-50% cache costs 1.22 pp vs VisionZip 50% alone.
+
 ## Disk notes
 
 - 2026-11-09: the shared disk dropped to 60 GB free (other users). After C1 and C2 finished, the
