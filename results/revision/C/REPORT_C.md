@@ -34,7 +34,7 @@ Branch `revision-c` (cut from `vision` at `bb7ce66`), machine **mint06**. Brief:
 | C1 Qwen2.5-VL-7B on Video-MME | integration tested, eta calibrated; **done**, all 7 arms x 2,700 |
 | C2 LVBench | **done**, both models, 7 arms x 1,549 |
 | C5 analysis | eta heatmaps done; evidence position and selection maps **done** (both models) |
-| C3 video baselines | implemented and smoke-tested; Video-MME timing queued |
+| C3 video baselines | timing done (~115 GPU-h, no subset); full runs **running** |
 | C4 | out of scope (authors) |
 
 ## Environment check (2026-11-08)
@@ -307,7 +307,7 @@ groups (2 frames each) are shown at frame resolution by repetition. CIs bootstra
 Selection concentrates at the ends of the video: LLaVA-Video mostly on the last frames (closest to
 the question), Qwen2.5-VL mostly on the first frames; the middle of the video gets about 10-13%.
 
-## C3: video baselines (implemented and smoke-tested; full runs not started)
+## C3: video baselines (full runs running)
 
 Official code exists for all three (cloned read-only to `~/c3src`; commits recorded at run time).
 None of it runs unmodified on our stack, so each method's core step is ported into the harness.
@@ -357,6 +357,31 @@ Implementation status (2026-11-08), every arm smoke-tested on Video-MME 601-1..3
   gave the harness answer on 2 of 3 smoke questions; the third flipped at margin 0.125 (bf16 kernel
   differences). So `hf_full` is run as LLaVA's paired reference for these arms.
 - Job lines: `gen_jobs_c3.py`.
+
+**Timing (Video-MME, 20 Long videos = 60 questions per arm; GPUs shared with the VisionZip
+embedding prep, so an upper bound).** LVBench cost = same s / question x 1,549.
+
+| model | arm | s / question | peak GB | Video-MME (2,700) | LVBench (1,549) |
+|---|---|---|---|---|---|
+| Qwen2.5-VL | VisionZip 50% + FullKV | 4.1 | 15.5 | 3.1 GPU-h | 1.8 GPU-h |
+| Qwen2.5-VL | VisionZip 25% + FullKV | 3.5 | 14.9 | 2.7 | 1.5 |
+| Qwen2.5-VL | VisionZip 50% + OVAL | 9.1 | 16.0 | 6.8 | 3.9 |
+| Qwen2.5-VL | InfiniPot-V, mem-matched | 6.7 | 16.8 | 5.0 | 2.9 |
+| Qwen2.5-VL | InfiniPot-V, 2k | 6.5 | 16.0 | 4.9 | 2.8 |
+| Qwen2.5-VL | ReKV | 5.6 | 18.5 | 4.2 | 2.4 |
+| LLaVA-Video | VisionZip 50% + FullKV | 6.8 | 22.7 | 5.1 | 2.9 |
+| LLaVA-Video | VisionZip 25% + FullKV | 6.2 | 22.7 | 4.6 | 2.7 |
+| LLaVA-Video | VisionZip 50% + OVAL | rerunning (first attempt OOM: GPU shared with prep) | | ~8 (est.) | ~5 (est.) |
+| LLaVA-Video | InfiniPot-V, mem-matched | 8.2 | 16.9 | 6.2 | 3.5 |
+| LLaVA-Video | InfiniPot-V, 2k | 8.0 | 16.9 | 6.0 | 3.5 |
+| LLaVA-Video | ReKV | 10.0 | 17.3 | 7.5 | 4.3 |
+| LLaVA-Video | HF dense reference (`hf_full`) | 13.6 | 16.9 | 10.2 | 5.9 |
+
+Total about 115 GPU-h (~30 h on 4 GPUs), under the 5-day cut: **no subset**; all arms on all
+2,700 Video-MME and 1,549 LVBench questions, queued (Video-MME first). Measured mean prefill cache
+lengths match the design: Qwen InfiniPot-V mem / 2k 6,565 / 2,062, ReKV 1,843; LLaVA InfiniPot-V
+mem / 2k 7,319 / 2,699 (the final, uncompressed block plus the time instruction), ReKV 1,908.
+The 60 timing questions are rerun inside the full runs; tables use full-run shards only.
 
 ## Disk notes
 
