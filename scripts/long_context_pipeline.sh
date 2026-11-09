@@ -134,11 +134,18 @@ if want run; then
     [ -s "$(table $M $B)" ] || { say "ABORT: missing eta table $(table $M $B)"; exit 1; }
   done; done
   jobs=()
-  # longest first: LongGenBench shards (16K-token generations), then LongBench v2 (64K prefills)
+  # largest model's LongGenBench shards (16K-token generations) first, then LongBench v2 for every
+  # model (64K prefills, ~1-2 h each), so a complete LongBench v2 column lands early; then the
+  # remaining LongGenBench shards. LB2_EARLY=0 restores LongGenBench-all-first.
+  first=1
   for M in $(echo $MODELS | tr ' ' '\n' | tac); do
     [[ " $BENCHES " == *" LongGenBench "* ]] && for k in $(seq 0 $((LGB_SHARDS - 1))); do jobs+=("lgb:$M:$k"); done
+    if [ "$first" = 1 ] && [ "${LB2_EARLY:-1}" = 1 ]; then
+      for M2 in $(echo $MODELS | tr ' ' '\n' | tac); do [[ " $BENCHES " == *" LongBench2 "* ]] && jobs+=("lb2:$M2"); done
+    fi
+    first=0
   done
-  for M in $(echo $MODELS | tr ' ' '\n' | tac); do [[ " $BENCHES " == *" LongBench2 "* ]] && jobs+=("lb2:$M"); done
+  [ "${LB2_EARLY:-1}" = 1 ] || for M in $(echo $MODELS | tr ' ' '\n' | tac); do [[ " $BENCHES " == *" LongBench2 "* ]] && jobs+=("lb2:$M"); done
   say "run: ${#jobs[@]} jobs on GPUs [$GPUS] x $SLOTS slots, KRANK=$KRANK VRANK=$VRANK, LongGenBench top-p $TOPP seed $SEED"
   run_queue "${jobs[@]}"
 fi
