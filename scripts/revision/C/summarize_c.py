@@ -46,7 +46,7 @@ TOTAL = {"videomme": 2700, "lvbench": 1549}
 def load(d):
     out = {}
     for f in sorted(glob.glob(os.path.join(d, "shard*.jsonl"))):
-        if "_timing" in f:
+        if "_timing" in f or "_pilot" in f:
             continue
         for l in open(f):
             if l.endswith("\n"):

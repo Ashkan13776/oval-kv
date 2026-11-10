@@ -29,7 +29,7 @@ from paper_table import MCOLS, MROWS, RUNS, R
 def recs(roots, d):
     for r in roots:
         p = os.path.join(RUNS, r, d)
-        fs = sorted(glob.glob(os.path.join(p, "shard*.jsonl")))
+        fs = sorted(f for f in glob.glob(os.path.join(p, "shard*.jsonl")) if "_timing" not in f and "_pilot" not in f)
         if fs:
             out = [json.loads(l) for f in fs for l in open(f) if l.endswith("\n")]
             return p, json.load(open(os.path.join(p, "args.json"))), out
