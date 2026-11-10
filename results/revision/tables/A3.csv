@@ -1,9 +1,18 @@
 arm,model,task,budget,avg@8,avg@8 CI,pass@8,pass@8 CI,avg@8 - rule 1,paired CI,reference
-A3_ds-r1-qwen-7b_AIME24_argmin01_b2048,ds-r1-qwen-7b,AIME24,2048,incomplete (0/8 seeds),,,,,,
-A3_ds-r1-qwen-7b_AIME24_layer_b2048,ds-r1-qwen-7b,AIME24,2048,incomplete (2/8 seeds),,,,,,
+A3_ds-r1-llama-8b_AIME24_argmin01_b2048,ds-r1-llama-8b,AIME24,2048,incomplete (0/8 seeds),,,,,,
+A3_ds-r1-llama-8b_AIME24_layer_b2048,ds-r1-llama-8b,AIME24,2048,incomplete (0/8 seeds),,,,,,
+A3_ds-r1-llama-8b_AIME24_shared_b2048,ds-r1-llama-8b,AIME24,2048,incomplete (0/8 seeds),,,,,,
+A3_ds-r1-llama-8b_GPQA50c_argmin01_b2048,ds-r1-llama-8b,GPQA50c,2048,incomplete (0/8 seeds),,,,,,
+A3_ds-r1-llama-8b_GPQA50c_layer_b2048,ds-r1-llama-8b,GPQA50c,2048,incomplete (0/8 seeds),,,,,,
+A3_ds-r1-llama-8b_GPQA50c_shared_b2048,ds-r1-llama-8b,GPQA50c,2048,incomplete (0/8 seeds),,,,,,
+A3_ds-r1-llama-8b_MATH50_argmin01_b2048,ds-r1-llama-8b,MATH50,2048,incomplete (0/8 seeds),,,,,,
+A3_ds-r1-llama-8b_MATH50_layer_b2048,ds-r1-llama-8b,MATH50,2048,incomplete (0/8 seeds),,,,,,
+A3_ds-r1-llama-8b_MATH50_shared_b2048,ds-r1-llama-8b,MATH50,2048,incomplete (0/8 seeds),,,,,,
+A3_ds-r1-qwen-7b_AIME24_argmin01_b2048,ds-r1-qwen-7b,AIME24,2048,incomplete (6/8 seeds),,,,,,
+A3_ds-r1-qwen-7b_AIME24_layer_b2048,ds-r1-qwen-7b,AIME24,2048,50.42,"[37.08, 64.17]",80.00,"[66.67, 93.33]",+1.67,"[-5.00, +8.33]",rule-1 repo run etabfa1b4e40 = 48.75
 A3_ds-r1-qwen-7b_AIME24_shared_b2048,ds-r1-qwen-7b,AIME24,2048,49.58,"[35.83, 63.75]",80.00,"[66.67, 93.33]",+0.83,"[-5.00, +7.08]",rule-1 repo run etabfa1b4e40 = 48.75
-A3_ds-r1-qwen-7b_GPQA50c_argmin01_b2048,ds-r1-qwen-7b,GPQA50c,2048,incomplete (2/8 seeds),,,,,,
-A3_ds-r1-qwen-7b_GPQA50c_layer_b2048,ds-r1-qwen-7b,GPQA50c,2048,incomplete (0/8 seeds),,,,,,
+A3_ds-r1-qwen-7b_GPQA50c_argmin01_b2048,ds-r1-qwen-7b,GPQA50c,2048,33.75,"[22.75, 45.25]",56.00,"[42.00, 70.00]",-1.25,"[-4.75, +2.75]",rule-1 repo run etab86e2340d = 35.00
+A3_ds-r1-qwen-7b_GPQA50c_layer_b2048,ds-r1-qwen-7b,GPQA50c,2048,34.50,"[23.50, 46.25]",62.00,"[48.00, 74.05]",-0.50,"[-4.25, +3.25]",rule-1 repo run etab86e2340d = 35.00
 A3_ds-r1-qwen-7b_GPQA50c_shared_b2048,ds-r1-qwen-7b,GPQA50c,2048,35.25,"[24.25, 47.25]",60.00,"[46.00, 74.00]",+0.25,"[-3.25, +3.76]",rule-1 repo run etab86e2340d = 35.00
 A3_ds-r1-qwen-7b_MATH50_argmin01_b2048,ds-r1-qwen-7b,MATH50,2048,68.25,"[56.00, 80.00]",74.00,"[62.00, 86.00]",-2.25,"[-4.50, -0.50]",rule-1 repo run etab0c99a26a = 70.50
 A3_ds-r1-qwen-7b_MATH50_layer_b2048,ds-r1-qwen-7b,MATH50,2048,71.00,"[59.00, 82.50]",78.00,"[66.00, 88.00]",+0.50,"[-2.50, +3.50]",rule-1 repo run etab0c99a26a = 70.50

@@ -108,7 +108,8 @@ def reference(model, task):
             files = {}
             for s in SEEDS:
                 suf = "" if s == 42 else f"-seed{s}"
-                g = glob.glob(str(ROOT / f"results/reasoning/{model}-spec_ret/{task}-*-b2048-*_etab{h}_q0_recon1_vr16_vpca-*Mg16384{suf}.jsonl"))
+                g = [x for d in ("results/reasoning", "results/revision/A3/runs")
+                     for x in glob.glob(str(ROOT / f"{d}/{model}-spec_ret/{task}-*-b2048-*_etab{h}_q0_recon1_vr16_vpca-*Mg16384{suf}.jsonl"))]
                 if g:
                     files[s] = g[0]
             m, ok = matrix(files, task)

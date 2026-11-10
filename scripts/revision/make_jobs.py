@@ -21,6 +21,12 @@ if __name__ == "__main__":
                     assert os.path.exists(t), t
                     for s in SEEDS: lines.append(ovalj("A3", m, task, v, t, s))
     elif which == "A1":      # disjoint tables on their own task
+        # First: rule-1 Llama-8B cells with the tables recalibrated here (calib_vr16), the paired
+        # reference for A3/A1/A2 on Llama (the Tab. 1 Llama runs are not on this machine).
+        m = "ds-r1-llama-8b"
+        for task in ["MATH50", "GPQA50c", "AIME24"]:
+            t = f"{ROOT}/results/revision/A/calib_vr16/tables/{m}_{task}_r1.json"
+            for s in SEEDS: lines.append(ovalj("A3", m, task, "rule1", t, s))
         for m in ["ds-r1-qwen-7b", "ds-r1-llama-8b"]:
             for task in ["MATH50", "AIME24"]:
                 t = f"{ROOT}/results/revision/A/calib_vr16/tables/{m}_{task}_r1_disjoint.json"
