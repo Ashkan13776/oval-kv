@@ -43,6 +43,11 @@ def get(roots, d):
 
 
 def main():
+    import argparse
+    ap = argparse.ArgumentParser(); ap.add_argument("--drop", nargs="*", default=[], help="arm dirs to leave out")
+    ap.add_argument("--name", default="paper_table_c"); a = ap.parse_args()
+    global ROWS
+    ROWS = [r for r in ROWS if r[0] not in a.drop]
     cell, out_csv = {}, []
     for ci, (lab, bench, roots) in enumerate(COLS):
         ref = get(roots, "full_n64")
@@ -77,9 +82,9 @@ def main():
         md.append(f"| {lab} | {tok} | " + " | ".join(x.replace('$^{*}$', '*') for x in cs) + " |")
     tex += ["\\bottomrule", "\\end{tabular}"]
     os.makedirs(os.path.join(R, "latex"), exist_ok=True)
-    open(os.path.join(R, "latex", "paper_table_c.tex"), "w").write("\n".join(tex) + "\n")
-    open(os.path.join(R, "tables", "paper_table_c.md"), "w").write("\n".join(md) + "\n")
-    with open(os.path.join(R, "tables", "paper_table_c.csv"), "w", newline="") as f:
+    open(os.path.join(R, "latex", a.name + ".tex"), "w").write("\n".join(tex) + "\n")
+    open(os.path.join(R, "tables", a.name + ".md"), "w").write("\n".join(md) + "\n")
+    with open(os.path.join(R, "tables", a.name + ".csv"), "w", newline="") as f:
         w = csv.writer(f); w.writerow(["column", "arm", "n", "acc", "lo", "hi", "diff_vs_fullN", "dlo", "dhi", "sig"]); w.writerows(out_csv)
     print("\n".join(md)); print(); print("\n".join(tex))
 

@@ -480,6 +480,14 @@ Budget-matched pairs (overall): OVAL - ReKV +2.32 [+0.59, +4.05]; OVAL - InfiniP
 
 ## Open questions
 
+- **Paper table, 4-bit keys row (author decision, 2026-11-10).** At the author's request, a variant of
+  the combined table without the 4-bit-keys row was made: `latex/paper_table_c_no4bit.tex`. The full
+  table `latex/paper_table_c.tex` is kept, and all 4-bit-keys results stay in every per-run table here.
+  For the record: 4-bit keys is never significantly below FullKV (N) and is above OVAL in all four
+  columns (Video-MME: 63.11 vs 61.93 Qwen2.5-VL, 62.81 vs 61.37 LLaVA-Video; LVBench: 40.99 vs 39.70,
+  42.35 vs 40.87). If the row is dropped, the paper should state why (e.g. that it is a different kind
+  of method), since Tab. 5 includes it.
+
 1. **"20 videos" for the reproduction.** I use the first 20 Long videos (601-620),
    which are all 60 of their questions, not 20 questions. 20 questions is what the
    earlier `diag_newmachine` check used. 60 is the stricter reading.
