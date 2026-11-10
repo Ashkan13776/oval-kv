@@ -480,6 +480,14 @@ Budget-matched pairs (overall): OVAL - ReKV +2.32 [+0.59, +4.05]; OVAL - InfiniP
 
 ## Open questions
 
+- **Printed Tab. 5 does not match its run files (found 2026-11-10).** In `iclr_kv_cache`
+  (CVPR2027/sec/VLLM.tex, main at ae6f9ee), the FullKV row (74.3 / 60.7 / 51.1 / 62.0) is the 44-frame run
+  `row2b_full_n44` (64 frames: 75.56 / 61.67 / 51.44 / 62.89). The OVAL row (76.0 / 60.6 / 51.1 / 61.8) matches
+  no single run: OVAL (`row3_ovalfull_n64`) is 74.44 / 60.56 / 49.11 / 61.37, and 76.0 / 51.1 are 4-bit keys'
+  short and FullKV-44's long. The 4-bit-keys row (74.4 / ... / 61.4) also differs from its run (76.00 / 61.56 /
+  50.89 / 62.81). Quest, FreeKV, SnapKV match. At the author's request the section was rewritten from the run
+  files on branch `revision-c-video` of `iclr_kv_cache` (not merged into main; main syncs with Overleaf).
+
 - **Paper table, 4-bit keys row (author decision, 2026-11-10).** At the author's request, a variant of
   the combined table without the 4-bit-keys row was made: `latex/paper_table_c_no4bit.tex`. The full
   table `latex/paper_table_c.tex` is kept, and all 4-bit-keys results stay in every per-run table here.
