@@ -35,6 +35,7 @@ combines them.
 | 3 | value compression | rebuild the selected pages' values from rank-16 PCA records (`--oval_vrank 16`) | [docs/3-value-compression.md](docs/3-value-compression.md) |
 | 4 | per-head eta | choose eta per (layer, KV head) with rule 1, a closed form fitted on calibration traces (`--eta_table`) | [docs/4-per-head-eta.md](docs/4-per-head-eta.md) |
 | 5 | **full pipeline** | all four together on long reasoning (MATH50, AIME24, GPQA50c; R1-Qwen-7B, R1-Llama-8B, R1-Qwen-14B; k = 8) -- **next run** | [docs/5-full-pipeline.md](docs/5-full-pipeline.md), `scripts/full_pipeline.sh` |
+| 6 | long context | the full pipeline on LongBench v2 and LongGenBench (Qwen-2.5-7B, Llama-3.1-8B, Qwen-2.5-14B; keys rank 16, values rank 32) | [docs/6-long-context.md](docs/6-long-context.md), `scripts/long_context_pipeline.sh`, [table](results/long_context/table_kr16_vr32.md) |
 
 Pieces 2-4 exist on long reasoning only; on long context (LongBench v2,
 LongGenBench) only retrieval has been run, and transferring the rest is

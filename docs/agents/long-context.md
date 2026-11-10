@@ -10,6 +10,18 @@ _Owned by the agent running this brief. Update it at each step: survey
 report, design proposal, confirmed configuration (with date), progress,
 results, deviations._
 
+**2026-11-10 14:18: done.** All 3 models x 2 benchmarks, OVAL full pipeline (keys rank 16, values rank 32, rule-1 eta per head at kr16/vr32), judge included. Table: [`results/long_context/table_kr16_vr32.md`](../../results/long_context/table_kr16_vr32.md); write-up: [docs/6-long-context.md](../6-long-context.md).
+
+| Model | LB2 Overall (FreeKV / eta* / **OVAL**) | LGB CR (FreeKV / eta* / **OVAL**) | LGB CR x Acc (FreeKV / eta* / **OVAL**) |
+|---|---|---|---|
+| Qwen-2.5-7B | 26.84 / 28.03 / **27.83** | 76.93 / 78.54 / **75.29** | 32.81 / 32.38 / **32.48** |
+| Llama-3.1-8B | 29.22 / 29.82 / **30.02** | 78.03 / 74.71 / **72.48** | 27.62 / 28.50 / **27.01** |
+| Qwen-2.5-14B | 34.19 / 33.00 / **32.60** | 65.46 / 63.92 / **61.81** | 29.39 / 28.64 / **26.66** |
+
+- **LongGenBench gaps are early stopping, not OVAL.** Llama-8B dense control (same harness and seeds, 3K cap, all 400 items): 87 / 400 early stops vs OVAL's 94 / 400, ~1.5 CR points, within one-seed noise. Qwen-14B: 46 of 100 Menu Week items stop while still inside the 2,048-token exact window.
+- **Schedule changes (no effect on results):** queue reordered on 2026-11-08 21:18 so LongBench v2 ran right after Qwen-14B LongGenBench (`LB2_EARLY`, 81042b9; resumed with no lost records); the Qwen-14B and Llama-8B judges were run by hand on an idle GPU 1 with the pipeline's own command and done markers.
+- Earlier history (top-p switch, rank 8 -> 16, fixes) below.
+
 **2026-11-08 14:40: running.** Keys rank 16 and values rank 32; eta tables at kr16/vr32 for all 3 models x 2 benchmarks (`results/long_context/eta_rules/kr16_vr32/`). LongGenBench now runs at **top-p 0.95** (see below). Runs restarted 14:34.
 
 ### LongGenBench: top-p 1.0 vs 0.95 (why the protocol changed)

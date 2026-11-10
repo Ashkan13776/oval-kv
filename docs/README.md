@@ -20,7 +20,7 @@ four complementary ways, each tested on its own before they are combined:
 | 3 | value compression | [3-value-compression.md](3-value-compression.md) | `--oval_vrank R --vbasis pca` | done: rank 16 and 8 = lossless (k = 8, qwen-7b) |
 | 4 | per-head eta | [4-per-head-eta.md](4-per-head-eta.md) | `--eta_table <json>` | done at value rank 8 (qwen-7b, llama-8b): rule 1 >= the hand-picked eta |
 | 5 | **full pipeline** | [5-full-pipeline.md](5-full-pipeline.md) | all of the above, values rank 16 | **to run** on long reasoning (one agent per model) |
-| 6 | long context | [agents/long-context.md](agents/long-context.md) | pieces 2-4 transferred to LongBench v2 and LongGenBench (7B, 8B, 14B) | **to design and run**; so far retrieval only (the paper's Table 2) |
+| 6 | long context | [6-long-context.md](6-long-context.md) | all of the above on LongBench v2 and LongGenBench (7B, 8B, 14B): keys rank 16, values rank 32, rule-1 eta per (model, benchmark) | done: [table](../results/long_context/table_kr16_vr32.md), at or near the paper's FreeKV / eta* columns |
 
 **Agents start at [agents/README.md](agents/README.md)**: survey the repo, confirm the
 configuration with the user, then run. One brief per agent.
