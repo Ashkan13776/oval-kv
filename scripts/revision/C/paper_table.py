@@ -34,6 +34,25 @@ ROWS = [  # (arm dir, LaTeX label, tokens column, group)
 ]
 
 
+UNRANKED = {"full_n64", "full_n32", "full_n44", "snapkv_n64"}   # references and SnapKV (daggered) are never ranked
+
+
+def ranks(vals):
+    """vals: {arm: value rounded to 2 dp}; competition ranking (ties share a rank)."""
+    v = sorted(set(vals.values()), reverse=True)
+    out, r = {}, 1
+    for x in v:
+        tied = [d for d in vals if vals[d] == x]
+        for d in tied:
+            out[d] = r
+        r += len(tied)
+    return out
+
+
+def mark(txt, rank):
+    return {1: f"\\topone{{{txt}}}", 2: f"\\toptwo{{{txt}}}", 3: f"\\topthree{{{txt}}}"}.get(rank, txt)
+
+
 def get(roots, d):
     for r in roots:
         x = load(os.path.join(RUNS, r, d))
@@ -70,6 +89,11 @@ def main():
            "\\textbf{Method} & \\textbf{Budget} & Qwen2.5-VL & LLaVA-Video & Qwen2.5-VL & LLaVA-Video \\\\",
            "\\midrule"]
     md = ["| Method | Budget | " + " | ".join(c[0] for c in COLS) + " |", "|---|---|" + "---|" * len(COLS)]
+    rk = {}
+    for ci in range(len(COLS)):
+        vals = {d: round(cell[d, ci][0], 2) for d, *_ in ROWS if d not in UNRANKED and cell[d, ci] is not None}
+        for d, r in ranks(vals).items():
+            rk[d, ci] = r
     g0 = 0
     for d, lab, tok, g in ROWS:
         if g != g0:
@@ -77,7 +101,7 @@ def main():
         cs = []
         for ci in range(len(COLS)):
             c = cell[d, ci]
-            cs.append("--" if c is None else f"{c[0]:.2f}" + ("$^{*}$" if c[1] else ""))
+            cs.append("--" if c is None else mark(f"{c[0]:.2f}" + ("$^{*}$" if c[1] else ""), rk.get((d, ci))))
         tex.append(f"{lab} & {tok} & " + " & ".join(cs) + " \\\\")
         md.append(f"| {lab} | {tok} | " + " | ".join(x.replace('$^{*}$', '*') for x in cs) + " |")
     tex += ["\\bottomrule", "\\end{tabular}"]
@@ -105,22 +129,20 @@ ABL_ROWS = [  # LLaVA-Video-7B, Video-MME: every Tab. 5 run, by duration (compan
 ]
 
 
-def ablation():
-    """LLaVA-Video Video-MME, all Tab. 5 runs, overall + short / medium / long; * vs FullKV (N)."""
+def ablation(drop=()):
+    """LLaVA-Video Video-MME, all Tab. 5 runs, overall + short / medium / long; * vs FullKV (N);
+    top-3 per column among the ranked arms marked with \\topone / \\toptwo / \\topthree."""
     root = os.path.join(RUNS, "tab5_llava_videomme")
     dur = lambda x: x.get("group") or x["duration"]
     ref = load(os.path.join(root, "full_n64"))
     G = ["overall", "short", "medium", "long"]
-    tex = ["\\begin{tabular}{llcccc}", "\\toprule",
-           "\\textbf{Method} & \\textbf{Budget} & Overall & Short & Medium & Long \\\\", "\\midrule"]
-    md = ["| Method | Budget | " + " | ".join(G) + " |", "|---|---|" + "---|" * len(G)]
-    rows_csv = []
-    for d, lab, tok in ABL_ROWS:
+    rows = [r for r in ABL_ROWS if r[0] not in drop]
+    cell, rows_csv = {}, []
+    for d, lab, tok in rows:
         r = load(os.path.join(root, d))
-        cs = []
         for g in G:
             if len(r) < TOTAL["videomme"]:
-                cs.append("--"); continue
+                cell[d, g] = None; continue
             dv, dd = defaultdict(list), defaultdict(list)
             for q in r:
                 if g == "overall" or dur(r[q]) == g:
@@ -128,23 +150,36 @@ def ablation():
                     dd[r[q]["videoID"]].append(100 * (r[q]["score"] - ref[q]["score"]))
             (m, lo, hi), (dm, dlo, dhi) = boot(dv), boot(dd)
             sig = d != "full_n64" and (dlo > 0 or dhi < 0)
-            cs.append(f"{m:.2f}" + ("$^{*}$" if sig else ""))
+            cell[d, g] = (m, sig)
             rows_csv.append([d, g, f"{m:.3f}", f"{lo:.3f}", f"{hi:.3f}", f"{dm:.3f}", f"{dlo:.3f}", f"{dhi:.3f}", sig])
+    rk = {}
+    for g in G:
+        vals = {d: round(cell[d, g][0], 2) for d, *_ in rows if d not in UNRANKED and cell[d, g] is not None}
+        for d, r in ranks(vals).items():
+            rk[d, g] = r
+    tex = ["\\begin{tabular}{llcccc}", "\\toprule",
+           "\\textbf{Method} & \\textbf{Budget} & Overall & Short & Medium & Long \\\\", "\\midrule"]
+    md = ["| Method | Budget | " + " | ".join(G) + " |", "|---|---|" + "---|" * len(G)]
+    for d, lab, tok in rows:
+        cs = []
+        for g in G:
+            c = cell[d, g]
+            cs.append("--" if c is None else mark(f"{c[0]:.2f}" + ("$^{*}$" if c[1] else ""), rk.get((d, g))))
         tex.append(f"{lab} & {tok} & " + " & ".join(cs) + " \\\\")
         md.append(f"| {lab} | {tok} | " + " | ".join(x.replace('$^{*}$', '*') for x in cs) + " |")
-        if d in ("full_n32",):
+        if d == "full_n32":
             tex.append("\\midrule")
     tex += ["\\bottomrule", "\\end{tabular}"]
-    open(os.path.join(R, "latex", "paper_table_c_llava_vmme.tex"), "w").write("\n".join(tex) + "\n")
-    open(os.path.join(R, "tables", "paper_table_c_llava_vmme.md"), "w").write("\n".join(md) + "\n")
-    with open(os.path.join(R, "tables", "paper_table_c_llava_vmme.csv"), "w", newline="") as f:
+    name = "paper_table_c_llava_vmme" + ("_no4bit" if "q4key_n64" in drop else "")
+    open(os.path.join(R, "latex", name + ".tex"), "w").write("\n".join(tex) + "\n")
+    open(os.path.join(R, "tables", name + ".md"), "w").write("\n".join(md) + "\n")
+    with open(os.path.join(R, "tables", name + ".csv"), "w", newline="") as f:
         w = csv.writer(f); w.writerow(["arm", "group", "acc", "lo", "hi", "diff_vs_fullN", "dlo", "dhi", "sig"]); w.writerows(rows_csv)
     print("\n".join(md)); print(); print("\n".join(tex))
-
 
 if __name__ == "__main__":
     import sys
     if "--ablation" in sys.argv:
-        ablation()
+        ablation(drop=("q4key_n64",) if "--no4bit" in sys.argv else ())
     else:
         main()
