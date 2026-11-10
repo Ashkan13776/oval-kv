@@ -177,9 +177,91 @@ def ablation(drop=()):
         w = csv.writer(f); w.writerow(["arm", "group", "acc", "lo", "hi", "diff_vs_fullN", "dlo", "dhi", "sig"]); w.writerows(rows_csv)
     print("\n".join(md)); print(); print("\n".join(tex))
 
+
+# ---------------------------------------------------------------------------------------------
+# Merged paper table (2026-11-10): Video-MME by duration for both models + LVBench overall; all rows of
+# the former main and duration tables. Top-3 marks only within the matched ~15% block (SnapKV excluded).
+MCOLS = [  # (bench, model label, roots, split)
+    *[("videomme", "Qwen2.5-VL", ["c3_videomme_qwen25vl", "c1_qwen25vl"], g) for g in ("short", "medium", "long", "overall")],
+    *[("videomme", "LLaVA-Video", ["c3_videomme_llava", "tab5_llava_videomme"], g) for g in ("short", "medium", "long", "overall")],
+    ("lvbench", "Qwen2.5-VL", ["c3_lvbench_qwen25vl", "c2_lvbench_qwen25vl"], "overall"),
+    ("lvbench", "LLaVA-Video", ["c3_lvbench_llava", "c2_lvbench_llava"], "overall"),
+]
+MROWS = [  # (arm, label, budget, block); block 2 = matched ~15% (ranked)
+    ("full_n64", "FullKV ($N$ frames)", "100\\%", 0),
+    ("full_n44", "FullKV ($0.69N$ frames)", "69\\%", 0),
+    ("full_n32", "FullKV ($N/2$ frames)", "50\\%", 0),
+    ("vz50_full", "VisionZip$^\\ddagger$", "50\\%", 1),
+    ("infinipot_mem", "InfiniPot-V$^\\ddagger$", "50\\%", 1),
+    ("vz25_full", "VisionZip$^\\ddagger$", "25\\%", 1),
+    ("sliding_n64", "Sliding window", "$\\approx$15\\%", 2),
+    ("infinipot_2k", "InfiniPot-V$^\\ddagger$", "$\\approx$15\\%", 2),
+    ("rekv", "ReKV$^\\ddagger$", "$\\approx$15\\%", 2),
+    ("snapkv_n64", "SnapKV$^\\dagger$", "$\\approx$15\\%", 2),
+    ("quest_n64", "Quest", "$\\approx$15\\%", 2),
+    ("freekv_n64", "FreeKV", "$\\approx$15\\%", 2),
+    ("oval_n64", "\\method{}", "$\\approx$15\\%", 2),
+]
+
+
+def merged():
+    dur = lambda x: x.get("group") or x.get("duration")
+    cell, rows_csv = {}, []
+    for ci, (bench, mlab, roots, split) in enumerate(MCOLS):
+        ref = get(roots, "full_n64")
+        for d, *_ in MROWS:
+            r = get(roots, d)
+            if len(r) < TOTAL[bench] or len(ref) < TOTAL[bench]:
+                cell[d, ci] = None; continue
+            dv, dd = defaultdict(list), defaultdict(list)
+            for q in set(r) & set(ref):
+                if split == "overall" or dur(r[q]) == split:
+                    dv[r[q]["videoID"]].append(100 * r[q]["score"])
+                    dd[r[q]["videoID"]].append(100 * (r[q]["score"] - ref[q]["score"]))
+            (m, lo, hi), (dm, dlo, dhi) = boot(dv), boot(dd)
+            sig = d != "full_n64" and (dlo > 0 or dhi < 0)
+            cell[d, ci] = (m, sig)
+            rows_csv.append([bench, mlab, split, d, sum(map(len, dv.values())), f"{m:.3f}", f"{lo:.3f}", f"{hi:.3f}",
+                             f"{dm:.3f}", f"{dlo:.3f}", f"{dhi:.3f}", sig])
+    rk = {}
+    for ci in range(len(MCOLS)):
+        vals = {d: round(cell[d, ci][0], 2) for d, _, _, blk in MROWS
+                if blk == 2 and d not in UNRANKED and cell[d, ci] is not None}
+        for d, r in ranks(vals).items():
+            rk[d, ci] = r
+    S = {"short": "S", "medium": "M", "long": "L", "overall": "All"}
+    tex = ["\\begin{tabular}{@{}ll" + "cccc" * 2 + "cc@{}}", "\\toprule",
+           " & & \\multicolumn{8}{c}{Video-MME} & \\multicolumn{2}{c}{LVBench} \\\\",
+           "\\cmidrule(lr){3-10}\\cmidrule(l){11-12}",
+           " & & \\multicolumn{4}{c}{Qwen2.5-VL} & \\multicolumn{4}{c}{LLaVA-Video} & Qwen2.5-VL & LLaVA-Video \\\\",
+           "\\cmidrule(lr){3-6}\\cmidrule(lr){7-10}",
+           "\\textbf{Method} & \\textbf{Budget} & " + " & ".join(S[c[3]] for c in MCOLS[:8]) + " & All & All \\\\",
+           "\\midrule"]
+    md = ["| Method | Budget | " + " | ".join(f"{c[0]} {c[1]} {c[3]}" for c in MCOLS) + " |", "|---|---|" + "---|" * len(MCOLS)]
+    b0 = 0
+    for d, lab, tok, blk in MROWS:
+        if blk != b0:
+            tex.append("\\midrule"); b0 = blk
+        cs = []
+        for ci in range(len(MCOLS)):
+            c = cell[d, ci]
+            cs.append("--" if c is None else mark(f"{c[0]:.2f}" + ("$^{*}$" if c[1] else ""), rk.get((d, ci))))
+        tex.append(f"{lab} & {tok} & " + " & ".join(cs) + " \\\\")
+        md.append(f"| {lab} | {tok} | " + " | ".join(x.replace('$^{*}$', '*') for x in cs) + " |")
+    tex += ["\\bottomrule", "\\end{tabular}"]
+    open(os.path.join(R, "latex", "paper_table_c_merged.tex"), "w").write("\n".join(tex) + "\n")
+    open(os.path.join(R, "tables", "paper_table_c_merged.md"), "w").write("\n".join(md) + "\n")
+    with open(os.path.join(R, "tables", "paper_table_c_merged.csv"), "w", newline="") as f:
+        w = csv.writer(f); w.writerow(["bench", "model", "split", "arm", "n", "acc", "lo", "hi", "diff_vs_fullN", "dlo", "dhi", "sig"])
+        w.writerows(rows_csv)
+    print("\n".join(tex))
+
+
 if __name__ == "__main__":
     import sys
-    if "--ablation" in sys.argv:
+    if "--merged" in sys.argv:
+        merged()
+    elif "--ablation" in sys.argv:
         # --paper: the version in the paper (no 4-bit keys, no OVAL keys-only; author decision 2026-11-10)
         ablation(drop=("q4key_n64", "ovalkeys_n64") if "--paper" in sys.argv else
                  ("q4key_n64",) if "--no4bit" in sys.argv else ())
