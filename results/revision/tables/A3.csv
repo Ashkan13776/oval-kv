@@ -8,7 +8,7 @@ A3_ds-r1-llama-8b_GPQA50c_shared_b2048,ds-r1-llama-8b,GPQA50c,2048,incomplete (0
 A3_ds-r1-llama-8b_MATH50_argmin01_b2048,ds-r1-llama-8b,MATH50,2048,incomplete (0/8 seeds),,,,,,
 A3_ds-r1-llama-8b_MATH50_layer_b2048,ds-r1-llama-8b,MATH50,2048,incomplete (0/8 seeds),,,,,,
 A3_ds-r1-llama-8b_MATH50_shared_b2048,ds-r1-llama-8b,MATH50,2048,incomplete (0/8 seeds),,,,,,
-A3_ds-r1-qwen-7b_AIME24_argmin01_b2048,ds-r1-qwen-7b,AIME24,2048,incomplete (6/8 seeds),,,,,,
+A3_ds-r1-qwen-7b_AIME24_argmin01_b2048,ds-r1-qwen-7b,AIME24,2048,50.42,"[36.67, 64.58]",76.67,"[60.00, 90.00]",+1.67,"[-2.92, +6.67]",rule-1 repo run etabfa1b4e40 = 48.75
 A3_ds-r1-qwen-7b_AIME24_layer_b2048,ds-r1-qwen-7b,AIME24,2048,50.42,"[37.08, 64.17]",80.00,"[66.67, 93.33]",+1.67,"[-5.00, +8.33]",rule-1 repo run etabfa1b4e40 = 48.75
 A3_ds-r1-qwen-7b_AIME24_shared_b2048,ds-r1-qwen-7b,AIME24,2048,49.58,"[35.83, 63.75]",80.00,"[66.67, 93.33]",+0.83,"[-5.00, +7.08]",rule-1 repo run etabfa1b4e40 = 48.75
 A3_ds-r1-qwen-7b_GPQA50c_argmin01_b2048,ds-r1-qwen-7b,GPQA50c,2048,33.75,"[22.75, 45.25]",56.00,"[42.00, 70.00]",-1.25,"[-4.75, +2.75]",rule-1 repo run etab86e2340d = 35.00
