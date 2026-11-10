@@ -26,11 +26,11 @@ ROWS = [  # (arm dir, LaTeX label, tokens column, group)
     ("vz25_full", "VisionZip$^\\ddagger$", "25\\%", 1),
     ("infinipot_2k", "InfiniPot-V$^\\ddagger$", "$\\approx$2k", 2),
     ("rekv", "ReKV$^\\ddagger$", "$\\approx$2k", 2),
-    ("snapkv_n64", "SnapKV$^\\dagger$", "1.8k", 2),
-    ("quest_n64", "Quest", "1.8k", 2),
-    ("freekv_n64", "FreeKV", "1.8k", 2),
-    ("q4key_n64", "4-bit keys", "1.8k", 2),
-    ("oval_n64", "\\method{}", "1.8k", 2),
+    ("snapkv_n64", "SnapKV$^\\dagger$", "2k", 2),
+    ("quest_n64", "Quest", "2k", 2),
+    ("freekv_n64", "FreeKV", "2k", 2),
+    ("q4key_n64", "4-bit keys", "2k", 2),
+    ("oval_n64", "\\method{}", "2k", 2),
 ]
 
 
@@ -89,5 +89,62 @@ def main():
     print("\n".join(md)); print(); print("\n".join(tex))
 
 
+
+
+ABL_ROWS = [  # LLaVA-Video-7B, Video-MME: every Tab. 5 run, by duration (companion to the merged table)
+    ("full_n64", "FullKV ($N$ frames)", "100\\%"),
+    ("full_n44", "FullKV ($0.69N$ frames)", "69\\%"),
+    ("full_n32", "FullKV ($N/2$ frames)", "50\\%"),
+    ("sliding_n64", "Sliding window", "2k"),
+    ("snapkv_n64", "SnapKV$^\\dagger$", "2k"),
+    ("quest_n64", "Quest", "2k"),
+    ("freekv_n64", "FreeKV", "2k"),
+    ("q4key_n64", "4-bit keys", "2k"),
+    ("ovalkeys_n64", "\\method{} (keys only)", "2k"),
+    ("oval_n64", "\\method{}", "2k"),
+]
+
+
+def ablation():
+    """LLaVA-Video Video-MME, all Tab. 5 runs, overall + short / medium / long; * vs FullKV (N)."""
+    root = os.path.join(RUNS, "tab5_llava_videomme")
+    dur = lambda x: x.get("group") or x["duration"]
+    ref = load(os.path.join(root, "full_n64"))
+    G = ["overall", "short", "medium", "long"]
+    tex = ["\\begin{tabular}{llcccc}", "\\toprule",
+           "\\textbf{Method} & \\textbf{Budget} & Overall & Short & Medium & Long \\\\", "\\midrule"]
+    md = ["| Method | Budget | " + " | ".join(G) + " |", "|---|---|" + "---|" * len(G)]
+    rows_csv = []
+    for d, lab, tok in ABL_ROWS:
+        r = load(os.path.join(root, d))
+        cs = []
+        for g in G:
+            if len(r) < TOTAL["videomme"]:
+                cs.append("--"); continue
+            dv, dd = defaultdict(list), defaultdict(list)
+            for q in r:
+                if g == "overall" or dur(r[q]) == g:
+                    dv[r[q]["videoID"]].append(100 * r[q]["score"])
+                    dd[r[q]["videoID"]].append(100 * (r[q]["score"] - ref[q]["score"]))
+            (m, lo, hi), (dm, dlo, dhi) = boot(dv), boot(dd)
+            sig = d != "full_n64" and (dlo > 0 or dhi < 0)
+            cs.append(f"{m:.2f}" + ("$^{*}$" if sig else ""))
+            rows_csv.append([d, g, f"{m:.3f}", f"{lo:.3f}", f"{hi:.3f}", f"{dm:.3f}", f"{dlo:.3f}", f"{dhi:.3f}", sig])
+        tex.append(f"{lab} & {tok} & " + " & ".join(cs) + " \\\\")
+        md.append(f"| {lab} | {tok} | " + " | ".join(x.replace('$^{*}$', '*') for x in cs) + " |")
+        if d in ("full_n32",):
+            tex.append("\\midrule")
+    tex += ["\\bottomrule", "\\end{tabular}"]
+    open(os.path.join(R, "latex", "paper_table_c_llava_vmme.tex"), "w").write("\n".join(tex) + "\n")
+    open(os.path.join(R, "tables", "paper_table_c_llava_vmme.md"), "w").write("\n".join(md) + "\n")
+    with open(os.path.join(R, "tables", "paper_table_c_llava_vmme.csv"), "w", newline="") as f:
+        w = csv.writer(f); w.writerow(["arm", "group", "acc", "lo", "hi", "diff_vs_fullN", "dlo", "dhi", "sig"]); w.writerows(rows_csv)
+    print("\n".join(md)); print(); print("\n".join(tex))
+
+
 if __name__ == "__main__":
-    main()
+    import sys
+    if "--ablation" in sys.argv:
+        ablation()
+    else:
+        main()
