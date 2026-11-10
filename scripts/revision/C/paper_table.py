@@ -24,13 +24,13 @@ ROWS = [  # (arm dir, LaTeX label, tokens column, group)
     ("vz50_full", "VisionZip$^\\ddagger$", "50\\%", 1),
     ("infinipot_mem", "InfiniPot-V$^\\ddagger$", "50\\%", 1),
     ("vz25_full", "VisionZip$^\\ddagger$", "25\\%", 1),
-    ("infinipot_2k", "InfiniPot-V$^\\ddagger$", "$\\approx$2k", 2),
-    ("rekv", "ReKV$^\\ddagger$", "$\\approx$2k", 2),
-    ("snapkv_n64", "SnapKV$^\\dagger$", "2k", 2),
-    ("quest_n64", "Quest", "2k", 2),
-    ("freekv_n64", "FreeKV", "2k", 2),
-    ("q4key_n64", "4-bit keys", "2k", 2),
-    ("oval_n64", "\\method{}", "2k", 2),
+    ("infinipot_2k", "InfiniPot-V$^\\ddagger$", "$\\approx$15\\%", 2),
+    ("rekv", "ReKV$^\\ddagger$", "$\\approx$15\\%", 2),
+    ("snapkv_n64", "SnapKV$^\\dagger$", "$\\approx$15\\%", 2),
+    ("quest_n64", "Quest", "$\\approx$15\\%", 2),
+    ("freekv_n64", "FreeKV", "$\\approx$15\\%", 2),
+    ("q4key_n64", "4-bit keys", "$\\approx$15\\%", 2),
+    ("oval_n64", "\\method{}", "$\\approx$15\\%", 2),
 ]
 
 
@@ -95,13 +95,13 @@ ABL_ROWS = [  # LLaVA-Video-7B, Video-MME: every Tab. 5 run, by duration (compan
     ("full_n64", "FullKV ($N$ frames)", "100\\%"),
     ("full_n44", "FullKV ($0.69N$ frames)", "69\\%"),
     ("full_n32", "FullKV ($N/2$ frames)", "50\\%"),
-    ("sliding_n64", "Sliding window", "2k"),
-    ("snapkv_n64", "SnapKV$^\\dagger$", "2k"),
-    ("quest_n64", "Quest", "2k"),
-    ("freekv_n64", "FreeKV", "2k"),
-    ("q4key_n64", "4-bit keys", "2k"),
-    ("ovalkeys_n64", "\\method{} (keys only)", "2k"),
-    ("oval_n64", "\\method{}", "2k"),
+    ("sliding_n64", "Sliding window", "$\\approx$15\\%"),
+    ("snapkv_n64", "SnapKV$^\\dagger$", "$\\approx$15\\%"),
+    ("quest_n64", "Quest", "$\\approx$15\\%"),
+    ("freekv_n64", "FreeKV", "$\\approx$15\\%"),
+    ("q4key_n64", "4-bit keys", "$\\approx$15\\%"),
+    ("ovalkeys_n64", "\\method{} (keys only)", "$\\approx$15\\%"),
+    ("oval_n64", "\\method{}", "$\\approx$15\\%"),
 ]
 
 
