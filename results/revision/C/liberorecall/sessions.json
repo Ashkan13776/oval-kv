@@ -1,0 +1,5348 @@
+{
+ "seed": 0,
+ "k": 8,
+ "sessions": [
+  {
+   "sid": "lr000",
+   "spans": [
+    {
+     "task": 24,
+     "episode": 1148,
+     "start": 0,
+     "end": 150
+    },
+    {
+     "task": 26,
+     "episode": 1017,
+     "start": 150,
+     "end": 268
+    },
+    {
+     "task": 2,
+     "episode": 142,
+     "start": 268,
+     "end": 568
+    },
+    {
+     "task": 16,
+     "episode": 654,
+     "start": 568,
+     "end": 647
+    },
+    {
+     "task": 32,
+     "episode": 1388,
+     "start": 647,
+     "end": 753
+    },
+    {
+     "task": 31,
+     "episode": 1441,
+     "start": 753,
+     "end": 906
+    },
+    {
+     "task": 25,
+     "episode": 911,
+     "start": 906,
+     "end": 1043
+    },
+    {
+     "task": 19,
+     "episode": 463,
+     "start": 1043,
+     "end": 1186
+    }
+   ]
+  },
+  {
+   "sid": "lr001",
+   "spans": [
+    {
+     "task": 31,
+     "episode": 1394,
+     "start": 0,
+     "end": 163
+    },
+    {
+     "task": 37,
+     "episode": 1495,
+     "start": 163,
+     "end": 298
+    },
+    {
+     "task": 21,
+     "episode": 924,
+     "start": 298,
+     "end": 457
+    },
+    {
+     "task": 12,
+     "episode": 614,
+     "start": 457,
+     "end": 633
+    },
+    {
+     "task": 15,
+     "episode": 752,
+     "start": 633,
+     "end": 848
+    },
+    {
+     "task": 1,
+     "episode": 11,
+     "start": 848,
+     "end": 1066
+    },
+    {
+     "task": 17,
+     "episode": 445,
+     "start": 1066,
+     "end": 1165
+    },
+    {
+     "task": 7,
+     "episode": 76,
+     "start": 1165,
+     "end": 1443
+    }
+   ]
+  },
+  {
+   "sid": "lr002",
+   "spans": [
+    {
+     "task": 5,
+     "episode": 308,
+     "start": 0,
+     "end": 336
+    },
+    {
+     "task": 0,
+     "episode": 362,
+     "start": 336,
+     "end": 596
+    },
+    {
+     "task": 12,
+     "episode": 701,
+     "start": 596,
+     "end": 794
+    },
+    {
+     "task": 21,
+     "episode": 815,
+     "start": 794,
+     "end": 946
+    },
+    {
+     "task": 10,
+     "episode": 615,
+     "start": 946,
+     "end": 1025
+    },
+    {
+     "task": 15,
+     "episode": 744,
+     "start": 1025,
+     "end": 1171
+    },
+    {
+     "task": 14,
+     "episode": 697,
+     "start": 1171,
+     "end": 1293
+    },
+    {
+     "task": 28,
+     "episode": 839,
+     "start": 1293,
+     "end": 1432
+    }
+   ]
+  },
+  {
+   "sid": "lr003",
+   "spans": [
+    {
+     "task": 37,
+     "episode": 1555,
+     "start": 0,
+     "end": 131
+    },
+    {
+     "task": 18,
+     "episode": 573,
+     "start": 131,
+     "end": 222
+    },
+    {
+     "task": 23,
+     "episode": 843,
+     "start": 222,
+     "end": 357
+    },
+    {
+     "task": 25,
+     "episode": 993,
+     "start": 357,
+     "end": 498
+    },
+    {
+     "task": 35,
+     "episode": 1386,
+     "start": 498,
+     "end": 595
+    },
+    {
+     "task": 8,
+     "episode": 375,
+     "start": 595,
+     "end": 850
+    },
+    {
+     "task": 38,
+     "episode": 1310,
+     "start": 850,
+     "end": 961
+    },
+    {
+     "task": 7,
+     "episode": 165,
+     "start": 961,
+     "end": 1217
+    }
+   ]
+  },
+  {
+   "sid": "lr004",
+   "spans": [
+    {
+     "task": 20,
+     "episode": 1139,
+     "start": 0,
+     "end": 129
+    },
+    {
+     "task": 2,
+     "episode": 44,
+     "start": 129,
+     "end": 396
+    },
+    {
+     "task": 33,
+     "episode": 1325,
+     "start": 396,
+     "end": 531
+    },
+    {
+     "task": 9,
+     "episode": 313,
+     "start": 531,
+     "end": 724
+    },
+    {
+     "task": 16,
+     "episode": 406,
+     "start": 724,
+     "end": 808
+    },
+    {
+     "task": 36,
+     "episode": 1332,
+     "start": 808,
+     "end": 933
+    },
+    {
+     "task": 24,
+     "episode": 978,
+     "start": 933,
+     "end": 1120
+    },
+    {
+     "task": 18,
+     "episode": 474,
+     "start": 1120,
+     "end": 1223
+    }
+   ]
+  },
+  {
+   "sid": "lr005",
+   "spans": [
+    {
+     "task": 23,
+     "episode": 951,
+     "start": 0,
+     "end": 122
+    },
+    {
+     "task": 12,
+     "episode": 383,
+     "start": 122,
+     "end": 340
+    },
+    {
+     "task": 29,
+     "episode": 1104,
+     "start": 340,
+     "end": 508
+    },
+    {
+     "task": 22,
+     "episode": 1241,
+     "start": 508,
+     "end": 645
+    },
+    {
+     "task": 4,
+     "episode": 286,
+     "start": 645,
+     "end": 922
+    },
+    {
+     "task": 2,
+     "episode": 142,
+     "start": 922,
+     "end": 1222
+    },
+    {
+     "task": 34,
+     "episode": 1397,
+     "start": 1222,
+     "end": 1317
+    },
+    {
+     "task": 31,
+     "episode": 1298,
+     "start": 1317,
+     "end": 1448
+    }
+   ]
+  },
+  {
+   "sid": "lr006",
+   "spans": [
+    {
+     "task": 9,
+     "episode": 374,
+     "start": 0,
+     "end": 173
+    },
+    {
+     "task": 37,
+     "episode": 1495,
+     "start": 173,
+     "end": 308
+    },
+    {
+     "task": 27,
+     "episode": 1186,
+     "start": 308,
+     "end": 483
+    },
+    {
+     "task": 19,
+     "episode": 722,
+     "start": 483,
+     "end": 611
+    },
+    {
+     "task": 22,
+     "episode": 886,
+     "start": 611,
+     "end": 749
+    },
+    {
+     "task": 5,
+     "episode": 308,
+     "start": 749,
+     "end": 1085
+    },
+    {
+     "task": 15,
+     "episode": 744,
+     "start": 1085,
+     "end": 1231
+    },
+    {
+     "task": 28,
+     "episode": 821,
+     "start": 1231,
+     "end": 1363
+    }
+   ]
+  },
+  {
+   "sid": "lr007",
+   "spans": [
+    {
+     "task": 23,
+     "episode": 1193,
+     "start": 0,
+     "end": 166
+    },
+    {
+     "task": 36,
+     "episode": 1536,
+     "start": 166,
+     "end": 287
+    },
+    {
+     "task": 8,
+     "episode": 90,
+     "start": 287,
+     "end": 510
+    },
+    {
+     "task": 10,
+     "episode": 670,
+     "start": 510,
+     "end": 605
+    },
+    {
+     "task": 7,
+     "episode": 333,
+     "start": 605,
+     "end": 843
+    },
+    {
+     "task": 35,
+     "episode": 1475,
+     "start": 843,
+     "end": 954
+    },
+    {
+     "task": 24,
+     "episode": 1035,
+     "start": 954,
+     "end": 1090
+    },
+    {
+     "task": 25,
+     "episode": 1182,
+     "start": 1090,
+     "end": 1222
+    }
+   ]
+  },
+  {
+   "sid": "lr008",
+   "spans": [
+    {
+     "task": 30,
+     "episode": 1446,
+     "start": 0,
+     "end": 106
+    },
+    {
+     "task": 13,
+     "episode": 384,
+     "start": 106,
+     "end": 218
+    },
+    {
+     "task": 21,
+     "episode": 992,
+     "start": 218,
+     "end": 360
+    },
+    {
+     "task": 17,
+     "episode": 763,
+     "start": 360,
+     "end": 462
+    },
+    {
+     "task": 2,
+     "episode": 2,
+     "start": 462,
+     "end": 807
+    },
+    {
+     "task": 35,
+     "episode": 1366,
+     "start": 807,
+     "end": 901
+    },
+    {
+     "task": 3,
+     "episode": 48,
+     "start": 901,
+     "end": 1179
+    },
+    {
+     "task": 10,
+     "episode": 621,
+     "start": 1179,
+     "end": 1271
+    }
+   ]
+  },
+  {
+   "sid": "lr009",
+   "spans": [
+    {
+     "task": 15,
+     "episode": 471,
+     "start": 0,
+     "end": 169
+    },
+    {
+     "task": 13,
+     "episode": 650,
+     "start": 169,
+     "end": 316
+    },
+    {
+     "task": 18,
+     "episode": 767,
+     "start": 316,
+     "end": 421
+    },
+    {
+     "task": 0,
+     "episode": 207,
+     "start": 421,
+     "end": 661
+    },
+    {
+     "task": 34,
+     "episode": 1344,
+     "start": 661,
+     "end": 773
+    },
+    {
+     "task": 32,
+     "episode": 1685,
+     "start": 773,
+     "end": 911
+    },
+    {
+     "task": 27,
+     "episode": 1012,
+     "start": 911,
+     "end": 1063
+    },
+    {
+     "task": 3,
+     "episode": 153,
+     "start": 1063,
+     "end": 1318
+    }
+   ]
+  },
+  {
+   "sid": "lr010",
+   "spans": [
+    {
+     "task": 14,
+     "episode": 556,
+     "start": 0,
+     "end": 93
+    },
+    {
+     "task": 20,
+     "episode": 1114,
+     "start": 93,
+     "end": 220
+    },
+    {
+     "task": 4,
+     "episode": 83,
+     "start": 220,
+     "end": 512
+    },
+    {
+     "task": 3,
+     "episode": 225,
+     "start": 512,
+     "end": 769
+    },
+    {
+     "task": 22,
+     "episode": 1015,
+     "start": 769,
+     "end": 902
+    },
+    {
+     "task": 27,
+     "episode": 914,
+     "start": 902,
+     "end": 1056
+    },
+    {
+     "task": 8,
+     "episode": 255,
+     "start": 1056,
+     "end": 1347
+    },
+    {
+     "task": 13,
+     "episode": 677,
+     "start": 1347,
+     "end": 1459
+    }
+   ]
+  },
+  {
+   "sid": "lr011",
+   "spans": [
+    {
+     "task": 21,
+     "episode": 1195,
+     "start": 0,
+     "end": 147
+    },
+    {
+     "task": 0,
+     "episode": 211,
+     "start": 147,
+     "end": 424
+    },
+    {
+     "task": 37,
+     "episode": 1480,
+     "start": 424,
+     "end": 551
+    },
+    {
+     "task": 3,
+     "episode": 278,
+     "start": 551,
+     "end": 812
+    },
+    {
+     "task": 9,
+     "episode": 229,
+     "start": 812,
+     "end": 1028
+    },
+    {
+     "task": 22,
+     "episode": 1198,
+     "start": 1028,
+     "end": 1215
+    },
+    {
+     "task": 23,
+     "episode": 1067,
+     "start": 1215,
+     "end": 1377
+    },
+    {
+     "task": 18,
+     "episode": 501,
+     "start": 1377,
+     "end": 1473
+    }
+   ]
+  },
+  {
+   "sid": "lr012",
+   "spans": [
+    {
+     "task": 31,
+     "episode": 1268,
+     "start": 0,
+     "end": 129
+    },
+    {
+     "task": 0,
+     "episode": 367,
+     "start": 129,
+     "end": 354
+    },
+    {
+     "task": 16,
+     "episode": 622,
+     "start": 354,
+     "end": 439
+    },
+    {
+     "task": 12,
+     "episode": 624,
+     "start": 439,
+     "end": 622
+    },
+    {
+     "task": 25,
+     "episode": 1147,
+     "start": 622,
+     "end": 768
+    },
+    {
+     "task": 24,
+     "episode": 877,
+     "start": 768,
+     "end": 921
+    },
+    {
+     "task": 27,
+     "episode": 1158,
+     "start": 921,
+     "end": 1075
+    },
+    {
+     "task": 34,
+     "episode": 1425,
+     "start": 1075,
+     "end": 1161
+    }
+   ]
+  },
+  {
+   "sid": "lr013",
+   "spans": [
+    {
+     "task": 7,
+     "episode": 328,
+     "start": 0,
+     "end": 271
+    },
+    {
+     "task": 8,
+     "episode": 144,
+     "start": 271,
+     "end": 555
+    },
+    {
+     "task": 20,
+     "episode": 832,
+     "start": 555,
+     "end": 691
+    },
+    {
+     "task": 1,
+     "episode": 242,
+     "start": 691,
+     "end": 906
+    },
+    {
+     "task": 11,
+     "episode": 407,
+     "start": 906,
+     "end": 1076
+    },
+    {
+     "task": 38,
+     "episode": 1682,
+     "start": 1076,
+     "end": 1187
+    },
+    {
+     "task": 36,
+     "episode": 1459,
+     "start": 1187,
+     "end": 1287
+    },
+    {
+     "task": 21,
+     "episode": 1029,
+     "start": 1287,
+     "end": 1446
+    }
+   ]
+  },
+  {
+   "sid": "lr014",
+   "spans": [
+    {
+     "task": 11,
+     "episode": 407,
+     "start": 0,
+     "end": 170
+    },
+    {
+     "task": 9,
+     "episode": 103,
+     "start": 170,
+     "end": 354
+    },
+    {
+     "task": 1,
+     "episode": 68,
+     "start": 354,
+     "end": 643
+    },
+    {
+     "task": 37,
+     "episode": 1350,
+     "start": 643,
+     "end": 770
+    },
+    {
+     "task": 20,
+     "episode": 1218,
+     "start": 770,
+     "end": 915
+    },
+    {
+     "task": 32,
+     "episode": 1561,
+     "start": 915,
+     "end": 1036
+    },
+    {
+     "task": 0,
+     "episode": 18,
+     "start": 1036,
+     "end": 1312
+    },
+    {
+     "task": 2,
+     "episode": 282,
+     "start": 1312,
+     "end": 1580
+    }
+   ]
+  },
+  {
+   "sid": "lr015",
+   "spans": [
+    {
+     "task": 39,
+     "episode": 1674,
+     "start": 0,
+     "end": 119
+    },
+    {
+     "task": 22,
+     "episode": 1246,
+     "start": 119,
+     "end": 251
+    },
+    {
+     "task": 10,
+     "episode": 433,
+     "start": 251,
+     "end": 356
+    },
+    {
+     "task": 1,
+     "episode": 248,
+     "start": 356,
+     "end": 591
+    },
+    {
+     "task": 27,
+     "episode": 1124,
+     "start": 591,
+     "end": 746
+    },
+    {
+     "task": 25,
+     "episode": 1134,
+     "start": 746,
+     "end": 885
+    },
+    {
+     "task": 29,
+     "episode": 875,
+     "start": 885,
+     "end": 1038
+    },
+    {
+     "task": 4,
+     "episode": 96,
+     "start": 1038,
+     "end": 1318
+    }
+   ]
+  },
+  {
+   "sid": "lr016",
+   "spans": [
+    {
+     "task": 32,
+     "episode": 1684,
+     "start": 0,
+     "end": 102
+    },
+    {
+     "task": 29,
+     "episode": 1201,
+     "start": 102,
+     "end": 250
+    },
+    {
+     "task": 2,
+     "episode": 276,
+     "start": 250,
+     "end": 541
+    },
+    {
+     "task": 30,
+     "episode": 1534,
+     "start": 541,
+     "end": 668
+    },
+    {
+     "task": 6,
+     "episode": 70,
+     "start": 668,
+     "end": 1084
+    },
+    {
+     "task": 17,
+     "episode": 530,
+     "start": 1084,
+     "end": 1190
+    },
+    {
+     "task": 39,
+     "episode": 1411,
+     "start": 1190,
+     "end": 1329
+    },
+    {
+     "task": 31,
+     "episode": 1619,
+     "start": 1329,
+     "end": 1485
+    }
+   ]
+  },
+  {
+   "sid": "lr017",
+   "spans": [
+    {
+     "task": 14,
+     "episode": 735,
+     "start": 0,
+     "end": 116
+    },
+    {
+     "task": 7,
+     "episode": 215,
+     "start": 116,
+     "end": 363
+    },
+    {
+     "task": 24,
+     "episode": 1152,
+     "start": 363,
+     "end": 515
+    },
+    {
+     "task": 37,
+     "episode": 1436,
+     "start": 515,
+     "end": 624
+    },
+    {
+     "task": 29,
+     "episode": 1086,
+     "start": 624,
+     "end": 778
+    },
+    {
+     "task": 32,
+     "episode": 1465,
+     "start": 778,
+     "end": 889
+    },
+    {
+     "task": 35,
+     "episode": 1487,
+     "start": 889,
+     "end": 992
+    },
+    {
+     "task": 39,
+     "episode": 1531,
+     "start": 992,
+     "end": 1134
+    }
+   ]
+  },
+  {
+   "sid": "lr018",
+   "spans": [
+    {
+     "task": 14,
+     "episode": 795,
+     "start": 0,
+     "end": 114
+    },
+    {
+     "task": 29,
+     "episode": 823,
+     "start": 114,
+     "end": 276
+    },
+    {
+     "task": 15,
+     "episode": 733,
+     "start": 276,
+     "end": 439
+    },
+    {
+     "task": 22,
+     "episode": 1072,
+     "start": 439,
+     "end": 572
+    },
+    {
+     "task": 30,
+     "episode": 1340,
+     "start": 572,
+     "end": 694
+    },
+    {
+     "task": 26,
+     "episode": 1054,
+     "start": 694,
+     "end": 818
+    },
+    {
+     "task": 1,
+     "episode": 146,
+     "start": 818,
+     "end": 1096
+    },
+    {
+     "task": 28,
+     "episode": 1037,
+     "start": 1096,
+     "end": 1279
+    }
+   ]
+  },
+  {
+   "sid": "lr019",
+   "spans": [
+    {
+     "task": 1,
+     "episode": 62,
+     "start": 0,
+     "end": 251
+    },
+    {
+     "task": 25,
+     "episode": 1116,
+     "start": 251,
+     "end": 381
+    },
+    {
+     "task": 13,
+     "episode": 730,
+     "start": 381,
+     "end": 485
+    },
+    {
+     "task": 5,
+     "episode": 234,
+     "start": 485,
+     "end": 740
+    },
+    {
+     "task": 26,
+     "episode": 1028,
+     "start": 740,
+     "end": 856
+    },
+    {
+     "task": 35,
+     "episode": 1610,
+     "start": 856,
+     "end": 948
+    },
+    {
+     "task": 37,
+     "episode": 1588,
+     "start": 948,
+     "end": 1137
+    },
+    {
+     "task": 0,
+     "episode": 58,
+     "start": 1137,
+     "end": 1390
+    }
+   ]
+  },
+  {
+   "sid": "lr020",
+   "spans": [
+    {
+     "task": 25,
+     "episode": 946,
+     "start": 0,
+     "end": 140
+    },
+    {
+     "task": 12,
+     "episode": 738,
+     "start": 140,
+     "end": 359
+    },
+    {
+     "task": 28,
+     "episode": 1087,
+     "start": 359,
+     "end": 519
+    },
+    {
+     "task": 22,
+     "episode": 913,
+     "start": 519,
+     "end": 646
+    },
+    {
+     "task": 10,
+     "episode": 532,
+     "start": 646,
+     "end": 734
+    },
+    {
+     "task": 17,
+     "episode": 707,
+     "start": 734,
+     "end": 838
+    },
+    {
+     "task": 36,
+     "episode": 1630,
+     "start": 838,
+     "end": 937
+    },
+    {
+     "task": 38,
+     "episode": 1283,
+     "start": 937,
+     "end": 1072
+    }
+   ]
+  },
+  {
+   "sid": "lr021",
+   "spans": [
+    {
+     "task": 35,
+     "episode": 1452,
+     "start": 0,
+     "end": 96
+    },
+    {
+     "task": 16,
+     "episode": 799,
+     "start": 96,
+     "end": 192
+    },
+    {
+     "task": 34,
+     "episode": 1589,
+     "start": 192,
+     "end": 285
+    },
+    {
+     "task": 1,
+     "episode": 62,
+     "start": 285,
+     "end": 536
+    },
+    {
+     "task": 11,
+     "episode": 502,
+     "start": 536,
+     "end": 706
+    },
+    {
+     "task": 14,
+     "episode": 475,
+     "start": 706,
+     "end": 798
+    },
+    {
+     "task": 26,
+     "episode": 1137,
+     "start": 798,
+     "end": 934
+    },
+    {
+     "task": 10,
+     "episode": 549,
+     "start": 934,
+     "end": 1037
+    }
+   ]
+  },
+  {
+   "sid": "lr022",
+   "spans": [
+    {
+     "task": 12,
+     "episode": 382,
+     "start": 0,
+     "end": 177
+    },
+    {
+     "task": 16,
+     "episode": 487,
+     "start": 177,
+     "end": 265
+    },
+    {
+     "task": 29,
+     "episode": 918,
+     "start": 265,
+     "end": 427
+    },
+    {
+     "task": 4,
+     "episode": 297,
+     "start": 427,
+     "end": 663
+    },
+    {
+     "task": 1,
+     "episode": 110,
+     "start": 663,
+     "end": 909
+    },
+    {
+     "task": 39,
+     "episode": 1683,
+     "start": 909,
+     "end": 1033
+    },
+    {
+     "task": 6,
+     "episode": 100,
+     "start": 1033,
+     "end": 1425
+    },
+    {
+     "task": 38,
+     "episode": 1641,
+     "start": 1425,
+     "end": 1518
+    }
+   ]
+  },
+  {
+   "sid": "lr023",
+   "spans": [
+    {
+     "task": 32,
+     "episode": 1577,
+     "start": 0,
+     "end": 111
+    },
+    {
+     "task": 34,
+     "episode": 1506,
+     "start": 111,
+     "end": 190
+    },
+    {
+     "task": 4,
+     "episode": 250,
+     "start": 190,
+     "end": 451
+    },
+    {
+     "task": 0,
+     "episode": 18,
+     "start": 451,
+     "end": 727
+    },
+    {
+     "task": 2,
+     "episode": 217,
+     "start": 727,
+     "end": 998
+    },
+    {
+     "task": 36,
+     "episode": 1621,
+     "start": 998,
+     "end": 1148
+    },
+    {
+     "task": 8,
+     "episode": 90,
+     "start": 1148,
+     "end": 1371
+    },
+    {
+     "task": 7,
+     "episode": 53,
+     "start": 1371,
+     "end": 1613
+    }
+   ]
+  },
+  {
+   "sid": "lr024",
+   "spans": [
+    {
+     "task": 39,
+     "episode": 1476,
+     "start": 0,
+     "end": 125
+    },
+    {
+     "task": 29,
+     "episode": 977,
+     "start": 125,
+     "end": 285
+    },
+    {
+     "task": 32,
+     "episode": 1646,
+     "start": 285,
+     "end": 383
+    },
+    {
+     "task": 22,
+     "episode": 810,
+     "start": 383,
+     "end": 513
+    },
+    {
+     "task": 14,
+     "episode": 475,
+     "start": 513,
+     "end": 605
+    },
+    {
+     "task": 37,
+     "episode": 1601,
+     "start": 605,
+     "end": 739
+    },
+    {
+     "task": 2,
+     "episode": 44,
+     "start": 739,
+     "end": 1006
+    },
+    {
+     "task": 24,
+     "episode": 1148,
+     "start": 1006,
+     "end": 1156
+    }
+   ]
+  },
+  {
+   "sid": "lr025",
+   "spans": [
+    {
+     "task": 2,
+     "episode": 357,
+     "start": 0,
+     "end": 256
+    },
+    {
+     "task": 12,
+     "episode": 560,
+     "start": 256,
+     "end": 440
+    },
+    {
+     "task": 38,
+     "episode": 1682,
+     "start": 440,
+     "end": 551
+    },
+    {
+     "task": 10,
+     "episode": 642,
+     "start": 551,
+     "end": 641
+    },
+    {
+     "task": 35,
+     "episode": 1554,
+     "start": 641,
+     "end": 742
+    },
+    {
+     "task": 29,
+     "episode": 975,
+     "start": 742,
+     "end": 906
+    },
+    {
+     "task": 5,
+     "episode": 308,
+     "start": 906,
+     "end": 1242
+    },
+    {
+     "task": 16,
+     "episode": 412,
+     "start": 1242,
+     "end": 1361
+    }
+   ]
+  },
+  {
+   "sid": "lr026",
+   "spans": [
+    {
+     "task": 17,
+     "episode": 530,
+     "start": 0,
+     "end": 106
+    },
+    {
+     "task": 22,
+     "episode": 1057,
+     "start": 106,
+     "end": 241
+    },
+    {
+     "task": 34,
+     "episode": 1344,
+     "start": 241,
+     "end": 353
+    },
+    {
+     "task": 18,
+     "episode": 731,
+     "start": 353,
+     "end": 465
+    },
+    {
+     "task": 13,
+     "episode": 457,
+     "start": 465,
+     "end": 570
+    },
+    {
+     "task": 36,
+     "episode": 1547,
+     "start": 570,
+     "end": 674
+    },
+    {
+     "task": 25,
+     "episode": 911,
+     "start": 674,
+     "end": 811
+    },
+    {
+     "task": 4,
+     "episode": 246,
+     "start": 811,
+     "end": 1088
+    }
+   ]
+  },
+  {
+   "sid": "lr027",
+   "spans": [
+    {
+     "task": 39,
+     "episode": 1439,
+     "start": 0,
+     "end": 139
+    },
+    {
+     "task": 5,
+     "episode": 101,
+     "start": 139,
+     "end": 417
+    },
+    {
+     "task": 14,
+     "episode": 596,
+     "start": 417,
+     "end": 517
+    },
+    {
+     "task": 8,
+     "episode": 268,
+     "start": 517,
+     "end": 746
+    },
+    {
+     "task": 26,
+     "episode": 1228,
+     "start": 746,
+     "end": 870
+    },
+    {
+     "task": 15,
+     "episode": 478,
+     "start": 870,
+     "end": 1006
+    },
+    {
+     "task": 1,
+     "episode": 52,
+     "start": 1006,
+     "end": 1243
+    },
+    {
+     "task": 31,
+     "episode": 1591,
+     "start": 1243,
+     "end": 1413
+    }
+   ]
+  },
+  {
+   "sid": "lr028",
+   "spans": [
+    {
+     "task": 21,
+     "episode": 836,
+     "start": 0,
+     "end": 136
+    },
+    {
+     "task": 16,
+     "episode": 717,
+     "start": 136,
+     "end": 222
+    },
+    {
+     "task": 26,
+     "episode": 1252,
+     "start": 222,
+     "end": 347
+    },
+    {
+     "task": 24,
+     "episode": 887,
+     "start": 347,
+     "end": 490
+    },
+    {
+     "task": 1,
+     "episode": 146,
+     "start": 490,
+     "end": 768
+    },
+    {
+     "task": 18,
+     "episode": 702,
+     "start": 768,
+     "end": 874
+    },
+    {
+     "task": 15,
+     "episode": 584,
+     "start": 874,
+     "end": 1029
+    },
+    {
+     "task": 13,
+     "episode": 709,
+     "start": 1029,
+     "end": 1128
+    }
+   ]
+  },
+  {
+   "sid": "lr029",
+   "spans": [
+    {
+     "task": 26,
+     "episode": 1164,
+     "start": 0,
+     "end": 132
+    },
+    {
+     "task": 3,
+     "episode": 218,
+     "start": 132,
+     "end": 377
+    },
+    {
+     "task": 18,
+     "episode": 398,
+     "start": 377,
+     "end": 477
+    },
+    {
+     "task": 10,
+     "episode": 466,
+     "start": 477,
+     "end": 570
+    },
+    {
+     "task": 19,
+     "episode": 399,
+     "start": 570,
+     "end": 706
+    },
+    {
+     "task": 17,
+     "episode": 424,
+     "start": 706,
+     "end": 797
+    },
+    {
+     "task": 33,
+     "episode": 1571,
+     "start": 797,
+     "end": 930
+    },
+    {
+     "task": 7,
+     "episode": 378,
+     "start": 930,
+     "end": 1182
+    }
+   ]
+  },
+  {
+   "sid": "lr030",
+   "spans": [
+    {
+     "task": 35,
+     "episode": 1278,
+     "start": 0,
+     "end": 101
+    },
+    {
+     "task": 8,
+     "episode": 144,
+     "start": 101,
+     "end": 385
+    },
+    {
+     "task": 2,
+     "episode": 142,
+     "start": 385,
+     "end": 685
+    },
+    {
+     "task": 31,
+     "episode": 1284,
+     "start": 685,
+     "end": 834
+    },
+    {
+     "task": 26,
+     "episode": 1101,
+     "start": 834,
+     "end": 962
+    },
+    {
+     "task": 29,
+     "episode": 875,
+     "start": 962,
+     "end": 1115
+    },
+    {
+     "task": 28,
+     "episode": 874,
+     "start": 1115,
+     "end": 1276
+    },
+    {
+     "task": 23,
+     "episode": 1135,
+     "start": 1276,
+     "end": 1450
+    }
+   ]
+  },
+  {
+   "sid": "lr031",
+   "spans": [
+    {
+     "task": 2,
+     "episode": 145,
+     "start": 0,
+     "end": 255
+    },
+    {
+     "task": 37,
+     "episode": 1550,
+     "start": 255,
+     "end": 375
+    },
+    {
+     "task": 17,
+     "episode": 751,
+     "start": 375,
+     "end": 483
+    },
+    {
+     "task": 21,
+     "episode": 995,
+     "start": 483,
+     "end": 640
+    },
+    {
+     "task": 29,
+     "episode": 1110,
+     "start": 640,
+     "end": 791
+    },
+    {
+     "task": 4,
+     "episode": 135,
+     "start": 791,
+     "end": 1041
+    },
+    {
+     "task": 3,
+     "episode": 240,
+     "start": 1041,
+     "end": 1330
+    },
+    {
+     "task": 18,
+     "episode": 446,
+     "start": 1330,
+     "end": 1430
+    }
+   ]
+  },
+  {
+   "sid": "lr032",
+   "spans": [
+    {
+     "task": 9,
+     "episode": 81,
+     "start": 0,
+     "end": 174
+    },
+    {
+     "task": 16,
+     "episode": 529,
+     "start": 174,
+     "end": 262
+    },
+    {
+     "task": 20,
+     "episode": 1084,
+     "start": 262,
+     "end": 400
+    },
+    {
+     "task": 12,
+     "episode": 790,
+     "start": 400,
+     "end": 587
+    },
+    {
+     "task": 7,
+     "episode": 175,
+     "start": 587,
+     "end": 822
+    },
+    {
+     "task": 15,
+     "episode": 411,
+     "start": 822,
+     "end": 1015
+    },
+    {
+     "task": 22,
+     "episode": 1213,
+     "start": 1015,
+     "end": 1138
+    },
+    {
+     "task": 25,
+     "episode": 1023,
+     "start": 1138,
+     "end": 1265
+    }
+   ]
+  },
+  {
+   "sid": "lr033",
+   "spans": [
+    {
+     "task": 18,
+     "episode": 669,
+     "start": 0,
+     "end": 88
+    },
+    {
+     "task": 24,
+     "episode": 985,
+     "start": 88,
+     "end": 233
+    },
+    {
+     "task": 32,
+     "episode": 1577,
+     "start": 233,
+     "end": 344
+    },
+    {
+     "task": 1,
+     "episode": 5,
+     "start": 344,
+     "end": 584
+    },
+    {
+     "task": 31,
+     "episode": 1263,
+     "start": 584,
+     "end": 711
+    },
+    {
+     "task": 37,
+     "episode": 1508,
+     "start": 711,
+     "end": 824
+    },
+    {
+     "task": 34,
+     "episode": 1589,
+     "start": 824,
+     "end": 917
+    },
+    {
+     "task": 12,
+     "episode": 416,
+     "start": 917,
+     "end": 1116
+    }
+   ]
+  },
+  {
+   "sid": "lr034",
+   "spans": [
+    {
+     "task": 31,
+     "episode": 1284,
+     "start": 0,
+     "end": 149
+    },
+    {
+     "task": 24,
+     "episode": 877,
+     "start": 149,
+     "end": 302
+    },
+    {
+     "task": 9,
+     "episode": 290,
+     "start": 302,
+     "end": 452
+    },
+    {
+     "task": 27,
+     "episode": 994,
+     "start": 452,
+     "end": 608
+    },
+    {
+     "task": 13,
+     "episode": 644,
+     "start": 608,
+     "end": 712
+    },
+    {
+     "task": 36,
+     "episode": 1451,
+     "start": 712,
+     "end": 823
+    },
+    {
+     "task": 12,
+     "episode": 737,
+     "start": 823,
+     "end": 1017
+    },
+    {
+     "task": 17,
+     "episode": 612,
+     "start": 1017,
+     "end": 1124
+    }
+   ]
+  },
+  {
+   "sid": "lr035",
+   "spans": [
+    {
+     "task": 31,
+     "episode": 1494,
+     "start": 0,
+     "end": 142
+    },
+    {
+     "task": 14,
+     "episode": 470,
+     "start": 142,
+     "end": 249
+    },
+    {
+     "task": 38,
+     "episode": 1317,
+     "start": 249,
+     "end": 363
+    },
+    {
+     "task": 4,
+     "episode": 188,
+     "start": 363,
+     "end": 633
+    },
+    {
+     "task": 8,
+     "episode": 90,
+     "start": 633,
+     "end": 856
+    },
+    {
+     "task": 28,
+     "episode": 965,
+     "start": 856,
+     "end": 1018
+    },
+    {
+     "task": 27,
+     "episode": 938,
+     "start": 1018,
+     "end": 1196
+    },
+    {
+     "task": 6,
+     "episode": 204,
+     "start": 1196,
+     "end": 1594
+    }
+   ]
+  },
+  {
+   "sid": "lr036",
+   "spans": [
+    {
+     "task": 13,
+     "episode": 518,
+     "start": 0,
+     "end": 109
+    },
+    {
+     "task": 29,
+     "episode": 910,
+     "start": 109,
+     "end": 266
+    },
+    {
+     "task": 19,
+     "episode": 779,
+     "start": 266,
+     "end": 392
+    },
+    {
+     "task": 25,
+     "episode": 941,
+     "start": 392,
+     "end": 518
+    },
+    {
+     "task": 27,
+     "episode": 855,
+     "start": 518,
+     "end": 669
+    },
+    {
+     "task": 8,
+     "episode": 189,
+     "start": 669,
+     "end": 921
+    },
+    {
+     "task": 11,
+     "episode": 739,
+     "start": 921,
+     "end": 1076
+    },
+    {
+     "task": 30,
+     "episode": 1544,
+     "start": 1076,
+     "end": 1197
+    }
+   ]
+  },
+  {
+   "sid": "lr037",
+   "spans": [
+    {
+     "task": 19,
+     "episode": 490,
+     "start": 0,
+     "end": 124
+    },
+    {
+     "task": 21,
+     "episode": 1038,
+     "start": 124,
+     "end": 259
+    },
+    {
+     "task": 39,
+     "episode": 1295,
+     "start": 259,
+     "end": 396
+    },
+    {
+     "task": 9,
+     "episode": 180,
+     "start": 396,
+     "end": 595
+    },
+    {
+     "task": 31,
+     "episode": 1360,
+     "start": 595,
+     "end": 729
+    },
+    {
+     "task": 28,
+     "episode": 1223,
+     "start": 729,
+     "end": 894
+    },
+    {
+     "task": 0,
+     "episode": 121,
+     "start": 894,
+     "end": 1186
+    },
+    {
+     "task": 20,
+     "episode": 848,
+     "start": 1186,
+     "end": 1313
+    }
+   ]
+  },
+  {
+   "sid": "lr038",
+   "spans": [
+    {
+     "task": 36,
+     "episode": 1623,
+     "start": 0,
+     "end": 127
+    },
+    {
+     "task": 39,
+     "episode": 1444,
+     "start": 127,
+     "end": 263
+    },
+    {
+     "task": 5,
+     "episode": 156,
+     "start": 263,
+     "end": 518
+    },
+    {
+     "task": 9,
+     "episode": 366,
+     "start": 518,
+     "end": 698
+    },
+    {
+     "task": 23,
+     "episode": 973,
+     "start": 698,
+     "end": 827
+    },
+    {
+     "task": 34,
+     "episode": 1272,
+     "start": 827,
+     "end": 911
+    },
+    {
+     "task": 0,
+     "episode": 362,
+     "start": 911,
+     "end": 1171
+    },
+    {
+     "task": 21,
+     "episode": 1038,
+     "start": 1171,
+     "end": 1306
+    }
+   ]
+  },
+  {
+   "sid": "lr039",
+   "spans": [
+    {
+     "task": 13,
+     "episode": 508,
+     "start": 0,
+     "end": 103
+    },
+    {
+     "task": 32,
+     "episode": 1498,
+     "start": 103,
+     "end": 234
+    },
+    {
+     "task": 25,
+     "episode": 817,
+     "start": 234,
+     "end": 377
+    },
+    {
+     "task": 31,
+     "episode": 1461,
+     "start": 377,
+     "end": 544
+    },
+    {
+     "task": 14,
+     "episode": 423,
+     "start": 544,
+     "end": 644
+    },
+    {
+     "task": 5,
+     "episode": 92,
+     "start": 644,
+     "end": 924
+    },
+    {
+     "task": 7,
+     "episode": 329,
+     "start": 924,
+     "end": 1176
+    },
+    {
+     "task": 9,
+     "episode": 374,
+     "start": 1176,
+     "end": 1349
+    }
+   ]
+  },
+  {
+   "sid": "lr040",
+   "spans": [
+    {
+     "task": 2,
+     "episode": 145,
+     "start": 0,
+     "end": 255
+    },
+    {
+     "task": 26,
+     "episode": 986,
+     "start": 255,
+     "end": 432
+    },
+    {
+     "task": 4,
+     "episode": 318,
+     "start": 432,
+     "end": 722
+    },
+    {
+     "task": 29,
+     "episode": 847,
+     "start": 722,
+     "end": 885
+    },
+    {
+     "task": 11,
+     "episode": 671,
+     "start": 885,
+     "end": 1037
+    },
+    {
+     "task": 37,
+     "episode": 1656,
+     "start": 1037,
+     "end": 1166
+    },
+    {
+     "task": 7,
+     "episode": 326,
+     "start": 1166,
+     "end": 1410
+    },
+    {
+     "task": 25,
+     "episode": 991,
+     "start": 1410,
+     "end": 1543
+    }
+   ]
+  },
+  {
+   "sid": "lr041",
+   "spans": [
+    {
+     "task": 8,
+     "episode": 155,
+     "start": 0,
+     "end": 267
+    },
+    {
+     "task": 3,
+     "episode": 259,
+     "start": 267,
+     "end": 495
+    },
+    {
+     "task": 35,
+     "episode": 1487,
+     "start": 495,
+     "end": 598
+    },
+    {
+     "task": 18,
+     "episode": 767,
+     "start": 598,
+     "end": 703
+    },
+    {
+     "task": 12,
+     "episode": 560,
+     "start": 703,
+     "end": 887
+    },
+    {
+     "task": 23,
+     "episode": 812,
+     "start": 887,
+     "end": 1019
+    },
+    {
+     "task": 15,
+     "episode": 425,
+     "start": 1019,
+     "end": 1173
+    },
+    {
+     "task": 5,
+     "episode": 350,
+     "start": 1173,
+     "end": 1451
+    }
+   ]
+  },
+  {
+   "sid": "lr042",
+   "spans": [
+    {
+     "task": 29,
+     "episode": 972,
+     "start": 0,
+     "end": 150
+    },
+    {
+     "task": 7,
+     "episode": 122,
+     "start": 150,
+     "end": 426
+    },
+    {
+     "task": 33,
+     "episode": 1398,
+     "start": 426,
+     "end": 568
+    },
+    {
+     "task": 1,
+     "episode": 224,
+     "start": 568,
+     "end": 803
+    },
+    {
+     "task": 31,
+     "episode": 1651,
+     "start": 803,
+     "end": 985
+    },
+    {
+     "task": 15,
+     "episode": 755,
+     "start": 985,
+     "end": 1102
+    },
+    {
+     "task": 17,
+     "episode": 676,
+     "start": 1102,
+     "end": 1206
+    },
+    {
+     "task": 32,
+     "episode": 1498,
+     "start": 1206,
+     "end": 1337
+    }
+   ]
+  },
+  {
+   "sid": "lr043",
+   "spans": [
+    {
+     "task": 30,
+     "episode": 1502,
+     "start": 0,
+     "end": 146
+    },
+    {
+     "task": 37,
+     "episode": 1587,
+     "start": 146,
+     "end": 283
+    },
+    {
+     "task": 21,
+     "episode": 809,
+     "start": 283,
+     "end": 424
+    },
+    {
+     "task": 16,
+     "episode": 753,
+     "start": 424,
+     "end": 513
+    },
+    {
+     "task": 38,
+     "episode": 1460,
+     "start": 513,
+     "end": 622
+    },
+    {
+     "task": 14,
+     "episode": 512,
+     "start": 622,
+     "end": 724
+    },
+    {
+     "task": 3,
+     "episode": 40,
+     "start": 724,
+     "end": 952
+    },
+    {
+     "task": 15,
+     "episode": 553,
+     "start": 952,
+     "end": 1096
+    }
+   ]
+  },
+  {
+   "sid": "lr044",
+   "spans": [
+    {
+     "task": 23,
+     "episode": 1193,
+     "start": 0,
+     "end": 166
+    },
+    {
+     "task": 17,
+     "episode": 673,
+     "start": 166,
+     "end": 289
+    },
+    {
+     "task": 22,
+     "episode": 1198,
+     "start": 289,
+     "end": 476
+    },
+    {
+     "task": 9,
+     "episode": 261,
+     "start": 476,
+     "end": 673
+    },
+    {
+     "task": 26,
+     "episode": 1222,
+     "start": 673,
+     "end": 801
+    },
+    {
+     "task": 13,
+     "episode": 777,
+     "start": 801,
+     "end": 896
+    },
+    {
+     "task": 12,
+     "episode": 538,
+     "start": 896,
+     "end": 1117
+    },
+    {
+     "task": 10,
+     "episode": 806,
+     "start": 1117,
+     "end": 1209
+    }
+   ]
+  },
+  {
+   "sid": "lr045",
+   "spans": [
+    {
+     "task": 27,
+     "episode": 881,
+     "start": 0,
+     "end": 153
+    },
+    {
+     "task": 6,
+     "episode": 54,
+     "start": 153,
+     "end": 554
+    },
+    {
+     "task": 19,
+     "episode": 599,
+     "start": 554,
+     "end": 692
+    },
+    {
+     "task": 17,
+     "episode": 545,
+     "start": 692,
+     "end": 790
+    },
+    {
+     "task": 10,
+     "episode": 679,
+     "start": 790,
+     "end": 886
+    },
+    {
+     "task": 9,
+     "episode": 366,
+     "start": 886,
+     "end": 1066
+    },
+    {
+     "task": 13,
+     "episode": 508,
+     "start": 1066,
+     "end": 1169
+    },
+    {
+     "task": 37,
+     "episode": 1297,
+     "start": 1169,
+     "end": 1285
+    }
+   ]
+  },
+  {
+   "sid": "lr046",
+   "spans": [
+    {
+     "task": 36,
+     "episode": 1346,
+     "start": 0,
+     "end": 123
+    },
+    {
+     "task": 3,
+     "episode": 203,
+     "start": 123,
+     "end": 366
+    },
+    {
+     "task": 39,
+     "episode": 1454,
+     "start": 366,
+     "end": 511
+    },
+    {
+     "task": 6,
+     "episode": 46,
+     "start": 511,
+     "end": 920
+    },
+    {
+     "task": 16,
+     "episode": 728,
+     "start": 920,
+     "end": 1012
+    },
+    {
+     "task": 27,
+     "episode": 960,
+     "start": 1012,
+     "end": 1179
+    },
+    {
+     "task": 37,
+     "episode": 1322,
+     "start": 1179,
+     "end": 1299
+    },
+    {
+     "task": 2,
+     "episode": 164,
+     "start": 1299,
+     "end": 1609
+    }
+   ]
+  },
+  {
+   "sid": "lr047",
+   "spans": [
+    {
+     "task": 7,
+     "episode": 128,
+     "start": 0,
+     "end": 254
+    },
+    {
+     "task": 0,
+     "episode": 88,
+     "start": 254,
+     "end": 523
+    },
+    {
+     "task": 33,
+     "episode": 1362,
+     "start": 523,
+     "end": 667
+    },
+    {
+     "task": 6,
+     "episode": 54,
+     "start": 667,
+     "end": 1068
+    },
+    {
+     "task": 34,
+     "episode": 1344,
+     "start": 1068,
+     "end": 1180
+    },
+    {
+     "task": 2,
+     "episode": 123,
+     "start": 1180,
+     "end": 1497
+    },
+    {
+     "task": 13,
+     "episode": 771,
+     "start": 1497,
+     "end": 1607
+    },
+    {
+     "task": 26,
+     "episode": 969,
+     "start": 1607,
+     "end": 1741
+    }
+   ]
+  },
+  {
+   "sid": "lr048",
+   "spans": [
+    {
+     "task": 12,
+     "episode": 684,
+     "start": 0,
+     "end": 184
+    },
+    {
+     "task": 1,
+     "episode": 5,
+     "start": 184,
+     "end": 424
+    },
+    {
+     "task": 10,
+     "episode": 532,
+     "start": 424,
+     "end": 512
+    },
+    {
+     "task": 3,
+     "episode": 277,
+     "start": 512,
+     "end": 750
+    },
+    {
+     "task": 26,
+     "episode": 1222,
+     "start": 750,
+     "end": 878
+    },
+    {
+     "task": 27,
+     "episode": 1158,
+     "start": 878,
+     "end": 1032
+    },
+    {
+     "task": 21,
+     "episode": 1142,
+     "start": 1032,
+     "end": 1177
+    },
+    {
+     "task": 34,
+     "episode": 1272,
+     "start": 1177,
+     "end": 1261
+    }
+   ]
+  },
+  {
+   "sid": "lr049",
+   "spans": [
+    {
+     "task": 36,
+     "episode": 1488,
+     "start": 0,
+     "end": 133
+    },
+    {
+     "task": 23,
+     "episode": 867,
+     "start": 133,
+     "end": 261
+    },
+    {
+     "task": 16,
+     "episode": 418,
+     "start": 261,
+     "end": 358
+    },
+    {
+     "task": 29,
+     "episode": 1201,
+     "start": 358,
+     "end": 506
+    },
+    {
+     "task": 18,
+     "episode": 674,
+     "start": 506,
+     "end": 602
+    },
+    {
+     "task": 17,
+     "episode": 704,
+     "start": 602,
+     "end": 700
+    },
+    {
+     "task": 33,
+     "episode": 1364,
+     "start": 700,
+     "end": 867
+    },
+    {
+     "task": 21,
+     "episode": 838,
+     "start": 867,
+     "end": 1012
+    }
+   ]
+  },
+  {
+   "sid": "lr050",
+   "spans": [
+    {
+     "task": 2,
+     "episode": 34,
+     "start": 0,
+     "end": 449
+    },
+    {
+     "task": 25,
+     "episode": 1105,
+     "start": 449,
+     "end": 645
+    },
+    {
+     "task": 24,
+     "episode": 983,
+     "start": 645,
+     "end": 793
+    },
+    {
+     "task": 17,
+     "episode": 545,
+     "start": 793,
+     "end": 891
+    },
+    {
+     "task": 21,
+     "episode": 981,
+     "start": 891,
+     "end": 1038
+    },
+    {
+     "task": 12,
+     "episode": 494,
+     "start": 1038,
+     "end": 1237
+    },
+    {
+     "task": 32,
+     "episode": 1433,
+     "start": 1237,
+     "end": 1379
+    },
+    {
+     "task": 15,
+     "episode": 755,
+     "start": 1379,
+     "end": 1496
+    }
+   ]
+  },
+  {
+   "sid": "lr051",
+   "spans": [
+    {
+     "task": 30,
+     "episode": 1624,
+     "start": 0,
+     "end": 108
+    },
+    {
+     "task": 23,
+     "episode": 849,
+     "start": 108,
+     "end": 268
+    },
+    {
+     "task": 4,
+     "episode": 98,
+     "start": 268,
+     "end": 553
+    },
+    {
+     "task": 16,
+     "episode": 783,
+     "start": 553,
+     "end": 639
+    },
+    {
+     "task": 13,
+     "episode": 384,
+     "start": 639,
+     "end": 751
+    },
+    {
+     "task": 8,
+     "episode": 377,
+     "start": 751,
+     "end": 980
+    },
+    {
+     "task": 33,
+     "episode": 1637,
+     "start": 980,
+     "end": 1121
+    },
+    {
+     "task": 18,
+     "episode": 712,
+     "start": 1121,
+     "end": 1208
+    }
+   ]
+  },
+  {
+   "sid": "lr052",
+   "spans": [
+    {
+     "task": 2,
+     "episode": 324,
+     "start": 0,
+     "end": 307
+    },
+    {
+     "task": 1,
+     "episode": 11,
+     "start": 307,
+     "end": 525
+    },
+    {
+     "task": 14,
+     "episode": 419,
+     "start": 525,
+     "end": 624
+    },
+    {
+     "task": 20,
+     "episode": 1114,
+     "start": 624,
+     "end": 751
+    },
+    {
+     "task": 7,
+     "episode": 117,
+     "start": 751,
+     "end": 1009
+    },
+    {
+     "task": 5,
+     "episode": 199,
+     "start": 1009,
+     "end": 1259
+    },
+    {
+     "task": 18,
+     "episode": 597,
+     "start": 1259,
+     "end": 1349
+    },
+    {
+     "task": 16,
+     "episode": 800,
+     "start": 1349,
+     "end": 1428
+    }
+   ]
+  },
+  {
+   "sid": "lr053",
+   "spans": [
+    {
+     "task": 8,
+     "episode": 262,
+     "start": 0,
+     "end": 228
+    },
+    {
+     "task": 26,
+     "episode": 1007,
+     "start": 228,
+     "end": 353
+    },
+    {
+     "task": 34,
+     "episode": 1669,
+     "start": 353,
+     "end": 451
+    },
+    {
+     "task": 22,
+     "episode": 936,
+     "start": 451,
+     "end": 578
+    },
+    {
+     "task": 20,
+     "episode": 866,
+     "start": 578,
+     "end": 832
+    },
+    {
+     "task": 7,
+     "episode": 347,
+     "start": 832,
+     "end": 1114
+    },
+    {
+     "task": 1,
+     "episode": 176,
+     "start": 1114,
+     "end": 1389
+    },
+    {
+     "task": 9,
+     "episode": 227,
+     "start": 1389,
+     "end": 1556
+    }
+   ]
+  },
+  {
+   "sid": "lr054",
+   "spans": [
+    {
+     "task": 12,
+     "episode": 548,
+     "start": 0,
+     "end": 186
+    },
+    {
+     "task": 9,
+     "episode": 228,
+     "start": 186,
+     "end": 353
+    },
+    {
+     "task": 18,
+     "episode": 521,
+     "start": 353,
+     "end": 455
+    },
+    {
+     "task": 34,
+     "episode": 1300,
+     "start": 455,
+     "end": 557
+    },
+    {
+     "task": 36,
+     "episode": 1609,
+     "start": 557,
+     "end": 656
+    },
+    {
+     "task": 11,
+     "episode": 651,
+     "start": 656,
+     "end": 857
+    },
+    {
+     "task": 27,
+     "episode": 1052,
+     "start": 857,
+     "end": 1004
+    },
+    {
+     "task": 6,
+     "episode": 51,
+     "start": 1004,
+     "end": 1408
+    }
+   ]
+  },
+  {
+   "sid": "lr055",
+   "spans": [
+    {
+     "task": 18,
+     "episode": 706,
+     "start": 0,
+     "end": 123
+    },
+    {
+     "task": 27,
+     "episode": 828,
+     "start": 123,
+     "end": 290
+    },
+    {
+     "task": 21,
+     "episode": 1032,
+     "start": 290,
+     "end": 447
+    },
+    {
+     "task": 29,
+     "episode": 1106,
+     "start": 447,
+     "end": 616
+    },
+    {
+     "task": 7,
+     "episode": 175,
+     "start": 616,
+     "end": 851
+    },
+    {
+     "task": 22,
+     "episode": 1213,
+     "start": 851,
+     "end": 974
+    },
+    {
+     "task": 28,
+     "episode": 821,
+     "start": 974,
+     "end": 1106
+    },
+    {
+     "task": 26,
+     "episode": 1017,
+     "start": 1106,
+     "end": 1224
+    }
+   ]
+  },
+  {
+   "sid": "lr056",
+   "spans": [
+    {
+     "task": 5,
+     "episode": 77,
+     "start": 0,
+     "end": 300
+    },
+    {
+     "task": 16,
+     "episode": 759,
+     "start": 300,
+     "end": 396
+    },
+    {
+     "task": 2,
+     "episode": 357,
+     "start": 396,
+     "end": 652
+    },
+    {
+     "task": 14,
+     "episode": 788,
+     "start": 652,
+     "end": 744
+    },
+    {
+     "task": 32,
+     "episode": 1689,
+     "start": 744,
+     "end": 846
+    },
+    {
+     "task": 22,
+     "episode": 1092,
+     "start": 846,
+     "end": 983
+    },
+    {
+     "task": 24,
+     "episode": 818,
+     "start": 983,
+     "end": 1147
+    },
+    {
+     "task": 34,
+     "episode": 1382,
+     "start": 1147,
+     "end": 1268
+    }
+   ]
+  },
+  {
+   "sid": "lr057",
+   "spans": [
+    {
+     "task": 12,
+     "episode": 494,
+     "start": 0,
+     "end": 199
+    },
+    {
+     "task": 10,
+     "episode": 448,
+     "start": 199,
+     "end": 291
+    },
+    {
+     "task": 30,
+     "episode": 1333,
+     "start": 291,
+     "end": 432
+    },
+    {
+     "task": 3,
+     "episode": 292,
+     "start": 432,
+     "end": 744
+    },
+    {
+     "task": 39,
+     "episode": 1408,
+     "start": 744,
+     "end": 880
+    },
+    {
+     "task": 2,
+     "episode": 84,
+     "start": 880,
+     "end": 1127
+    },
+    {
+     "task": 31,
+     "episode": 1334,
+     "start": 1127,
+     "end": 1274
+    },
+    {
+     "task": 0,
+     "episode": 267,
+     "start": 1274,
+     "end": 1506
+    }
+   ]
+  },
+  {
+   "sid": "lr058",
+   "spans": [
+    {
+     "task": 13,
+     "episode": 536,
+     "start": 0,
+     "end": 85
+    },
+    {
+     "task": 15,
+     "episode": 710,
+     "start": 85,
+     "end": 230
+    },
+    {
+     "task": 12,
+     "episode": 449,
+     "start": 230,
+     "end": 479
+    },
+    {
+     "task": 20,
+     "episode": 1159,
+     "start": 479,
+     "end": 632
+    },
+    {
+     "task": 1,
+     "episode": 224,
+     "start": 632,
+     "end": 867
+    },
+    {
+     "task": 6,
+     "episode": 70,
+     "start": 867,
+     "end": 1283
+    },
+    {
+     "task": 3,
+     "episode": 361,
+     "start": 1283,
+     "end": 1584
+    },
+    {
+     "task": 5,
+     "episode": 132,
+     "start": 1584,
+     "end": 1896
+    }
+   ]
+  },
+  {
+   "sid": "lr059",
+   "spans": [
+    {
+     "task": 28,
+     "episode": 874,
+     "start": 0,
+     "end": 161
+    },
+    {
+     "task": 18,
+     "episode": 398,
+     "start": 161,
+     "end": 261
+    },
+    {
+     "task": 37,
+     "episode": 1632,
+     "start": 261,
+     "end": 384
+    },
+    {
+     "task": 19,
+     "episode": 405,
+     "start": 384,
+     "end": 522
+    },
+    {
+     "task": 38,
+     "episode": 1509,
+     "start": 522,
+     "end": 645
+    },
+    {
+     "task": 0,
+     "episode": 33,
+     "start": 645,
+     "end": 904
+    },
+    {
+     "task": 22,
+     "episode": 919,
+     "start": 904,
+     "end": 1067
+    },
+    {
+     "task": 17,
+     "episode": 424,
+     "start": 1067,
+     "end": 1158
+    }
+   ]
+  },
+  {
+   "sid": "lr060",
+   "spans": [
+    {
+     "task": 1,
+     "episode": 37,
+     "start": 0,
+     "end": 246
+    },
+    {
+     "task": 2,
+     "episode": 59,
+     "start": 246,
+     "end": 470
+    },
+    {
+     "task": 4,
+     "episode": 250,
+     "start": 470,
+     "end": 731
+    },
+    {
+     "task": 14,
+     "episode": 480,
+     "start": 731,
+     "end": 840
+    },
+    {
+     "task": 35,
+     "episode": 1592,
+     "start": 840,
+     "end": 935
+    },
+    {
+     "task": 27,
+     "episode": 1088,
+     "start": 935,
+     "end": 1088
+    },
+    {
+     "task": 20,
+     "episode": 835,
+     "start": 1088,
+     "end": 1217
+    },
+    {
+     "task": 32,
+     "episode": 1498,
+     "start": 1217,
+     "end": 1348
+    }
+   ]
+  },
+  {
+   "sid": "lr061",
+   "spans": [
+    {
+     "task": 7,
+     "episode": 165,
+     "start": 0,
+     "end": 256
+    },
+    {
+     "task": 13,
+     "episode": 709,
+     "start": 256,
+     "end": 355
+    },
+    {
+     "task": 14,
+     "episode": 480,
+     "start": 355,
+     "end": 464
+    },
+    {
+     "task": 9,
+     "episode": 133,
+     "start": 464,
+     "end": 645
+    },
+    {
+     "task": 36,
+     "episode": 1467,
+     "start": 645,
+     "end": 754
+    },
+    {
+     "task": 17,
+     "episode": 545,
+     "start": 754,
+     "end": 852
+    },
+    {
+     "task": 33,
+     "episode": 1369,
+     "start": 852,
+     "end": 985
+    },
+    {
+     "task": 30,
+     "episode": 1526,
+     "start": 985,
+     "end": 1115
+    }
+   ]
+  },
+  {
+   "sid": "lr062",
+   "spans": [
+    {
+     "task": 30,
+     "episode": 1309,
+     "start": 0,
+     "end": 115
+    },
+    {
+     "task": 31,
+     "episode": 1595,
+     "start": 115,
+     "end": 254
+    },
+    {
+     "task": 13,
+     "episode": 714,
+     "start": 254,
+     "end": 367
+    },
+    {
+     "task": 28,
+     "episode": 1141,
+     "start": 367,
+     "end": 509
+    },
+    {
+     "task": 34,
+     "episode": 1617,
+     "start": 509,
+     "end": 601
+    },
+    {
+     "task": 24,
+     "episode": 985,
+     "start": 601,
+     "end": 746
+    },
+    {
+     "task": 19,
+     "episode": 577,
+     "start": 746,
+     "end": 884
+    },
+    {
+     "task": 14,
+     "episode": 417,
+     "start": 884,
+     "end": 977
+    }
+   ]
+  },
+  {
+   "sid": "lr063",
+   "spans": [
+    {
+     "task": 4,
+     "episode": 237,
+     "start": 0,
+     "end": 264
+    },
+    {
+     "task": 8,
+     "episode": 327,
+     "start": 264,
+     "end": 499
+    },
+    {
+     "task": 14,
+     "episode": 619,
+     "start": 499,
+     "end": 603
+    },
+    {
+     "task": 33,
+     "episode": 1381,
+     "start": 603,
+     "end": 731
+    },
+    {
+     "task": 38,
+     "episode": 1657,
+     "start": 731,
+     "end": 857
+    },
+    {
+     "task": 30,
+     "episode": 1544,
+     "start": 857,
+     "end": 978
+    },
+    {
+     "task": 19,
+     "episode": 631,
+     "start": 978,
+     "end": 1120
+    },
+    {
+     "task": 2,
+     "episode": 59,
+     "start": 1120,
+     "end": 1344
+    }
+   ]
+  },
+  {
+   "sid": "lr064",
+   "spans": [
+    {
+     "task": 31,
+     "episode": 1373,
+     "start": 0,
+     "end": 156
+    },
+    {
+     "task": 19,
+     "episode": 547,
+     "start": 156,
+     "end": 292
+    },
+    {
+     "task": 3,
+     "episode": 153,
+     "start": 292,
+     "end": 547
+    },
+    {
+     "task": 1,
+     "episode": 52,
+     "start": 547,
+     "end": 784
+    },
+    {
+     "task": 39,
+     "episode": 1653,
+     "start": 784,
+     "end": 925
+    },
+    {
+     "task": 8,
+     "episode": 375,
+     "start": 925,
+     "end": 1180
+    },
+    {
+     "task": 7,
+     "episode": 117,
+     "start": 1180,
+     "end": 1438
+    },
+    {
+     "task": 2,
+     "episode": 140,
+     "start": 1438,
+     "end": 1750
+    }
+   ]
+  },
+  {
+   "sid": "lr065",
+   "spans": [
+    {
+     "task": 1,
+     "episode": 5,
+     "start": 0,
+     "end": 240
+    },
+    {
+     "task": 26,
+     "episode": 1252,
+     "start": 240,
+     "end": 365
+    },
+    {
+     "task": 22,
+     "episode": 1103,
+     "start": 365,
+     "end": 490
+    },
+    {
+     "task": 12,
+     "episode": 711,
+     "start": 490,
+     "end": 741
+    },
+    {
+     "task": 13,
+     "episode": 587,
+     "start": 741,
+     "end": 836
+    },
+    {
+     "task": 21,
+     "episode": 981,
+     "start": 836,
+     "end": 983
+    },
+    {
+     "task": 27,
+     "episode": 1026,
+     "start": 983,
+     "end": 1129
+    },
+    {
+     "task": 6,
+     "episode": 204,
+     "start": 1129,
+     "end": 1527
+    }
+   ]
+  },
+  {
+   "sid": "lr066",
+   "spans": [
+    {
+     "task": 18,
+     "episode": 775,
+     "start": 0,
+     "end": 93
+    },
+    {
+     "task": 8,
+     "episode": 89,
+     "start": 93,
+     "end": 322
+    },
+    {
+     "task": 17,
+     "episode": 789,
+     "start": 322,
+     "end": 425
+    },
+    {
+     "task": 3,
+     "episode": 263,
+     "start": 425,
+     "end": 732
+    },
+    {
+     "task": 0,
+     "episode": 33,
+     "start": 732,
+     "end": 991
+    },
+    {
+     "task": 15,
+     "episode": 606,
+     "start": 991,
+     "end": 1117
+    },
+    {
+     "task": 23,
+     "episode": 871,
+     "start": 1117,
+     "end": 1246
+    },
+    {
+     "task": 21,
+     "episode": 1095,
+     "start": 1246,
+     "end": 1396
+    }
+   ]
+  },
+  {
+   "sid": "lr067",
+   "spans": [
+    {
+     "task": 20,
+     "episode": 1227,
+     "start": 0,
+     "end": 126
+    },
+    {
+     "task": 36,
+     "episode": 1515,
+     "start": 126,
+     "end": 240
+    },
+    {
+     "task": 19,
+     "episode": 672,
+     "start": 240,
+     "end": 436
+    },
+    {
+     "task": 5,
+     "episode": 69,
+     "start": 436,
+     "end": 728
+    },
+    {
+     "task": 7,
+     "episode": 326,
+     "start": 728,
+     "end": 972
+    },
+    {
+     "task": 6,
+     "episode": 143,
+     "start": 972,
+     "end": 1391
+    },
+    {
+     "task": 4,
+     "episode": 331,
+     "start": 1391,
+     "end": 1658
+    },
+    {
+     "task": 15,
+     "episode": 400,
+     "start": 1658,
+     "end": 1796
+    }
+   ]
+  },
+  {
+   "sid": "lr068",
+   "spans": [
+    {
+     "task": 33,
+     "episode": 1398,
+     "start": 0,
+     "end": 142
+    },
+    {
+     "task": 2,
+     "episode": 145,
+     "start": 142,
+     "end": 397
+    },
+    {
+     "task": 17,
+     "episode": 741,
+     "start": 397,
+     "end": 511
+    },
+    {
+     "task": 31,
+     "episode": 1461,
+     "start": 511,
+     "end": 678
+    },
+    {
+     "task": 27,
+     "episode": 914,
+     "start": 678,
+     "end": 832
+    },
+    {
+     "task": 7,
+     "episode": 24,
+     "start": 832,
+     "end": 1073
+    },
+    {
+     "task": 10,
+     "episode": 431,
+     "start": 1073,
+     "end": 1179
+    },
+    {
+     "task": 16,
+     "episode": 388,
+     "start": 1179,
+     "end": 1269
+    }
+   ]
+  },
+  {
+   "sid": "lr069",
+   "spans": [
+    {
+     "task": 30,
+     "episode": 1526,
+     "start": 0,
+     "end": 130
+    },
+    {
+     "task": 36,
+     "episode": 1599,
+     "start": 130,
+     "end": 246
+    },
+    {
+     "task": 5,
+     "episode": 291,
+     "start": 246,
+     "end": 491
+    },
+    {
+     "task": 33,
+     "episode": 1423,
+     "start": 491,
+     "end": 628
+    },
+    {
+     "task": 14,
+     "episode": 427,
+     "start": 628,
+     "end": 729
+    },
+    {
+     "task": 32,
+     "episode": 1343,
+     "start": 729,
+     "end": 837
+    },
+    {
+     "task": 29,
+     "episode": 972,
+     "start": 837,
+     "end": 987
+    },
+    {
+     "task": 10,
+     "episode": 642,
+     "start": 987,
+     "end": 1077
+    }
+   ]
+  },
+  {
+   "sid": "lr070",
+   "spans": [
+    {
+     "task": 30,
+     "episode": 1645,
+     "start": 0,
+     "end": 155
+    },
+    {
+     "task": 3,
+     "episode": 45,
+     "start": 155,
+     "end": 422
+    },
+    {
+     "task": 31,
+     "episode": 1298,
+     "start": 422,
+     "end": 553
+    },
+    {
+     "task": 8,
+     "episode": 144,
+     "start": 553,
+     "end": 837
+    },
+    {
+     "task": 36,
+     "episode": 1584,
+     "start": 837,
+     "end": 952
+    },
+    {
+     "task": 22,
+     "episode": 1241,
+     "start": 952,
+     "end": 1089
+    },
+    {
+     "task": 29,
+     "episode": 1237,
+     "start": 1089,
+     "end": 1238
+    },
+    {
+     "task": 20,
+     "episode": 807,
+     "start": 1238,
+     "end": 1381
+    }
+   ]
+  },
+  {
+   "sid": "lr071",
+   "spans": [
+    {
+     "task": 36,
+     "episode": 1464,
+     "start": 0,
+     "end": 113
+    },
+    {
+     "task": 2,
+     "episode": 276,
+     "start": 113,
+     "end": 404
+    },
+    {
+     "task": 28,
+     "episode": 1107,
+     "start": 404,
+     "end": 530
+    },
+    {
+     "task": 16,
+     "episode": 602,
+     "start": 530,
+     "end": 615
+    },
+    {
+     "task": 22,
+     "episode": 1036,
+     "start": 615,
+     "end": 777
+    },
+    {
+     "task": 6,
+     "episode": 316,
+     "start": 777,
+     "end": 1173
+    },
+    {
+     "task": 24,
+     "episode": 1020,
+     "start": 1173,
+     "end": 1334
+    },
+    {
+     "task": 17,
+     "episode": 544,
+     "start": 1334,
+     "end": 1436
+    }
+   ]
+  },
+  {
+   "sid": "lr072",
+   "spans": [
+    {
+     "task": 32,
+     "episode": 1496,
+     "start": 0,
+     "end": 100
+    },
+    {
+     "task": 38,
+     "episode": 1320,
+     "start": 100,
+     "end": 223
+    },
+    {
+     "task": 0,
+     "episode": 249,
+     "start": 223,
+     "end": 456
+    },
+    {
+     "task": 36,
+     "episode": 1285,
+     "start": 456,
+     "end": 581
+    },
+    {
+     "task": 24,
+     "episode": 945,
+     "start": 581,
+     "end": 735
+    },
+    {
+     "task": 15,
+     "episode": 589,
+     "start": 735,
+     "end": 882
+    },
+    {
+     "task": 29,
+     "episode": 1048,
+     "start": 882,
+     "end": 1053
+    },
+    {
+     "task": 30,
+     "episode": 1645,
+     "start": 1053,
+     "end": 1208
+    }
+   ]
+  },
+  {
+   "sid": "lr073",
+   "spans": [
+    {
+     "task": 6,
+     "episode": 100,
+     "start": 0,
+     "end": 392
+    },
+    {
+     "task": 20,
+     "episode": 898,
+     "start": 392,
+     "end": 513
+    },
+    {
+     "task": 37,
+     "episode": 1601,
+     "start": 513,
+     "end": 647
+    },
+    {
+     "task": 9,
+     "episode": 55,
+     "start": 647,
+     "end": 825
+    },
+    {
+     "task": 24,
+     "episode": 876,
+     "start": 825,
+     "end": 985
+    },
+    {
+     "task": 32,
+     "episode": 1443,
+     "start": 985,
+     "end": 1113
+    },
+    {
+     "task": 18,
+     "episode": 689,
+     "start": 1113,
+     "end": 1222
+    },
+    {
+     "task": 16,
+     "episode": 435,
+     "start": 1222,
+     "end": 1322
+    }
+   ]
+  },
+  {
+   "sid": "lr074",
+   "spans": [
+    {
+     "task": 1,
+     "episode": 356,
+     "start": 0,
+     "end": 342
+    },
+    {
+     "task": 31,
+     "episode": 1582,
+     "start": 342,
+     "end": 479
+    },
+    {
+     "task": 17,
+     "episode": 676,
+     "start": 479,
+     "end": 583
+    },
+    {
+     "task": 27,
+     "episode": 1178,
+     "start": 583,
+     "end": 729
+    },
+    {
+     "task": 2,
+     "episode": 365,
+     "start": 729,
+     "end": 996
+    },
+    {
+     "task": 16,
+     "episode": 572,
+     "start": 996,
+     "end": 1091
+    },
+    {
+     "task": 30,
+     "episode": 1624,
+     "start": 1091,
+     "end": 1199
+    },
+    {
+     "task": 35,
+     "episode": 1580,
+     "start": 1199,
+     "end": 1299
+    }
+   ]
+  },
+  {
+   "sid": "lr075",
+   "spans": [
+    {
+     "task": 27,
+     "episode": 939,
+     "start": 0,
+     "end": 207
+    },
+    {
+     "task": 25,
+     "episode": 1244,
+     "start": 207,
+     "end": 357
+    },
+    {
+     "task": 24,
+     "episode": 876,
+     "start": 357,
+     "end": 517
+    },
+    {
+     "task": 29,
+     "episode": 990,
+     "start": 517,
+     "end": 667
+    },
+    {
+     "task": 7,
+     "episode": 43,
+     "start": 667,
+     "end": 939
+    },
+    {
+     "task": 33,
+     "episode": 1667,
+     "start": 939,
+     "end": 1071
+    },
+    {
+     "task": 0,
+     "episode": 235,
+     "start": 1071,
+     "end": 1318
+    },
+    {
+     "task": 28,
+     "episode": 1206,
+     "start": 1318,
+     "end": 1468
+    }
+   ]
+  },
+  {
+   "sid": "lr076",
+   "spans": [
+    {
+     "task": 24,
+     "episode": 818,
+     "start": 0,
+     "end": 164
+    },
+    {
+     "task": 27,
+     "episode": 1059,
+     "start": 164,
+     "end": 325
+    },
+    {
+     "task": 33,
+     "episode": 1516,
+     "start": 325,
+     "end": 461
+    },
+    {
+     "task": 4,
+     "episode": 293,
+     "start": 461,
+     "end": 766
+    },
+    {
+     "task": 26,
+     "episode": 1056,
+     "start": 766,
+     "end": 929
+    },
+    {
+     "task": 30,
+     "episode": 1606,
+     "start": 929,
+     "end": 1042
+    },
+    {
+     "task": 19,
+     "episode": 765,
+     "start": 1042,
+     "end": 1170
+    },
+    {
+     "task": 15,
+     "episode": 769,
+     "start": 1170,
+     "end": 1319
+    }
+   ]
+  },
+  {
+   "sid": "lr077",
+   "spans": [
+    {
+     "task": 32,
+     "episode": 1577,
+     "start": 0,
+     "end": 111
+    },
+    {
+     "task": 21,
+     "episode": 836,
+     "start": 111,
+     "end": 247
+    },
+    {
+     "task": 17,
+     "episode": 616,
+     "start": 247,
+     "end": 343
+    },
+    {
+     "task": 39,
+     "episode": 1439,
+     "start": 343,
+     "end": 482
+    },
+    {
+     "task": 24,
+     "episode": 1171,
+     "start": 482,
+     "end": 633
+    },
+    {
+     "task": 28,
+     "episode": 864,
+     "start": 633,
+     "end": 766
+    },
+    {
+     "task": 6,
+     "episode": 376,
+     "start": 766,
+     "end": 1224
+    },
+    {
+     "task": 0,
+     "episode": 33,
+     "start": 1224,
+     "end": 1483
+    }
+   ]
+  },
+  {
+   "sid": "lr078",
+   "spans": [
+    {
+     "task": 28,
+     "episode": 1087,
+     "start": 0,
+     "end": 160
+    },
+    {
+     "task": 11,
+     "episode": 652,
+     "start": 160,
+     "end": 337
+    },
+    {
+     "task": 31,
+     "episode": 1334,
+     "start": 337,
+     "end": 484
+    },
+    {
+     "task": 12,
+     "episode": 694,
+     "start": 484,
+     "end": 657
+    },
+    {
+     "task": 4,
+     "episode": 98,
+     "start": 657,
+     "end": 942
+    },
+    {
+     "task": 36,
+     "episode": 1503,
+     "start": 942,
+     "end": 1047
+    },
+    {
+     "task": 29,
+     "episode": 1168,
+     "start": 1047,
+     "end": 1196
+    },
+    {
+     "task": 1,
+     "episode": 356,
+     "start": 1196,
+     "end": 1538
+    }
+   ]
+  },
+  {
+   "sid": "lr079",
+   "spans": [
+    {
+     "task": 17,
+     "episode": 796,
+     "start": 0,
+     "end": 98
+    },
+    {
+     "task": 34,
+     "episode": 1344,
+     "start": 98,
+     "end": 210
+    },
+    {
+     "task": 18,
+     "episode": 661,
+     "start": 210,
+     "end": 315
+    },
+    {
+     "task": 21,
+     "episode": 1018,
+     "start": 315,
+     "end": 494
+    },
+    {
+     "task": 37,
+     "episode": 1632,
+     "start": 494,
+     "end": 617
+    },
+    {
+     "task": 0,
+     "episode": 309,
+     "start": 617,
+     "end": 881
+    },
+    {
+     "task": 38,
+     "episode": 1510,
+     "start": 881,
+     "end": 995
+    },
+    {
+     "task": 23,
+     "episode": 1258,
+     "start": 995,
+     "end": 1143
+    }
+   ]
+  },
+  {
+   "sid": "lr080",
+   "spans": [
+    {
+     "task": 3,
+     "episode": 162,
+     "start": 0,
+     "end": 272
+    },
+    {
+     "task": 14,
+     "episode": 588,
+     "start": 272,
+     "end": 364
+    },
+    {
+     "task": 28,
+     "episode": 883,
+     "start": 364,
+     "end": 501
+    },
+    {
+     "task": 0,
+     "episode": 233,
+     "start": 501,
+     "end": 766
+    },
+    {
+     "task": 8,
+     "episode": 377,
+     "start": 766,
+     "end": 995
+    },
+    {
+     "task": 2,
+     "episode": 285,
+     "start": 995,
+     "end": 1290
+    },
+    {
+     "task": 10,
+     "episode": 727,
+     "start": 1290,
+     "end": 1377
+    },
+    {
+     "task": 37,
+     "episode": 1601,
+     "start": 1377,
+     "end": 1511
+    }
+   ]
+  },
+  {
+   "sid": "lr081",
+   "spans": [
+    {
+     "task": 17,
+     "episode": 721,
+     "start": 0,
+     "end": 102
+    },
+    {
+     "task": 13,
+     "episode": 730,
+     "start": 102,
+     "end": 206
+    },
+    {
+     "task": 33,
+     "episode": 1398,
+     "start": 206,
+     "end": 348
+    },
+    {
+     "task": 36,
+     "episode": 1409,
+     "start": 348,
+     "end": 458
+    },
+    {
+     "task": 35,
+     "episode": 1528,
+     "start": 458,
+     "end": 571
+    },
+    {
+     "task": 11,
+     "episode": 695,
+     "start": 571,
+     "end": 723
+    },
+    {
+     "task": 25,
+     "episode": 1154,
+     "start": 723,
+     "end": 898
+    },
+    {
+     "task": 30,
+     "episode": 1448,
+     "start": 898,
+     "end": 1017
+    }
+   ]
+  },
+  {
+   "sid": "lr082",
+   "spans": [
+    {
+     "task": 1,
+     "episode": 152,
+     "start": 0,
+     "end": 226
+    },
+    {
+     "task": 15,
+     "episode": 461,
+     "start": 226,
+     "end": 355
+    },
+    {
+     "task": 4,
+     "episode": 286,
+     "start": 355,
+     "end": 632
+    },
+    {
+     "task": 18,
+     "episode": 661,
+     "start": 632,
+     "end": 737
+    },
+    {
+     "task": 7,
+     "episode": 116,
+     "start": 737,
+     "end": 999
+    },
+    {
+     "task": 16,
+     "episode": 690,
+     "start": 999,
+     "end": 1098
+    },
+    {
+     "task": 27,
+     "episode": 1014,
+     "start": 1098,
+     "end": 1262
+    },
+    {
+     "task": 3,
+     "episode": 150,
+     "start": 1262,
+     "end": 1560
+    }
+   ]
+  },
+  {
+   "sid": "lr083",
+   "spans": [
+    {
+     "task": 25,
+     "episode": 1053,
+     "start": 0,
+     "end": 127
+    },
+    {
+     "task": 6,
+     "episode": 187,
+     "start": 127,
+     "end": 489
+    },
+    {
+     "task": 0,
+     "episode": 346,
+     "start": 489,
+     "end": 764
+    },
+    {
+     "task": 7,
+     "episode": 378,
+     "start": 764,
+     "end": 1016
+    },
+    {
+     "task": 1,
+     "episode": 68,
+     "start": 1016,
+     "end": 1305
+    },
+    {
+     "task": 18,
+     "episode": 696,
+     "start": 1305,
+     "end": 1409
+    },
+    {
+     "task": 2,
+     "episode": 80,
+     "start": 1409,
+     "end": 1648
+    },
+    {
+     "task": 35,
+     "episode": 1324,
+     "start": 1648,
+     "end": 1747
+    }
+   ]
+  },
+  {
+   "sid": "lr084",
+   "spans": [
+    {
+     "task": 38,
+     "episode": 1573,
+     "start": 0,
+     "end": 117
+    },
+    {
+     "task": 3,
+     "episode": 95,
+     "start": 117,
+     "end": 359
+    },
+    {
+     "task": 8,
+     "episode": 262,
+     "start": 359,
+     "end": 587
+    },
+    {
+     "task": 35,
+     "episode": 1366,
+     "start": 587,
+     "end": 681
+    },
+    {
+     "task": 21,
+     "episode": 971,
+     "start": 681,
+     "end": 837
+    },
+    {
+     "task": 6,
+     "episode": 179,
+     "start": 837,
+     "end": 1247
+    },
+    {
+     "task": 4,
+     "episode": 250,
+     "start": 1247,
+     "end": 1508
+    },
+    {
+     "task": 37,
+     "episode": 1664,
+     "start": 1508,
+     "end": 1658
+    }
+   ]
+  },
+  {
+   "sid": "lr085",
+   "spans": [
+    {
+     "task": 32,
+     "episode": 1481,
+     "start": 0,
+     "end": 118
+    },
+    {
+     "task": 14,
+     "episode": 697,
+     "start": 118,
+     "end": 240
+    },
+    {
+     "task": 1,
+     "episode": 37,
+     "start": 240,
+     "end": 486
+    },
+    {
+     "task": 26,
+     "episode": 1167,
+     "start": 486,
+     "end": 606
+    },
+    {
+     "task": 5,
+     "episode": 308,
+     "start": 606,
+     "end": 942
+    },
+    {
+     "task": 33,
+     "episode": 1593,
+     "start": 942,
+     "end": 1066
+    },
+    {
+     "task": 38,
+     "episode": 1317,
+     "start": 1066,
+     "end": 1180
+    },
+    {
+     "task": 35,
+     "episode": 1570,
+     "start": 1180,
+     "end": 1286
+    }
+   ]
+  },
+  {
+   "sid": "lr086",
+   "spans": [
+    {
+     "task": 20,
+     "episode": 1197,
+     "start": 0,
+     "end": 121
+    },
+    {
+     "task": 33,
+     "episode": 1398,
+     "start": 121,
+     "end": 263
+    },
+    {
+     "task": 28,
+     "episode": 1257,
+     "start": 263,
+     "end": 395
+    },
+    {
+     "task": 30,
+     "episode": 1301,
+     "start": 395,
+     "end": 536
+    },
+    {
+     "task": 5,
+     "episode": 71,
+     "start": 536,
+     "end": 848
+    },
+    {
+     "task": 17,
+     "episode": 616,
+     "start": 848,
+     "end": 944
+    },
+    {
+     "task": 4,
+     "episode": 41,
+     "start": 944,
+     "end": 1180
+    },
+    {
+     "task": 27,
+     "episode": 1026,
+     "start": 1180,
+     "end": 1326
+    }
+   ]
+  },
+  {
+   "sid": "lr087",
+   "spans": [
+    {
+     "task": 34,
+     "episode": 1395,
+     "start": 0,
+     "end": 87
+    },
+    {
+     "task": 35,
+     "episode": 1279,
+     "start": 87,
+     "end": 183
+    },
+    {
+     "task": 3,
+     "episode": 203,
+     "start": 183,
+     "end": 426
+    },
+    {
+     "task": 2,
+     "episode": 2,
+     "start": 426,
+     "end": 771
+    },
+    {
+     "task": 37,
+     "episode": 1529,
+     "start": 771,
+     "end": 882
+    },
+    {
+     "task": 27,
+     "episode": 1220,
+     "start": 882,
+     "end": 1032
+    },
+    {
+     "task": 26,
+     "episode": 1167,
+     "start": 1032,
+     "end": 1152
+    },
+    {
+     "task": 30,
+     "episode": 1338,
+     "start": 1152,
+     "end": 1277
+    }
+   ]
+  },
+  {
+   "sid": "lr088",
+   "spans": [
+    {
+     "task": 32,
+     "episode": 1561,
+     "start": 0,
+     "end": 121
+    },
+    {
+     "task": 26,
+     "episode": 1137,
+     "start": 121,
+     "end": 257
+    },
+    {
+     "task": 3,
+     "episode": 321,
+     "start": 257,
+     "end": 497
+    },
+    {
+     "task": 18,
+     "episode": 712,
+     "start": 497,
+     "end": 584
+    },
+    {
+     "task": 0,
+     "episode": 22,
+     "start": 584,
+     "end": 847
+    },
+    {
+     "task": 4,
+     "episode": 297,
+     "start": 847,
+     "end": 1083
+    },
+    {
+     "task": 27,
+     "episode": 855,
+     "start": 1083,
+     "end": 1234
+    },
+    {
+     "task": 34,
+     "episode": 1344,
+     "start": 1234,
+     "end": 1346
+    }
+   ]
+  },
+  {
+   "sid": "lr089",
+   "spans": [
+    {
+     "task": 4,
+     "episode": 96,
+     "start": 0,
+     "end": 280
+    },
+    {
+     "task": 36,
+     "episode": 1392,
+     "start": 280,
+     "end": 402
+    },
+    {
+     "task": 28,
+     "episode": 1174,
+     "start": 402,
+     "end": 537
+    },
+    {
+     "task": 10,
+     "episode": 563,
+     "start": 537,
+     "end": 635
+    },
+    {
+     "task": 17,
+     "episode": 612,
+     "start": 635,
+     "end": 742
+    },
+    {
+     "task": 5,
+     "episode": 8,
+     "start": 742,
+     "end": 1001
+    },
+    {
+     "task": 20,
+     "episode": 837,
+     "start": 1001,
+     "end": 1126
+    },
+    {
+     "task": 3,
+     "episode": 87,
+     "start": 1126,
+     "end": 1389
+    }
+   ]
+  },
+  {
+   "sid": "lr090",
+   "spans": [
+    {
+     "task": 19,
+     "episode": 754,
+     "start": 0,
+     "end": 125
+    },
+    {
+     "task": 15,
+     "episode": 680,
+     "start": 125,
+     "end": 303
+    },
+    {
+     "task": 10,
+     "episode": 422,
+     "start": 303,
+     "end": 390
+    },
+    {
+     "task": 5,
+     "episode": 26,
+     "start": 390,
+     "end": 686
+    },
+    {
+     "task": 34,
+     "episode": 1491,
+     "start": 686,
+     "end": 786
+    },
+    {
+     "task": 20,
+     "episode": 866,
+     "start": 786,
+     "end": 1040
+    },
+    {
+     "task": 30,
+     "episode": 1304,
+     "start": 1040,
+     "end": 1153
+    },
+    {
+     "task": 36,
+     "episode": 1513,
+     "start": 1153,
+     "end": 1264
+    }
+   ]
+  },
+  {
+   "sid": "lr091",
+   "spans": [
+    {
+     "task": 37,
+     "episode": 1555,
+     "start": 0,
+     "end": 131
+    },
+    {
+     "task": 3,
+     "episode": 87,
+     "start": 131,
+     "end": 394
+    },
+    {
+     "task": 33,
+     "episode": 1673,
+     "start": 394,
+     "end": 524
+    },
+    {
+     "task": 34,
+     "episode": 1379,
+     "start": 524,
+     "end": 599
+    },
+    {
+     "task": 31,
+     "episode": 1586,
+     "start": 599,
+     "end": 730
+    },
+    {
+     "task": 6,
+     "episode": 214,
+     "start": 730,
+     "end": 1118
+    },
+    {
+     "task": 8,
+     "episode": 262,
+     "start": 1118,
+     "end": 1346
+    },
+    {
+     "task": 20,
+     "episode": 870,
+     "start": 1346,
+     "end": 1481
+    }
+   ]
+  },
+  {
+   "sid": "lr092",
+   "spans": [
+    {
+     "task": 9,
+     "episode": 290,
+     "start": 0,
+     "end": 150
+    },
+    {
+     "task": 14,
+     "episode": 404,
+     "start": 150,
+     "end": 266
+    },
+    {
+     "task": 13,
+     "episode": 391,
+     "start": 266,
+     "end": 401
+    },
+    {
+     "task": 15,
+     "episode": 778,
+     "start": 401,
+     "end": 555
+    },
+    {
+     "task": 18,
+     "episode": 474,
+     "start": 555,
+     "end": 658
+    },
+    {
+     "task": 4,
+     "episode": 196,
+     "start": 658,
+     "end": 927
+    },
+    {
+     "task": 5,
+     "episode": 336,
+     "start": 927,
+     "end": 1203
+    },
+    {
+     "task": 38,
+     "episode": 1460,
+     "start": 1203,
+     "end": 1312
+    }
+   ]
+  },
+  {
+   "sid": "lr093",
+   "spans": [
+    {
+     "task": 5,
+     "episode": 13,
+     "start": 0,
+     "end": 285
+    },
+    {
+     "task": 38,
+     "episode": 1573,
+     "start": 285,
+     "end": 402
+    },
+    {
+     "task": 4,
+     "episode": 265,
+     "start": 402,
+     "end": 654
+    },
+    {
+     "task": 32,
+     "episode": 1562,
+     "start": 654,
+     "end": 771
+    },
+    {
+     "task": 37,
+     "episode": 1508,
+     "start": 771,
+     "end": 884
+    },
+    {
+     "task": 19,
+     "episode": 463,
+     "start": 884,
+     "end": 1027
+    },
+    {
+     "task": 2,
+     "episode": 230,
+     "start": 1027,
+     "end": 1305
+    },
+    {
+     "task": 24,
+     "episode": 945,
+     "start": 1305,
+     "end": 1459
+    }
+   ]
+  },
+  {
+   "sid": "lr094",
+   "spans": [
+    {
+     "task": 8,
+     "episode": 192,
+     "start": 0,
+     "end": 230
+    },
+    {
+     "task": 37,
+     "episode": 1305,
+     "start": 230,
+     "end": 373
+    },
+    {
+     "task": 4,
+     "episode": 63,
+     "start": 373,
+     "end": 621
+    },
+    {
+     "task": 32,
+     "episode": 1626,
+     "start": 621,
+     "end": 733
+    },
+    {
+     "task": 20,
+     "episode": 1050,
+     "start": 733,
+     "end": 856
+    },
+    {
+     "task": 24,
+     "episode": 945,
+     "start": 856,
+     "end": 1010
+    },
+    {
+     "task": 33,
+     "episode": 1269,
+     "start": 1010,
+     "end": 1149
+    },
+    {
+     "task": 29,
+     "episode": 847,
+     "start": 1149,
+     "end": 1312
+    }
+   ]
+  },
+  {
+   "sid": "lr095",
+   "spans": [
+    {
+     "task": 24,
+     "episode": 1166,
+     "start": 0,
+     "end": 148
+    },
+    {
+     "task": 6,
+     "episode": 376,
+     "start": 148,
+     "end": 606
+    },
+    {
+     "task": 11,
+     "episode": 583,
+     "start": 606,
+     "end": 766
+    },
+    {
+     "task": 13,
+     "episode": 644,
+     "start": 766,
+     "end": 870
+    },
+    {
+     "task": 35,
+     "episode": 1658,
+     "start": 870,
+     "end": 971
+    },
+    {
+     "task": 22,
+     "episode": 1061,
+     "start": 971,
+     "end": 1110
+    },
+    {
+     "task": 25,
+     "episode": 1116,
+     "start": 1110,
+     "end": 1240
+    },
+    {
+     "task": 8,
+     "episode": 319,
+     "start": 1240,
+     "end": 1477
+    }
+   ]
+  },
+  {
+   "sid": "lr096",
+   "spans": [
+    {
+     "task": 20,
+     "episode": 1013,
+     "start": 0,
+     "end": 144
+    },
+    {
+     "task": 18,
+     "episode": 590,
+     "start": 144,
+     "end": 234
+    },
+    {
+     "task": 5,
+     "episode": 102,
+     "start": 234,
+     "end": 551
+    },
+    {
+     "task": 26,
+     "episode": 902,
+     "start": 551,
+     "end": 675
+    },
+    {
+     "task": 34,
+     "episode": 1401,
+     "start": 675,
+     "end": 764
+    },
+    {
+     "task": 37,
+     "episode": 1370,
+     "start": 764,
+     "end": 916
+    },
+    {
+     "task": 32,
+     "episode": 1341,
+     "start": 916,
+     "end": 1070
+    },
+    {
+     "task": 36,
+     "episode": 1409,
+     "start": 1070,
+     "end": 1180
+    }
+   ]
+  },
+  {
+   "sid": "lr097",
+   "spans": [
+    {
+     "task": 16,
+     "episode": 640,
+     "start": 0,
+     "end": 81
+    },
+    {
+     "task": 9,
+     "episode": 103,
+     "start": 81,
+     "end": 265
+    },
+    {
+     "task": 18,
+     "episode": 474,
+     "start": 265,
+     "end": 368
+    },
+    {
+     "task": 28,
+     "episode": 962,
+     "start": 368,
+     "end": 505
+    },
+    {
+     "task": 36,
+     "episode": 1348,
+     "start": 505,
+     "end": 619
+    },
+    {
+     "task": 31,
+     "episode": 1276,
+     "start": 619,
+     "end": 759
+    },
+    {
+     "task": 19,
+     "episode": 541,
+     "start": 759,
+     "end": 909
+    },
+    {
+     "task": 0,
+     "episode": 264,
+     "start": 909,
+     "end": 1195
+    }
+   ]
+  },
+  {
+   "sid": "lr098",
+   "spans": [
+    {
+     "task": 7,
+     "episode": 360,
+     "start": 0,
+     "end": 246
+    },
+    {
+     "task": 6,
+     "episode": 70,
+     "start": 246,
+     "end": 662
+    },
+    {
+     "task": 35,
+     "episode": 1618,
+     "start": 662,
+     "end": 752
+    },
+    {
+     "task": 29,
+     "episode": 1214,
+     "start": 752,
+     "end": 900
+    },
+    {
+     "task": 8,
+     "episode": 31,
+     "start": 900,
+     "end": 1141
+    },
+    {
+     "task": 9,
+     "episode": 368,
+     "start": 1141,
+     "end": 1310
+    },
+    {
+     "task": 27,
+     "episode": 999,
+     "start": 1310,
+     "end": 1475
+    },
+    {
+     "task": 36,
+     "episode": 1507,
+     "start": 1475,
+     "end": 1582
+    }
+   ]
+  },
+  {
+   "sid": "lr099",
+   "spans": [
+    {
+     "task": 28,
+     "episode": 830,
+     "start": 0,
+     "end": 130
+    },
+    {
+     "task": 34,
+     "episode": 1568,
+     "start": 130,
+     "end": 222
+    },
+    {
+     "task": 10,
+     "episode": 639,
+     "start": 222,
+     "end": 329
+    },
+    {
+     "task": 38,
+     "episode": 1358,
+     "start": 329,
+     "end": 434
+    },
+    {
+     "task": 9,
+     "episode": 61,
+     "start": 434,
+     "end": 614
+    },
+    {
+     "task": 37,
+     "episode": 1656,
+     "start": 614,
+     "end": 743
+    },
+    {
+     "task": 22,
+     "episode": 931,
+     "start": 743,
+     "end": 870
+    },
+    {
+     "task": 21,
+     "episode": 1142,
+     "start": 870,
+     "end": 1015
+    }
+   ]
+  }
+ ],
+ "tasks": {
+  "0": "put the white mug on the left plate and put the yellow and white mug on the right plate",
+  "1": "put the white mug on the plate and put the chocolate pudding to the right of the plate",
+  "2": "put the yellow and white mug in the microwave and close it",
+  "3": "turn on the stove and put the moka pot on it",
+  "4": "put both the alphabet soup and the cream cheese box in the basket",
+  "5": "put both the alphabet soup and the tomato sauce in the basket",
+  "6": "put both moka pots on the stove",
+  "7": "put both the cream cheese box and the butter in the basket",
+  "8": "put the black bowl in the bottom drawer of the cabinet and close it",
+  "9": "pick up the book and place it in the back compartment of the caddy",
+  "10": "put the bowl on the plate",
+  "11": "put the wine bottle on the rack",
+  "12": "open the top drawer and put the bowl inside",
+  "13": "put the cream cheese in the bowl",
+  "14": "put the wine bottle on top of the cabinet",
+  "15": "push the plate to the front of the stove",
+  "16": "turn on the stove",
+  "17": "put the bowl on the stove",
+  "18": "put the bowl on top of the cabinet",
+  "19": "open the middle drawer of the cabinet",
+  "20": "pick up the orange juice and place it in the basket",
+  "21": "pick up the ketchup and place it in the basket",
+  "22": "pick up the cream cheese and place it in the basket",
+  "23": "pick up the bbq sauce and place it in the basket",
+  "24": "pick up the alphabet soup and place it in the basket",
+  "25": "pick up the milk and place it in the basket",
+  "26": "pick up the salad dressing and place it in the basket",
+  "27": "pick up the butter and place it in the basket",
+  "28": "pick up the tomato sauce and place it in the basket",
+  "29": "pick up the chocolate pudding and place it in the basket",
+  "30": "pick up the black bowl next to the cookie box and place it on the plate",
+  "31": "pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate",
+  "32": "pick up the black bowl on the ramekin and place it on the plate",
+  "33": "pick up the black bowl on the stove and place it on the plate",
+  "34": "pick up the black bowl between the plate and the ramekin and place it on the plate",
+  "35": "pick up the black bowl on the cookie box and place it on the plate",
+  "36": "pick up the black bowl next to the plate and place it on the plate",
+  "37": "pick up the black bowl next to the ramekin and place it on the plate",
+  "38": "pick up the black bowl from table center and place it on the plate",
+  "39": "pick up the black bowl on the wooden cabinet and place it on the plate"
+ }
+}
