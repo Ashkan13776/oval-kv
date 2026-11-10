@@ -102,8 +102,8 @@ def main():
         for ci in range(len(COLS)):
             c = cell[d, ci]
             cs.append("--" if c is None else mark(f"{c[0]:.2f}" + ("$^{*}$" if c[1] else ""), rk.get((d, ci))))
-        tex.append(f"{lab} & {tok} & " + " & ".join(cs) + " \\\\")
-        md.append(f"| {lab} | {tok} | " + " | ".join(x.replace('$^{*}$', '*') for x in cs) + " |")
+        tex.append(f"{lab} & {tok} & {mem.get(d, '--')} & " + " & ".join(cs) + " \\\\")
+        md.append(f"| {lab} | {tok} | {mem.get(d, '--')} | " + " | ".join(x.replace('$^{*}$', '*') for x in cs) + " |")
     tex += ["\\bottomrule", "\\end{tabular}"]
     os.makedirs(os.path.join(R, "latex"), exist_ok=True)
     open(os.path.join(R, "latex", a.name + ".tex"), "w").write("\n".join(tex) + "\n")
@@ -165,8 +165,8 @@ def ablation(drop=()):
         for g in G:
             c = cell[d, g]
             cs.append("--" if c is None else mark(f"{c[0]:.2f}" + ("$^{*}$" if c[1] else ""), rk.get((d, g))))
-        tex.append(f"{lab} & {tok} & " + " & ".join(cs) + " \\\\")
-        md.append(f"| {lab} | {tok} | " + " | ".join(x.replace('$^{*}$', '*') for x in cs) + " |")
+        tex.append(f"{lab} & {tok} & {mem.get(d, '--')} & " + " & ".join(cs) + " \\\\")
+        md.append(f"| {lab} | {tok} | {mem.get(d, '--')} | " + " | ".join(x.replace('$^{*}$', '*') for x in cs) + " |")
         if d == "full_n32":
             tex.append("\\midrule")
     tex += ["\\bottomrule", "\\end{tabular}"]
@@ -204,6 +204,24 @@ MROWS = [  # (arm, label, budget, block); block 2 = matched ~15% (ranked)
 ]
 
 
+def memcol():
+    """KV-memory column (% of FullKV N, range over the four model x benchmark settings) from memory_c.csv."""
+    p = os.path.join(R, "tables", "memory_c.csv")
+    if not os.path.exists(p):
+        return {}
+    v, res = defaultdict(list), defaultdict(list)
+    for r in csv.DictReader(open(p)):
+        if r["pct_of_fullN"]:
+            v[r["arm"]].append(float(r["pct_of_fullN"]))
+            if r["rekv_resident_pct"]:
+                res[r["arm"]].append(float(r["rekv_resident_pct"]))
+    fmt = lambda xs: f"{round(min(xs))}\\%" if round(min(xs)) == round(max(xs)) else f"{round(min(xs))}--{round(max(xs))}\\%"
+    out = {a: fmt(x) for a, x in v.items()}
+    for a, x in res.items():
+        out[a] += f"$^{{\\S}}$"
+    return out
+
+
 def merged():
     dur = lambda x: x.get("group") or x.get("duration")
     cell, rows_csv = {}, []
@@ -230,14 +248,15 @@ def merged():
         for d, r in ranks(vals).items():
             rk[d, ci] = r
     S = {"short": "S", "medium": "M", "long": "L", "overall": "All"}
-    tex = ["\\begin{tabular}{@{}ll" + "cccc" * 2 + "cc@{}}", "\\toprule",
-           " & & \\multicolumn{8}{c}{Video-MME} & \\multicolumn{2}{c}{LVBench} \\\\",
-           "\\cmidrule(lr){3-10}\\cmidrule(l){11-12}",
-           " & & \\multicolumn{4}{c}{Qwen2.5-VL} & \\multicolumn{4}{c}{LLaVA-Video} & Qwen2.5-VL & LLaVA-Video \\\\",
-           "\\cmidrule(lr){3-6}\\cmidrule(lr){7-10}",
-           "\\textbf{Method} & \\textbf{Budget} & " + " & ".join(S[c[3]] for c in MCOLS[:8]) + " & All & All \\\\",
+    mem = memcol()
+    tex = ["\\begin{tabular}{@{}lll" + "cccc" * 2 + "cc@{}}", "\\toprule",
+           " & & & \\multicolumn{8}{c}{Video-MME} & \\multicolumn{2}{c}{LVBench} \\\\",
+           "\\cmidrule(lr){4-11}\\cmidrule(l){12-13}",
+           " & & & \\multicolumn{4}{c}{Qwen2.5-VL} & \\multicolumn{4}{c}{LLaVA-Video} & Qwen2.5-VL & LLaVA-Video \\\\",
+           "\\cmidrule(lr){4-7}\\cmidrule(lr){8-11}",
+           "\\textbf{Method} & \\textbf{Budget} & \\textbf{KV mem.} & " + " & ".join(S[c[3]] for c in MCOLS[:8]) + " & All & All \\\\",
            "\\midrule"]
-    md = ["| Method | Budget | " + " | ".join(f"{c[0]} {c[1]} {c[3]}" for c in MCOLS) + " |", "|---|---|" + "---|" * len(MCOLS)]
+    md = ["| Method | Budget | KV mem. | " + " | ".join(f"{c[0]} {c[1]} {c[3]}" for c in MCOLS) + " |", "|---|---|---|" + "---|" * len(MCOLS)]
     b0 = 0
     for d, lab, tok, blk in MROWS:
         if blk != b0:
@@ -246,8 +265,8 @@ def merged():
         for ci in range(len(MCOLS)):
             c = cell[d, ci]
             cs.append("--" if c is None else mark(f"{c[0]:.2f}" + ("$^{*}$" if c[1] else ""), rk.get((d, ci))))
-        tex.append(f"{lab} & {tok} & " + " & ".join(cs) + " \\\\")
-        md.append(f"| {lab} | {tok} | " + " | ".join(x.replace('$^{*}$', '*') for x in cs) + " |")
+        tex.append(f"{lab} & {tok} & {mem.get(d, '--')} & " + " & ".join(cs) + " \\\\")
+        md.append(f"| {lab} | {tok} | {mem.get(d, '--')} | " + " | ".join(x.replace('$^{*}$', '*') for x in cs) + " |")
     tex += ["\\bottomrule", "\\end{tabular}"]
     open(os.path.join(R, "latex", "paper_table_c_merged.tex"), "w").write("\n".join(tex) + "\n")
     open(os.path.join(R, "tables", "paper_table_c_merged.md"), "w").write("\n".join(md) + "\n")
