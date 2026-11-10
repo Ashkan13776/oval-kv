@@ -61,5 +61,27 @@ def main():
         w = csv.writer(f); w.writerow(["panel", "model", "arm", "x", "value", "lo", "hi"]); w.writerows(out)
 
 
+def selection_only():
+    """Panel (a) alone -> figures/video_selection.pdf (+ .csv): the version in the paper."""
+    sel = rows(os.path.join(R, "figures", "c5_selection_line.csv"))
+    fig, ax = plt.subplots(figsize=(COL, 1.75))
+    out = []
+    for (m, lab), c, ls in zip(MODELS, [SEQ(1.0), SEQ(0.45)], ["-", "--"]):
+        r = [x for x in sel if x["model"] == m]
+        f = [int(x["frame"]) for x in r]
+        y, lo, hi = ([100 * float(x[k]) for x in r] for k in ("mean_selected_fraction", "lo", "hi"))
+        ax.fill_between(f, lo, hi, color=c, alpha=0.2, lw=0)
+        ax.plot(f, y, color=c, lw=1.1, ls=ls, label=lab)
+        out += [[lab, a, b, l, h] for a, b, l, h in zip(f, y, lo, hi)]
+    ax.set_xlim(0, 63); ax.set_ylim(0, None); ax.set_xticks([0, 16, 32, 48, 63])
+    ax.set_xlabel("frame index (64 frames)"); ax.set_ylabel("tokens selected (%)")
+    ax.yaxis.grid(True, color=GRID, lw=0.5); ax.set_axisbelow(True)
+    ax.legend(frameon=False, loc="upper center", ncol=2, handlelength=1.4)
+    fig.savefig(os.path.join(R, "figures", "video_selection.pdf"))
+    with open(os.path.join(R, "figures", "video_selection.csv"), "w", newline="") as f:
+        w = csv.writer(f); w.writerow(["model", "frame", "selected_pct", "lo", "hi"]); w.writerows(out)
+
+
 if __name__ == "__main__":
     main()
+    selection_only()
