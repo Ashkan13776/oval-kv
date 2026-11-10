@@ -1,0 +1,21 @@
+{
+ "method": "infinipot",
+ "block": 5,
+ "compress": 4,
+ "topk": 4,
+ "sink": 128,
+ "recent": 128,
+ "bench": "lvbench",
+ "durations": [
+  "short",
+  "medium",
+  "long"
+ ],
+ "limit": null,
+ "qids": null,
+ "shard": 3,
+ "nshards": 4,
+ "max_new_tokens": 16,
+ "file_tag": "",
+ "out": "results/revision/C/runs/c3_lvbench_qwen25vl/infinipot_2k"
+}

@@ -453,6 +453,25 @@ baselines overall (not on Long). VisionZip 50% (3.75x OVAL's per-step attention,
 tokens dropped before the LM) is significantly above OVAL on LLaVA-Video, and stacking OVAL on it
 costs 1.89 pp.
 
+**Qwen2.5-VL-7B on LVBench: complete (6 C3 arms x 1,549; references and OVAL from C2).** Table:
+`tables/c3_qwen25vl_lvbench.md` (+ csv, `latex/c3_qwen25vl_lvbench.tex`; by question type and video type).
+
+| arm | tokens kept / attended | overall | paired vs FullKV-64 |
+|---|---|---|---|
+| FullKV-64 | 12,960 | 41.25 [39.05, 43.55] | |
+| FullKV-32 | 6,480 | 38.41 [35.86, 40.98] | -2.84 [-4.67, -1.04] |
+| InfiniPot-V (mem-matched) | 6,480 | 40.41 [37.97, 42.92] | -0.84 [-2.23, +0.51] |
+| VisionZip 50% | 6,480 | 39.90 [37.76, 42.08] | -1.36 [-2.64, -0.13] |
+| OVAL | attends 1,792 / step | 39.70 [37.27, 42.17] | -1.55 [-2.98, -0.12] |
+| VisionZip 25% | 3,240 | 38.48 [36.21, 40.83] | -2.78 [-4.64, -0.96] |
+| VisionZip 50% + OVAL | attends 1,792 of 6,480 | 37.90 [35.45, 40.37] | -3.36 [-5.13, -1.65] |
+| ReKV | 1,620 + 256 | 37.38 [34.86, 39.96] | -3.87 [-5.78, -1.97] |
+| InfiniPot-V (2k) | 2,025 | 36.60 [33.90, 39.40] | -4.65 [-6.68, -2.66] |
+
+Budget-matched pairs (overall): OVAL - ReKV +2.32 [+0.59, +4.05]; OVAL - InfiniPot-V (2k) +3.10
+[+1.19, +5.05]; OVAL - InfiniPot-V (mem-matched) -0.71 [-2.19, +0.76]; OVAL - VisionZip 50% -0.19
+[-1.62, +1.27]; VisionZip 50% + OVAL - VisionZip 50% -2.00 [-3.29, -0.76].
+
 ## Disk notes
 
 - 2026-11-09: the shared disk dropped to 60 GB free (other users). After C1 and C2 finished, the
