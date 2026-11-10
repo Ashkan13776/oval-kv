@@ -64,7 +64,7 @@ def boot(dv, n=10000, seed=0):
 
 def groups(r, bench):
     if bench == "videomme":
-        return [("duration", r["group"])]
+        return [("duration", r.get("group") or r["duration"])]   # Tab. 5 run files use "duration"
     g = [("video type", r["group"])]
     g += [("question type", t) for t in (r.get("task_type") or "").split("|") if t]
     return g

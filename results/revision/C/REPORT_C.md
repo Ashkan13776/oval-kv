@@ -415,6 +415,44 @@ overall, short and medium; on Long none of these differences is significant. The
 (VisionZip 50%, InfiniPot-V mem-matched) are not significantly different from OVAL overall. Stacking
 OVAL on the VisionZip-50% cache costs 1.22 pp vs VisionZip 50% alone.
 
+**LLaVA-Video-7B on Video-MME: complete (7 C3 arms x 2,700).** Table: `tables/c3_llava_videomme.md`
+(+ csv, `latex/c3_llava_videomme.tex`). References and OVAL are the Tab. 5 run files
+(`vision/runs/row{1,2,3}_*`, linked as `runs/tab5_llava_videomme/`), recomputed here with the same
+bootstrap; the printed Tab. 5 is not in this repo, so the numbers were not checked against it
+(the run files themselves were reproduced bit-exactly on 20 videos, above). The HF dense path
+(`hf_full`, the path InfiniPot-V and ReKV run on) agrees with the harness FullKV-64:
+-0.04 [-0.33, +0.26] (all three durations within +-0.11).
+
+| arm | tokens kept / attended | overall | short | medium | long | paired vs FullKV-64 |
+|---|---|---|---|---|---|---|
+| FullKV-64 (Tab. 5 run) | 13,440 | 62.89 [61.00, 64.81] | 75.56 | 61.67 | 51.44 | |
+| FullKV-64, HF path | 13,440 | 62.85 [60.96, 64.78] | 75.44 | 61.56 | 51.56 | -0.04 [-0.33, +0.26] |
+| FullKV-32 (Tab. 5 run) | 6,720 | 60.85 [58.93, 62.81] | 74.00 | 57.56 | 51.00 | -2.04 [-3.22, -0.85] |
+| VisionZip 50% | 6,720 | 63.44 [61.59, 65.33] | 76.00 | 62.33 | 52.00 | +0.56 [-0.33, +1.48] |
+| InfiniPot-V (mem-matched) | 6,720 | 62.07 [60.15, 64.00] | 74.22 | 61.44 | 50.56 | -0.81 [-1.74, +0.11] |
+| VisionZip 25% | 3,360 | 61.11 [59.15, 63.07] | 72.89 | 60.56 | 49.89 | -1.78 [-2.96, -0.59] |
+| OVAL (Tab. 5 run) | attends 1,792 / step | 61.37 [59.44, 63.33] | 74.44 | 60.56 | 49.11 | -1.52 [-2.52, -0.52] |
+| VisionZip 50% + OVAL | attends 1,792 of 6,720 | 61.56 [59.67, 63.44] | 74.11 | 60.22 | 50.33 | -1.33 [-2.41, -0.26] |
+| ReKV | 1,680 + 256 | 59.70 [57.81, 61.63] | 70.89 | 57.78 | 50.44 | -3.19 [-4.52, -1.81] |
+| InfiniPot-V (2k) | 2,100 | 58.56 [56.67, 60.48] | 70.00 | 57.89 | 47.78 | -4.33 [-5.67, -3.00] |
+
+ReKV and InfiniPot-V paired against the HF-path reference instead: -3.15 [-4.48, -1.78] and
+-4.30 [-5.63, -2.96] (same conclusions; all pairs vs all three references are in `_paired.csv`).
+Budget-matched pairs:
+
+| pair | overall | short | medium | long |
+|---|---|---|---|---|
+| OVAL - ReKV | +1.67 [+0.26, +3.07] | +3.56 [+1.11, +6.00] | +2.78 [+0.33, +5.11] | -1.33 [-3.67, +1.00] |
+| OVAL - InfiniPot-V (2k) | +2.81 [+1.56, +4.07] | +4.44 [+2.33, +6.56] | +2.67 [+0.33, +5.00] | +1.33 [-0.67, +3.44] |
+| OVAL - InfiniPot-V (mem-matched) | -0.70 [-1.74, +0.37] | +0.22 [-1.56, +2.00] | -0.89 [-2.78, +1.00] | -1.44 [-3.33, +0.44] |
+| OVAL - VisionZip 50% | -2.07 [-3.15, -1.00] | -1.56 [-3.44, +0.22] | -1.78 [-3.67, +0.11] | -2.89 [-4.78, -1.11] |
+| VisionZip 50% + OVAL - VisionZip 50% | -1.89 [-2.85, -0.96] | | | |
+
+Reading: same pattern as Qwen2.5-VL. At a ~2k budget OVAL is significantly above both ported ~2k
+baselines overall (not on Long). VisionZip 50% (3.75x OVAL's per-step attention, half the frames'
+tokens dropped before the LM) is significantly above OVAL on LLaVA-Video, and stacking OVAL on it
+costs 1.89 pp.
+
 ## Disk notes
 
 - 2026-11-09: the shared disk dropped to 60 GB free (other users). After C1 and C2 finished, the

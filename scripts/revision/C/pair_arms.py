@@ -15,11 +15,11 @@ def main():
     a = ap.parse_args()
     A, B = load(a.a), load(a.b)
     qs = sorted(set(A) & set(B))
-    keys = [None] + (sorted({A[q]["group"] for q in qs}) if a.groups else [])
+    keys = [None] + (sorted({A[q].get("group") or A[q]["duration"] for q in qs}) if a.groups else [])
     for k in keys:
         dv = defaultdict(list)
         for q in qs:
-            if k is None or A[q]["group"] == k:
+            if k is None or (A[q].get("group") or A[q]["duration"]) == k:
                 dv[A[q]["videoID"]].append(100 * (A[q]["score"] - B[q]["score"]))
         m, lo, hi = boot(dv)
         print(f"{k or 'overall'}\tn={sum(map(len, dv.values()))}\t{m:+.2f} [{lo:+.2f}, {hi:+.2f}]{'*' if lo > 0 or hi < 0 else ''}")
