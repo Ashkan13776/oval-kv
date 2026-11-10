@@ -170,7 +170,7 @@ def ablation(drop=()):
         if d == "full_n32":
             tex.append("\\midrule")
     tex += ["\\bottomrule", "\\end{tabular}"]
-    name = "paper_table_c_llava_vmme" + ("_no4bit" if "q4key_n64" in drop else "")
+    name = "paper_table_c_llava_vmme" + ("_paper" if "ovalkeys_n64" in drop else "_no4bit" if "q4key_n64" in drop else "")
     open(os.path.join(R, "latex", name + ".tex"), "w").write("\n".join(tex) + "\n")
     open(os.path.join(R, "tables", name + ".md"), "w").write("\n".join(md) + "\n")
     with open(os.path.join(R, "tables", name + ".csv"), "w", newline="") as f:
@@ -180,6 +180,8 @@ def ablation(drop=()):
 if __name__ == "__main__":
     import sys
     if "--ablation" in sys.argv:
-        ablation(drop=("q4key_n64",) if "--no4bit" in sys.argv else ())
+        # --paper: the version in the paper (no 4-bit keys, no OVAL keys-only; author decision 2026-11-10)
+        ablation(drop=("q4key_n64", "ovalkeys_n64") if "--paper" in sys.argv else
+                 ("q4key_n64",) if "--no4bit" in sys.argv else ())
     else:
         main()
