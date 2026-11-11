@@ -1,0 +1,157 @@
+model,bench,arm,reference,breakdown,group,diff,lo,hi
+Qwen2.5-VL-7B,lvbench,FullKV-32,FullKV-64,all,overall,-2.841,-4.669,-1.045
+Qwen2.5-VL-7B,lvbench,FullKV-32,FullKV-64,question type,entity recognition,-1.182,-3.799,1.493
+Qwen2.5-VL-7B,lvbench,FullKV-32,FullKV-64,question type,event understanding,-4.173,-6.863,-1.499
+Qwen2.5-VL-7B,lvbench,FullKV-32,FullKV-64,question type,key information retrieval,-1.031,-6.728,4.494
+Qwen2.5-VL-7B,lvbench,FullKV-32,FullKV-64,question type,reasoning,-4.478,-8.290,-0.952
+Qwen2.5-VL-7B,lvbench,FullKV-32,FullKV-64,question type,summarization,-5.172,-12.069,1.961
+Qwen2.5-VL-7B,lvbench,FullKV-32,FullKV-64,question type,temporal grounding,-2.273,-6.635,1.932
+Qwen2.5-VL-7B,lvbench,FullKV-32,FullKV-64,video type,cartoon,-5.300,-9.386,-1.095
+Qwen2.5-VL-7B,lvbench,FullKV-32,FullKV-64,video type,documentary,-0.508,-2.632,1.667
+Qwen2.5-VL-7B,lvbench,FullKV-32,FullKV-64,video type,live,1.527,-3.984,6.198
+Qwen2.5-VL-7B,lvbench,FullKV-32,FullKV-64,video type,selfmedia,-5.047,-8.415,-1.501
+Qwen2.5-VL-7B,lvbench,FullKV-32,FullKV-64,video type,sport,-1.250,-4.386,1.916
+Qwen2.5-VL-7B,lvbench,FullKV-32,FullKV-64,video type,tv,-5.200,-10.753,0.000
+Qwen2.5-VL-7B,lvbench,OVAL,FullKV-64,all,overall,-1.549,-2.981,-0.124
+Qwen2.5-VL-7B,lvbench,OVAL,FullKV-64,question type,entity recognition,-1.773,-3.882,0.302
+Qwen2.5-VL-7B,lvbench,OVAL,FullKV-64,question type,event understanding,-1.855,-4.399,0.641
+Qwen2.5-VL-7B,lvbench,OVAL,FullKV-64,question type,key information retrieval,0.344,-3.237,4.044
+Qwen2.5-VL-7B,lvbench,OVAL,FullKV-64,question type,reasoning,-1.493,-4.478,1.422
+Qwen2.5-VL-7B,lvbench,OVAL,FullKV-64,question type,summarization,-5.172,-14.545,3.636
+Qwen2.5-VL-7B,lvbench,OVAL,FullKV-64,question type,temporal grounding,-1.364,-4.783,2.174
+Qwen2.5-VL-7B,lvbench,OVAL,FullKV-64,video type,cartoon,-1.060,-4.745,2.536
+Qwen2.5-VL-7B,lvbench,OVAL,FullKV-64,video type,documentary,-4.061,-6.699,-1.951
+Qwen2.5-VL-7B,lvbench,OVAL,FullKV-64,video type,live,0.000,-3.802,4.068
+Qwen2.5-VL-7B,lvbench,OVAL,FullKV-64,video type,selfmedia,-2.524,-5.085,0.000
+Qwen2.5-VL-7B,lvbench,OVAL,FullKV-64,video type,sport,-0.833,-4.348,2.602
+Qwen2.5-VL-7B,lvbench,OVAL,FullKV-64,video type,tv,-1.200,-5.307,3.019
+Qwen2.5-VL-7B,lvbench,FreeKV,FullKV-64,all,overall,-2.776,-4.356,-1.167
+Qwen2.5-VL-7B,lvbench,FreeKV,FullKV-64,question type,entity recognition,-4.431,-6.872,-1.890
+Qwen2.5-VL-7B,lvbench,FreeKV,FullKV-64,question type,event understanding,-2.937,-5.331,-0.607
+Qwen2.5-VL-7B,lvbench,FreeKV,FullKV-64,question type,key information retrieval,0.000,-3.935,3.943
+Qwen2.5-VL-7B,lvbench,FreeKV,FullKV-64,question type,reasoning,-4.975,-9.048,-1.449
+Qwen2.5-VL-7B,lvbench,FreeKV,FullKV-64,question type,summarization,0.000,-8.696,8.164
+Qwen2.5-VL-7B,lvbench,FreeKV,FullKV-64,question type,temporal grounding,-2.273,-6.945,2.062
+Qwen2.5-VL-7B,lvbench,FreeKV,FullKV-64,video type,cartoon,-2.120,-4.982,0.685
+Qwen2.5-VL-7B,lvbench,FreeKV,FullKV-64,video type,documentary,-3.046,-6.566,0.459
+Qwen2.5-VL-7B,lvbench,FreeKV,FullKV-64,video type,live,-2.672,-7.631,2.353
+Qwen2.5-VL-7B,lvbench,FreeKV,FullKV-64,video type,selfmedia,-5.363,-8.725,-2.034
+Qwen2.5-VL-7B,lvbench,FreeKV,FullKV-64,video type,sport,-0.417,-3.586,3.540
+Qwen2.5-VL-7B,lvbench,FreeKV,FullKV-64,video type,tv,-2.400,-6.819,2.335
+Qwen2.5-VL-7B,lvbench,Quest,FullKV-64,all,overall,-2.260,-3.953,-0.595
+Qwen2.5-VL-7B,lvbench,Quest,FullKV-64,question type,entity recognition,-3.102,-5.414,-0.732
+Qwen2.5-VL-7B,lvbench,Quest,FullKV-64,question type,event understanding,-3.555,-6.320,-0.910
+Qwen2.5-VL-7B,lvbench,Quest,FullKV-64,question type,key information retrieval,0.687,-3.736,4.930
+Qwen2.5-VL-7B,lvbench,Quest,FullKV-64,question type,reasoning,-3.980,-7.179,-1.036
+Qwen2.5-VL-7B,lvbench,Quest,FullKV-64,question type,summarization,-3.448,-10.871,3.176
+Qwen2.5-VL-7B,lvbench,Quest,FullKV-64,question type,temporal grounding,0.000,-4.955,4.762
+Qwen2.5-VL-7B,lvbench,Quest,FullKV-64,video type,cartoon,-0.707,-3.887,2.069
+Qwen2.5-VL-7B,lvbench,Quest,FullKV-64,video type,documentary,-1.015,-4.813,2.139
+Qwen2.5-VL-7B,lvbench,Quest,FullKV-64,video type,live,-2.672,-7.554,2.198
+Qwen2.5-VL-7B,lvbench,Quest,FullKV-64,video type,selfmedia,-5.363,-8.039,-2.827
+Qwen2.5-VL-7B,lvbench,Quest,FullKV-64,video type,sport,-0.833,-3.376,1.754
+Qwen2.5-VL-7B,lvbench,Quest,FullKV-64,video type,tv,-2.000,-8.070,4.400
+Qwen2.5-VL-7B,lvbench,4-bit keys,FullKV-64,all,overall,-0.258,-1.569,1.065
+Qwen2.5-VL-7B,lvbench,4-bit keys,FullKV-64,question type,entity recognition,-0.295,-2.216,1.576
+Qwen2.5-VL-7B,lvbench,4-bit keys,FullKV-64,question type,event understanding,-1.391,-3.556,0.768
+Qwen2.5-VL-7B,lvbench,4-bit keys,FullKV-64,question type,key information retrieval,2.062,-0.324,4.779
+Qwen2.5-VL-7B,lvbench,4-bit keys,FullKV-64,question type,reasoning,-2.488,-5.140,0.000
+Qwen2.5-VL-7B,lvbench,4-bit keys,FullKV-64,question type,summarization,-1.724,-8.163,3.922
+Qwen2.5-VL-7B,lvbench,4-bit keys,FullKV-64,question type,temporal grounding,1.818,-1.762,5.340
+Qwen2.5-VL-7B,lvbench,4-bit keys,FullKV-64,video type,cartoon,0.707,-3.249,4.659
+Qwen2.5-VL-7B,lvbench,4-bit keys,FullKV-64,video type,documentary,0.000,-3.371,3.015
+Qwen2.5-VL-7B,lvbench,4-bit keys,FullKV-64,video type,live,0.000,-3.175,3.147
+Qwen2.5-VL-7B,lvbench,4-bit keys,FullKV-64,video type,selfmedia,-2.839,-5.212,-0.301
+Qwen2.5-VL-7B,lvbench,4-bit keys,FullKV-64,video type,sport,0.833,-1.896,3.719
+Qwen2.5-VL-7B,lvbench,4-bit keys,FullKV-64,video type,tv,0.400,-2.857,3.937
+Qwen2.5-VL-7B,lvbench,SnapKV†,FullKV-64,all,overall,-5.165,-7.361,-2.970
+Qwen2.5-VL-7B,lvbench,SnapKV†,FullKV-64,question type,entity recognition,-6.352,-9.213,-3.483
+Qwen2.5-VL-7B,lvbench,SnapKV†,FullKV-64,question type,event understanding,-6.028,-8.994,-3.040
+Qwen2.5-VL-7B,lvbench,SnapKV†,FullKV-64,question type,key information retrieval,-0.344,-5.733,5.185
+Qwen2.5-VL-7B,lvbench,SnapKV†,FullKV-64,question type,reasoning,-7.463,-12.222,-2.927
+Qwen2.5-VL-7B,lvbench,SnapKV†,FullKV-64,question type,summarization,-10.345,-21.154,0.000
+Qwen2.5-VL-7B,lvbench,SnapKV†,FullKV-64,question type,temporal grounding,-5.909,-11.683,0.000
+Qwen2.5-VL-7B,lvbench,SnapKV†,FullKV-64,video type,cartoon,-5.654,-9.926,-1.404
+Qwen2.5-VL-7B,lvbench,SnapKV†,FullKV-64,video type,documentary,-5.584,-9.616,-1.435
+Qwen2.5-VL-7B,lvbench,SnapKV†,FullKV-64,video type,live,-1.527,-6.584,3.137
+Qwen2.5-VL-7B,lvbench,SnapKV†,FullKV-64,video type,selfmedia,-10.726,-14.502,-6.728
+Qwen2.5-VL-7B,lvbench,SnapKV†,FullKV-64,video type,sport,0.417,-5.907,7.500
+Qwen2.5-VL-7B,lvbench,SnapKV†,FullKV-64,video type,tv,-6.400,-12.205,0.000
+Qwen2.5-VL-7B,lvbench,FullKV-64,FullKV-32,all,overall,2.841,1.045,4.669
+Qwen2.5-VL-7B,lvbench,FullKV-64,FullKV-32,question type,entity recognition,1.182,-1.493,3.799
+Qwen2.5-VL-7B,lvbench,FullKV-64,FullKV-32,question type,event understanding,4.173,1.499,6.863
+Qwen2.5-VL-7B,lvbench,FullKV-64,FullKV-32,question type,key information retrieval,1.031,-4.494,6.728
+Qwen2.5-VL-7B,lvbench,FullKV-64,FullKV-32,question type,reasoning,4.478,0.952,8.290
+Qwen2.5-VL-7B,lvbench,FullKV-64,FullKV-32,question type,summarization,5.172,-1.961,12.069
+Qwen2.5-VL-7B,lvbench,FullKV-64,FullKV-32,question type,temporal grounding,2.273,-1.932,6.635
+Qwen2.5-VL-7B,lvbench,FullKV-64,FullKV-32,video type,cartoon,5.300,1.095,9.386
+Qwen2.5-VL-7B,lvbench,FullKV-64,FullKV-32,video type,documentary,0.508,-1.667,2.632
+Qwen2.5-VL-7B,lvbench,FullKV-64,FullKV-32,video type,live,-1.527,-6.198,3.984
+Qwen2.5-VL-7B,lvbench,FullKV-64,FullKV-32,video type,selfmedia,5.047,1.501,8.415
+Qwen2.5-VL-7B,lvbench,FullKV-64,FullKV-32,video type,sport,1.250,-1.916,4.386
+Qwen2.5-VL-7B,lvbench,FullKV-64,FullKV-32,video type,tv,5.200,0.000,10.753
+Qwen2.5-VL-7B,lvbench,OVAL,FullKV-32,all,overall,1.291,-0.444,3.090
+Qwen2.5-VL-7B,lvbench,OVAL,FullKV-32,question type,entity recognition,-0.591,-3.274,2.158
+Qwen2.5-VL-7B,lvbench,OVAL,FullKV-32,question type,event understanding,2.318,-0.785,5.381
+Qwen2.5-VL-7B,lvbench,OVAL,FullKV-32,question type,key information retrieval,1.375,-3.534,6.061
+Qwen2.5-VL-7B,lvbench,OVAL,FullKV-32,question type,reasoning,2.985,0.000,6.383
+Qwen2.5-VL-7B,lvbench,OVAL,FullKV-32,question type,summarization,0.000,-8.621,7.843
+Qwen2.5-VL-7B,lvbench,OVAL,FullKV-32,question type,temporal grounding,0.909,-2.155,4.147
+Qwen2.5-VL-7B,lvbench,OVAL,FullKV-32,video type,cartoon,4.240,-0.368,8.993
+Qwen2.5-VL-7B,lvbench,OVAL,FullKV-32,video type,documentary,-3.553,-6.404,-1.395
+Qwen2.5-VL-7B,lvbench,OVAL,FullKV-32,video type,live,-1.527,-5.075,2.791
+Qwen2.5-VL-7B,lvbench,OVAL,FullKV-32,video type,selfmedia,2.524,-0.968,6.135
+Qwen2.5-VL-7B,lvbench,OVAL,FullKV-32,video type,sport,0.417,-3.017,3.968
+Qwen2.5-VL-7B,lvbench,OVAL,FullKV-32,video type,tv,4.000,-0.855,9.231
+Qwen2.5-VL-7B,lvbench,FreeKV,FullKV-32,all,overall,0.065,-1.752,1.891
+Qwen2.5-VL-7B,lvbench,FreeKV,FullKV-32,question type,entity recognition,-3.250,-5.858,-0.581
+Qwen2.5-VL-7B,lvbench,FreeKV,FullKV-32,question type,event understanding,1.236,-1.461,4.011
+Qwen2.5-VL-7B,lvbench,FreeKV,FullKV-32,question type,key information retrieval,1.031,-4.180,6.391
+Qwen2.5-VL-7B,lvbench,FreeKV,FullKV-32,question type,reasoning,-0.498,-5.025,3.930
+Qwen2.5-VL-7B,lvbench,FreeKV,FullKV-32,question type,summarization,5.172,-5.263,14.286
+Qwen2.5-VL-7B,lvbench,FreeKV,FullKV-32,question type,temporal grounding,0.000,-4.898,4.846
+Qwen2.5-VL-7B,lvbench,FreeKV,FullKV-32,video type,cartoon,3.180,-0.722,7.266
+Qwen2.5-VL-7B,lvbench,FreeKV,FullKV-32,video type,documentary,-2.538,-6.704,1.587
+Qwen2.5-VL-7B,lvbench,FreeKV,FullKV-32,video type,live,-4.198,-8.481,0.784
+Qwen2.5-VL-7B,lvbench,FreeKV,FullKV-32,video type,selfmedia,-0.315,-4.361,3.583
+Qwen2.5-VL-7B,lvbench,FreeKV,FullKV-32,video type,sport,0.833,-2.564,4.854
+Qwen2.5-VL-7B,lvbench,FreeKV,FullKV-32,video type,tv,2.800,-1.261,7.288
+Qwen2.5-VL-7B,lvbench,Quest,FullKV-32,all,overall,0.581,-1.178,2.329
+Qwen2.5-VL-7B,lvbench,Quest,FullKV-32,question type,entity recognition,-1.920,-4.373,0.541
+Qwen2.5-VL-7B,lvbench,Quest,FullKV-32,question type,event understanding,0.618,-2.117,3.328
+Qwen2.5-VL-7B,lvbench,Quest,FullKV-32,question type,key information retrieval,1.718,-2.749,6.475
+Qwen2.5-VL-7B,lvbench,Quest,FullKV-32,question type,reasoning,0.498,-3.261,4.306
+Qwen2.5-VL-7B,lvbench,Quest,FullKV-32,question type,summarization,1.724,-7.692,10.000
+Qwen2.5-VL-7B,lvbench,Quest,FullKV-32,question type,temporal grounding,2.273,-2.490,6.842
+Qwen2.5-VL-7B,lvbench,Quest,FullKV-32,video type,cartoon,4.594,0.356,8.784
+Qwen2.5-VL-7B,lvbench,Quest,FullKV-32,video type,documentary,-0.508,-4.678,3.196
+Qwen2.5-VL-7B,lvbench,Quest,FullKV-32,video type,live,-4.198,-8.279,1.195
+Qwen2.5-VL-7B,lvbench,Quest,FullKV-32,video type,selfmedia,-0.315,-4.167,3.343
+Qwen2.5-VL-7B,lvbench,Quest,FullKV-32,video type,sport,0.417,-1.953,3.030
+Qwen2.5-VL-7B,lvbench,Quest,FullKV-32,video type,tv,3.200,-0.840,7.438
+Qwen2.5-VL-7B,lvbench,4-bit keys,FullKV-32,all,overall,2.582,0.565,4.641
+Qwen2.5-VL-7B,lvbench,4-bit keys,FullKV-32,question type,entity recognition,0.886,-2.032,3.727
+Qwen2.5-VL-7B,lvbench,4-bit keys,FullKV-32,question type,event understanding,2.782,0.000,5.692
+Qwen2.5-VL-7B,lvbench,4-bit keys,FullKV-32,question type,key information retrieval,3.093,-2.410,8.911
+Qwen2.5-VL-7B,lvbench,4-bit keys,FullKV-32,question type,reasoning,1.990,-2.051,6.250
+Qwen2.5-VL-7B,lvbench,4-bit keys,FullKV-32,question type,summarization,3.448,-5.002,11.111
+Qwen2.5-VL-7B,lvbench,4-bit keys,FullKV-32,question type,temporal grounding,4.091,-0.461,8.491
+Qwen2.5-VL-7B,lvbench,4-bit keys,FullKV-32,video type,cartoon,6.007,0.717,11.511
+Qwen2.5-VL-7B,lvbench,4-bit keys,FullKV-32,video type,documentary,0.508,-3.333,3.792
+Qwen2.5-VL-7B,lvbench,4-bit keys,FullKV-32,video type,live,-1.527,-6.863,4.565
+Qwen2.5-VL-7B,lvbench,4-bit keys,FullKV-32,video type,selfmedia,2.208,-1.274,5.865
+Qwen2.5-VL-7B,lvbench,4-bit keys,FullKV-32,video type,sport,2.083,-1.245,5.263
+Qwen2.5-VL-7B,lvbench,4-bit keys,FullKV-32,video type,tv,5.600,0.000,11.481
+Qwen2.5-VL-7B,lvbench,SnapKV†,FullKV-32,all,overall,-2.324,-4.246,-0.329
+Qwen2.5-VL-7B,lvbench,SnapKV†,FullKV-32,question type,entity recognition,-5.170,-7.692,-2.624
+Qwen2.5-VL-7B,lvbench,SnapKV†,FullKV-32,question type,event understanding,-1.855,-5.132,1.282
+Qwen2.5-VL-7B,lvbench,SnapKV†,FullKV-32,question type,key information retrieval,0.687,-5.576,6.818
+Qwen2.5-VL-7B,lvbench,SnapKV†,FullKV-32,question type,reasoning,-2.985,-6.630,0.513
+Qwen2.5-VL-7B,lvbench,SnapKV†,FullKV-32,question type,summarization,-5.172,-15.280,3.226
+Qwen2.5-VL-7B,lvbench,SnapKV†,FullKV-32,question type,temporal grounding,-3.636,-9.005,1.961
+Qwen2.5-VL-7B,lvbench,SnapKV†,FullKV-32,video type,cartoon,-0.353,-3.521,2.465
+Qwen2.5-VL-7B,lvbench,SnapKV†,FullKV-32,video type,documentary,-5.076,-9.548,-0.500
+Qwen2.5-VL-7B,lvbench,SnapKV†,FullKV-32,video type,live,-3.053,-6.870,1.550
+Qwen2.5-VL-7B,lvbench,SnapKV†,FullKV-32,video type,selfmedia,-5.678,-9.603,-1.608
+Qwen2.5-VL-7B,lvbench,SnapKV†,FullKV-32,video type,sport,1.667,-3.629,7.905
+Qwen2.5-VL-7B,lvbench,SnapKV†,FullKV-32,video type,tv,-1.200,-7.660,4.724

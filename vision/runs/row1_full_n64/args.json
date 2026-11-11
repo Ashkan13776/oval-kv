@@ -12,7 +12,7 @@
  "vbasis": "pca",
  "veta": 0.0,
  "page_rep": "quest",
- "GQA_policy": "avgS",
+ "GQA_policy": "avgSM",
  "temperature": 0.0,
  "top_p": 1.0,
  "max_gen": 8192,
@@ -20,11 +20,11 @@
  "data_idx": null,
  "data_idx_to": null,
  "attn_load_dir": "manual",
- "sink": 512,
- "recent": 512,
- "budget": 1024,
+ "sink": 128,
+ "recent": 128,
+ "budget": 1792,
  "page_size": 32,
- "sparsity": 1,
+ "sparsity": 1.0,
  "threshold": null,
  "raas_alpha": 0.0001,
  "spec_ret_steps": 1,
@@ -39,13 +39,15 @@
  "protocol": "stream",
  "frames": 64,
  "durations": [
-  "long"
+  "short",
+  "medium"
  ],
  "limit": null,
- "shard": 0,
- "nshards": 2,
+ "shard": 3,
+ "nshards": 4,
  "out": "vision/runs/row1_full_n64",
  "max_new_tokens": 16,
+ "file_tag": "_sm",
  "qids": null,
  "only_cached": false
 }

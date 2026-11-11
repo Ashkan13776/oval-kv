@@ -1,0 +1,13 @@
+model,arm,subset,n,acc,lo,hi
+LLaVA-Video-7B,FullKV-64,span>=1 frame,709,43.018,39.351,46.685
+LLaVA-Video-7B,FullKV-64,span 0 frames,838,40.573,37.232,43.914
+LLaVA-Video-7B,FreeKV,span>=1 frame,709,43.441,39.915,47.109
+LLaVA-Video-7B,FreeKV,span 0 frames,838,41.169,37.828,44.511
+LLaVA-Video-7B,OVAL,span>=1 frame,709,42.595,38.928,46.262
+LLaVA-Video-7B,OVAL,span 0 frames,838,39.499,36.158,42.840
+Qwen2.5-VL-7B,FullKV-64,span>=1 frame,709,45.134,41.467,48.801
+Qwen2.5-VL-7B,FullKV-64,span 0 frames,838,38.067,34.726,41.408
+Qwen2.5-VL-7B,FreeKV,span>=1 frame,709,42.313,38.646,45.980
+Qwen2.5-VL-7B,FreeKV,span 0 frames,838,35.322,32.100,38.544
+Qwen2.5-VL-7B,OVAL,span>=1 frame,709,41.890,38.223,45.557
+Qwen2.5-VL-7B,OVAL,span 0 frames,838,37.947,34.726,41.289

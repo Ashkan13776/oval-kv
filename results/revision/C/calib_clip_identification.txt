@@ -1,0 +1,11 @@
+34 candidate clips with per-clip sums
+test: 145 signature-consistent subsets; best 3:
+   max rel. deviation 0.00e+00  ('ytb_gWn_9tVg_-Q.mp4', 'ytb_swo-I2Bl3zY.mp4')
+   max rel. deviation 9.18e-02  ('ytb_ahPAaKnKHNU.mp4', 'ytb_swo-I2Bl3zY.mp4')
+   max rel. deviation 1.04e-01  ('ytb_W4MUVxxro6E.mp4', 'ytb_swo-I2Bl3zY.mp4')
+calib: 4060 signature-consistent subsets; best 3:
+   max rel. deviation 0.00e+00  ('ytb_-lYWmYJ2gsY.mp4', 'ytb_GzuT7VIBK4Y.mp4', 'ytb_RP5mput8V9A.mp4', 'ytb_XkNYStGhGQ8.mp4')
+   max rel. deviation 5.00e-02  ('ytb_GzuT7VIBK4Y.mp4', 'ytb_TVdlNwSDCg4.mp4', 'ytb_XkNYStGhGQ8.mp4', 'ytb_swo-I2Bl3zY.mp4')
+   max rel. deviation 5.25e-02  ('ytb_GzuT7VIBK4Y.mp4', 'ytb_T5sU2whN3E0.mp4', 'ytb_WHGlQdhE7OM.mp4', 'ytb_XkNYStGhGQ8.mp4')
+
+[exited with code 0]

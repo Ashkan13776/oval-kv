@@ -1,0 +1,17 @@
+\begin{tabular}{l|cccc}
+\toprule
+\textbf{Method} & Overall & Short & Medium & Long \\
+\midrule
+FullKV ($N$) & 62.89 & 75.56 & 61.67 & 51.44 \\
+FullKV ($N/2$) & 60.85 & 74.00 & 57.56 & 51.00 \\
+FullKV ($N$, HF path) & 62.85 & 75.44 & 61.56 & 51.56 \\
+\midrule
+\method{} & 61.37 & 74.44 & 60.56 & 49.11 \\
+VisionZip 50\% & 63.44 & 76.00 & 62.33 & 52.00 \\
+VisionZip 25\% & 61.11 & 72.89 & 60.56 & 49.89 \\
+VisionZip 50\% + \method{} & 61.56 & 74.11 & 60.22 & 50.33 \\
+InfiniPot-V (mem.) & 62.07 & 74.22 & 61.44 & 50.56 \\
+InfiniPot-V (2k) & 58.56 & 70.00 & 57.89 & 47.78 \\
+ReKV & 59.70 & 70.89 & 57.78 & 50.44 \\
+\bottomrule
+\end{tabular}

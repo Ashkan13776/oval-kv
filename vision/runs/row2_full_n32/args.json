@@ -39,14 +39,15 @@
  "protocol": "stream",
  "frames": 32,
  "durations": [
-  "long"
+  "short",
+  "medium"
  ],
  "limit": null,
  "shard": 3,
  "nshards": 4,
  "out": "vision/runs/row2_full_n32",
  "max_new_tokens": 16,
- "file_tag": "",
+ "file_tag": "_sm",
  "qids": null,
  "only_cached": false
 }

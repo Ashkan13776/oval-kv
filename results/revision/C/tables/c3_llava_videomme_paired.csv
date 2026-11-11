@@ -1,0 +1,109 @@
+model,bench,arm,reference,breakdown,group,diff,lo,hi
+LLaVA-Video-7B-Qwen2,videomme,FullKV-32,FullKV-64,all,overall,-2.037,-3.222,-0.852
+LLaVA-Video-7B-Qwen2,videomme,FullKV-32,FullKV-64,duration,short,-1.556,-3.333,0.222
+LLaVA-Video-7B-Qwen2,videomme,FullKV-32,FullKV-64,duration,medium,-4.111,-6.333,-2.000
+LLaVA-Video-7B-Qwen2,videomme,FullKV-32,FullKV-64,duration,long,-0.444,-2.556,1.667
+LLaVA-Video-7B-Qwen2,videomme,"FullKV-64, HF path",FullKV-64,all,overall,-0.037,-0.333,0.259
+LLaVA-Video-7B-Qwen2,videomme,"FullKV-64, HF path",FullKV-64,duration,short,-0.111,-0.667,0.444
+LLaVA-Video-7B-Qwen2,videomme,"FullKV-64, HF path",FullKV-64,duration,medium,-0.111,-0.556,0.333
+LLaVA-Video-7B-Qwen2,videomme,"FullKV-64, HF path",FullKV-64,duration,long,0.111,-0.333,0.558
+LLaVA-Video-7B-Qwen2,videomme,OVAL,FullKV-64,all,overall,-1.519,-2.519,-0.519
+LLaVA-Video-7B-Qwen2,videomme,OVAL,FullKV-64,duration,short,-1.111,-2.778,0.444
+LLaVA-Video-7B-Qwen2,videomme,OVAL,FullKV-64,duration,medium,-1.111,-2.781,0.556
+LLaVA-Video-7B-Qwen2,videomme,OVAL,FullKV-64,duration,long,-2.333,-4.222,-0.556
+LLaVA-Video-7B-Qwen2,videomme,VisionZip 50%,FullKV-64,all,overall,0.556,-0.333,1.481
+LLaVA-Video-7B-Qwen2,videomme,VisionZip 50%,FullKV-64,duration,short,0.444,-1.000,1.889
+LLaVA-Video-7B-Qwen2,videomme,VisionZip 50%,FullKV-64,duration,medium,0.667,-1.000,2.333
+LLaVA-Video-7B-Qwen2,videomme,VisionZip 50%,FullKV-64,duration,long,0.556,-1.111,2.222
+LLaVA-Video-7B-Qwen2,videomme,VisionZip 25%,FullKV-64,all,overall,-1.778,-2.963,-0.593
+LLaVA-Video-7B-Qwen2,videomme,VisionZip 25%,FullKV-64,duration,short,-2.667,-4.778,-0.556
+LLaVA-Video-7B-Qwen2,videomme,VisionZip 25%,FullKV-64,duration,medium,-1.111,-3.222,1.000
+LLaVA-Video-7B-Qwen2,videomme,VisionZip 25%,FullKV-64,duration,long,-1.556,-3.556,0.556
+LLaVA-Video-7B-Qwen2,videomme,VisionZip 50% + OVAL,FullKV-64,all,overall,-1.333,-2.407,-0.259
+LLaVA-Video-7B-Qwen2,videomme,VisionZip 50% + OVAL,FullKV-64,duration,short,-1.444,-3.222,0.444
+LLaVA-Video-7B-Qwen2,videomme,VisionZip 50% + OVAL,FullKV-64,duration,medium,-1.444,-3.333,0.556
+LLaVA-Video-7B-Qwen2,videomme,VisionZip 50% + OVAL,FullKV-64,duration,long,-1.111,-3.111,0.778
+LLaVA-Video-7B-Qwen2,videomme,InfiniPot-V (mem-matched),FullKV-64,all,overall,-0.815,-1.741,0.111
+LLaVA-Video-7B-Qwen2,videomme,InfiniPot-V (mem-matched),FullKV-64,duration,short,-1.333,-2.889,0.222
+LLaVA-Video-7B-Qwen2,videomme,InfiniPot-V (mem-matched),FullKV-64,duration,medium,-0.222,-1.889,1.444
+LLaVA-Video-7B-Qwen2,videomme,InfiniPot-V (mem-matched),FullKV-64,duration,long,-0.889,-2.444,0.556
+LLaVA-Video-7B-Qwen2,videomme,InfiniPot-V (2k),FullKV-64,all,overall,-4.333,-5.667,-3.000
+LLaVA-Video-7B-Qwen2,videomme,InfiniPot-V (2k),FullKV-64,duration,short,-5.556,-7.889,-3.222
+LLaVA-Video-7B-Qwen2,videomme,InfiniPot-V (2k),FullKV-64,duration,medium,-3.778,-6.222,-1.444
+LLaVA-Video-7B-Qwen2,videomme,InfiniPot-V (2k),FullKV-64,duration,long,-3.667,-6.000,-1.333
+LLaVA-Video-7B-Qwen2,videomme,ReKV,FullKV-64,all,overall,-3.185,-4.519,-1.815
+LLaVA-Video-7B-Qwen2,videomme,ReKV,FullKV-64,duration,short,-4.667,-7.111,-2.222
+LLaVA-Video-7B-Qwen2,videomme,ReKV,FullKV-64,duration,medium,-3.889,-6.444,-1.444
+LLaVA-Video-7B-Qwen2,videomme,ReKV,FullKV-64,duration,long,-1.000,-3.111,1.000
+LLaVA-Video-7B-Qwen2,videomme,FullKV-64,FullKV-32,all,overall,2.037,0.852,3.222
+LLaVA-Video-7B-Qwen2,videomme,FullKV-64,FullKV-32,duration,short,1.556,-0.222,3.333
+LLaVA-Video-7B-Qwen2,videomme,FullKV-64,FullKV-32,duration,medium,4.111,2.000,6.333
+LLaVA-Video-7B-Qwen2,videomme,FullKV-64,FullKV-32,duration,long,0.444,-1.667,2.556
+LLaVA-Video-7B-Qwen2,videomme,"FullKV-64, HF path",FullKV-32,all,overall,2.000,0.852,3.148
+LLaVA-Video-7B-Qwen2,videomme,"FullKV-64, HF path",FullKV-32,duration,short,1.444,-0.333,3.222
+LLaVA-Video-7B-Qwen2,videomme,"FullKV-64, HF path",FullKV-32,duration,medium,4.000,1.889,6.222
+LLaVA-Video-7B-Qwen2,videomme,"FullKV-64, HF path",FullKV-32,duration,long,0.556,-1.556,2.667
+LLaVA-Video-7B-Qwen2,videomme,OVAL,FullKV-32,all,overall,0.519,-0.778,1.815
+LLaVA-Video-7B-Qwen2,videomme,OVAL,FullKV-32,duration,short,0.444,-1.556,2.444
+LLaVA-Video-7B-Qwen2,videomme,OVAL,FullKV-32,duration,medium,3.000,0.667,5.333
+LLaVA-Video-7B-Qwen2,videomme,OVAL,FullKV-32,duration,long,-1.889,-4.222,0.556
+LLaVA-Video-7B-Qwen2,videomme,VisionZip 50%,FullKV-32,all,overall,2.593,1.407,3.741
+LLaVA-Video-7B-Qwen2,videomme,VisionZip 50%,FullKV-32,duration,short,2.000,0.333,3.667
+LLaVA-Video-7B-Qwen2,videomme,VisionZip 50%,FullKV-32,duration,medium,4.778,2.667,7.000
+LLaVA-Video-7B-Qwen2,videomme,VisionZip 50%,FullKV-32,duration,long,1.000,-1.114,3.111
+LLaVA-Video-7B-Qwen2,videomme,VisionZip 25%,FullKV-32,all,overall,0.259,-1.074,1.519
+LLaVA-Video-7B-Qwen2,videomme,VisionZip 25%,FullKV-32,duration,short,-1.111,-3.222,1.000
+LLaVA-Video-7B-Qwen2,videomme,VisionZip 25%,FullKV-32,duration,medium,3.000,0.667,5.444
+LLaVA-Video-7B-Qwen2,videomme,VisionZip 25%,FullKV-32,duration,long,-1.111,-3.333,1.111
+LLaVA-Video-7B-Qwen2,videomme,VisionZip 50% + OVAL,FullKV-32,all,overall,0.704,-0.556,1.926
+LLaVA-Video-7B-Qwen2,videomme,VisionZip 50% + OVAL,FullKV-32,duration,short,0.111,-1.889,2.111
+LLaVA-Video-7B-Qwen2,videomme,VisionZip 50% + OVAL,FullKV-32,duration,medium,2.667,0.444,5.000
+LLaVA-Video-7B-Qwen2,videomme,VisionZip 50% + OVAL,FullKV-32,duration,long,-0.667,-3.000,1.667
+LLaVA-Video-7B-Qwen2,videomme,InfiniPot-V (mem-matched),FullKV-32,all,overall,1.222,0.000,2.444
+LLaVA-Video-7B-Qwen2,videomme,InfiniPot-V (mem-matched),FullKV-32,duration,short,0.222,-1.778,2.222
+LLaVA-Video-7B-Qwen2,videomme,InfiniPot-V (mem-matched),FullKV-32,duration,medium,3.889,1.778,6.000
+LLaVA-Video-7B-Qwen2,videomme,InfiniPot-V (mem-matched),FullKV-32,duration,long,-0.444,-2.667,1.778
+LLaVA-Video-7B-Qwen2,videomme,InfiniPot-V (2k),FullKV-32,all,overall,-2.296,-3.778,-0.852
+LLaVA-Video-7B-Qwen2,videomme,InfiniPot-V (2k),FullKV-32,duration,short,-4.000,-6.556,-1.556
+LLaVA-Video-7B-Qwen2,videomme,InfiniPot-V (2k),FullKV-32,duration,medium,0.333,-2.222,2.778
+LLaVA-Video-7B-Qwen2,videomme,InfiniPot-V (2k),FullKV-32,duration,long,-3.222,-5.778,-0.667
+LLaVA-Video-7B-Qwen2,videomme,ReKV,FullKV-32,all,overall,-1.148,-2.630,0.333
+LLaVA-Video-7B-Qwen2,videomme,ReKV,FullKV-32,duration,short,-3.111,-5.667,-0.667
+LLaVA-Video-7B-Qwen2,videomme,ReKV,FullKV-32,duration,medium,0.222,-2.333,2.889
+LLaVA-Video-7B-Qwen2,videomme,ReKV,FullKV-32,duration,long,-0.556,-3.000,1.889
+LLaVA-Video-7B-Qwen2,videomme,FullKV-64,"FullKV-64, HF path",all,overall,0.037,-0.259,0.333
+LLaVA-Video-7B-Qwen2,videomme,FullKV-64,"FullKV-64, HF path",duration,short,0.111,-0.444,0.667
+LLaVA-Video-7B-Qwen2,videomme,FullKV-64,"FullKV-64, HF path",duration,medium,0.111,-0.333,0.556
+LLaVA-Video-7B-Qwen2,videomme,FullKV-64,"FullKV-64, HF path",duration,long,-0.111,-0.558,0.333
+LLaVA-Video-7B-Qwen2,videomme,FullKV-32,"FullKV-64, HF path",all,overall,-2.000,-3.148,-0.852
+LLaVA-Video-7B-Qwen2,videomme,FullKV-32,"FullKV-64, HF path",duration,short,-1.444,-3.222,0.333
+LLaVA-Video-7B-Qwen2,videomme,FullKV-32,"FullKV-64, HF path",duration,medium,-4.000,-6.222,-1.889
+LLaVA-Video-7B-Qwen2,videomme,FullKV-32,"FullKV-64, HF path",duration,long,-0.556,-2.667,1.556
+LLaVA-Video-7B-Qwen2,videomme,OVAL,"FullKV-64, HF path",all,overall,-1.481,-2.481,-0.481
+LLaVA-Video-7B-Qwen2,videomme,OVAL,"FullKV-64, HF path",duration,short,-1.000,-2.667,0.556
+LLaVA-Video-7B-Qwen2,videomme,OVAL,"FullKV-64, HF path",duration,medium,-1.000,-2.778,0.667
+LLaVA-Video-7B-Qwen2,videomme,OVAL,"FullKV-64, HF path",duration,long,-2.444,-4.225,-0.667
+LLaVA-Video-7B-Qwen2,videomme,VisionZip 50%,"FullKV-64, HF path",all,overall,0.593,-0.296,1.519
+LLaVA-Video-7B-Qwen2,videomme,VisionZip 50%,"FullKV-64, HF path",duration,short,0.556,-0.889,2.111
+LLaVA-Video-7B-Qwen2,videomme,VisionZip 50%,"FullKV-64, HF path",duration,medium,0.778,-0.889,2.444
+LLaVA-Video-7B-Qwen2,videomme,VisionZip 50%,"FullKV-64, HF path",duration,long,0.444,-1.222,2.111
+LLaVA-Video-7B-Qwen2,videomme,VisionZip 25%,"FullKV-64, HF path",all,overall,-1.741,-2.963,-0.519
+LLaVA-Video-7B-Qwen2,videomme,VisionZip 25%,"FullKV-64, HF path",duration,short,-2.556,-4.778,-0.333
+LLaVA-Video-7B-Qwen2,videomme,VisionZip 25%,"FullKV-64, HF path",duration,medium,-1.000,-3.111,1.111
+LLaVA-Video-7B-Qwen2,videomme,VisionZip 25%,"FullKV-64, HF path",duration,long,-1.667,-3.667,0.333
+LLaVA-Video-7B-Qwen2,videomme,VisionZip 50% + OVAL,"FullKV-64, HF path",all,overall,-1.296,-2.370,-0.259
+LLaVA-Video-7B-Qwen2,videomme,VisionZip 50% + OVAL,"FullKV-64, HF path",duration,short,-1.333,-3.111,0.444
+LLaVA-Video-7B-Qwen2,videomme,VisionZip 50% + OVAL,"FullKV-64, HF path",duration,medium,-1.333,-3.222,0.667
+LLaVA-Video-7B-Qwen2,videomme,VisionZip 50% + OVAL,"FullKV-64, HF path",duration,long,-1.222,-3.111,0.667
+LLaVA-Video-7B-Qwen2,videomme,InfiniPot-V (mem-matched),"FullKV-64, HF path",all,overall,-0.778,-1.704,0.148
+LLaVA-Video-7B-Qwen2,videomme,InfiniPot-V (mem-matched),"FullKV-64, HF path",duration,short,-1.222,-2.778,0.333
+LLaVA-Video-7B-Qwen2,videomme,InfiniPot-V (mem-matched),"FullKV-64, HF path",duration,medium,-0.111,-1.778,1.556
+LLaVA-Video-7B-Qwen2,videomme,InfiniPot-V (mem-matched),"FullKV-64, HF path",duration,long,-1.000,-2.556,0.444
+LLaVA-Video-7B-Qwen2,videomme,InfiniPot-V (2k),"FullKV-64, HF path",all,overall,-4.296,-5.630,-2.963
+LLaVA-Video-7B-Qwen2,videomme,InfiniPot-V (2k),"FullKV-64, HF path",duration,short,-5.444,-7.778,-3.222
+LLaVA-Video-7B-Qwen2,videomme,InfiniPot-V (2k),"FullKV-64, HF path",duration,medium,-3.667,-6.000,-1.333
+LLaVA-Video-7B-Qwen2,videomme,InfiniPot-V (2k),"FullKV-64, HF path",duration,long,-3.778,-6.111,-1.444
+LLaVA-Video-7B-Qwen2,videomme,ReKV,"FullKV-64, HF path",all,overall,-3.148,-4.482,-1.778
+LLaVA-Video-7B-Qwen2,videomme,ReKV,"FullKV-64, HF path",duration,short,-4.556,-6.889,-2.222
+LLaVA-Video-7B-Qwen2,videomme,ReKV,"FullKV-64, HF path",duration,medium,-3.778,-6.333,-1.222
+LLaVA-Video-7B-Qwen2,videomme,ReKV,"FullKV-64, HF path",duration,long,-1.111,-3.222,1.000

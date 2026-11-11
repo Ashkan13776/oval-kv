@@ -1,0 +1,561 @@
+table,hash,layer,kv_head,eta
+"Qwen-7B reasoning, MATH500",0c99a26a,0,0,0.6203
+"Qwen-7B reasoning, MATH500",0c99a26a,0,1,0.7386
+"Qwen-7B reasoning, MATH500",0c99a26a,0,2,1.0
+"Qwen-7B reasoning, MATH500",0c99a26a,0,3,0.693
+"Qwen-7B reasoning, MATH500",0c99a26a,1,0,1.0
+"Qwen-7B reasoning, MATH500",0c99a26a,1,1,0.9508
+"Qwen-7B reasoning, MATH500",0c99a26a,1,2,0.8433
+"Qwen-7B reasoning, MATH500",0c99a26a,1,3,1.0
+"Qwen-7B reasoning, MATH500",0c99a26a,2,0,1.0
+"Qwen-7B reasoning, MATH500",0c99a26a,2,1,1.0
+"Qwen-7B reasoning, MATH500",0c99a26a,2,2,0.9135
+"Qwen-7B reasoning, MATH500",0c99a26a,2,3,1.0
+"Qwen-7B reasoning, MATH500",0c99a26a,3,0,1.0
+"Qwen-7B reasoning, MATH500",0c99a26a,3,1,0.6018
+"Qwen-7B reasoning, MATH500",0c99a26a,3,2,0.6348
+"Qwen-7B reasoning, MATH500",0c99a26a,3,3,0.4717
+"Qwen-7B reasoning, MATH500",0c99a26a,4,0,1.0
+"Qwen-7B reasoning, MATH500",0c99a26a,4,1,0.0
+"Qwen-7B reasoning, MATH500",0c99a26a,4,2,0.8175
+"Qwen-7B reasoning, MATH500",0c99a26a,4,3,1.0
+"Qwen-7B reasoning, MATH500",0c99a26a,5,0,0.5895
+"Qwen-7B reasoning, MATH500",0c99a26a,5,1,0.9584
+"Qwen-7B reasoning, MATH500",0c99a26a,5,2,0.7876
+"Qwen-7B reasoning, MATH500",0c99a26a,5,3,0.8319
+"Qwen-7B reasoning, MATH500",0c99a26a,6,0,0.3532
+"Qwen-7B reasoning, MATH500",0c99a26a,6,1,0.9381
+"Qwen-7B reasoning, MATH500",0c99a26a,6,2,0.282
+"Qwen-7B reasoning, MATH500",0c99a26a,6,3,0.2047
+"Qwen-7B reasoning, MATH500",0c99a26a,7,0,0.6945
+"Qwen-7B reasoning, MATH500",0c99a26a,7,1,0.5911
+"Qwen-7B reasoning, MATH500",0c99a26a,7,2,0.8251
+"Qwen-7B reasoning, MATH500",0c99a26a,7,3,0.7129
+"Qwen-7B reasoning, MATH500",0c99a26a,8,0,0.5778
+"Qwen-7B reasoning, MATH500",0c99a26a,8,1,0.8864
+"Qwen-7B reasoning, MATH500",0c99a26a,8,2,0.726
+"Qwen-7B reasoning, MATH500",0c99a26a,8,3,0.3829
+"Qwen-7B reasoning, MATH500",0c99a26a,9,0,0.5105
+"Qwen-7B reasoning, MATH500",0c99a26a,9,1,0.6509
+"Qwen-7B reasoning, MATH500",0c99a26a,9,2,0.2234
+"Qwen-7B reasoning, MATH500",0c99a26a,9,3,0.8247
+"Qwen-7B reasoning, MATH500",0c99a26a,10,0,0.911
+"Qwen-7B reasoning, MATH500",0c99a26a,10,1,0.8255
+"Qwen-7B reasoning, MATH500",0c99a26a,10,2,0.8157
+"Qwen-7B reasoning, MATH500",0c99a26a,10,3,0.2933
+"Qwen-7B reasoning, MATH500",0c99a26a,11,0,0.5002
+"Qwen-7B reasoning, MATH500",0c99a26a,11,1,1.0
+"Qwen-7B reasoning, MATH500",0c99a26a,11,2,0.0
+"Qwen-7B reasoning, MATH500",0c99a26a,11,3,0.7092
+"Qwen-7B reasoning, MATH500",0c99a26a,12,0,0.0
+"Qwen-7B reasoning, MATH500",0c99a26a,12,1,0.0
+"Qwen-7B reasoning, MATH500",0c99a26a,12,2,0.0
+"Qwen-7B reasoning, MATH500",0c99a26a,12,3,0.6456
+"Qwen-7B reasoning, MATH500",0c99a26a,13,0,0.0
+"Qwen-7B reasoning, MATH500",0c99a26a,13,1,0.0
+"Qwen-7B reasoning, MATH500",0c99a26a,13,2,0.0
+"Qwen-7B reasoning, MATH500",0c99a26a,13,3,0.0
+"Qwen-7B reasoning, MATH500",0c99a26a,14,0,0.6759
+"Qwen-7B reasoning, MATH500",0c99a26a,14,1,0.0
+"Qwen-7B reasoning, MATH500",0c99a26a,14,2,0.0
+"Qwen-7B reasoning, MATH500",0c99a26a,14,3,0.0
+"Qwen-7B reasoning, MATH500",0c99a26a,15,0,0.0
+"Qwen-7B reasoning, MATH500",0c99a26a,15,1,0.0
+"Qwen-7B reasoning, MATH500",0c99a26a,15,2,0.1706
+"Qwen-7B reasoning, MATH500",0c99a26a,15,3,0.0
+"Qwen-7B reasoning, MATH500",0c99a26a,16,0,0.0
+"Qwen-7B reasoning, MATH500",0c99a26a,16,1,0.0
+"Qwen-7B reasoning, MATH500",0c99a26a,16,2,0.0
+"Qwen-7B reasoning, MATH500",0c99a26a,16,3,0.0
+"Qwen-7B reasoning, MATH500",0c99a26a,17,0,1.0
+"Qwen-7B reasoning, MATH500",0c99a26a,17,1,0.1234
+"Qwen-7B reasoning, MATH500",0c99a26a,17,2,0.0
+"Qwen-7B reasoning, MATH500",0c99a26a,17,3,0.0
+"Qwen-7B reasoning, MATH500",0c99a26a,18,0,0.0
+"Qwen-7B reasoning, MATH500",0c99a26a,18,1,0.0
+"Qwen-7B reasoning, MATH500",0c99a26a,18,2,0.0
+"Qwen-7B reasoning, MATH500",0c99a26a,18,3,0.1032
+"Qwen-7B reasoning, MATH500",0c99a26a,19,0,0.0
+"Qwen-7B reasoning, MATH500",0c99a26a,19,1,0.0
+"Qwen-7B reasoning, MATH500",0c99a26a,19,2,0.0
+"Qwen-7B reasoning, MATH500",0c99a26a,19,3,0.0
+"Qwen-7B reasoning, MATH500",0c99a26a,20,0,0.0
+"Qwen-7B reasoning, MATH500",0c99a26a,20,1,0.0
+"Qwen-7B reasoning, MATH500",0c99a26a,20,2,0.0
+"Qwen-7B reasoning, MATH500",0c99a26a,20,3,0.0
+"Qwen-7B reasoning, MATH500",0c99a26a,21,0,0.5051
+"Qwen-7B reasoning, MATH500",0c99a26a,21,1,0.0
+"Qwen-7B reasoning, MATH500",0c99a26a,21,2,0.0
+"Qwen-7B reasoning, MATH500",0c99a26a,21,3,0.0
+"Qwen-7B reasoning, MATH500",0c99a26a,22,0,0.702
+"Qwen-7B reasoning, MATH500",0c99a26a,22,1,0.2044
+"Qwen-7B reasoning, MATH500",0c99a26a,22,2,0.7191
+"Qwen-7B reasoning, MATH500",0c99a26a,22,3,0.2338
+"Qwen-7B reasoning, MATH500",0c99a26a,23,0,0.8148
+"Qwen-7B reasoning, MATH500",0c99a26a,23,1,0.7711
+"Qwen-7B reasoning, MATH500",0c99a26a,23,2,0.8966
+"Qwen-7B reasoning, MATH500",0c99a26a,23,3,0.0224
+"Qwen-7B reasoning, MATH500",0c99a26a,24,0,0.3814
+"Qwen-7B reasoning, MATH500",0c99a26a,24,1,0.263
+"Qwen-7B reasoning, MATH500",0c99a26a,24,2,0.0
+"Qwen-7B reasoning, MATH500",0c99a26a,24,3,0.6901
+"Qwen-7B reasoning, MATH500",0c99a26a,25,0,0.7621
+"Qwen-7B reasoning, MATH500",0c99a26a,25,1,0.9382
+"Qwen-7B reasoning, MATH500",0c99a26a,25,2,0.7738
+"Qwen-7B reasoning, MATH500",0c99a26a,25,3,0.5788
+"Qwen-7B reasoning, MATH500",0c99a26a,26,0,0.9317
+"Qwen-7B reasoning, MATH500",0c99a26a,26,1,1.0
+"Qwen-7B reasoning, MATH500",0c99a26a,26,2,1.0
+"Qwen-7B reasoning, MATH500",0c99a26a,26,3,0.7417
+"Qwen-7B reasoning, MATH500",0c99a26a,27,0,0.9295
+"Qwen-7B reasoning, MATH500",0c99a26a,27,1,0.9509
+"Qwen-7B reasoning, MATH500",0c99a26a,27,2,0.9206
+"Qwen-7B reasoning, MATH500",0c99a26a,27,3,0.7564
+"Qwen-7B reasoning, AIME24",fa1b4e40,0,0,0.9578
+"Qwen-7B reasoning, AIME24",fa1b4e40,0,1,0.97
+"Qwen-7B reasoning, AIME24",fa1b4e40,0,2,0.9163
+"Qwen-7B reasoning, AIME24",fa1b4e40,0,3,0.8196
+"Qwen-7B reasoning, AIME24",fa1b4e40,1,0,1.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,1,1,0.9499
+"Qwen-7B reasoning, AIME24",fa1b4e40,1,2,0.8951
+"Qwen-7B reasoning, AIME24",fa1b4e40,1,3,1.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,2,0,1.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,2,1,1.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,2,2,0.8792
+"Qwen-7B reasoning, AIME24",fa1b4e40,2,3,0.8009
+"Qwen-7B reasoning, AIME24",fa1b4e40,3,0,0.8413
+"Qwen-7B reasoning, AIME24",fa1b4e40,3,1,0.4993
+"Qwen-7B reasoning, AIME24",fa1b4e40,3,2,1.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,3,3,0.5155
+"Qwen-7B reasoning, AIME24",fa1b4e40,4,0,1.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,4,1,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,4,2,0.7222
+"Qwen-7B reasoning, AIME24",fa1b4e40,4,3,1.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,5,0,0.5859
+"Qwen-7B reasoning, AIME24",fa1b4e40,5,1,0.8782
+"Qwen-7B reasoning, AIME24",fa1b4e40,5,2,0.5048
+"Qwen-7B reasoning, AIME24",fa1b4e40,5,3,0.3635
+"Qwen-7B reasoning, AIME24",fa1b4e40,6,0,0.2903
+"Qwen-7B reasoning, AIME24",fa1b4e40,6,1,1.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,6,2,0.1595
+"Qwen-7B reasoning, AIME24",fa1b4e40,6,3,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,7,0,0.9373
+"Qwen-7B reasoning, AIME24",fa1b4e40,7,1,0.1441
+"Qwen-7B reasoning, AIME24",fa1b4e40,7,2,0.7865
+"Qwen-7B reasoning, AIME24",fa1b4e40,7,3,0.8227
+"Qwen-7B reasoning, AIME24",fa1b4e40,8,0,1.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,8,1,1.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,8,2,0.6141
+"Qwen-7B reasoning, AIME24",fa1b4e40,8,3,0.2364
+"Qwen-7B reasoning, AIME24",fa1b4e40,9,0,0.2421
+"Qwen-7B reasoning, AIME24",fa1b4e40,9,1,0.8434
+"Qwen-7B reasoning, AIME24",fa1b4e40,9,2,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,9,3,0.2483
+"Qwen-7B reasoning, AIME24",fa1b4e40,10,0,0.952
+"Qwen-7B reasoning, AIME24",fa1b4e40,10,1,0.1541
+"Qwen-7B reasoning, AIME24",fa1b4e40,10,2,0.7145
+"Qwen-7B reasoning, AIME24",fa1b4e40,10,3,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,11,0,0.3857
+"Qwen-7B reasoning, AIME24",fa1b4e40,11,1,0.8894
+"Qwen-7B reasoning, AIME24",fa1b4e40,11,2,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,11,3,0.4204
+"Qwen-7B reasoning, AIME24",fa1b4e40,12,0,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,12,1,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,12,2,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,12,3,0.1281
+"Qwen-7B reasoning, AIME24",fa1b4e40,13,0,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,13,1,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,13,2,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,13,3,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,14,0,0.4234
+"Qwen-7B reasoning, AIME24",fa1b4e40,14,1,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,14,2,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,14,3,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,15,0,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,15,1,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,15,2,0.1272
+"Qwen-7B reasoning, AIME24",fa1b4e40,15,3,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,16,0,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,16,1,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,16,2,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,16,3,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,17,0,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,17,1,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,17,2,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,17,3,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,18,0,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,18,1,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,18,2,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,18,3,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,19,0,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,19,1,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,19,2,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,19,3,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,20,0,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,20,1,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,20,2,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,20,3,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,21,0,0.5449
+"Qwen-7B reasoning, AIME24",fa1b4e40,21,1,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,21,2,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,21,3,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,22,0,0.6167
+"Qwen-7B reasoning, AIME24",fa1b4e40,22,1,0.4766
+"Qwen-7B reasoning, AIME24",fa1b4e40,22,2,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,22,3,0.4604
+"Qwen-7B reasoning, AIME24",fa1b4e40,23,0,0.2869
+"Qwen-7B reasoning, AIME24",fa1b4e40,23,1,0.5613
+"Qwen-7B reasoning, AIME24",fa1b4e40,23,2,0.735
+"Qwen-7B reasoning, AIME24",fa1b4e40,23,3,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,24,0,0.4368
+"Qwen-7B reasoning, AIME24",fa1b4e40,24,1,0.4381
+"Qwen-7B reasoning, AIME24",fa1b4e40,24,2,0.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,24,3,0.8192
+"Qwen-7B reasoning, AIME24",fa1b4e40,25,0,0.7237
+"Qwen-7B reasoning, AIME24",fa1b4e40,25,1,0.742
+"Qwen-7B reasoning, AIME24",fa1b4e40,25,2,0.4969
+"Qwen-7B reasoning, AIME24",fa1b4e40,25,3,0.4201
+"Qwen-7B reasoning, AIME24",fa1b4e40,26,0,0.9365
+"Qwen-7B reasoning, AIME24",fa1b4e40,26,1,1.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,26,2,0.616
+"Qwen-7B reasoning, AIME24",fa1b4e40,26,3,0.6128
+"Qwen-7B reasoning, AIME24",fa1b4e40,27,0,0.7087
+"Qwen-7B reasoning, AIME24",fa1b4e40,27,1,1.0
+"Qwen-7B reasoning, AIME24",fa1b4e40,27,2,0.856
+"Qwen-7B reasoning, AIME24",fa1b4e40,27,3,0.5741
+"Qwen-7B reasoning, GPQA",86e2340d,0,0,0.8076
+"Qwen-7B reasoning, GPQA",86e2340d,0,1,0.7858
+"Qwen-7B reasoning, GPQA",86e2340d,0,2,1.0
+"Qwen-7B reasoning, GPQA",86e2340d,0,3,0.8041
+"Qwen-7B reasoning, GPQA",86e2340d,1,0,1.0
+"Qwen-7B reasoning, GPQA",86e2340d,1,1,0.9174
+"Qwen-7B reasoning, GPQA",86e2340d,1,2,0.8976
+"Qwen-7B reasoning, GPQA",86e2340d,1,3,1.0
+"Qwen-7B reasoning, GPQA",86e2340d,2,0,1.0
+"Qwen-7B reasoning, GPQA",86e2340d,2,1,1.0
+"Qwen-7B reasoning, GPQA",86e2340d,2,2,0.4249
+"Qwen-7B reasoning, GPQA",86e2340d,2,3,1.0
+"Qwen-7B reasoning, GPQA",86e2340d,3,0,1.0
+"Qwen-7B reasoning, GPQA",86e2340d,3,1,0.3052
+"Qwen-7B reasoning, GPQA",86e2340d,3,2,0.8716
+"Qwen-7B reasoning, GPQA",86e2340d,3,3,0.5335
+"Qwen-7B reasoning, GPQA",86e2340d,4,0,1.0
+"Qwen-7B reasoning, GPQA",86e2340d,4,1,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,4,2,0.4792
+"Qwen-7B reasoning, GPQA",86e2340d,4,3,1.0
+"Qwen-7B reasoning, GPQA",86e2340d,5,0,0.5878
+"Qwen-7B reasoning, GPQA",86e2340d,5,1,0.5565
+"Qwen-7B reasoning, GPQA",86e2340d,5,2,0.5533
+"Qwen-7B reasoning, GPQA",86e2340d,5,3,0.1514
+"Qwen-7B reasoning, GPQA",86e2340d,6,0,0.1957
+"Qwen-7B reasoning, GPQA",86e2340d,6,1,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,6,2,0.8143
+"Qwen-7B reasoning, GPQA",86e2340d,6,3,0.1399
+"Qwen-7B reasoning, GPQA",86e2340d,7,0,0.9741
+"Qwen-7B reasoning, GPQA",86e2340d,7,1,0.1538
+"Qwen-7B reasoning, GPQA",86e2340d,7,2,0.6247
+"Qwen-7B reasoning, GPQA",86e2340d,7,3,0.6947
+"Qwen-7B reasoning, GPQA",86e2340d,8,0,1.0
+"Qwen-7B reasoning, GPQA",86e2340d,8,1,0.4966
+"Qwen-7B reasoning, GPQA",86e2340d,8,2,0.6372
+"Qwen-7B reasoning, GPQA",86e2340d,8,3,0.2808
+"Qwen-7B reasoning, GPQA",86e2340d,9,0,0.9221
+"Qwen-7B reasoning, GPQA",86e2340d,9,1,0.3905
+"Qwen-7B reasoning, GPQA",86e2340d,9,2,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,9,3,0.3758
+"Qwen-7B reasoning, GPQA",86e2340d,10,0,0.8241
+"Qwen-7B reasoning, GPQA",86e2340d,10,1,0.0514
+"Qwen-7B reasoning, GPQA",86e2340d,10,2,0.5068
+"Qwen-7B reasoning, GPQA",86e2340d,10,3,0.1121
+"Qwen-7B reasoning, GPQA",86e2340d,11,0,0.5573
+"Qwen-7B reasoning, GPQA",86e2340d,11,1,0.6564
+"Qwen-7B reasoning, GPQA",86e2340d,11,2,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,11,3,0.6393
+"Qwen-7B reasoning, GPQA",86e2340d,12,0,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,12,1,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,12,2,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,12,3,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,13,0,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,13,1,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,13,2,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,13,3,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,14,0,0.4736
+"Qwen-7B reasoning, GPQA",86e2340d,14,1,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,14,2,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,14,3,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,15,0,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,15,1,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,15,2,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,15,3,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,16,0,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,16,1,0.1318
+"Qwen-7B reasoning, GPQA",86e2340d,16,2,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,16,3,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,17,0,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,17,1,0.0941
+"Qwen-7B reasoning, GPQA",86e2340d,17,2,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,17,3,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,18,0,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,18,1,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,18,2,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,18,3,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,19,0,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,19,1,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,19,2,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,19,3,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,20,0,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,20,1,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,20,2,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,20,3,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,21,0,0.5976
+"Qwen-7B reasoning, GPQA",86e2340d,21,1,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,21,2,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,21,3,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,22,0,0.625
+"Qwen-7B reasoning, GPQA",86e2340d,22,1,0.4172
+"Qwen-7B reasoning, GPQA",86e2340d,22,2,0.3952
+"Qwen-7B reasoning, GPQA",86e2340d,22,3,0.3589
+"Qwen-7B reasoning, GPQA",86e2340d,23,0,0.7866
+"Qwen-7B reasoning, GPQA",86e2340d,23,1,0.7008
+"Qwen-7B reasoning, GPQA",86e2340d,23,2,0.7399
+"Qwen-7B reasoning, GPQA",86e2340d,23,3,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,24,0,0.5721
+"Qwen-7B reasoning, GPQA",86e2340d,24,1,0.8311
+"Qwen-7B reasoning, GPQA",86e2340d,24,2,0.0
+"Qwen-7B reasoning, GPQA",86e2340d,24,3,0.8275
+"Qwen-7B reasoning, GPQA",86e2340d,25,0,0.5342
+"Qwen-7B reasoning, GPQA",86e2340d,25,1,0.9524
+"Qwen-7B reasoning, GPQA",86e2340d,25,2,0.8369
+"Qwen-7B reasoning, GPQA",86e2340d,25,3,0.3364
+"Qwen-7B reasoning, GPQA",86e2340d,26,0,0.9387
+"Qwen-7B reasoning, GPQA",86e2340d,26,1,1.0
+"Qwen-7B reasoning, GPQA",86e2340d,26,2,0.8478
+"Qwen-7B reasoning, GPQA",86e2340d,26,3,0.5921
+"Qwen-7B reasoning, GPQA",86e2340d,27,0,0.8822
+"Qwen-7B reasoning, GPQA",86e2340d,27,1,1.0
+"Qwen-7B reasoning, GPQA",86e2340d,27,2,0.959
+"Qwen-7B reasoning, GPQA",86e2340d,27,3,0.6104
+"LLaVA-Video-7B, video",42bf0455,0,0,0.0
+"LLaVA-Video-7B, video",42bf0455,0,1,0.0
+"LLaVA-Video-7B, video",42bf0455,0,2,0.5507
+"LLaVA-Video-7B, video",42bf0455,0,3,0.0
+"LLaVA-Video-7B, video",42bf0455,1,0,0.681
+"LLaVA-Video-7B, video",42bf0455,1,1,0.9713
+"LLaVA-Video-7B, video",42bf0455,1,2,0.9892
+"LLaVA-Video-7B, video",42bf0455,1,3,0.971
+"LLaVA-Video-7B, video",42bf0455,2,0,0.8922
+"LLaVA-Video-7B, video",42bf0455,2,1,0.8554
+"LLaVA-Video-7B, video",42bf0455,2,2,0.8673
+"LLaVA-Video-7B, video",42bf0455,2,3,0.8974
+"LLaVA-Video-7B, video",42bf0455,3,0,0.0
+"LLaVA-Video-7B, video",42bf0455,3,1,0.4229
+"LLaVA-Video-7B, video",42bf0455,3,2,0.5091
+"LLaVA-Video-7B, video",42bf0455,3,3,0.0
+"LLaVA-Video-7B, video",42bf0455,4,0,0.9801
+"LLaVA-Video-7B, video",42bf0455,4,1,0.0
+"LLaVA-Video-7B, video",42bf0455,4,2,0.7111
+"LLaVA-Video-7B, video",42bf0455,4,3,1.0
+"LLaVA-Video-7B, video",42bf0455,5,0,0.7553
+"LLaVA-Video-7B, video",42bf0455,5,1,0.4778
+"LLaVA-Video-7B, video",42bf0455,5,2,0.5393
+"LLaVA-Video-7B, video",42bf0455,5,3,1.0
+"LLaVA-Video-7B, video",42bf0455,6,0,0.0
+"LLaVA-Video-7B, video",42bf0455,6,1,1.0
+"LLaVA-Video-7B, video",42bf0455,6,2,0.8348
+"LLaVA-Video-7B, video",42bf0455,6,3,1.0
+"LLaVA-Video-7B, video",42bf0455,7,0,0.7533
+"LLaVA-Video-7B, video",42bf0455,7,1,0.5675
+"LLaVA-Video-7B, video",42bf0455,7,2,0.9241
+"LLaVA-Video-7B, video",42bf0455,7,3,0.1485
+"LLaVA-Video-7B, video",42bf0455,8,0,0.8622
+"LLaVA-Video-7B, video",42bf0455,8,1,1.0
+"LLaVA-Video-7B, video",42bf0455,8,2,1.0
+"LLaVA-Video-7B, video",42bf0455,8,3,0.1549
+"LLaVA-Video-7B, video",42bf0455,9,0,0.7566
+"LLaVA-Video-7B, video",42bf0455,9,1,0.9786
+"LLaVA-Video-7B, video",42bf0455,9,2,0.2442
+"LLaVA-Video-7B, video",42bf0455,9,3,0.6072
+"LLaVA-Video-7B, video",42bf0455,10,0,0.8975
+"LLaVA-Video-7B, video",42bf0455,10,1,0.6107
+"LLaVA-Video-7B, video",42bf0455,10,2,0.8596
+"LLaVA-Video-7B, video",42bf0455,10,3,0.972
+"LLaVA-Video-7B, video",42bf0455,11,0,1.0
+"LLaVA-Video-7B, video",42bf0455,11,1,1.0
+"LLaVA-Video-7B, video",42bf0455,11,2,0.7923
+"LLaVA-Video-7B, video",42bf0455,11,3,0.5171
+"LLaVA-Video-7B, video",42bf0455,12,0,0.5024
+"LLaVA-Video-7B, video",42bf0455,12,1,0.5228
+"LLaVA-Video-7B, video",42bf0455,12,2,0.5332
+"LLaVA-Video-7B, video",42bf0455,12,3,1.0
+"LLaVA-Video-7B, video",42bf0455,13,0,0.645
+"LLaVA-Video-7B, video",42bf0455,13,1,0.9966
+"LLaVA-Video-7B, video",42bf0455,13,2,0.6629
+"LLaVA-Video-7B, video",42bf0455,13,3,0.5853
+"LLaVA-Video-7B, video",42bf0455,14,0,0.3653
+"LLaVA-Video-7B, video",42bf0455,14,1,0.1944
+"LLaVA-Video-7B, video",42bf0455,14,2,0.8621
+"LLaVA-Video-7B, video",42bf0455,14,3,0.5892
+"LLaVA-Video-7B, video",42bf0455,15,0,0.4891
+"LLaVA-Video-7B, video",42bf0455,15,1,1.0
+"LLaVA-Video-7B, video",42bf0455,15,2,0.2167
+"LLaVA-Video-7B, video",42bf0455,15,3,0.7405
+"LLaVA-Video-7B, video",42bf0455,16,0,0.579
+"LLaVA-Video-7B, video",42bf0455,16,1,0.5569
+"LLaVA-Video-7B, video",42bf0455,16,2,0.7196
+"LLaVA-Video-7B, video",42bf0455,16,3,0.2828
+"LLaVA-Video-7B, video",42bf0455,17,0,1.0
+"LLaVA-Video-7B, video",42bf0455,17,1,0.8309
+"LLaVA-Video-7B, video",42bf0455,17,2,0.2641
+"LLaVA-Video-7B, video",42bf0455,17,3,0.6098
+"LLaVA-Video-7B, video",42bf0455,18,0,0.0383
+"LLaVA-Video-7B, video",42bf0455,18,1,0.5408
+"LLaVA-Video-7B, video",42bf0455,18,2,0.58
+"LLaVA-Video-7B, video",42bf0455,18,3,0.7262
+"LLaVA-Video-7B, video",42bf0455,19,0,0.5038
+"LLaVA-Video-7B, video",42bf0455,19,1,0.6884
+"LLaVA-Video-7B, video",42bf0455,19,2,0.6094
+"LLaVA-Video-7B, video",42bf0455,19,3,0.5792
+"LLaVA-Video-7B, video",42bf0455,20,0,0.0187
+"LLaVA-Video-7B, video",42bf0455,20,1,0.8822
+"LLaVA-Video-7B, video",42bf0455,20,2,0.635
+"LLaVA-Video-7B, video",42bf0455,20,3,0.343
+"LLaVA-Video-7B, video",42bf0455,21,0,0.7446
+"LLaVA-Video-7B, video",42bf0455,21,1,0.7902
+"LLaVA-Video-7B, video",42bf0455,21,2,1.0
+"LLaVA-Video-7B, video",42bf0455,21,3,0.3997
+"LLaVA-Video-7B, video",42bf0455,22,0,0.5882
+"LLaVA-Video-7B, video",42bf0455,22,1,0.7105
+"LLaVA-Video-7B, video",42bf0455,22,2,0.4462
+"LLaVA-Video-7B, video",42bf0455,22,3,0.8186
+"LLaVA-Video-7B, video",42bf0455,23,0,0.4139
+"LLaVA-Video-7B, video",42bf0455,23,1,0.6706
+"LLaVA-Video-7B, video",42bf0455,23,2,1.0
+"LLaVA-Video-7B, video",42bf0455,23,3,0.7465
+"LLaVA-Video-7B, video",42bf0455,24,0,0.0
+"LLaVA-Video-7B, video",42bf0455,24,1,0.9924
+"LLaVA-Video-7B, video",42bf0455,24,2,0.773
+"LLaVA-Video-7B, video",42bf0455,24,3,0.7643
+"LLaVA-Video-7B, video",42bf0455,25,0,0.6598
+"LLaVA-Video-7B, video",42bf0455,25,1,0.8402
+"LLaVA-Video-7B, video",42bf0455,25,2,0.9751
+"LLaVA-Video-7B, video",42bf0455,25,3,0.4625
+"LLaVA-Video-7B, video",42bf0455,26,0,1.0
+"LLaVA-Video-7B, video",42bf0455,26,1,0.7209
+"LLaVA-Video-7B, video",42bf0455,26,2,0.6071
+"LLaVA-Video-7B, video",42bf0455,26,3,0.5817
+"LLaVA-Video-7B, video",42bf0455,27,0,0.7135
+"LLaVA-Video-7B, video",42bf0455,27,1,0.633
+"LLaVA-Video-7B, video",42bf0455,27,2,0.8739
+"LLaVA-Video-7B, video",42bf0455,27,3,0.7781
+"Qwen2.5-VL-7B, video",486493e2,0,0,0.0
+"Qwen2.5-VL-7B, video",486493e2,0,1,0.1038
+"Qwen2.5-VL-7B, video",486493e2,0,2,0.0
+"Qwen2.5-VL-7B, video",486493e2,0,3,0.3601
+"Qwen2.5-VL-7B, video",486493e2,1,0,0.9067
+"Qwen2.5-VL-7B, video",486493e2,1,1,0.2599
+"Qwen2.5-VL-7B, video",486493e2,1,2,0.585
+"Qwen2.5-VL-7B, video",486493e2,1,3,0.7409
+"Qwen2.5-VL-7B, video",486493e2,2,0,0.0
+"Qwen2.5-VL-7B, video",486493e2,2,1,0.5112
+"Qwen2.5-VL-7B, video",486493e2,2,2,0.0445
+"Qwen2.5-VL-7B, video",486493e2,2,3,0.1333
+"Qwen2.5-VL-7B, video",486493e2,3,0,0.0
+"Qwen2.5-VL-7B, video",486493e2,3,1,0.636
+"Qwen2.5-VL-7B, video",486493e2,3,2,0.0
+"Qwen2.5-VL-7B, video",486493e2,3,3,0.4678
+"Qwen2.5-VL-7B, video",486493e2,4,0,0.0
+"Qwen2.5-VL-7B, video",486493e2,4,1,0.1074
+"Qwen2.5-VL-7B, video",486493e2,4,2,0.0
+"Qwen2.5-VL-7B, video",486493e2,4,3,0.7983
+"Qwen2.5-VL-7B, video",486493e2,5,0,0.336
+"Qwen2.5-VL-7B, video",486493e2,5,1,0.2528
+"Qwen2.5-VL-7B, video",486493e2,5,2,0.4339
+"Qwen2.5-VL-7B, video",486493e2,5,3,0.4071
+"Qwen2.5-VL-7B, video",486493e2,6,0,0.4676
+"Qwen2.5-VL-7B, video",486493e2,6,1,0.0
+"Qwen2.5-VL-7B, video",486493e2,6,2,0.3496
+"Qwen2.5-VL-7B, video",486493e2,6,3,0.5596
+"Qwen2.5-VL-7B, video",486493e2,7,0,0.2695
+"Qwen2.5-VL-7B, video",486493e2,7,1,0.3035
+"Qwen2.5-VL-7B, video",486493e2,7,2,0.4742
+"Qwen2.5-VL-7B, video",486493e2,7,3,0.338
+"Qwen2.5-VL-7B, video",486493e2,8,0,0.0
+"Qwen2.5-VL-7B, video",486493e2,8,1,0.3964
+"Qwen2.5-VL-7B, video",486493e2,8,2,0.0538
+"Qwen2.5-VL-7B, video",486493e2,8,3,0.2967
+"Qwen2.5-VL-7B, video",486493e2,9,0,0.6155
+"Qwen2.5-VL-7B, video",486493e2,9,1,0.277
+"Qwen2.5-VL-7B, video",486493e2,9,2,0.285
+"Qwen2.5-VL-7B, video",486493e2,9,3,0.4668
+"Qwen2.5-VL-7B, video",486493e2,10,0,0.3791
+"Qwen2.5-VL-7B, video",486493e2,10,1,0.6705
+"Qwen2.5-VL-7B, video",486493e2,10,2,0.0
+"Qwen2.5-VL-7B, video",486493e2,10,3,0.3859
+"Qwen2.5-VL-7B, video",486493e2,11,0,0.1731
+"Qwen2.5-VL-7B, video",486493e2,11,1,0.4188
+"Qwen2.5-VL-7B, video",486493e2,11,2,0.4957
+"Qwen2.5-VL-7B, video",486493e2,11,3,0.5719
+"Qwen2.5-VL-7B, video",486493e2,12,0,0.5631
+"Qwen2.5-VL-7B, video",486493e2,12,1,0.4281
+"Qwen2.5-VL-7B, video",486493e2,12,2,0.3488
+"Qwen2.5-VL-7B, video",486493e2,12,3,0.2597
+"Qwen2.5-VL-7B, video",486493e2,13,0,0.4793
+"Qwen2.5-VL-7B, video",486493e2,13,1,0.2923
+"Qwen2.5-VL-7B, video",486493e2,13,2,0.4086
+"Qwen2.5-VL-7B, video",486493e2,13,3,0.6173
+"Qwen2.5-VL-7B, video",486493e2,14,0,0.3391
+"Qwen2.5-VL-7B, video",486493e2,14,1,0.275
+"Qwen2.5-VL-7B, video",486493e2,14,2,0.5478
+"Qwen2.5-VL-7B, video",486493e2,14,3,0.501
+"Qwen2.5-VL-7B, video",486493e2,15,0,0.4755
+"Qwen2.5-VL-7B, video",486493e2,15,1,0.0
+"Qwen2.5-VL-7B, video",486493e2,15,2,0.2118
+"Qwen2.5-VL-7B, video",486493e2,15,3,0.2734
+"Qwen2.5-VL-7B, video",486493e2,16,0,0.5375
+"Qwen2.5-VL-7B, video",486493e2,16,1,0.5947
+"Qwen2.5-VL-7B, video",486493e2,16,2,0.6659
+"Qwen2.5-VL-7B, video",486493e2,16,3,0.93
+"Qwen2.5-VL-7B, video",486493e2,17,0,0.4826
+"Qwen2.5-VL-7B, video",486493e2,17,1,0.5675
+"Qwen2.5-VL-7B, video",486493e2,17,2,0.4018
+"Qwen2.5-VL-7B, video",486493e2,17,3,0.5872
+"Qwen2.5-VL-7B, video",486493e2,18,0,0.3563
+"Qwen2.5-VL-7B, video",486493e2,18,1,0.4444
+"Qwen2.5-VL-7B, video",486493e2,18,2,0.2649
+"Qwen2.5-VL-7B, video",486493e2,18,3,0.2916
+"Qwen2.5-VL-7B, video",486493e2,19,0,0.6243
+"Qwen2.5-VL-7B, video",486493e2,19,1,0.0
+"Qwen2.5-VL-7B, video",486493e2,19,2,0.5676
+"Qwen2.5-VL-7B, video",486493e2,19,3,0.4801
+"Qwen2.5-VL-7B, video",486493e2,20,0,0.0
+"Qwen2.5-VL-7B, video",486493e2,20,1,0.7195
+"Qwen2.5-VL-7B, video",486493e2,20,2,0.6498
+"Qwen2.5-VL-7B, video",486493e2,20,3,0.4381
+"Qwen2.5-VL-7B, video",486493e2,21,0,0.6758
+"Qwen2.5-VL-7B, video",486493e2,21,1,0.582
+"Qwen2.5-VL-7B, video",486493e2,21,2,0.0
+"Qwen2.5-VL-7B, video",486493e2,21,3,0.321
+"Qwen2.5-VL-7B, video",486493e2,22,0,0.8733
+"Qwen2.5-VL-7B, video",486493e2,22,1,0.7102
+"Qwen2.5-VL-7B, video",486493e2,22,2,0.1777
+"Qwen2.5-VL-7B, video",486493e2,22,3,0.9623
+"Qwen2.5-VL-7B, video",486493e2,23,0,0.4304
+"Qwen2.5-VL-7B, video",486493e2,23,1,0.7971
+"Qwen2.5-VL-7B, video",486493e2,23,2,0.7011
+"Qwen2.5-VL-7B, video",486493e2,23,3,0.0
+"Qwen2.5-VL-7B, video",486493e2,24,0,0.0
+"Qwen2.5-VL-7B, video",486493e2,24,1,0.2901
+"Qwen2.5-VL-7B, video",486493e2,24,2,0.0
+"Qwen2.5-VL-7B, video",486493e2,24,3,0.8795
+"Qwen2.5-VL-7B, video",486493e2,25,0,0.0607
+"Qwen2.5-VL-7B, video",486493e2,25,1,0.6198
+"Qwen2.5-VL-7B, video",486493e2,25,2,0.0
+"Qwen2.5-VL-7B, video",486493e2,25,3,0.7304
+"Qwen2.5-VL-7B, video",486493e2,26,0,0.6301
+"Qwen2.5-VL-7B, video",486493e2,26,1,0.1591
+"Qwen2.5-VL-7B, video",486493e2,26,2,0.7387
+"Qwen2.5-VL-7B, video",486493e2,26,3,0.5222
+"Qwen2.5-VL-7B, video",486493e2,27,0,0.5764
+"Qwen2.5-VL-7B, video",486493e2,27,1,0.5089
+"Qwen2.5-VL-7B, video",486493e2,27,2,0.4544
+"Qwen2.5-VL-7B, video",486493e2,27,3,0.4262
