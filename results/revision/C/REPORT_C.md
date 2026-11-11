@@ -514,3 +514,47 @@ Budget-matched pairs (overall): OVAL - ReKV +2.32 [+0.59, +4.05]; OVAL - InfiniP
 - **ReKV and VisionZip on SigLIP/M-RoPE** are ports, not the authors' code paths (see C3);
   arms are labelled "(our port)".
 
+
+## LIBERO-Recall: robot-episode memory (added 2026-11-10, author request)
+
+**Benchmark** (`liberorecall_build.py`; questions and spans in `results/revision/C/liberorecall/`):
+- 100 sessions; each chains 8 LIBERO demonstrations of 8 distinct tasks (of 40; lerobot/libero, third-person camera, 10 fps), about 2 minutes per session.
+- 600 four-way questions, 6 per session: present, absent, first, last, after, before. Answers come from the dataset's task labels and episode order. Distractors outside the session come from the same LIBERO suite where possible. Seed 0.
+- Written in LVBench's format, so the C2/C3 runners ran unchanged (`LVB_ROOT=~/liberorecall`; jobs from `gen_jobs_lr.py`). Same arms, flags, eta tables and 64 frames as LVBench.
+- Name: `libero-mem/LIBERO-Mem` already exists on HF (policy-learning demos, not QA), so ours is LIBERO-Recall.
+
+**Results** (`lr_table.py` -> `latex/lr_table.tex`, `tables/lr_table.{md,csv}`, `tables/lr_pairs.csv`). Overall accuracy, 600 questions per arm, all 22 arms complete. Chance is 25%.
+
+| arm | KV mem. | Qwen2.5-VL | LLaVA-Video |
+|---|---|---|---|
+| FullKV (N) | 100% | 40.50 | 40.50 |
+| FullKV (N/2) | 50-51% | 37.67 | 38.50 |
+| VisionZip 50% | 50-52% | 39.83 | 37.50* |
+| InfiniPot-V 50% | 50-52% | 38.50 | 37.83* |
+| VisionZip 25% | 26-28% | 38.00 | 37.33* |
+| InfiniPot-V 2k | 16-19% | 32.83* | 33.33* |
+| ReKV | 100% stored | 35.83* | 34.67* |
+| SnapKV (dagger) | 17-18% | 35.00* | 37.33 |
+| Quest | 103% | 37.50 | 39.17 |
+| FreeKV | 103% | 37.17 | 37.17* |
+| OVAL | 53% | 38.33 | 37.17* |
+
+`*` marks a paired 95% CI vs FullKV (N) that excludes 0.
+
+Paired differences, OVAL minus X, with 95% CIs:
+
+| X | Qwen2.5-VL | LLaVA-Video |
+|---|---|---|
+| FullKV N | -2.17 [-5.33, 1.17] | -3.33* [-6.17, -0.67] |
+| InfiniPot-V 2k | +5.50* [2.33, 8.67] | +3.83* [0.67, 7.17] |
+| ReKV | +2.50 [-0.83, 5.83] | +2.50 [-0.33, 5.33] |
+| Quest | +0.83 | -2.00 |
+| FreeKV | +1.17 | 0.00 |
+
+None of the other OVAL pairs is significant.
+
+Caveats:
+- Some question types are near chance even for FullKV, which compresses the differences between methods: LLaVA absent/after/before (28/28/27) and Qwen after/before (29/26).
+- The LLaVA pilot on 10 sessions (51.7%) overstated the full-set accuracy.
+
+**Determinism fix.** `summarize_c.boot` iterated the videos in dict order, which comes from a set of string ids and so varies with the hash seed. That moved CI bounds by about 0.2 between runs. Videos are now sorted. Re-checked: `paper_table_c_merged.tex` (the paper's video table) is unchanged byte for byte.

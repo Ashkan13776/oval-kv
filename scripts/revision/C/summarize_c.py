@@ -55,7 +55,7 @@ def load(d):
 
 
 def boot(dv, n=10000, seed=0):
-    vids = list(dv)
+    vids = sorted(dv)          # fixed order: set iteration order of str ids varies across runs (hash seed)
     s = np.array([sum(dv[v]) for v in vids], float); c = np.array([len(dv[v]) for v in vids], float)
     idx = np.random.default_rng(seed).integers(0, len(vids), (n, len(vids)))
     st = s[idx].sum(1) / c[idx].sum(1)

@@ -1,0 +1,21 @@
+model,pair,diff,lo,hi,sig
+Qwen2.5-VL,OVAL - full_n64,-2.167,-5.333,1.167,False
+Qwen2.5-VL,OVAL - full_n32,0.667,-2.833,4.167,False
+Qwen2.5-VL,OVAL - vz50_full,-1.500,-4.333,1.500,False
+Qwen2.5-VL,OVAL - infinipot_mem,-0.167,-3.500,3.167,False
+Qwen2.5-VL,OVAL - vz25_full,0.333,-2.500,3.167,False
+Qwen2.5-VL,OVAL - infinipot_2k,5.500,2.333,8.667,True
+Qwen2.5-VL,OVAL - rekv,2.500,-0.833,5.833,False
+Qwen2.5-VL,OVAL - snapkv_n64,3.333,-0.500,7.167,False
+Qwen2.5-VL,OVAL - quest_n64,0.833,-1.833,3.500,False
+Qwen2.5-VL,OVAL - freekv_n64,1.167,-1.833,4.167,False
+LLaVA-Video,OVAL - full_n64,-3.333,-6.167,-0.667,True
+LLaVA-Video,OVAL - full_n32,-1.333,-4.000,1.333,False
+LLaVA-Video,OVAL - vz50_full,-0.333,-3.167,2.500,False
+LLaVA-Video,OVAL - infinipot_mem,-0.667,-3.500,2.167,False
+LLaVA-Video,OVAL - vz25_full,-0.167,-3.000,2.833,False
+LLaVA-Video,OVAL - infinipot_2k,3.833,0.667,7.167,True
+LLaVA-Video,OVAL - rekv,2.500,-0.333,5.333,False
+LLaVA-Video,OVAL - snapkv_n64,-0.167,-3.333,3.000,False
+LLaVA-Video,OVAL - quest_n64,-2.000,-4.500,0.500,False
+LLaVA-Video,OVAL - freekv_n64,0.000,-2.333,2.333,False
