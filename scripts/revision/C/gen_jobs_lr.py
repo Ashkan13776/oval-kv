@@ -8,7 +8,7 @@ ap = argparse.ArgumentParser(); ap.add_argument("--model", required=True); ap.ad
 ap.add_argument("--pilot", type=int, default=0, help="only the questions of the first N sessions (file tag _pilot)")
 a = ap.parse_args()
 C2 = ["full_n64", "full_n32", "quest_n64", "freekv_n64", "snapkv_n64", "oval_n64"]
-C3 = ["infinipot_2k", "rekv", "infinipot_mem", "vz50_full", "vz25_full"]
+C3 = ["infinipot_2k", "rekv", "infinipot_mem", "vz50_full", "vz25_full", "vz50_oval"]
 arms = a.arms or C2 + C3
 m = "qwen25vl" if a.model == "qwen" else "llava"
 lines = []
