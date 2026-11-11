@@ -205,20 +205,24 @@ MROWS = [  # (arm, label, budget, block); block 2 = matched ~15% (ranked)
 
 
 def memcol():
-    """KV-memory column (% of FullKV N, range over the four model x benchmark settings) from memory_c.csv."""
+    """KV-memory column: stored KV cache per question (MiB, whole model = memory_c's per-KV-head bytes x 4 KV heads),
+    "Qwen2.5-VL / LLaVA-Video" on Video-MME (LVBench differs by at most 2.4%, asserted < 2.5%), from memory_c.csv.
+    Also writes tables/video_pareto.csv (every setting x arm: MiB, overall acc)."""
     p = os.path.join(R, "tables", "memory_c.csv")
     if not os.path.exists(p):
         return {}
-    v, res = defaultdict(list), defaultdict(list)
+    mib = {}
     for r in csv.DictReader(open(p)):
-        if r["pct_of_fullN"]:
-            v[r["arm"]].append(float(r["pct_of_fullN"]))
-            if r["rekv_resident_pct"]:
-                res[r["arm"]].append(float(r["rekv_resident_pct"]))
-    fmt = lambda xs: f"{round(min(xs))}\\%" if round(min(xs)) == round(max(xs)) else f"{round(min(xs))}--{round(max(xs))}\\%"
-    out = {a: fmt(x) for a, x in v.items()}
-    for a, x in res.items():
-        out[a] += f"$^{{\\S}}$"
+        if r["kv_MiB_mean"]:
+            mib[r["bench"], r["model"], r["arm"]] = 4 * float(r["kv_MiB_mean"])
+    for (b, m, a), x in mib.items():
+        y = mib.get(("lvbench" if b == "videomme" else "videomme", m, a))
+        assert y is None or abs(x - y) / y < 0.025, (b, m, a, x, y)
+    out = {}
+    for a in {k[2] for k in mib}:
+        q, l = mib.get(("videomme", "Qwen2.5-VL", a)), mib.get(("videomme", "LLaVA-Video", a))
+        f = lambda v: "--" if v is None else f"{v:.0f}"
+        out[a] = f"{f(q)}\\,/\\,{f(l)}" + ("$^{\\S}$" if a == "rekv" else "")
     return out
 
 
@@ -254,7 +258,7 @@ def merged():
            "\\cmidrule(lr){4-11}\\cmidrule(l){12-13}",
            " & & & \\multicolumn{4}{c}{Qwen2.5-VL} & \\multicolumn{4}{c}{LLaVA-Video} & Qwen2.5-VL & LLaVA-Video \\\\",
            "\\cmidrule(lr){4-7}\\cmidrule(lr){8-11}",
-           "\\textbf{Method} & \\textbf{Budget} & \\textbf{KV mem.} & " + " & ".join(S[c[3]] for c in MCOLS[:8]) + " & All & All \\\\",
+           "\\textbf{Method} & \\textbf{Budget} & \\textbf{KV (MiB)} & " + " & ".join(S[c[3]] for c in MCOLS[:8]) + " & All & All \\\\",
            "\\midrule"]
     md = ["| Method | Budget | KV mem. | " + " | ".join(f"{c[0]} {c[1]} {c[3]}" for c in MCOLS) + " |", "|---|---|---|" + "---|" * len(MCOLS)]
     b0 = 0

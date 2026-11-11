@@ -1,13 +1,13 @@
-| Method | Budget | KV mem. | Qwen2.5-VL present | Qwen2.5-VL absent | Qwen2.5-VL first | Qwen2.5-VL last | Qwen2.5-VL after | Qwen2.5-VL before | Qwen2.5-VL overall | LLaVA-Video present | LLaVA-Video absent | LLaVA-Video first | LLaVA-Video last | LLaVA-Video after | LLaVA-Video before | LLaVA-Video overall |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| FullKV ($N$) | 100\% | 100\% | 36.00 | 40.00 | 54.00 | 58.00 | 29.00 | 26.00 | 40.50 | 48.00 | 28.00 | 62.00 | 50.00 | 28.00 | 27.00 | 40.50 |
-| FullKV ($N/2$) | 50\% | 50--51\% | 34.00 | 35.00 | 50.00 | 48.00* | 33.00 | 26.00 | 37.67 | 45.00 | 29.00 | 63.00 | 42.00* | 28.00 | 24.00 | 38.50 |
-| VisionZip$^\ddagger$ | 50\% | 50--52\% | 36.00 | 36.00 | 55.00 | 60.00 | 24.00 | 28.00 | 39.83 | 41.00* | 29.00 | 62.00 | 43.00 | 27.00 | 23.00 | 37.50* |
-| InfiniPot-V$^\ddagger$ | 50\% | 50--52\% | 38.00 | 40.00 | 42.00* | 59.00 | 30.00 | 22.00 | 38.50 | 39.00* | 28.00 | 56.00 | 53.00 | 26.00 | 25.00 | 37.83* |
-| VisionZip$^\ddagger$ | 25\% | 26--28\% | 36.00 | 39.00 | 54.00 | 49.00* | 23.00 | 27.00 | 38.00 | 46.00 | 27.00 | 56.00 | 42.00 | 29.00 | 24.00 | 37.33* |
-| InfiniPot-V$^\ddagger$ | $\approx$15\% | 16--19\% | \toptwo{33.00} | \topone{42.00} | 31.00* | 51.00 | 23.00 | 17.00* | 32.83* | 34.00* | \toptwo{27.00} | 41.00* | \topthree{46.00} | \topone{27.00} | 25.00 | 33.33* |
-| ReKV$^\ddagger$ | $\approx$15\% | 100\%$^{\S}$ | 32.00 | 31.00 | \topthree{49.00} | \toptwo{55.00} | \topone{26.00} | 22.00 | 35.83* | 38.00* | \toptwo{27.00} | \topthree{59.00} | 38.00* | 20.00 | \topthree{26.00} | 34.67* |
-| SnapKV$^\dagger$ | $\approx$15\% | 17--18\% | 27.00 | 33.00 | 37.00* | 66.00* | 30.00 | 17.00 | 35.00* | 34.00* | 34.00 | 56.00 | 55.00 | 19.00 | 26.00 | 37.33 |
-| Quest | $\approx$15\% | 103\% | 29.00 | \toptwo{39.00} | \toptwo{53.00} | \topone{56.00} | \topthree{24.00} | \topthree{24.00} | \toptwo{37.50} | \topone{42.00} | 24.00 | \topone{62.00} | \topone{53.00} | \toptwo{26.00} | \topone{28.00} | \topone{39.17} |
-| FreeKV | $\approx$15\% | 103\% | \topone{37.00} | \topthree{34.00} | 48.00 | \topthree{54.00} | 23.00 | \toptwo{27.00} | \topthree{37.17} | \toptwo{40.00*} | 24.00 | \topthree{59.00} | \toptwo{49.00} | \topthree{25.00} | \topthree{26.00} | \toptwo{37.17*} |
-| \method{} | $\approx$15\% | 53\% | \toptwo{33.00} | \topthree{34.00} | \topone{55.00} | 53.00 | \toptwo{25.00} | \topone{30.00} | \topone{38.33} | \toptwo{40.00*} | \topone{29.00} | \toptwo{61.00} | 45.00 | 21.00* | \toptwo{27.00} | \toptwo{37.17*} |
+| Method | Budget | Qwen2.5-VL KV MiB | Qwen2.5-VL Qwen2.5-VL present | Qwen2.5-VL absent | Qwen2.5-VL first | Qwen2.5-VL last | Qwen2.5-VL after | Qwen2.5-VL before | Qwen2.5-VL overall | LLaVA-Video KV MiB | LLaVA-Video LLaVA-Video present | LLaVA-Video absent | LLaVA-Video first | LLaVA-Video last | LLaVA-Video after | LLaVA-Video before | LLaVA-Video overall |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| FullKV ($N$) | 100\% | 778 | 36.00 | 40.00 | 54.00 | 58.00 | 29.00 | 26.00 | 40.50 | 768 | 48.00 | 28.00 | 62.00 | 50.00 | 28.00 | 27.00 | 40.50 |
+| FullKV ($N/2$) | 50\% | 392 | 34.00 | 35.00 | 50.00 | 48.00* | 33.00 | 26.00 | 37.67 | 388 | 45.00 | 29.00 | 63.00 | 42.00* | 28.00 | 24.00 | 38.50 |
+| VisionZip$^\ddagger$ | 50\% | 392 | 36.00 | 36.00 | 55.00 | 60.00 | 24.00 | 28.00 | 39.83 | 401 | 41.00* | 29.00 | 62.00 | 43.00 | 27.00 | 23.00 | 37.50* |
+| InfiniPot-V$^\ddagger$ | 50\% | 392 | 38.00 | 40.00 | 42.00* | 59.00 | 30.00 | 22.00 | 38.50 | 401 | 39.00* | 28.00 | 56.00 | 53.00 | 26.00 | 25.00 | 37.83* |
+| VisionZip$^\ddagger$ | 25\% | 199 | 36.00 | 39.00 | 54.00 | 49.00* | 23.00 | 27.00 | 38.00 | 217 | 46.00 | 27.00 | 56.00 | 42.00 | 29.00 | 24.00 | 37.33* |
+| InfiniPot-V$^\ddagger$ | $\approx$15\% | 126 | \toptwo{33.00} | \topone{42.00} | 31.00* | 51.00 | 23.00 | 17.00* | 32.83* | 148 | 34.00* | \toptwo{27.00} | 41.00* | \topthree{46.00} | \topone{27.00} | 25.00 | 33.33* |
+| ReKV$^\ddagger$ | $\approx$15\% | 778$^{\S}$ | 32.00 | 31.00 | \topthree{49.00} | \toptwo{55.00} | \topone{26.00} | 22.00 | 35.83* | 770$^{\S}$ | 38.00* | \toptwo{27.00} | \topthree{59.00} | 38.00* | 20.00 | \topthree{26.00} | 34.67* |
+| SnapKV$^\dagger$ | $\approx$15\% | 136 | 27.00 | 33.00 | 37.00* | 66.00* | 30.00 | 17.00 | 35.00* | 135 | 34.00* | 34.00 | 56.00 | 55.00 | 19.00 | 26.00 | 37.33 |
+| Quest | $\approx$15\% | 801 | 29.00 | \toptwo{39.00} | \toptwo{53.00} | \topone{56.00} | \topthree{24.00} | \topthree{24.00} | \toptwo{37.50} | 791 | \topone{42.00} | 24.00 | \topone{62.00} | \topone{53.00} | \toptwo{26.00} | \topone{28.00} | \topone{39.17} |
+| FreeKV | $\approx$15\% | 801 | \topone{37.00} | \topthree{34.00} | 48.00 | \topthree{54.00} | 23.00 | \toptwo{27.00} | \topthree{37.17} | 791 | \toptwo{40.00*} | 24.00 | \topthree{59.00} | \toptwo{49.00} | \topthree{25.00} | \topthree{26.00} | \toptwo{37.17*} |
+| \method{} | $\approx$15\% | 412 | \toptwo{33.00} | \topthree{34.00} | \topone{55.00} | 53.00 | \toptwo{25.00} | \topone{30.00} | \topone{38.33} | 407 | \toptwo{40.00*} | \topone{29.00} | \toptwo{61.00} | 45.00 | 21.00* | \toptwo{27.00} | \toptwo{37.17*} |
