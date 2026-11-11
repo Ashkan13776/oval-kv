@@ -472,6 +472,96 @@ Budget-matched pairs (overall): OVAL - ReKV +2.32 [+0.59, +4.05]; OVAL - InfiniP
 [+1.19, +5.05]; OVAL - InfiniPot-V (mem-matched) -0.71 [-2.19, +0.76]; OVAL - VisionZip 50% -0.19
 [-1.62, +1.27]; VisionZip 50% + OVAL - VisionZip 50% -2.00 [-3.29, -0.76].
 
+## Iso-memory (128 frames) (started 2026-11-11, RUNNING)
+
+**Question.** At equal stored KV memory, is it better to keep more frames compressed (OVAL, VisionZip 50%)
+or fewer frames exact? Qwen2.5-VL-7B, Video-MME **Long only** (900 q / 300 videos). New arms at 128 frames:
+OVAL (`oval_n64` flags, `--frames 128`), VisionZip 50% + FullKV (`vz50_full` flags, `--frames 128`), and
+FullKV-128 (reference). The existing 64-frame runs are the iso-memory comparison (FullKV-64 stores about
+what OVAL-128 and VisionZip50-128 store). Job lines: `gen_jobs_c1.py iso128`; driver `iso128.sh`;
+run dir `runs/iso128_qwen25vl/{full_n128,oval_n128,vz50_full_n128}` (one shard file per launched shard);
+summary `iso128_summary.py` (memory + accuracy + paired CIs; it flags arms with < 900 answers as INCOMPLETE).
+
+**Inputs.**
+- The raw mp4s (`~/vmme/videos`) were no longer on disk and the shared disk had ~11 GB free. `iso128_fetch.sh`
+  re-downloads the 20 chunks to tmpfs (`/dev/shm/oval_iso128`), unzips only the 300 Long videos, extracts
+  128 frames each (`qwen_prep.py --frames 128 --frames_only`: `np.linspace(0, T-1, 128)`, same resize/PNG as the
+  64-frame cache; 300/300 complete, 12 GB) and deletes zips and mp4s. The 128 indices are sampled directly,
+  so they are not a superset of the 64.
+- `qwen_prep.py` changes (64-frame path unchanged): frame count parameter for the cache; `QWEN_CACHE_ROOT`
+  to relocate `frames_qwen/` + `qwen_emb/`; the vision encoder runs on at most 32 temporal groups per call
+  (`visual_chunked`). Reason: HF 4.51's SDPA vision path builds a dense mask over all patches, which OOMs
+  at 128 frames (207K patches). Every vision block attends within one temporal group, so the split is exact
+  in fp32 (4 groups, 1 call vs 4 calls: relative L2 2e-5). In bf16 it changes the outputs at the level of
+  bf16 noise of this ViT (64-frame test video, 32 vs 16 groups per call: relative L2 0.043, mean cos 0.9988;
+  for scale, bf16 vs fp32 is relative L2 0.14). 64-frame videos still run in one call (bit-identical).
+- Embeddings: ~186 MB (full) / ~93 MB (VisionZip 50%) per video do not fit on disk, so `iso128_prep.py`
+  (3 workers) makes them in tmpfs just ahead of the harness and deletes each once every arm has answered
+  all its questions. LM decoder layers are parked on the CPU in these workers (only the vision tower,
+  `embed_tokens`, `get_rope_index` are used). Prefill: 64 groups x 405 = **25,920 visual tokens**, L = 25,936
+  for 16:9 (64 frames: 12,960 / 12,976); VisionZip 50% keeps 12,960 of 25,920. Max M-RoPE position 6,313 on the
+  smoke video (64 frames: 6,213), well under the model's 128K. `KVC_MAX_TOKENS=32768` (env.sh: 16384; it is only
+  the initial slab size).
+- Reproducing later: the tmpfs caches do not survive a reboot; rerun `iso128_fetch.sh`, then `iso128.sh`
+  (resumable; answered questions are skipped).
+
+**Smoke test** (video 068rdc75mHM, questions 717-1..3, GPU 3 alone, `runs/iso128_qwen25vl_smoke/`): all three
+arms ran end to end, every answer line has `prefill_len`, `n_stream`, `n_gen`, `peak_gb`, hashes;
+OVAL lines carry `sellog` (64 temporal-group units). FullKV and VisionZip lines have no sellog, as in the
+64-frame runs.
+
+| arm | answers (717-1/2/3, key C/A/A) | s / q | peak GB |
+|---|---|---|---|
+| FullKV-128 | C A B (2/3) | 8.7-10.3 | 19.0 |
+| OVAL-128 | C A B (2/3) | 15.7-16.8 | 19.9 |
+| VisionZip50-128 | C A B (2/3) | 5.5-7.8 | 16.6 |
+| (FullKV-64, existing) | C B A (2/3) | 5.5-8.6 | |
+| (OVAL-64, existing) | C B A (2/3) | 11.0-15.6 | |
+| (VisionZip50-64, existing) | C A A (3/3) | 4.2-4.7 | |
+
+Vision prep: 37-38 s per embedding (128 frames), peak 24.5 GB with the whole model on the GPU.
+
+**Stored KV memory** (`iso128_summary.py`, memory_c.py's model). 64-frame arms: all 900 Long questions;
+128-frame arms: the 3 smoke questions only (to be recomputed on 900 when the runs finish).
+
+| arm | stored KV MiB / question | % of FullKV-64 |
+|---|---|---|
+| FullKV-64 (Long, 900 q) | 181.0 | 100.0 |
+| OVAL-64 (Long, 900 q) | 96.2 | 53.1 |
+| VisionZip50-64 (Long, 900 q) | 91.4 | 50.5 |
+| FullKV-32 (Long, 900 q) | 91.4 | 50.5 |
+| FullKV-64 on the 3 smoke q | 179.3 | 100.0 |
+| FullKV-128 (3 smoke q) | 356.4 | 198.8 |
+| OVAL-128 (3 smoke q) | 187.0 | 104.3 |
+| VisionZip50-128 (3 smoke q) | 179.3 | 100.0 |
+
+So OVAL-128 stores 104% and VisionZip50-128 100% of FullKV-64's KV: the comparison is iso-memory.
+VisionZip50-128 has exactly FullKV-64's sequence length (12,976 prefill tokens).
+
+**Launch** (2026-11-11 18:48 EST; 4x A6000 were empty, the OpenVLA rollouts had already exited by then):
+
+| process | GPU | PID |
+|---|---|---|
+| prep workers w0 / w1 / w2 | 0 / 1 / 3 | 1411757 / 1411758 / 1411759 |
+| OVAL-128 shards 0 / 1 / 2 of 3 | 0 / 1 / 3 | 1411763 / 1411957 / 1411962 |
+| FullKV-128 (1 shard) | 2 | 1411967 |
+| VisionZip50-128 (1 shard) | 2 | 1411972 |
+
+Logs `logs/revc/iso128/`. Measured with all 8 processes sharing the GPUs (first ~9 min): FullKV-128 15.0 s/q,
+OVAL-128 17-20 s/q per shard, VisionZip50-128 11.9 s/q; vision prep ~3.5 embeddings / min overall (600 needed).
+Expected finish: ~4 h after launch. **Results: pending; nothing reported until all three arms have 900/900.**
+
+## Video-MME by task type (existing runs, 2026-11-11)
+
+`tasktype_c.py` -> `tables/tasktype_c.{md,csv}`: accuracy of 10 arms by the 12 Video-MME task types
+(annotation `task_type`, n per type in the table) for both models, and paired OVAL - {VisionZip 50%, VisionZip 25%,
+InfiniPot-V mem-matched, FullKV-32} per type (cluster bootstrap over videos, 10k, seed 0). No type shows a
+consistent OVAL advantage across both models: of 96 per-type intervals, 5 exclude 0 (about the number expected
+by chance), 4 of them against OVAL (Qwen: Action Recognition vs VZ50, Action Reasoning vs InfiniPot-V mem,
+Spatial Reasoning vs VZ25; LLaVA: Object Recognition vs VZ50) and 1 for OVAL (LLaVA: Counting vs VZ25). Note: rerunning `pair_arms.py` today gives
+OVAL - VisionZip 50% (Qwen) -1.00 [-2.07, +0.04] and OVAL - InfiniPot-V mem -0.85 [-1.85, +0.19]; the C3 table
+above prints +0.07 and [-1.89, +0.15] (same means, CI ends differ; same conclusion).
+
 ## Disk notes
 
 - 2026-11-09: the shared disk dropped to 60 GB free (other users). After C1 and C2 finished, the

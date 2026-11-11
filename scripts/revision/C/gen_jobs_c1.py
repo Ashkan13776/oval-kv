@@ -1,5 +1,5 @@
 """Job lines for C1 (Qwen2.5-VL-7B on Video-MME) -> stdout. Usage:
-    python scripts/revision/C/gen_jobs_c1.py sanity|timing|full [--arms ...] [--nshards 4]
+    python scripts/revision/C/gen_jobs_c1.py sanity|timing|full|iso128 [--arms ...] [--nshards 4]
 Arms and flags = Tab. 5 (vision/runs/row*/args.json); OVAL with the Qwen eta table."""
 import sys, argparse
 H = ("--budget 1792 --sink 128 --recent 128 --page_size 32 --GQA_policy avgSM --skip_layer 1 --sparsity 1 "
@@ -15,6 +15,11 @@ ARMS = {
     "oval_n64":   f"--method spec_ret --page_rep oval --oval_rank 8 --oval_recon --oval_vrank 16 --vbasis pca "
                   f"--eta_table {QT} --spec_ret_steps 2 --spec_ret_corr 0.8 --frames 64",
 }
+# Iso-memory (128 frames, Long split only; REPORT_C.md 'Iso-memory (128 frames)'): run under
+# scripts/revision/C/iso128.sh (QWEN_CACHE_ROOT on tmpfs, KVC_MAX_TOKENS=32768, iso128_prep.py alongside).
+ISO = {"full_n128": ARMS["full_n64"].replace("--frames 64", "--frames 128"),
+       "oval_n128": ARMS["oval_n64"].replace("--frames 64", "--frames 128"),
+       "vz50_full_n128": ARMS["full_n64"].replace("--frames 64", "--frames 128") + " --vz 0.5"}
 R = "results/revision/C/runs/c1_qwen25vl"
 PY = "python scripts/revision/C/run_qwen25vl.py --bench videomme"
 ap = argparse.ArgumentParser(); ap.add_argument("what"); ap.add_argument("--arms", nargs="+", default=list(ARMS))
@@ -29,6 +34,11 @@ elif a.what == "timing":   # first 20 Long videos = 60 questions; written into t
     q = " ".join(open("logs/revc/repro_qids.txt").read().split())
     for arm in a.arms:
         print(f"{PY} {H} {ARMS[arm]} --durations long --qids {q} --file_tag _timing20 --out {R}/{arm} > logs/revc/jobs/{arm}_timing20.log 2>&1")
+elif a.what == "iso128":
+    RI = "results/revision/C/runs/iso128_qwen25vl"
+    for arm in [x for x in a.arms if x in ISO] or list(ISO):
+        for s in range(a.nshards):
+            print(f"{PY} {H} {ISO[arm]} --durations long --shard {s} --nshards {a.nshards} --out {RI}/{arm} > logs/revc/iso128/{arm}_s{s}.log 2>&1")
 elif a.what == "full":
     for arm in a.arms:
         for s in range(a.nshards):
