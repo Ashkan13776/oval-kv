@@ -1,0 +1,21 @@
+\begin{tabular}{@{}llrcrc@{}}
+\toprule
+ & & \multicolumn{2}{c}{Qwen2.5-VL} & \multicolumn{2}{c}{LLaVA-Video} \\
+\cmidrule(lr){3-4}\cmidrule(l){5-6}
+\textbf{Method} & \textbf{Budget} & KV (MiB) & Acc. & KV (MiB) & Acc. \\
+\midrule
+FullKV ($N$) & 100\% & 778 & 40.50 & 768 & 40.50 \\
+FullKV ($N/2$) & 50\% & 392 & 37.67 & 388 & 38.50 \\
+\midrule
+VisionZip$^\ddagger$ & 50\% & 392 & 39.83 & 401 & 37.50$^{*}$ \\
+InfiniPot-V$^\ddagger$ & 50\% & 392 & 38.50 & 401 & 37.83$^{*}$ \\
+VisionZip$^\ddagger$ & 25\% & 199 & 38.00 & 217 & 37.33$^{*}$ \\
+\midrule
+InfiniPot-V$^\ddagger$ & $\approx$15\% & 126 & 32.83$^{*}$ & 148 & 33.33$^{*}$ \\
+ReKV$^\ddagger$ & $\approx$15\% & 778$^{\S}$ & 35.83$^{*}$ & 770$^{\S}$ & 34.67$^{*}$ \\
+SnapKV$^\dagger$ & $\approx$15\% & 136 & 35.00$^{*}$ & 135 & 37.33 \\
+Quest & $\approx$15\% & 801 & \toptwo{37.50} & 791 & \topone{39.17} \\
+FreeKV & $\approx$15\% & 801 & \topthree{37.17} & 791 & \toptwo{37.17$^{*}$} \\
+\method{} & $\approx$15\% & 412 & \topone{38.33} & 407 & \toptwo{37.17$^{*}$} \\
+\bottomrule
+\end{tabular}
