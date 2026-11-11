@@ -16,11 +16,14 @@
 {"target": "open the middle drawer of the cabinet", "command": "open the top drawer and put the bowl inside", "init_idx": 22}
 {"target": "open the middle drawer of the cabinet", "command": "open the top drawer and put the bowl inside", "init_idx": 3}
 {"target": "open the middle drawer of the cabinet", "command": "open the top drawer and put the bowl inside", "init_idx": 42}
+{"target": "open the middle drawer of the cabinet", "command": "push the plate to the front of the stove", "init_idx": 0}
 {"target": "open the middle drawer of the cabinet", "command": "push the plate to the front of the stove", "init_idx": 1}
 {"target": "open the middle drawer of the cabinet", "command": "push the plate to the front of the stove", "init_idx": 36}
+{"target": "open the middle drawer of the cabinet", "command": "put the bowl on the stove", "init_idx": 0}
 {"target": "open the middle drawer of the cabinet", "command": "put the bowl on the stove", "init_idx": 29}
 {"target": "open the middle drawer of the cabinet", "command": "put the bowl on the stove", "init_idx": 36}
 {"target": "open the middle drawer of the cabinet", "command": "put the bowl on the stove", "init_idx": 44}
+{"target": "open the middle drawer of the cabinet", "command": "put the bowl on top of the cabinet", "init_idx": 0}
 {"target": "open the middle drawer of the cabinet", "command": "put the bowl on top of the cabinet", "init_idx": 14}
 {"target": "open the middle drawer of the cabinet", "command": "put the bowl on top of the cabinet", "init_idx": 32}
 {"target": "open the middle drawer of the cabinet", "command": "put the bowl on top of the cabinet", "init_idx": 42}
@@ -37,8 +40,11 @@
 {"target": "open the middle drawer of the cabinet", "command": "put the wine bottle on the rack", "init_idx": 46}
 {"target": "open the middle drawer of the cabinet", "command": "put the wine bottle on top of the cabinet", "init_idx": 10}
 {"target": "open the middle drawer of the cabinet", "command": "put the wine bottle on top of the cabinet", "init_idx": 31}
+{"target": "open the middle drawer of the cabinet", "command": "put the wine bottle on top of the cabinet", "init_idx": 32}
+{"target": "open the middle drawer of the cabinet", "command": "put the wine bottle on top of the cabinet", "init_idx": 44}
 {"target": "open the middle drawer of the cabinet", "command": "turn on the stove", "init_idx": 0}
 {"target": "open the middle drawer of the cabinet", "command": "turn on the stove", "init_idx": 29}
+{"target": "open the middle drawer of the cabinet", "command": "turn on the stove", "init_idx": 36}
 {"target": "open the middle drawer of the cabinet", "command": "turn on the stove", "init_idx": 45}
 {"target": "open the top drawer and put the bowl inside", "command": "open the middle drawer of the cabinet", "init_idx": 40}
 {"target": "open the top drawer and put the bowl inside", "command": "open the top drawer and put the bowl inside", "init_idx": 11}
@@ -66,27 +72,42 @@
 {"target": "open the top drawer and put the bowl inside", "command": "push the plate to the front of the stove", "init_idx": 11}
 {"target": "open the top drawer and put the bowl inside", "command": "push the plate to the front of the stove", "init_idx": 30}
 {"target": "open the top drawer and put the bowl inside", "command": "push the plate to the front of the stove", "init_idx": 33}
+{"target": "open the top drawer and put the bowl inside", "command": "push the plate to the front of the stove", "init_idx": 39}
+{"target": "open the top drawer and put the bowl inside", "command": "push the plate to the front of the stove", "init_idx": 42}
 {"target": "open the top drawer and put the bowl inside", "command": "push the plate to the front of the stove", "init_idx": 43}
+{"target": "open the top drawer and put the bowl inside", "command": "put the bowl on the plate", "init_idx": 2}
 {"target": "open the top drawer and put the bowl inside", "command": "put the bowl on the plate", "init_idx": 21}
 {"target": "open the top drawer and put the bowl inside", "command": "put the bowl on the plate", "init_idx": 22}
 {"target": "open the top drawer and put the bowl inside", "command": "put the bowl on the plate", "init_idx": 39}
+{"target": "open the top drawer and put the bowl inside", "command": "put the bowl on the plate", "init_idx": 6}
 {"target": "open the top drawer and put the bowl inside", "command": "put the bowl on the stove", "init_idx": 17}
 {"target": "open the top drawer and put the bowl inside", "command": "put the bowl on the stove", "init_idx": 27}
 {"target": "open the top drawer and put the bowl inside", "command": "put the bowl on the stove", "init_idx": 43}
+{"target": "open the top drawer and put the bowl inside", "command": "put the bowl on top of the cabinet", "init_idx": 2}
 {"target": "open the top drawer and put the bowl inside", "command": "put the bowl on top of the cabinet", "init_idx": 22}
 {"target": "open the top drawer and put the bowl inside", "command": "put the bowl on top of the cabinet", "init_idx": 33}
 {"target": "open the top drawer and put the bowl inside", "command": "put the bowl on top of the cabinet", "init_idx": 38}
+{"target": "open the top drawer and put the bowl inside", "command": "put the bowl on top of the cabinet", "init_idx": 40}
+{"target": "open the top drawer and put the bowl inside", "command": "put the bowl on top of the cabinet", "init_idx": 42}
+{"target": "open the top drawer and put the bowl inside", "command": "put the bowl on top of the cabinet", "init_idx": 47}
 {"target": "open the top drawer and put the bowl inside", "command": "put the cream cheese in the bowl", "init_idx": 14}
+{"target": "open the top drawer and put the bowl inside", "command": "put the cream cheese in the bowl", "init_idx": 22}
 {"target": "open the top drawer and put the bowl inside", "command": "put the cream cheese in the bowl", "init_idx": 40}
 {"target": "open the top drawer and put the bowl inside", "command": "put the cream cheese in the bowl", "init_idx": 49}
+{"target": "open the top drawer and put the bowl inside", "command": "put the cream cheese in the bowl", "init_idx": 6}
 {"target": "open the top drawer and put the bowl inside", "command": "put the wine bottle on the rack", "init_idx": 22}
+{"target": "open the top drawer and put the bowl inside", "command": "put the wine bottle on the rack", "init_idx": 26}
 {"target": "open the top drawer and put the bowl inside", "command": "put the wine bottle on the rack", "init_idx": 42}
 {"target": "open the top drawer and put the bowl inside", "command": "put the wine bottle on the rack", "init_idx": 43}
+{"target": "open the top drawer and put the bowl inside", "command": "put the wine bottle on the rack", "init_idx": 45}
 {"target": "open the top drawer and put the bowl inside", "command": "put the wine bottle on the rack", "init_idx": 8}
 {"target": "open the top drawer and put the bowl inside", "command": "put the wine bottle on top of the cabinet", "init_idx": 14}
 {"target": "open the top drawer and put the bowl inside", "command": "put the wine bottle on top of the cabinet", "init_idx": 2}
 {"target": "open the top drawer and put the bowl inside", "command": "put the wine bottle on top of the cabinet", "init_idx": 22}
 {"target": "open the top drawer and put the bowl inside", "command": "put the wine bottle on top of the cabinet", "init_idx": 26}
+{"target": "open the top drawer and put the bowl inside", "command": "put the wine bottle on top of the cabinet", "init_idx": 30}
+{"target": "open the top drawer and put the bowl inside", "command": "put the wine bottle on top of the cabinet", "init_idx": 33}
+{"target": "open the top drawer and put the bowl inside", "command": "put the wine bottle on top of the cabinet", "init_idx": 43}
 {"target": "open the top drawer and put the bowl inside", "command": "put the wine bottle on top of the cabinet", "init_idx": 45}
 {"target": "open the top drawer and put the bowl inside", "command": "put the wine bottle on top of the cabinet", "init_idx": 47}
 {"target": "open the top drawer and put the bowl inside", "command": "turn on the stove", "init_idx": 30}
@@ -97,6 +118,10 @@
 {"target": "push the plate to the front of the stove", "command": "open the top drawer and put the bowl inside", "init_idx": 11}
 {"target": "push the plate to the front of the stove", "command": "open the top drawer and put the bowl inside", "init_idx": 15}
 {"target": "push the plate to the front of the stove", "command": "open the top drawer and put the bowl inside", "init_idx": 16}
+{"target": "push the plate to the front of the stove", "command": "open the top drawer and put the bowl inside", "init_idx": 19}
+{"target": "push the plate to the front of the stove", "command": "open the top drawer and put the bowl inside", "init_idx": 29}
+{"target": "push the plate to the front of the stove", "command": "open the top drawer and put the bowl inside", "init_idx": 30}
+{"target": "push the plate to the front of the stove", "command": "open the top drawer and put the bowl inside", "init_idx": 34}
 {"target": "push the plate to the front of the stove", "command": "open the top drawer and put the bowl inside", "init_idx": 41}
 {"target": "push the plate to the front of the stove", "command": "push the plate to the front of the stove", "init_idx": 10}
 {"target": "push the plate to the front of the stove", "command": "push the plate to the front of the stove", "init_idx": 11}
@@ -123,8 +148,13 @@
 {"target": "push the plate to the front of the stove", "command": "put the bowl on the plate", "init_idx": 46}
 {"target": "push the plate to the front of the stove", "command": "put the bowl on the stove", "init_idx": 31}
 {"target": "push the plate to the front of the stove", "command": "put the bowl on the stove", "init_idx": 38}
+{"target": "push the plate to the front of the stove", "command": "put the bowl on top of the cabinet", "init_idx": 11}
 {"target": "push the plate to the front of the stove", "command": "put the bowl on top of the cabinet", "init_idx": 16}
+{"target": "push the plate to the front of the stove", "command": "put the bowl on top of the cabinet", "init_idx": 41}
+{"target": "push the plate to the front of the stove", "command": "put the cream cheese in the bowl", "init_idx": 10}
+{"target": "push the plate to the front of the stove", "command": "put the cream cheese in the bowl", "init_idx": 16}
 {"target": "push the plate to the front of the stove", "command": "put the cream cheese in the bowl", "init_idx": 29}
+{"target": "push the plate to the front of the stove", "command": "put the cream cheese in the bowl", "init_idx": 38}
 {"target": "push the plate to the front of the stove", "command": "put the wine bottle on the rack", "init_idx": 29}
 {"target": "push the plate to the front of the stove", "command": "put the wine bottle on the rack", "init_idx": 31}
 {"target": "push the plate to the front of the stove", "command": "put the wine bottle on the rack", "init_idx": 34}
@@ -140,13 +170,18 @@
 {"target": "push the plate to the front of the stove", "command": "turn on the stove", "init_idx": 19}
 {"target": "push the plate to the front of the stove", "command": "turn on the stove", "init_idx": 41}
 {"target": "push the plate to the front of the stove", "command": "turn on the stove", "init_idx": 9}
+{"target": "put the bowl on the plate", "command": "open the middle drawer of the cabinet", "init_idx": 10}
+{"target": "put the bowl on the plate", "command": "open the middle drawer of the cabinet", "init_idx": 27}
 {"target": "put the bowl on the plate", "command": "open the middle drawer of the cabinet", "init_idx": 30}
 {"target": "put the bowl on the plate", "command": "open the top drawer and put the bowl inside", "init_idx": 10}
+{"target": "put the bowl on the plate", "command": "open the top drawer and put the bowl inside", "init_idx": 18}
 {"target": "put the bowl on the plate", "command": "open the top drawer and put the bowl inside", "init_idx": 25}
 {"target": "put the bowl on the plate", "command": "open the top drawer and put the bowl inside", "init_idx": 3}
 {"target": "put the bowl on the plate", "command": "open the top drawer and put the bowl inside", "init_idx": 38}
 {"target": "put the bowl on the plate", "command": "open the top drawer and put the bowl inside", "init_idx": 49}
+{"target": "put the bowl on the plate", "command": "push the plate to the front of the stove", "init_idx": 19}
 {"target": "put the bowl on the plate", "command": "push the plate to the front of the stove", "init_idx": 22}
+{"target": "put the bowl on the plate", "command": "push the plate to the front of the stove", "init_idx": 8}
 {"target": "put the bowl on the plate", "command": "put the bowl on the plate", "init_idx": 0}
 {"target": "put the bowl on the plate", "command": "put the bowl on the plate", "init_idx": 1}
 {"target": "put the bowl on the plate", "command": "put the bowl on the plate", "init_idx": 10}
@@ -178,29 +213,41 @@
 {"target": "put the bowl on the plate", "command": "put the cream cheese in the bowl", "init_idx": 13}
 {"target": "put the bowl on the plate", "command": "put the cream cheese in the bowl", "init_idx": 14}
 {"target": "put the bowl on the plate", "command": "put the cream cheese in the bowl", "init_idx": 18}
+{"target": "put the bowl on the plate", "command": "put the cream cheese in the bowl", "init_idx": 27}
 {"target": "put the bowl on the plate", "command": "put the cream cheese in the bowl", "init_idx": 3}
 {"target": "put the bowl on the plate", "command": "put the cream cheese in the bowl", "init_idx": 34}
 {"target": "put the bowl on the plate", "command": "put the cream cheese in the bowl", "init_idx": 38}
 {"target": "put the bowl on the plate", "command": "put the cream cheese in the bowl", "init_idx": 5}
 {"target": "put the bowl on the plate", "command": "put the wine bottle on the rack", "init_idx": 10}
 {"target": "put the bowl on the plate", "command": "put the wine bottle on the rack", "init_idx": 16}
+{"target": "put the bowl on the plate", "command": "put the wine bottle on the rack", "init_idx": 19}
 {"target": "put the bowl on the plate", "command": "put the wine bottle on the rack", "init_idx": 21}
 {"target": "put the bowl on the plate", "command": "put the wine bottle on the rack", "init_idx": 22}
+{"target": "put the bowl on the plate", "command": "put the wine bottle on the rack", "init_idx": 30}
 {"target": "put the bowl on the plate", "command": "put the wine bottle on top of the cabinet", "init_idx": 0}
 {"target": "put the bowl on the plate", "command": "put the wine bottle on top of the cabinet", "init_idx": 10}
+{"target": "put the bowl on the plate", "command": "put the wine bottle on top of the cabinet", "init_idx": 13}
+{"target": "put the bowl on the plate", "command": "put the wine bottle on top of the cabinet", "init_idx": 16}
 {"target": "put the bowl on the plate", "command": "put the wine bottle on top of the cabinet", "init_idx": 19}
+{"target": "put the bowl on the plate", "command": "put the wine bottle on top of the cabinet", "init_idx": 21}
+{"target": "put the bowl on the plate", "command": "put the wine bottle on top of the cabinet", "init_idx": 34}
 {"target": "put the bowl on the plate", "command": "put the wine bottle on top of the cabinet", "init_idx": 49}
 {"target": "put the bowl on the plate", "command": "put the wine bottle on top of the cabinet", "init_idx": 8}
 {"target": "put the bowl on the plate", "command": "turn on the stove", "init_idx": 1}
+{"target": "put the bowl on the plate", "command": "turn on the stove", "init_idx": 14}
+{"target": "put the bowl on the plate", "command": "turn on the stove", "init_idx": 49}
 {"target": "put the bowl on the plate", "command": "turn on the stove", "init_idx": 5}
 {"target": "put the bowl on the stove", "command": "open the middle drawer of the cabinet", "init_idx": 15}
 {"target": "put the bowl on the stove", "command": "open the middle drawer of the cabinet", "init_idx": 3}
 {"target": "put the bowl on the stove", "command": "open the middle drawer of the cabinet", "init_idx": 33}
 {"target": "put the bowl on the stove", "command": "open the middle drawer of the cabinet", "init_idx": 48}
+{"target": "put the bowl on the stove", "command": "open the middle drawer of the cabinet", "init_idx": 49}
 {"target": "put the bowl on the stove", "command": "open the middle drawer of the cabinet", "init_idx": 7}
 {"target": "put the bowl on the stove", "command": "open the top drawer and put the bowl inside", "init_idx": 15}
 {"target": "put the bowl on the stove", "command": "open the top drawer and put the bowl inside", "init_idx": 22}
 {"target": "put the bowl on the stove", "command": "open the top drawer and put the bowl inside", "init_idx": 31}
+{"target": "put the bowl on the stove", "command": "open the top drawer and put the bowl inside", "init_idx": 49}
+{"target": "put the bowl on the stove", "command": "open the top drawer and put the bowl inside", "init_idx": 8}
 {"target": "put the bowl on the stove", "command": "push the plate to the front of the stove", "init_idx": 12}
 {"target": "put the bowl on the stove", "command": "push the plate to the front of the stove", "init_idx": 13}
 {"target": "put the bowl on the stove", "command": "push the plate to the front of the stove", "init_idx": 15}
@@ -241,6 +288,7 @@
 {"target": "put the bowl on the stove", "command": "put the bowl on the stove", "init_idx": 5}
 {"target": "put the bowl on the stove", "command": "put the bowl on the stove", "init_idx": 7}
 {"target": "put the bowl on the stove", "command": "put the bowl on the stove", "init_idx": 8}
+{"target": "put the bowl on the stove", "command": "put the bowl on top of the cabinet", "init_idx": 1}
 {"target": "put the bowl on the stove", "command": "put the bowl on top of the cabinet", "init_idx": 2}
 {"target": "put the bowl on the stove", "command": "put the bowl on top of the cabinet", "init_idx": 20}
 {"target": "put the bowl on the stove", "command": "put the bowl on top of the cabinet", "init_idx": 22}
@@ -258,24 +306,33 @@
 {"target": "put the bowl on the stove", "command": "put the wine bottle on the rack", "init_idx": 8}
 {"target": "put the bowl on the stove", "command": "put the wine bottle on top of the cabinet", "init_idx": 13}
 {"target": "put the bowl on the stove", "command": "put the wine bottle on top of the cabinet", "init_idx": 2}
+{"target": "put the bowl on the stove", "command": "put the wine bottle on top of the cabinet", "init_idx": 20}
 {"target": "put the bowl on the stove", "command": "put the wine bottle on top of the cabinet", "init_idx": 24}
 {"target": "put the bowl on the stove", "command": "put the wine bottle on top of the cabinet", "init_idx": 3}
 {"target": "put the bowl on the stove", "command": "put the wine bottle on top of the cabinet", "init_idx": 31}
+{"target": "put the bowl on the stove", "command": "put the wine bottle on top of the cabinet", "init_idx": 37}
 {"target": "put the bowl on the stove", "command": "put the wine bottle on top of the cabinet", "init_idx": 48}
+{"target": "put the bowl on the stove", "command": "turn on the stove", "init_idx": 24}
 {"target": "put the bowl on the stove", "command": "turn on the stove", "init_idx": 33}
 {"target": "put the bowl on the stove", "command": "turn on the stove", "init_idx": 4}
+{"target": "put the bowl on top of the cabinet", "command": "open the middle drawer of the cabinet", "init_idx": 25}
+{"target": "put the bowl on top of the cabinet", "command": "open the middle drawer of the cabinet", "init_idx": 32}
 {"target": "put the bowl on top of the cabinet", "command": "open the middle drawer of the cabinet", "init_idx": 40}
 {"target": "put the bowl on top of the cabinet", "command": "open the top drawer and put the bowl inside", "init_idx": 21}
 {"target": "put the bowl on top of the cabinet", "command": "open the top drawer and put the bowl inside", "init_idx": 33}
+{"target": "put the bowl on top of the cabinet", "command": "open the top drawer and put the bowl inside", "init_idx": 39}
+{"target": "put the bowl on top of the cabinet", "command": "open the top drawer and put the bowl inside", "init_idx": 4}
 {"target": "put the bowl on top of the cabinet", "command": "open the top drawer and put the bowl inside", "init_idx": 44}
 {"target": "put the bowl on top of the cabinet", "command": "push the plate to the front of the stove", "init_idx": 33}
 {"target": "put the bowl on top of the cabinet", "command": "push the plate to the front of the stove", "init_idx": 34}
+{"target": "put the bowl on top of the cabinet", "command": "push the plate to the front of the stove", "init_idx": 4}
 {"target": "put the bowl on top of the cabinet", "command": "push the plate to the front of the stove", "init_idx": 45}
 {"target": "put the bowl on top of the cabinet", "command": "push the plate to the front of the stove", "init_idx": 46}
 {"target": "put the bowl on top of the cabinet", "command": "put the bowl on the plate", "init_idx": 33}
 {"target": "put the bowl on top of the cabinet", "command": "put the bowl on the plate", "init_idx": 4}
 {"target": "put the bowl on top of the cabinet", "command": "put the bowl on the plate", "init_idx": 48}
 {"target": "put the bowl on top of the cabinet", "command": "put the bowl on the stove", "init_idx": 18}
+{"target": "put the bowl on top of the cabinet", "command": "put the bowl on the stove", "init_idx": 21}
 {"target": "put the bowl on top of the cabinet", "command": "put the bowl on the stove", "init_idx": 39}
 {"target": "put the bowl on top of the cabinet", "command": "put the bowl on the stove", "init_idx": 43}
 {"target": "put the bowl on top of the cabinet", "command": "put the bowl on top of the cabinet", "init_idx": 18}
@@ -295,19 +352,28 @@
 {"target": "put the bowl on top of the cabinet", "command": "put the bowl on top of the cabinet", "init_idx": 45}
 {"target": "put the bowl on top of the cabinet", "command": "put the bowl on top of the cabinet", "init_idx": 46}
 {"target": "put the bowl on top of the cabinet", "command": "put the bowl on top of the cabinet", "init_idx": 48}
+{"target": "put the bowl on top of the cabinet", "command": "put the cream cheese in the bowl", "init_idx": 18}
 {"target": "put the bowl on top of the cabinet", "command": "put the cream cheese in the bowl", "init_idx": 21}
 {"target": "put the bowl on top of the cabinet", "command": "put the cream cheese in the bowl", "init_idx": 23}
 {"target": "put the bowl on top of the cabinet", "command": "put the cream cheese in the bowl", "init_idx": 32}
 {"target": "put the bowl on top of the cabinet", "command": "put the cream cheese in the bowl", "init_idx": 33}
+{"target": "put the bowl on top of the cabinet", "command": "put the cream cheese in the bowl", "init_idx": 44}
 {"target": "put the bowl on top of the cabinet", "command": "put the wine bottle on the rack", "init_idx": 21}
 {"target": "put the bowl on top of the cabinet", "command": "put the wine bottle on the rack", "init_idx": 23}
+{"target": "put the bowl on top of the cabinet", "command": "put the wine bottle on the rack", "init_idx": 37}
 {"target": "put the bowl on top of the cabinet", "command": "put the wine bottle on the rack", "init_idx": 39}
+{"target": "put the bowl on top of the cabinet", "command": "put the wine bottle on the rack", "init_idx": 40}
+{"target": "put the bowl on top of the cabinet", "command": "put the wine bottle on the rack", "init_idx": 44}
+{"target": "put the bowl on top of the cabinet", "command": "put the wine bottle on the rack", "init_idx": 45}
+{"target": "put the bowl on top of the cabinet", "command": "put the wine bottle on the rack", "init_idx": 48}
 {"target": "put the bowl on top of the cabinet", "command": "put the wine bottle on top of the cabinet", "init_idx": 2}
 {"target": "put the bowl on top of the cabinet", "command": "put the wine bottle on top of the cabinet", "init_idx": 25}
+{"target": "put the bowl on top of the cabinet", "command": "put the wine bottle on top of the cabinet", "init_idx": 34}
 {"target": "put the bowl on top of the cabinet", "command": "turn on the stove", "init_idx": 21}
 {"target": "put the bowl on top of the cabinet", "command": "turn on the stove", "init_idx": 23}
 {"target": "put the bowl on top of the cabinet", "command": "turn on the stove", "init_idx": 32}
 {"target": "put the bowl on top of the cabinet", "command": "turn on the stove", "init_idx": 40}
+{"target": "put the bowl on top of the cabinet", "command": "turn on the stove", "init_idx": 46}
 {"target": "put the cream cheese in the bowl", "command": "open the top drawer and put the bowl inside", "init_idx": 3}
 {"target": "put the cream cheese in the bowl", "command": "open the top drawer and put the bowl inside", "init_idx": 35}
 {"target": "put the cream cheese in the bowl", "command": "open the top drawer and put the bowl inside", "init_idx": 45}
@@ -315,16 +381,21 @@
 {"target": "put the cream cheese in the bowl", "command": "push the plate to the front of the stove", "init_idx": 10}
 {"target": "put the cream cheese in the bowl", "command": "push the plate to the front of the stove", "init_idx": 14}
 {"target": "put the cream cheese in the bowl", "command": "push the plate to the front of the stove", "init_idx": 23}
+{"target": "put the cream cheese in the bowl", "command": "push the plate to the front of the stove", "init_idx": 26}
 {"target": "put the cream cheese in the bowl", "command": "push the plate to the front of the stove", "init_idx": 32}
 {"target": "put the cream cheese in the bowl", "command": "push the plate to the front of the stove", "init_idx": 34}
 {"target": "put the cream cheese in the bowl", "command": "push the plate to the front of the stove", "init_idx": 45}
 {"target": "put the cream cheese in the bowl", "command": "push the plate to the front of the stove", "init_idx": 48}
+{"target": "put the cream cheese in the bowl", "command": "push the plate to the front of the stove", "init_idx": 5}
+{"target": "put the cream cheese in the bowl", "command": "put the bowl on the plate", "init_idx": 43}
+{"target": "put the cream cheese in the bowl", "command": "put the bowl on the plate", "init_idx": 48}
 {"target": "put the cream cheese in the bowl", "command": "put the bowl on the plate", "init_idx": 5}
 {"target": "put the cream cheese in the bowl", "command": "put the bowl on the stove", "init_idx": 34}
 {"target": "put the cream cheese in the bowl", "command": "put the bowl on the stove", "init_idx": 35}
 {"target": "put the cream cheese in the bowl", "command": "put the bowl on the stove", "init_idx": 5}
 {"target": "put the cream cheese in the bowl", "command": "put the bowl on top of the cabinet", "init_idx": 26}
 {"target": "put the cream cheese in the bowl", "command": "put the bowl on top of the cabinet", "init_idx": 3}
+{"target": "put the cream cheese in the bowl", "command": "put the bowl on top of the cabinet", "init_idx": 43}
 {"target": "put the cream cheese in the bowl", "command": "put the bowl on top of the cabinet", "init_idx": 45}
 {"target": "put the cream cheese in the bowl", "command": "put the bowl on top of the cabinet", "init_idx": 48}
 {"target": "put the cream cheese in the bowl", "command": "put the cream cheese in the bowl", "init_idx": 10}
@@ -343,31 +414,45 @@
 {"target": "put the cream cheese in the bowl", "command": "put the wine bottle on top of the cabinet", "init_idx": 10}
 {"target": "put the cream cheese in the bowl", "command": "put the wine bottle on top of the cabinet", "init_idx": 43}
 {"target": "put the cream cheese in the bowl", "command": "put the wine bottle on top of the cabinet", "init_idx": 45}
+{"target": "put the cream cheese in the bowl", "command": "turn on the stove", "init_idx": 32}
+{"target": "put the cream cheese in the bowl", "command": "turn on the stove", "init_idx": 34}
 {"target": "put the wine bottle on the rack", "command": "open the middle drawer of the cabinet", "init_idx": 18}
 {"target": "put the wine bottle on the rack", "command": "open the middle drawer of the cabinet", "init_idx": 21}
+{"target": "put the wine bottle on the rack", "command": "open the middle drawer of the cabinet", "init_idx": 26}
 {"target": "put the wine bottle on the rack", "command": "open the middle drawer of the cabinet", "init_idx": 4}
+{"target": "put the wine bottle on the rack", "command": "open the middle drawer of the cabinet", "init_idx": 49}
 {"target": "put the wine bottle on the rack", "command": "open the top drawer and put the bowl inside", "init_idx": 17}
+{"target": "put the wine bottle on the rack", "command": "open the top drawer and put the bowl inside", "init_idx": 18}
 {"target": "put the wine bottle on the rack", "command": "open the top drawer and put the bowl inside", "init_idx": 21}
 {"target": "put the wine bottle on the rack", "command": "open the top drawer and put the bowl inside", "init_idx": 22}
+{"target": "put the wine bottle on the rack", "command": "open the top drawer and put the bowl inside", "init_idx": 30}
 {"target": "put the wine bottle on the rack", "command": "open the top drawer and put the bowl inside", "init_idx": 34}
 {"target": "put the wine bottle on the rack", "command": "open the top drawer and put the bowl inside", "init_idx": 39}
+{"target": "put the wine bottle on the rack", "command": "open the top drawer and put the bowl inside", "init_idx": 4}
 {"target": "put the wine bottle on the rack", "command": "open the top drawer and put the bowl inside", "init_idx": 46}
 {"target": "put the wine bottle on the rack", "command": "push the plate to the front of the stove", "init_idx": 10}
 {"target": "put the wine bottle on the rack", "command": "push the plate to the front of the stove", "init_idx": 17}
 {"target": "put the wine bottle on the rack", "command": "push the plate to the front of the stove", "init_idx": 19}
+{"target": "put the wine bottle on the rack", "command": "push the plate to the front of the stove", "init_idx": 26}
 {"target": "put the wine bottle on the rack", "command": "push the plate to the front of the stove", "init_idx": 37}
+{"target": "put the wine bottle on the rack", "command": "push the plate to the front of the stove", "init_idx": 39}
 {"target": "put the wine bottle on the rack", "command": "push the plate to the front of the stove", "init_idx": 41}
+{"target": "put the wine bottle on the rack", "command": "push the plate to the front of the stove", "init_idx": 43}
 {"target": "put the wine bottle on the rack", "command": "push the plate to the front of the stove", "init_idx": 46}
 {"target": "put the wine bottle on the rack", "command": "push the plate to the front of the stove", "init_idx": 47}
+{"target": "put the wine bottle on the rack", "command": "put the bowl on the plate", "init_idx": 1}
+{"target": "put the wine bottle on the rack", "command": "put the bowl on the plate", "init_idx": 2}
 {"target": "put the wine bottle on the rack", "command": "put the bowl on the plate", "init_idx": 21}
 {"target": "put the wine bottle on the rack", "command": "put the bowl on the plate", "init_idx": 22}
 {"target": "put the wine bottle on the rack", "command": "put the bowl on the plate", "init_idx": 26}
 {"target": "put the wine bottle on the rack", "command": "put the bowl on the plate", "init_idx": 30}
 {"target": "put the wine bottle on the rack", "command": "put the bowl on the plate", "init_idx": 35}
+{"target": "put the wine bottle on the rack", "command": "put the bowl on the plate", "init_idx": 37}
 {"target": "put the wine bottle on the rack", "command": "put the bowl on the plate", "init_idx": 46}
 {"target": "put the wine bottle on the rack", "command": "put the bowl on the plate", "init_idx": 7}
 {"target": "put the wine bottle on the rack", "command": "put the bowl on the stove", "init_idx": 32}
 {"target": "put the wine bottle on the rack", "command": "put the bowl on the stove", "init_idx": 37}
+{"target": "put the wine bottle on the rack", "command": "put the bowl on the stove", "init_idx": 47}
 {"target": "put the wine bottle on the rack", "command": "put the bowl on the stove", "init_idx": 49}
 {"target": "put the wine bottle on the rack", "command": "put the bowl on top of the cabinet", "init_idx": 19}
 {"target": "put the wine bottle on the rack", "command": "put the bowl on top of the cabinet", "init_idx": 2}
@@ -376,6 +461,7 @@
 {"target": "put the wine bottle on the rack", "command": "put the bowl on top of the cabinet", "init_idx": 37}
 {"target": "put the wine bottle on the rack", "command": "put the bowl on top of the cabinet", "init_idx": 46}
 {"target": "put the wine bottle on the rack", "command": "put the cream cheese in the bowl", "init_idx": 1}
+{"target": "put the wine bottle on the rack", "command": "put the cream cheese in the bowl", "init_idx": 2}
 {"target": "put the wine bottle on the rack", "command": "put the cream cheese in the bowl", "init_idx": 32}
 {"target": "put the wine bottle on the rack", "command": "put the cream cheese in the bowl", "init_idx": 37}
 {"target": "put the wine bottle on the rack", "command": "put the cream cheese in the bowl", "init_idx": 39}
@@ -415,13 +501,17 @@
 {"target": "put the wine bottle on the rack", "command": "turn on the stove", "init_idx": 10}
 {"target": "put the wine bottle on the rack", "command": "turn on the stove", "init_idx": 26}
 {"target": "put the wine bottle on the rack", "command": "turn on the stove", "init_idx": 31}
+{"target": "put the wine bottle on the rack", "command": "turn on the stove", "init_idx": 4}
 {"target": "put the wine bottle on the rack", "command": "turn on the stove", "init_idx": 43}
 {"target": "put the wine bottle on top of the cabinet", "command": "open the middle drawer of the cabinet", "init_idx": 22}
 {"target": "put the wine bottle on top of the cabinet", "command": "open the middle drawer of the cabinet", "init_idx": 33}
+{"target": "put the wine bottle on top of the cabinet", "command": "open the top drawer and put the bowl inside", "init_idx": 19}
 {"target": "put the wine bottle on top of the cabinet", "command": "open the top drawer and put the bowl inside", "init_idx": 28}
 {"target": "put the wine bottle on top of the cabinet", "command": "open the top drawer and put the bowl inside", "init_idx": 43}
 {"target": "put the wine bottle on top of the cabinet", "command": "push the plate to the front of the stove", "init_idx": 0}
 {"target": "put the wine bottle on top of the cabinet", "command": "push the plate to the front of the stove", "init_idx": 29}
+{"target": "put the wine bottle on top of the cabinet", "command": "put the bowl on the plate", "init_idx": 19}
+{"target": "put the wine bottle on top of the cabinet", "command": "put the bowl on the plate", "init_idx": 28}
 {"target": "put the wine bottle on top of the cabinet", "command": "put the bowl on the plate", "init_idx": 33}
 {"target": "put the wine bottle on top of the cabinet", "command": "put the bowl on the plate", "init_idx": 36}
 {"target": "put the wine bottle on top of the cabinet", "command": "put the bowl on the plate", "init_idx": 38}
@@ -430,14 +520,17 @@
 {"target": "put the wine bottle on top of the cabinet", "command": "put the bowl on the stove", "init_idx": 23}
 {"target": "put the wine bottle on top of the cabinet", "command": "put the bowl on the stove", "init_idx": 24}
 {"target": "put the wine bottle on top of the cabinet", "command": "put the bowl on the stove", "init_idx": 28}
+{"target": "put the wine bottle on top of the cabinet", "command": "put the bowl on the stove", "init_idx": 29}
 {"target": "put the wine bottle on top of the cabinet", "command": "put the bowl on the stove", "init_idx": 43}
 {"target": "put the wine bottle on top of the cabinet", "command": "put the bowl on the stove", "init_idx": 7}
 {"target": "put the wine bottle on top of the cabinet", "command": "put the bowl on top of the cabinet", "init_idx": 0}
 {"target": "put the wine bottle on top of the cabinet", "command": "put the bowl on top of the cabinet", "init_idx": 28}
 {"target": "put the wine bottle on top of the cabinet", "command": "put the cream cheese in the bowl", "init_idx": 0}
+{"target": "put the wine bottle on top of the cabinet", "command": "put the cream cheese in the bowl", "init_idx": 22}
 {"target": "put the wine bottle on top of the cabinet", "command": "put the cream cheese in the bowl", "init_idx": 24}
 {"target": "put the wine bottle on top of the cabinet", "command": "put the wine bottle on the rack", "init_idx": 13}
 {"target": "put the wine bottle on top of the cabinet", "command": "put the wine bottle on the rack", "init_idx": 19}
+{"target": "put the wine bottle on top of the cabinet", "command": "put the wine bottle on the rack", "init_idx": 23}
 {"target": "put the wine bottle on top of the cabinet", "command": "put the wine bottle on the rack", "init_idx": 7}
 {"target": "put the wine bottle on top of the cabinet", "command": "put the wine bottle on top of the cabinet", "init_idx": 0}
 {"target": "put the wine bottle on top of the cabinet", "command": "put the wine bottle on top of the cabinet", "init_idx": 10}
@@ -457,19 +550,31 @@
 {"target": "put the wine bottle on top of the cabinet", "command": "put the wine bottle on top of the cabinet", "init_idx": 6}
 {"target": "put the wine bottle on top of the cabinet", "command": "put the wine bottle on top of the cabinet", "init_idx": 7}
 {"target": "put the wine bottle on top of the cabinet", "command": "put the wine bottle on top of the cabinet", "init_idx": 8}
+{"target": "turn on the stove", "command": "open the middle drawer of the cabinet", "init_idx": 10}
 {"target": "turn on the stove", "command": "open the middle drawer of the cabinet", "init_idx": 3}
+{"target": "turn on the stove", "command": "open the middle drawer of the cabinet", "init_idx": 34}
+{"target": "turn on the stove", "command": "open the middle drawer of the cabinet", "init_idx": 45}
 {"target": "turn on the stove", "command": "open the middle drawer of the cabinet", "init_idx": 7}
 {"target": "turn on the stove", "command": "open the top drawer and put the bowl inside", "init_idx": 21}
+{"target": "turn on the stove", "command": "open the top drawer and put the bowl inside", "init_idx": 22}
+{"target": "turn on the stove", "command": "open the top drawer and put the bowl inside", "init_idx": 34}
 {"target": "turn on the stove", "command": "open the top drawer and put the bowl inside", "init_idx": 39}
 {"target": "turn on the stove", "command": "open the top drawer and put the bowl inside", "init_idx": 41}
 {"target": "turn on the stove", "command": "open the top drawer and put the bowl inside", "init_idx": 48}
 {"target": "turn on the stove", "command": "push the plate to the front of the stove", "init_idx": 13}
 {"target": "turn on the stove", "command": "push the plate to the front of the stove", "init_idx": 21}
+{"target": "turn on the stove", "command": "push the plate to the front of the stove", "init_idx": 30}
+{"target": "turn on the stove", "command": "push the plate to the front of the stove", "init_idx": 41}
 {"target": "turn on the stove", "command": "push the plate to the front of the stove", "init_idx": 45}
+{"target": "turn on the stove", "command": "put the bowl on the plate", "init_idx": 0}
 {"target": "turn on the stove", "command": "put the bowl on the plate", "init_idx": 4}
 {"target": "turn on the stove", "command": "put the bowl on the plate", "init_idx": 45}
 {"target": "turn on the stove", "command": "put the bowl on the plate", "init_idx": 6}
+{"target": "turn on the stove", "command": "put the bowl on the stove", "init_idx": 0}
 {"target": "turn on the stove", "command": "put the bowl on the stove", "init_idx": 13}
+{"target": "turn on the stove", "command": "put the bowl on the stove", "init_idx": 24}
+{"target": "turn on the stove", "command": "put the bowl on the stove", "init_idx": 38}
+{"target": "turn on the stove", "command": "put the bowl on the stove", "init_idx": 46}
 {"target": "turn on the stove", "command": "put the bowl on the stove", "init_idx": 6}
 {"target": "turn on the stove", "command": "put the bowl on top of the cabinet", "init_idx": 0}
 {"target": "turn on the stove", "command": "put the bowl on top of the cabinet", "init_idx": 24}
@@ -482,6 +587,9 @@
 {"target": "turn on the stove", "command": "put the wine bottle on the rack", "init_idx": 22}
 {"target": "turn on the stove", "command": "put the wine bottle on the rack", "init_idx": 3}
 {"target": "turn on the stove", "command": "put the wine bottle on the rack", "init_idx": 30}
+{"target": "turn on the stove", "command": "put the wine bottle on the rack", "init_idx": 38}
+{"target": "turn on the stove", "command": "put the wine bottle on the rack", "init_idx": 49}
+{"target": "turn on the stove", "command": "put the wine bottle on the rack", "init_idx": 6}
 {"target": "turn on the stove", "command": "put the wine bottle on the rack", "init_idx": 7}
 {"target": "turn on the stove", "command": "put the wine bottle on top of the cabinet", "init_idx": 0}
 {"target": "turn on the stove", "command": "put the wine bottle on top of the cabinet", "init_idx": 2}
