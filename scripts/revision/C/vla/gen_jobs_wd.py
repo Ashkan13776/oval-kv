@@ -5,6 +5,8 @@ Exactly the LVBench (C2 + C3) arms and flags, with LVB_ROOT=$HOME/libero_watchdo
 import argparse, json, os, subprocess, sys
 HERE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 ap = argparse.ArgumentParser(); ap.add_argument("--model", required=True); ap.add_argument("--arms", nargs="+")
+ap.add_argument("--root", default="libero_watchdo", help="dataset dir under $HOME (v2: libero_watchdo2)")
+ap.add_argument("--tag", default="wd", help="run-dir / log prefix (v2: wd2)")
 ap.add_argument("--pilot", type=int, default=0, help="only the questions of the first N sessions (file tag _pilot)")
 a = ap.parse_args()
 C2 = ["full_n64", "full_n32", "quest_n64", "freekv_n64", "snapkv_n64", "oval_n64"]
@@ -21,11 +23,11 @@ if c3:
                             capture_output=True, text=True, check=True).stdout.splitlines()
 q = ""
 if a.pilot:
-    rows = [json.loads(l) for l in open(os.path.expanduser("~/libero_watchdo/video_info.meta.jsonl"))][:a.pilot]
+    rows = [json.loads(l) for l in open(os.path.expanduser(f"~/{a.root}/video_info.meta.jsonl"))][:a.pilot]
     q = " --qids " + " ".join(x["uid"] for r in rows for x in r["qa"]) + " --file_tag _pilot"
 for l in lines:
-    l = (l.replace("$HOME/lvbench", "$HOME/libero_watchdo").replace(f"c2_lvbench_{m}", f"wd_{m}").replace(f"c3_lvbench_{m}", f"wd_{m}")
-          .replace("logs/revc/jobs/c2", "logs/revc/jobs/wd_c2").replace("logs/revc/jobs/c3", "logs/revc/jobs/wd_c3"))
+    l = (l.replace("$HOME/lvbench", f"$HOME/{a.root}").replace(f"c2_lvbench_{m}", f"{a.tag}_{m}").replace(f"c3_lvbench_{m}", f"{a.tag}_{m}")
+          .replace("logs/revc/jobs/c2", f"logs/revc/jobs/{a.tag}_c2").replace("logs/revc/jobs/c3", f"logs/revc/jobs/{a.tag}_c3"))
     if a.pilot:
         if "--shard 0 " not in l:
             continue

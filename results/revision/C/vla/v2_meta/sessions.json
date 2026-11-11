@@ -1,0 +1,4418 @@
+{
+ "seed": 0,
+ "k": 3,
+ "sessions": [
+  {
+   "sid": "wd000",
+   "spans": [
+    {
+     "task": 16,
+     "episode": 520,
+     "start": 0,
+     "end": 79
+    },
+    {
+     "task": 19,
+     "episode": 703,
+     "start": 79,
+     "end": 218
+    },
+    {
+     "task": 10,
+     "episode": 642,
+     "start": 218,
+     "end": 308
+    }
+   ],
+   "targets": {
+    "wd000-present": {
+     "target": "open the middle drawer of the cabinet",
+     "options": {
+      "A": "Put the bowl on top of the cabinet",
+      "B": "Open the middle drawer of the cabinet",
+      "C": "Put the wine bottle on top of the cabinet",
+      "D": "Put the cream cheese in the bowl"
+     },
+     "init_idx": 32
+    },
+    "wd000-first": {
+     "target": "turn on the stove",
+     "options": {
+      "A": "Open the top drawer and put the bowl inside",
+      "B": "Open the middle drawer of the cabinet",
+      "C": "Put the bowl on the plate",
+      "D": "Turn on the stove"
+     },
+     "init_idx": 34
+    },
+    "wd000-last": {
+     "target": "put the bowl on the plate",
+     "options": {
+      "A": "Put the wine bottle on the rack",
+      "B": "Turn on the stove",
+      "C": "Open the middle drawer of the cabinet",
+      "D": "Put the bowl on the plate"
+     },
+     "init_idx": 30
+    }
+   }
+  },
+  {
+   "sid": "wd001",
+   "spans": [
+    {
+     "task": 18,
+     "episode": 669,
+     "start": 0,
+     "end": 88
+    },
+    {
+     "task": 11,
+     "episode": 595,
+     "start": 88,
+     "end": 258
+    },
+    {
+     "task": 15,
+     "episode": 584,
+     "start": 258,
+     "end": 413
+    }
+   ],
+   "targets": {
+    "wd001-present": {
+     "target": "push the plate to the front of the stove",
+     "options": {
+      "A": "Put the wine bottle on top of the cabinet",
+      "B": "Turn on the stove",
+      "C": "Push the plate to the front of the stove",
+      "D": "Open the middle drawer of the cabinet"
+     },
+     "init_idx": 5
+    },
+    "wd001-first": {
+     "target": "put the bowl on top of the cabinet",
+     "options": {
+      "A": "Put the wine bottle on the rack",
+      "B": "Put the bowl on top of the cabinet",
+      "C": "Push the plate to the front of the stove",
+      "D": "Turn on the stove"
+     },
+     "init_idx": 46
+    },
+    "wd001-last": {
+     "target": "push the plate to the front of the stove",
+     "options": {
+      "A": "Open the top drawer and put the bowl inside",
+      "B": "Put the bowl on top of the cabinet",
+      "C": "Push the plate to the front of the stove",
+      "D": "Put the wine bottle on the rack"
+     },
+     "init_idx": 34
+    }
+   }
+  },
+  {
+   "sid": "wd002",
+   "spans": [
+    {
+     "task": 17,
+     "episode": 604,
+     "start": 0,
+     "end": 106
+    },
+    {
+     "task": 11,
+     "episode": 739,
+     "start": 106,
+     "end": 261
+    },
+    {
+     "task": 18,
+     "episode": 696,
+     "start": 261,
+     "end": 365
+    }
+   ],
+   "targets": {
+    "wd002-present": {
+     "target": "put the bowl on the stove",
+     "options": {
+      "A": "Open the middle drawer of the cabinet",
+      "B": "Put the cream cheese in the bowl",
+      "C": "Push the plate to the front of the stove",
+      "D": "Put the bowl on the stove"
+     },
+     "init_idx": 34
+    },
+    "wd002-first": {
+     "target": "put the bowl on the stove",
+     "options": {
+      "A": "Put the wine bottle on top of the cabinet",
+      "B": "Put the wine bottle on the rack",
+      "C": "Put the bowl on top of the cabinet",
+      "D": "Put the bowl on the stove"
+     },
+     "init_idx": 20
+    },
+    "wd002-last": {
+     "target": "put the bowl on top of the cabinet",
+     "options": {
+      "A": "Open the top drawer and put the bowl inside",
+      "B": "Put the wine bottle on the rack",
+      "C": "Put the bowl on top of the cabinet",
+      "D": "Put the bowl on the stove"
+     },
+     "init_idx": 39
+    }
+   }
+  },
+  {
+   "sid": "wd003",
+   "spans": [
+    {
+     "task": 14,
+     "episode": 417,
+     "start": 0,
+     "end": 93
+    },
+    {
+     "task": 17,
+     "episode": 786,
+     "start": 93,
+     "end": 207
+    },
+    {
+     "task": 11,
+     "episode": 484,
+     "start": 207,
+     "end": 371
+    }
+   ],
+   "targets": {
+    "wd003-present": {
+     "target": "put the wine bottle on top of the cabinet",
+     "options": {
+      "A": "Put the wine bottle on top of the cabinet",
+      "B": "Put the bowl on the plate",
+      "C": "Open the middle drawer of the cabinet",
+      "D": "Turn on the stove"
+     },
+     "init_idx": 33
+    },
+    "wd003-first": {
+     "target": "put the wine bottle on top of the cabinet",
+     "options": {
+      "A": "Put the wine bottle on top of the cabinet",
+      "B": "Put the bowl on the stove",
+      "C": "Put the wine bottle on the rack",
+      "D": "Put the bowl on top of the cabinet"
+     },
+     "init_idx": 28
+    },
+    "wd003-last": {
+     "target": "put the wine bottle on the rack",
+     "options": {
+      "A": "Put the bowl on the stove",
+      "B": "Put the wine bottle on the rack",
+      "C": "Put the bowl on the plate",
+      "D": "Put the wine bottle on top of the cabinet"
+     },
+     "init_idx": 31
+    }
+   }
+  },
+  {
+   "sid": "wd004",
+   "spans": [
+    {
+     "task": 19,
+     "episode": 541,
+     "start": 0,
+     "end": 150
+    },
+    {
+     "task": 15,
+     "episode": 400,
+     "start": 150,
+     "end": 288
+    },
+    {
+     "task": 13,
+     "episode": 564,
+     "start": 288,
+     "end": 387
+    }
+   ],
+   "targets": {
+    "wd004-present": {
+     "target": "open the middle drawer of the cabinet",
+     "options": {
+      "A": "Open the middle drawer of the cabinet",
+      "B": "Put the wine bottle on the rack",
+      "C": "Open the top drawer and put the bowl inside",
+      "D": "Put the bowl on the stove"
+     },
+     "init_idx": 3
+    },
+    "wd004-first": {
+     "target": "open the middle drawer of the cabinet",
+     "options": {
+      "A": "Put the bowl on top of the cabinet",
+      "B": "Put the cream cheese in the bowl",
+      "C": "Open the middle drawer of the cabinet",
+      "D": "Push the plate to the front of the stove"
+     },
+     "init_idx": 1
+    },
+    "wd004-last": {
+     "target": "put the cream cheese in the bowl",
+     "options": {
+      "A": "Push the plate to the front of the stove",
+      "B": "Turn on the stove",
+      "C": "Open the middle drawer of the cabinet",
+      "D": "Put the cream cheese in the bowl"
+     },
+     "init_idx": 23
+    }
+   }
+  },
+  {
+   "sid": "wd005",
+   "spans": [
+    {
+     "task": 11,
+     "episode": 509,
+     "start": 0,
+     "end": 164
+    },
+    {
+     "task": 10,
+     "episode": 483,
+     "start": 164,
+     "end": 253
+    },
+    {
+     "task": 18,
+     "episode": 794,
+     "start": 253,
+     "end": 361
+    }
+   ],
+   "targets": {
+    "wd005-present": {
+     "target": "put the wine bottle on the rack",
+     "options": {
+      "A": "Open the top drawer and put the bowl inside",
+      "B": "Push the plate to the front of the stove",
+      "C": "Put the cream cheese in the bowl",
+      "D": "Put the wine bottle on the rack"
+     },
+     "init_idx": 39
+    },
+    "wd005-first": {
+     "target": "put the wine bottle on the rack",
+     "options": {
+      "A": "Put the bowl on top of the cabinet",
+      "B": "Open the top drawer and put the bowl inside",
+      "C": "Put the wine bottle on the rack",
+      "D": "Put the bowl on the plate"
+     },
+     "init_idx": 22
+    },
+    "wd005-last": {
+     "target": "put the bowl on top of the cabinet",
+     "options": {
+      "A": "Put the bowl on the plate",
+      "B": "Put the wine bottle on the rack",
+      "C": "Put the bowl on top of the cabinet",
+      "D": "Open the top drawer and put the bowl inside"
+     },
+     "init_idx": 44
+    }
+   }
+  },
+  {
+   "sid": "wd006",
+   "spans": [
+    {
+     "task": 16,
+     "episode": 575,
+     "start": 0,
+     "end": 77
+    },
+    {
+     "task": 13,
+     "episode": 720,
+     "start": 77,
+     "end": 180
+    },
+    {
+     "task": 14,
+     "episode": 645,
+     "start": 180,
+     "end": 270
+    }
+   ],
+   "targets": {
+    "wd006-present": {
+     "target": "turn on the stove",
+     "options": {
+      "A": "Put the bowl on top of the cabinet",
+      "B": "Put the wine bottle on the rack",
+      "C": "Open the middle drawer of the cabinet",
+      "D": "Turn on the stove"
+     },
+     "init_idx": 10
+    },
+    "wd006-first": {
+     "target": "turn on the stove",
+     "options": {
+      "A": "Put the wine bottle on top of the cabinet",
+      "B": "Turn on the stove",
+      "C": "Put the cream cheese in the bowl",
+      "D": "Put the bowl on the plate"
+     },
+     "init_idx": 0
+    },
+    "wd006-last": {
+     "target": "put the wine bottle on top of the cabinet",
+     "options": {
+      "A": "Put the wine bottle on top of the cabinet",
+      "B": "Put the cream cheese in the bowl",
+      "C": "Put the bowl on the stove",
+      "D": "Turn on the stove"
+     },
+     "init_idx": 24
+    }
+   }
+  },
+  {
+   "sid": "wd007",
+   "spans": [
+    {
+     "task": 14,
+     "episode": 574,
+     "start": 0,
+     "end": 104
+    },
+    {
+     "task": 12,
+     "episode": 416,
+     "start": 104,
+     "end": 303
+    },
+    {
+     "task": 10,
+     "episode": 563,
+     "start": 303,
+     "end": 401
+    }
+   ],
+   "targets": {
+    "wd007-present": {
+     "target": "put the bowl on the plate",
+     "options": {
+      "A": "Put the bowl on the stove",
+      "B": "Push the plate to the front of the stove",
+      "C": "Put the bowl on the plate",
+      "D": "Put the wine bottle on the rack"
+     },
+     "init_idx": 22
+    },
+    "wd007-first": {
+     "target": "put the wine bottle on top of the cabinet",
+     "options": {
+      "A": "Put the wine bottle on top of the cabinet",
+      "B": "Put the bowl on the stove",
+      "C": "Open the top drawer and put the bowl inside",
+      "D": "Put the bowl on the plate"
+     },
+     "init_idx": 24
+    },
+    "wd007-last": {
+     "target": "put the bowl on the plate",
+     "options": {
+      "A": "Put the bowl on the plate",
+      "B": "Put the wine bottle on the rack",
+      "C": "Put the wine bottle on top of the cabinet",
+      "D": "Open the top drawer and put the bowl inside"
+     },
+     "init_idx": 10
+    }
+   }
+  },
+  {
+   "sid": "wd008",
+   "spans": [
+    {
+     "task": 13,
+     "episode": 650,
+     "start": 0,
+     "end": 147
+    },
+    {
+     "task": 19,
+     "episode": 754,
+     "start": 147,
+     "end": 272
+    },
+    {
+     "task": 17,
+     "episode": 641,
+     "start": 272,
+     "end": 391
+    }
+   ],
+   "targets": {
+    "wd008-present": {
+     "target": "put the cream cheese in the bowl",
+     "options": {
+      "A": "Put the wine bottle on top of the cabinet",
+      "B": "Put the cream cheese in the bowl",
+      "C": "Turn on the stove",
+      "D": "Push the plate to the front of the stove"
+     },
+     "init_idx": 10
+    },
+    "wd008-first": {
+     "target": "put the cream cheese in the bowl",
+     "options": {
+      "A": "Put the cream cheese in the bowl",
+      "B": "Open the middle drawer of the cabinet",
+      "C": "Open the top drawer and put the bowl inside",
+      "D": "Put the bowl on the stove"
+     },
+     "init_idx": 35
+    },
+    "wd008-last": {
+     "target": "put the bowl on the stove",
+     "options": {
+      "A": "Put the bowl on the stove",
+      "B": "Put the wine bottle on top of the cabinet",
+      "C": "Put the cream cheese in the bowl",
+      "D": "Open the middle drawer of the cabinet"
+     },
+     "init_idx": 3
+    }
+   }
+  },
+  {
+   "sid": "wd009",
+   "spans": [
+    {
+     "task": 16,
+     "episode": 783,
+     "start": 0,
+     "end": 86
+    },
+    {
+     "task": 13,
+     "episode": 491,
+     "start": 86,
+     "end": 182
+    },
+    {
+     "task": 11,
+     "episode": 380,
+     "start": 182,
+     "end": 337
+    }
+   ],
+   "targets": {
+    "wd009-present": {
+     "target": "put the cream cheese in the bowl",
+     "options": {
+      "A": "Put the bowl on top of the cabinet",
+      "B": "Push the plate to the front of the stove",
+      "C": "Put the wine bottle on top of the cabinet",
+      "D": "Put the cream cheese in the bowl"
+     },
+     "init_idx": 45
+    },
+    "wd009-first": {
+     "target": "turn on the stove",
+     "options": {
+      "A": "Put the cream cheese in the bowl",
+      "B": "Open the top drawer and put the bowl inside",
+      "C": "Put the wine bottle on the rack",
+      "D": "Turn on the stove"
+     },
+     "init_idx": 19
+    },
+    "wd009-last": {
+     "target": "put the wine bottle on the rack",
+     "options": {
+      "A": "Turn on the stove",
+      "B": "Put the wine bottle on the rack",
+      "C": "Put the cream cheese in the bowl",
+      "D": "Put the bowl on the plate"
+     },
+     "init_idx": 1
+    }
+   }
+  },
+  {
+   "sid": "wd010",
+   "spans": [
+    {
+     "task": 14,
+     "episode": 476,
+     "start": 0,
+     "end": 97
+    },
+    {
+     "task": 17,
+     "episode": 495,
+     "start": 97,
+     "end": 189
+    },
+    {
+     "task": 11,
+     "episode": 757,
+     "start": 189,
+     "end": 337
+    }
+   ],
+   "targets": {
+    "wd010-present": {
+     "target": "put the wine bottle on the rack",
+     "options": {
+      "A": "Put the cream cheese in the bowl",
+      "B": "Put the wine bottle on the rack",
+      "C": "Put the bowl on the plate",
+      "D": "Put the bowl on top of the cabinet"
+     },
+     "init_idx": 2
+    },
+    "wd010-first": {
+     "target": "put the wine bottle on top of the cabinet",
+     "options": {
+      "A": "Put the wine bottle on top of the cabinet",
+      "B": "Put the bowl on the stove",
+      "C": "Put the bowl on top of the cabinet",
+      "D": "Put the wine bottle on the rack"
+     },
+     "init_idx": 23
+    },
+    "wd010-last": {
+     "target": "put the wine bottle on the rack",
+     "options": {
+      "A": "Put the wine bottle on the rack",
+      "B": "Put the wine bottle on top of the cabinet",
+      "C": "Put the bowl on the stove",
+      "D": "Put the bowl on top of the cabinet"
+     },
+     "init_idx": 23
+    }
+   }
+  },
+  {
+   "sid": "wd011",
+   "spans": [
+    {
+     "task": 18,
+     "episode": 661,
+     "start": 0,
+     "end": 105
+    },
+    {
+     "task": 12,
+     "episode": 560,
+     "start": 105,
+     "end": 289
+    },
+    {
+     "task": 13,
+     "episode": 384,
+     "start": 289,
+     "end": 401
+    }
+   ],
+   "targets": {
+    "wd011-present": {
+     "target": "put the bowl on top of the cabinet",
+     "options": {
+      "A": "Put the bowl on the stove",
+      "B": "Put the bowl on top of the cabinet",
+      "C": "Put the wine bottle on the rack",
+      "D": "Put the wine bottle on top of the cabinet"
+     },
+     "init_idx": 21
+    },
+    "wd011-first": {
+     "target": "put the bowl on top of the cabinet",
+     "options": {
+      "A": "Put the cream cheese in the bowl",
+      "B": "Put the wine bottle on top of the cabinet",
+      "C": "Put the bowl on top of the cabinet",
+      "D": "Open the top drawer and put the bowl inside"
+     },
+     "init_idx": 23
+    },
+    "wd011-last": {
+     "target": "put the cream cheese in the bowl",
+     "options": {
+      "A": "Put the bowl on top of the cabinet",
+      "B": "Put the wine bottle on top of the cabinet",
+      "C": "Open the top drawer and put the bowl inside",
+      "D": "Put the cream cheese in the bowl"
+     },
+     "init_idx": 3
+    }
+   }
+  },
+  {
+   "sid": "wd012",
+   "spans": [
+    {
+     "task": 14,
+     "episode": 482,
+     "start": 0,
+     "end": 92
+    },
+    {
+     "task": 12,
+     "episode": 694,
+     "start": 92,
+     "end": 265
+    },
+    {
+     "task": 11,
+     "episode": 623,
+     "start": 265,
+     "end": 414
+    }
+   ],
+   "targets": {
+    "wd012-present": {
+     "target": "open the top drawer and put the bowl inside",
+     "options": {
+      "A": "Open the top drawer and put the bowl inside",
+      "B": "Put the bowl on the plate",
+      "C": "Turn on the stove",
+      "D": "Put the bowl on top of the cabinet"
+     },
+     "init_idx": 21
+    },
+    "wd012-first": {
+     "target": "put the wine bottle on top of the cabinet",
+     "options": {
+      "A": "Put the wine bottle on the rack",
+      "B": "Put the wine bottle on top of the cabinet",
+      "C": "Open the top drawer and put the bowl inside",
+      "D": "Put the bowl on the plate"
+     },
+     "init_idx": 19
+    },
+    "wd012-last": {
+     "target": "put the wine bottle on the rack",
+     "options": {
+      "A": "Open the top drawer and put the bowl inside",
+      "B": "Put the wine bottle on the rack",
+      "C": "Put the wine bottle on top of the cabinet",
+      "D": "Put the cream cheese in the bowl"
+     },
+     "init_idx": 4
+    }
+   }
+  },
+  {
+   "sid": "wd013",
+   "spans": [
+    {
+     "task": 11,
+     "episode": 407,
+     "start": 0,
+     "end": 170
+    },
+    {
+     "task": 13,
+     "episode": 650,
+     "start": 170,
+     "end": 317
+    },
+    {
+     "task": 18,
+     "episode": 398,
+     "start": 317,
+     "end": 417
+    }
+   ],
+   "targets": {
+    "wd013-present": {
+     "target": "put the wine bottle on the rack",
+     "options": {
+      "A": "Put the wine bottle on the rack",
+      "B": "Put the bowl on the stove",
+      "C": "Push the plate to the front of the stove",
+      "D": "Turn on the stove"
+     },
+     "init_idx": 37
+    },
+    "wd013-first": {
+     "target": "put the wine bottle on the rack",
+     "options": {
+      "A": "Put the bowl on the plate",
+      "B": "Put the cream cheese in the bowl",
+      "C": "Put the wine bottle on the rack",
+      "D": "Put the bowl on top of the cabinet"
+     },
+     "init_idx": 37
+    },
+    "wd013-last": {
+     "target": "put the bowl on top of the cabinet",
+     "options": {
+      "A": "Put the wine bottle on the rack",
+      "B": "Open the top drawer and put the bowl inside",
+      "C": "Put the bowl on top of the cabinet",
+      "D": "Put the cream cheese in the bowl"
+     },
+     "init_idx": 44
+    }
+   }
+  },
+  {
+   "sid": "wd014",
+   "spans": [
+    {
+     "task": 10,
+     "episode": 806,
+     "start": 0,
+     "end": 92
+    },
+    {
+     "task": 18,
+     "episode": 791,
+     "start": 92,
+     "end": 194
+    },
+    {
+     "task": 17,
+     "episode": 544,
+     "start": 194,
+     "end": 296
+    }
+   ],
+   "targets": {
+    "wd014-present": {
+     "target": "put the bowl on the plate",
+     "options": {
+      "A": "Put the cream cheese in the bowl",
+      "B": "Put the bowl on the plate",
+      "C": "Open the middle drawer of the cabinet",
+      "D": "Put the wine bottle on top of the cabinet"
+     },
+     "init_idx": 13
+    },
+    "wd014-first": {
+     "target": "put the bowl on the plate",
+     "options": {
+      "A": "Put the bowl on the plate",
+      "B": "Put the bowl on the stove",
+      "C": "Put the bowl on top of the cabinet",
+      "D": "Open the top drawer and put the bowl inside"
+     },
+     "init_idx": 34
+    },
+    "wd014-last": {
+     "target": "put the bowl on the stove",
+     "options": {
+      "A": "Put the bowl on top of the cabinet",
+      "B": "Put the bowl on the plate",
+      "C": "Put the bowl on the stove",
+      "D": "Push the plate to the front of the stove"
+     },
+     "init_idx": 40
+    }
+   }
+  },
+  {
+   "sid": "wd015",
+   "spans": [
+    {
+     "task": 16,
+     "episode": 753,
+     "start": 0,
+     "end": 89
+    },
+    {
+     "task": 18,
+     "episode": 630,
+     "start": 89,
+     "end": 188
+    },
+    {
+     "task": 17,
+     "episode": 688,
+     "start": 188,
+     "end": 302
+    }
+   ],
+   "targets": {
+    "wd015-present": {
+     "target": "put the bowl on top of the cabinet",
+     "options": {
+      "A": "Open the middle drawer of the cabinet",
+      "B": "Put the wine bottle on the rack",
+      "C": "Put the bowl on top of the cabinet",
+      "D": "Push the plate to the front of the stove"
+     },
+     "init_idx": 45
+    },
+    "wd015-first": {
+     "target": "turn on the stove",
+     "options": {
+      "A": "Put the bowl on top of the cabinet",
+      "B": "Turn on the stove",
+      "C": "Put the bowl on the plate",
+      "D": "Put the bowl on the stove"
+     },
+     "init_idx": 24
+    },
+    "wd015-last": {
+     "target": "put the bowl on the stove",
+     "options": {
+      "A": "Put the bowl on top of the cabinet",
+      "B": "Put the bowl on the plate",
+      "C": "Turn on the stove",
+      "D": "Put the bowl on the stove"
+     },
+     "init_idx": 4
+    }
+   }
+  },
+  {
+   "sid": "wd016",
+   "spans": [
+    {
+     "task": 13,
+     "episode": 587,
+     "start": 0,
+     "end": 95
+    },
+    {
+     "task": 12,
+     "episode": 382,
+     "start": 95,
+     "end": 272
+    },
+    {
+     "task": 10,
+     "episode": 806,
+     "start": 272,
+     "end": 364
+    }
+   ],
+   "targets": {
+    "wd016-present": {
+     "target": "open the top drawer and put the bowl inside",
+     "options": {
+      "A": "Open the top drawer and put the bowl inside",
+      "B": "Put the wine bottle on top of the cabinet",
+      "C": "Push the plate to the front of the stove",
+      "D": "Put the bowl on top of the cabinet"
+     },
+     "init_idx": 33
+    },
+    "wd016-first": {
+     "target": "put the cream cheese in the bowl",
+     "options": {
+      "A": "Put the bowl on top of the cabinet",
+      "B": "Open the top drawer and put the bowl inside",
+      "C": "Put the bowl on the plate",
+      "D": "Put the cream cheese in the bowl"
+     },
+     "init_idx": 48
+    },
+    "wd016-last": {
+     "target": "put the bowl on the plate",
+     "options": {
+      "A": "Put the bowl on the plate",
+      "B": "Open the top drawer and put the bowl inside",
+      "C": "Put the cream cheese in the bowl",
+      "D": "Put the bowl on the stove"
+     },
+     "init_idx": 38
+    }
+   }
+  },
+  {
+   "sid": "wd017",
+   "spans": [
+    {
+     "task": 19,
+     "episode": 802,
+     "start": 0,
+     "end": 160
+    },
+    {
+     "task": 13,
+     "episode": 384,
+     "start": 160,
+     "end": 272
+    },
+    {
+     "task": 10,
+     "episode": 803,
+     "start": 272,
+     "end": 369
+    }
+   ],
+   "targets": {
+    "wd017-present": {
+     "target": "open the middle drawer of the cabinet",
+     "options": {
+      "A": "Put the bowl on the stove",
+      "B": "Open the middle drawer of the cabinet",
+      "C": "Put the wine bottle on top of the cabinet",
+      "D": "Turn on the stove"
+     },
+     "init_idx": 31
+    },
+    "wd017-first": {
+     "target": "open the middle drawer of the cabinet",
+     "options": {
+      "A": "Open the middle drawer of the cabinet",
+      "B": "Put the cream cheese in the bowl",
+      "C": "Put the bowl on the plate",
+      "D": "Put the bowl on top of the cabinet"
+     },
+     "init_idx": 3
+    },
+    "wd017-last": {
+     "target": "put the bowl on the plate",
+     "options": {
+      "A": "Put the bowl on the plate",
+      "B": "Open the middle drawer of the cabinet",
+      "C": "Open the top drawer and put the bowl inside",
+      "D": "Put the cream cheese in the bowl"
+     },
+     "init_idx": 3
+    }
+   }
+  },
+  {
+   "sid": "wd018",
+   "spans": [
+    {
+     "task": 10,
+     "episode": 466,
+     "start": 0,
+     "end": 93
+    },
+    {
+     "task": 17,
+     "episode": 688,
+     "start": 93,
+     "end": 207
+    },
+    {
+     "task": 16,
+     "episode": 723,
+     "start": 207,
+     "end": 287
+    }
+   ],
+   "targets": {
+    "wd018-present": {
+     "target": "turn on the stove",
+     "options": {
+      "A": "Open the top drawer and put the bowl inside",
+      "B": "Turn on the stove",
+      "C": "Put the wine bottle on the rack",
+      "D": "Put the bowl on top of the cabinet"
+     },
+     "init_idx": 39
+    },
+    "wd018-first": {
+     "target": "put the bowl on the plate",
+     "options": {
+      "A": "Put the bowl on the stove",
+      "B": "Turn on the stove",
+      "C": "Put the wine bottle on top of the cabinet",
+      "D": "Put the bowl on the plate"
+     },
+     "init_idx": 49
+    },
+    "wd018-last": {
+     "target": "turn on the stove",
+     "options": {
+      "A": "Turn on the stove",
+      "B": "Put the wine bottle on the rack",
+      "C": "Put the bowl on the stove",
+      "D": "Put the bowl on the plate"
+     },
+     "init_idx": 6
+    }
+   }
+  },
+  {
+   "sid": "wd019",
+   "spans": [
+    {
+     "task": 18,
+     "episode": 661,
+     "start": 0,
+     "end": 105
+    },
+    {
+     "task": 15,
+     "episode": 778,
+     "start": 105,
+     "end": 259
+    },
+    {
+     "task": 13,
+     "episode": 464,
+     "start": 259,
+     "end": 349
+    }
+   ],
+   "targets": {
+    "wd019-present": {
+     "target": "put the bowl on top of the cabinet",
+     "options": {
+      "A": "Turn on the stove",
+      "B": "Put the bowl on top of the cabinet",
+      "C": "Put the wine bottle on top of the cabinet",
+      "D": "Put the bowl on the stove"
+     },
+     "init_idx": 43
+    },
+    "wd019-first": {
+     "target": "put the bowl on top of the cabinet",
+     "options": {
+      "A": "Put the cream cheese in the bowl",
+      "B": "Put the bowl on top of the cabinet",
+      "C": "Put the wine bottle on top of the cabinet",
+      "D": "Push the plate to the front of the stove"
+     },
+     "init_idx": 33
+    },
+    "wd019-last": {
+     "target": "put the cream cheese in the bowl",
+     "options": {
+      "A": "Put the cream cheese in the bowl",
+      "B": "Push the plate to the front of the stove",
+      "C": "Put the bowl on top of the cabinet",
+      "D": "Open the middle drawer of the cabinet"
+     },
+     "init_idx": 48
+    }
+   }
+  },
+  {
+   "sid": "wd020",
+   "spans": [
+    {
+     "task": 13,
+     "episode": 434,
+     "start": 0,
+     "end": 106
+    },
+    {
+     "task": 17,
+     "episode": 395,
+     "start": 106,
+     "end": 210
+    },
+    {
+     "task": 15,
+     "episode": 411,
+     "start": 210,
+     "end": 403
+    }
+   ],
+   "targets": {
+    "wd020-present": {
+     "target": "put the bowl on the stove",
+     "options": {
+      "A": "Turn on the stove",
+      "B": "Put the bowl on the plate",
+      "C": "Put the bowl on the stove",
+      "D": "Open the top drawer and put the bowl inside"
+     },
+     "init_idx": 49
+    },
+    "wd020-first": {
+     "target": "put the cream cheese in the bowl",
+     "options": {
+      "A": "Put the cream cheese in the bowl",
+      "B": "Put the bowl on the stove",
+      "C": "Put the bowl on the plate",
+      "D": "Push the plate to the front of the stove"
+     },
+     "init_idx": 5
+    },
+    "wd020-last": {
+     "target": "push the plate to the front of the stove",
+     "options": {
+      "A": "Put the bowl on the stove",
+      "B": "Put the bowl on the plate",
+      "C": "Put the cream cheese in the bowl",
+      "D": "Push the plate to the front of the stove"
+     },
+     "init_idx": 46
+    }
+   }
+  },
+  {
+   "sid": "wd021",
+   "spans": [
+    {
+     "task": 10,
+     "episode": 750,
+     "start": 0,
+     "end": 86
+    },
+    {
+     "task": 17,
+     "episode": 641,
+     "start": 86,
+     "end": 205
+    },
+    {
+     "task": 16,
+     "episode": 390,
+     "start": 205,
+     "end": 286
+    }
+   ],
+   "targets": {
+    "wd021-present": {
+     "target": "put the bowl on the stove",
+     "options": {
+      "A": "Put the cream cheese in the bowl",
+      "B": "Put the bowl on top of the cabinet",
+      "C": "Open the middle drawer of the cabinet",
+      "D": "Put the bowl on the stove"
+     },
+     "init_idx": 7
+    },
+    "wd021-first": {
+     "target": "put the bowl on the plate",
+     "options": {
+      "A": "Turn on the stove",
+      "B": "Put the cream cheese in the bowl",
+      "C": "Put the bowl on the plate",
+      "D": "Put the bowl on the stove"
+     },
+     "init_idx": 14
+    },
+    "wd021-last": {
+     "target": "turn on the stove",
+     "options": {
+      "A": "Push the plate to the front of the stove",
+      "B": "Put the bowl on the plate",
+      "C": "Turn on the stove",
+      "D": "Put the bowl on the stove"
+     },
+     "init_idx": 13
+    }
+   }
+  },
+  {
+   "sid": "wd022",
+   "spans": [
+    {
+     "task": 11,
+     "episode": 651,
+     "start": 0,
+     "end": 201
+    },
+    {
+     "task": 10,
+     "episode": 768,
+     "start": 201,
+     "end": 289
+    },
+    {
+     "task": 14,
+     "episode": 389,
+     "start": 289,
+     "end": 403
+    }
+   ],
+   "targets": {
+    "wd022-present": {
+     "target": "put the wine bottle on top of the cabinet",
+     "options": {
+      "A": "Open the middle drawer of the cabinet",
+      "B": "Put the cream cheese in the bowl",
+      "C": "Put the wine bottle on top of the cabinet",
+      "D": "Put the bowl on top of the cabinet"
+     },
+     "init_idx": 22
+    },
+    "wd022-first": {
+     "target": "put the wine bottle on the rack",
+     "options": {
+      "A": "Put the wine bottle on the rack",
+      "B": "Put the bowl on the plate",
+      "C": "Open the top drawer and put the bowl inside",
+      "D": "Put the wine bottle on top of the cabinet"
+     },
+     "init_idx": 30
+    },
+    "wd022-last": {
+     "target": "put the wine bottle on top of the cabinet",
+     "options": {
+      "A": "Put the bowl on the plate",
+      "B": "Put the bowl on the stove",
+      "C": "Put the wine bottle on top of the cabinet",
+      "D": "Put the wine bottle on the rack"
+     },
+     "init_idx": 6
+    }
+   }
+  },
+  {
+   "sid": "wd023",
+   "spans": [
+    {
+     "task": 18,
+     "episode": 661,
+     "start": 0,
+     "end": 105
+    },
+    {
+     "task": 14,
+     "episode": 430,
+     "start": 105,
+     "end": 204
+    },
+    {
+     "task": 12,
+     "episode": 465,
+     "start": 204,
+     "end": 431
+    }
+   ],
+   "targets": {
+    "wd023-present": {
+     "target": "put the bowl on top of the cabinet",
+     "options": {
+      "A": "Turn on the stove",
+      "B": "Put the wine bottle on the rack",
+      "C": "Put the bowl on top of the cabinet",
+      "D": "Put the cream cheese in the bowl"
+     },
+     "init_idx": 23
+    },
+    "wd023-first": {
+     "target": "put the bowl on top of the cabinet",
+     "options": {
+      "A": "Open the middle drawer of the cabinet",
+      "B": "Put the bowl on top of the cabinet",
+      "C": "Put the wine bottle on top of the cabinet",
+      "D": "Open the top drawer and put the bowl inside"
+     },
+     "init_idx": 25
+    },
+    "wd023-last": {
+     "target": "open the top drawer and put the bowl inside",
+     "options": {
+      "A": "Open the top drawer and put the bowl inside",
+      "B": "Put the wine bottle on top of the cabinet",
+      "C": "Put the bowl on top of the cabinet",
+      "D": "Put the wine bottle on the rack"
+     },
+     "init_idx": 47
+    }
+   }
+  },
+  {
+   "sid": "wd024",
+   "spans": [
+    {
+     "task": 12,
+     "episode": 624,
+     "start": 0,
+     "end": 183
+    },
+    {
+     "task": 16,
+     "episode": 435,
+     "start": 183,
+     "end": 283
+    },
+    {
+     "task": 14,
+     "episode": 475,
+     "start": 283,
+     "end": 375
+    }
+   ],
+   "targets": {
+    "wd024-present": {
+     "target": "turn on the stove",
+     "options": {
+      "A": "Put the bowl on the stove",
+      "B": "Put the cream cheese in the bowl",
+      "C": "Put the bowl on top of the cabinet",
+      "D": "Turn on the stove"
+     },
+     "init_idx": 0
+    },
+    "wd024-first": {
+     "target": "open the top drawer and put the bowl inside",
+     "options": {
+      "A": "Open the top drawer and put the bowl inside",
+      "B": "Turn on the stove",
+      "C": "Push the plate to the front of the stove",
+      "D": "Put the wine bottle on top of the cabinet"
+     },
+     "init_idx": 30
+    },
+    "wd024-last": {
+     "target": "put the wine bottle on top of the cabinet",
+     "options": {
+      "A": "Turn on the stove",
+      "B": "Open the middle drawer of the cabinet",
+      "C": "Open the top drawer and put the bowl inside",
+      "D": "Put the wine bottle on top of the cabinet"
+     },
+     "init_idx": 35
+    }
+   }
+  },
+  {
+   "sid": "wd025",
+   "spans": [
+    {
+     "task": 19,
+     "episode": 633,
+     "start": 0,
+     "end": 153
+    },
+    {
+     "task": 12,
+     "episode": 498,
+     "start": 153,
+     "end": 343
+    },
+    {
+     "task": 17,
+     "episode": 641,
+     "start": 343,
+     "end": 462
+    }
+   ],
+   "targets": {
+    "wd025-present": {
+     "target": "open the top drawer and put the bowl inside",
+     "options": {
+      "A": "Put the wine bottle on the rack",
+      "B": "Open the top drawer and put the bowl inside",
+      "C": "Put the wine bottle on top of the cabinet",
+      "D": "Put the bowl on top of the cabinet"
+     },
+     "init_idx": 22
+    },
+    "wd025-first": {
+     "target": "open the middle drawer of the cabinet",
+     "options": {
+      "A": "Open the top drawer and put the bowl inside",
+      "B": "Open the middle drawer of the cabinet",
+      "C": "Put the wine bottle on top of the cabinet",
+      "D": "Put the bowl on the stove"
+     },
+     "init_idx": 44
+    },
+    "wd025-last": {
+     "target": "put the bowl on the stove",
+     "options": {
+      "A": "Open the middle drawer of the cabinet",
+      "B": "Put the bowl on the stove",
+      "C": "Put the bowl on the plate",
+      "D": "Open the top drawer and put the bowl inside"
+     },
+     "init_idx": 49
+    }
+   }
+  },
+  {
+   "sid": "wd026",
+   "spans": [
+    {
+     "task": 14,
+     "episode": 555,
+     "start": 0,
+     "end": 130
+    },
+    {
+     "task": 18,
+     "episode": 794,
+     "start": 130,
+     "end": 238
+    },
+    {
+     "task": 12,
+     "episode": 742,
+     "start": 238,
+     "end": 425
+    }
+   ],
+   "targets": {
+    "wd026-present": {
+     "target": "put the wine bottle on top of the cabinet",
+     "options": {
+      "A": "Push the plate to the front of the stove",
+      "B": "Put the wine bottle on top of the cabinet",
+      "C": "Put the bowl on the stove",
+      "D": "Put the wine bottle on the rack"
+     },
+     "init_idx": 7
+    },
+    "wd026-first": {
+     "target": "put the wine bottle on top of the cabinet",
+     "options": {
+      "A": "Put the wine bottle on top of the cabinet",
+      "B": "Put the bowl on the plate",
+      "C": "Open the top drawer and put the bowl inside",
+      "D": "Put the bowl on top of the cabinet"
+     },
+     "init_idx": 28
+    },
+    "wd026-last": {
+     "target": "open the top drawer and put the bowl inside",
+     "options": {
+      "A": "Put the wine bottle on top of the cabinet",
+      "B": "Open the top drawer and put the bowl inside",
+      "C": "Put the cream cheese in the bowl",
+      "D": "Put the bowl on top of the cabinet"
+     },
+     "init_idx": 38
+    }
+   }
+  },
+  {
+   "sid": "wd027",
+   "spans": [
+    {
+     "task": 11,
+     "episode": 571,
+     "start": 0,
+     "end": 155
+    },
+    {
+     "task": 10,
+     "episode": 549,
+     "start": 155,
+     "end": 258
+    },
+    {
+     "task": 19,
+     "episode": 725,
+     "start": 258,
+     "end": 387
+    }
+   ],
+   "targets": {
+    "wd027-present": {
+     "target": "put the bowl on the plate",
+     "options": {
+      "A": "Turn on the stove",
+      "B": "Put the cream cheese in the bowl",
+      "C": "Put the bowl on the plate",
+      "D": "Open the top drawer and put the bowl inside"
+     },
+     "init_idx": 18
+    },
+    "wd027-first": {
+     "target": "put the wine bottle on the rack",
+     "options": {
+      "A": "Turn on the stove",
+      "B": "Put the wine bottle on the rack",
+      "C": "Put the bowl on the plate",
+      "D": "Open the middle drawer of the cabinet"
+     },
+     "init_idx": 26
+    },
+    "wd027-last": {
+     "target": "open the middle drawer of the cabinet",
+     "options": {
+      "A": "Put the wine bottle on the rack",
+      "B": "Open the middle drawer of the cabinet",
+      "C": "Put the bowl on the plate",
+      "D": "Put the wine bottle on top of the cabinet"
+     },
+     "init_idx": 10
+    }
+   }
+  },
+  {
+   "sid": "wd028",
+   "spans": [
+    {
+     "task": 11,
+     "episode": 666,
+     "start": 0,
+     "end": 167
+    },
+    {
+     "task": 19,
+     "episode": 765,
+     "start": 167,
+     "end": 295
+    },
+    {
+     "task": 16,
+     "episode": 622,
+     "start": 295,
+     "end": 380
+    }
+   ],
+   "targets": {
+    "wd028-present": {
+     "target": "put the wine bottle on the rack",
+     "options": {
+      "A": "Put the wine bottle on the rack",
+      "B": "Push the plate to the front of the stove",
+      "C": "Put the cream cheese in the bowl",
+      "D": "Put the bowl on the stove"
+     },
+     "init_idx": 47
+    },
+    "wd028-first": {
+     "target": "put the wine bottle on the rack",
+     "options": {
+      "A": "Put the wine bottle on the rack",
+      "B": "Turn on the stove",
+      "C": "Open the middle drawer of the cabinet",
+      "D": "Put the wine bottle on top of the cabinet"
+     },
+     "init_idx": 31
+    },
+    "wd028-last": {
+     "target": "turn on the stove",
+     "options": {
+      "A": "Turn on the stove",
+      "B": "Put the cream cheese in the bowl",
+      "C": "Open the middle drawer of the cabinet",
+      "D": "Put the wine bottle on the rack"
+     },
+     "init_idx": 3
+    }
+   }
+  },
+  {
+   "sid": "wd029",
+   "spans": [
+    {
+     "task": 19,
+     "episode": 599,
+     "start": 0,
+     "end": 138
+    },
+    {
+     "task": 13,
+     "episode": 720,
+     "start": 138,
+     "end": 241
+    },
+    {
+     "task": 10,
+     "episode": 615,
+     "start": 241,
+     "end": 320
+    }
+   ],
+   "targets": {
+    "wd029-present": {
+     "target": "open the middle drawer of the cabinet",
+     "options": {
+      "A": "Put the wine bottle on the rack",
+      "B": "Put the bowl on top of the cabinet",
+      "C": "Turn on the stove",
+      "D": "Open the middle drawer of the cabinet"
+     },
+     "init_idx": 0
+    },
+    "wd029-first": {
+     "target": "open the middle drawer of the cabinet",
+     "options": {
+      "A": "Put the wine bottle on the rack",
+      "B": "Put the cream cheese in the bowl",
+      "C": "Put the bowl on the plate",
+      "D": "Open the middle drawer of the cabinet"
+     },
+     "init_idx": 46
+    },
+    "wd029-last": {
+     "target": "put the bowl on the plate",
+     "options": {
+      "A": "Open the middle drawer of the cabinet",
+      "B": "Put the bowl on top of the cabinet",
+      "C": "Put the bowl on the plate",
+      "D": "Put the cream cheese in the bowl"
+     },
+     "init_idx": 27
+    }
+   }
+  },
+  {
+   "sid": "wd030",
+   "spans": [
+    {
+     "task": 17,
+     "episode": 524,
+     "start": 0,
+     "end": 102
+    },
+    {
+     "task": 15,
+     "episode": 685,
+     "start": 102,
+     "end": 244
+    },
+    {
+     "task": 16,
+     "episode": 609,
+     "start": 244,
+     "end": 334
+    }
+   ],
+   "targets": {
+    "wd030-present": {
+     "target": "turn on the stove",
+     "options": {
+      "A": "Put the bowl on top of the cabinet",
+      "B": "Turn on the stove",
+      "C": "Put the cream cheese in the bowl",
+      "D": "Put the wine bottle on the rack"
+     },
+     "init_idx": 33
+    },
+    "wd030-first": {
+     "target": "put the bowl on the stove",
+     "options": {
+      "A": "Put the bowl on the stove",
+      "B": "Push the plate to the front of the stove",
+      "C": "Put the wine bottle on the rack",
+      "D": "Turn on the stove"
+     },
+     "init_idx": 24
+    },
+    "wd030-last": {
+     "target": "turn on the stove",
+     "options": {
+      "A": "Put the bowl on the stove",
+      "B": "Put the cream cheese in the bowl",
+      "C": "Turn on the stove",
+      "D": "Push the plate to the front of the stove"
+     },
+     "init_idx": 13
+    }
+   }
+  },
+  {
+   "sid": "wd031",
+   "spans": [
+    {
+     "task": 19,
+     "episode": 410,
+     "start": 0,
+     "end": 131
+    },
+    {
+     "task": 10,
+     "episode": 511,
+     "start": 131,
+     "end": 221
+    },
+    {
+     "task": 16,
+     "episode": 729,
+     "start": 221,
+     "end": 313
+    }
+   ],
+   "targets": {
+    "wd031-present": {
+     "target": "open the middle drawer of the cabinet",
+     "options": {
+      "A": "Put the bowl on top of the cabinet",
+      "B": "Put the cream cheese in the bowl",
+      "C": "Open the top drawer and put the bowl inside",
+      "D": "Open the middle drawer of the cabinet"
+     },
+     "init_idx": 14
+    },
+    "wd031-first": {
+     "target": "open the middle drawer of the cabinet",
+     "options": {
+      "A": "Open the middle drawer of the cabinet",
+      "B": "Put the bowl on the stove",
+      "C": "Turn on the stove",
+      "D": "Put the bowl on the plate"
+     },
+     "init_idx": 29
+    },
+    "wd031-last": {
+     "target": "turn on the stove",
+     "options": {
+      "A": "Turn on the stove",
+      "B": "Put the bowl on the plate",
+      "C": "Open the middle drawer of the cabinet",
+      "D": "Push the plate to the front of the stove"
+     },
+     "init_idx": 45
+    }
+   }
+  },
+  {
+   "sid": "wd032",
+   "spans": [
+    {
+     "task": 17,
+     "episode": 565,
+     "start": 0,
+     "end": 92
+    },
+    {
+     "task": 13,
+     "episode": 393,
+     "start": 92,
+     "end": 184
+    },
+    {
+     "task": 15,
+     "episode": 411,
+     "start": 184,
+     "end": 377
+    }
+   ],
+   "targets": {
+    "wd032-present": {
+     "target": "put the bowl on the stove",
+     "options": {
+      "A": "Put the wine bottle on the rack",
+      "B": "Put the bowl on the stove",
+      "C": "Put the bowl on the plate",
+      "D": "Open the top drawer and put the bowl inside"
+     },
+     "init_idx": 8
+    },
+    "wd032-first": {
+     "target": "put the bowl on the stove",
+     "options": {
+      "A": "Put the bowl on the stove",
+      "B": "Put the bowl on top of the cabinet",
+      "C": "Push the plate to the front of the stove",
+      "D": "Put the cream cheese in the bowl"
+     },
+     "init_idx": 35
+    },
+    "wd032-last": {
+     "target": "push the plate to the front of the stove",
+     "options": {
+      "A": "Put the bowl on the stove",
+      "B": "Push the plate to the front of the stove",
+      "C": "Put the wine bottle on the rack",
+      "D": "Put the cream cheese in the bowl"
+     },
+     "init_idx": 38
+    }
+   }
+  },
+  {
+   "sid": "wd033",
+   "spans": [
+    {
+     "task": 11,
+     "episode": 773,
+     "start": 0,
+     "end": 153
+    },
+    {
+     "task": 15,
+     "episode": 761,
+     "start": 153,
+     "end": 328
+    },
+    {
+     "task": 18,
+     "episode": 630,
+     "start": 328,
+     "end": 427
+    }
+   ],
+   "targets": {
+    "wd033-present": {
+     "target": "push the plate to the front of the stove",
+     "options": {
+      "A": "Turn on the stove",
+      "B": "Push the plate to the front of the stove",
+      "C": "Open the middle drawer of the cabinet",
+      "D": "Put the bowl on the plate"
+     },
+     "init_idx": 13
+    },
+    "wd033-first": {
+     "target": "put the wine bottle on the rack",
+     "options": {
+      "A": "Put the wine bottle on the rack",
+      "B": "Push the plate to the front of the stove",
+      "C": "Open the middle drawer of the cabinet",
+      "D": "Put the bowl on top of the cabinet"
+     },
+     "init_idx": 19
+    },
+    "wd033-last": {
+     "target": "put the bowl on top of the cabinet",
+     "options": {
+      "A": "Push the plate to the front of the stove",
+      "B": "Put the bowl on top of the cabinet",
+      "C": "Put the wine bottle on top of the cabinet",
+      "D": "Put the wine bottle on the rack"
+     },
+     "init_idx": 2
+    }
+   }
+  },
+  {
+   "sid": "wd034",
+   "spans": [
+    {
+     "task": 14,
+     "episode": 385,
+     "start": 0,
+     "end": 90
+    },
+    {
+     "task": 18,
+     "episode": 681,
+     "start": 90,
+     "end": 181
+    },
+    {
+     "task": 11,
+     "episode": 719,
+     "start": 181,
+     "end": 370
+    }
+   ],
+   "targets": {
+    "wd034-present": {
+     "target": "put the wine bottle on the rack",
+     "options": {
+      "A": "Put the wine bottle on the rack",
+      "B": "Put the bowl on the plate",
+      "C": "Push the plate to the front of the stove",
+      "D": "Open the middle drawer of the cabinet"
+     },
+     "init_idx": 7
+    },
+    "wd034-first": {
+     "target": "put the wine bottle on top of the cabinet",
+     "options": {
+      "A": "Put the wine bottle on the rack",
+      "B": "Put the bowl on top of the cabinet",
+      "C": "Open the top drawer and put the bowl inside",
+      "D": "Put the wine bottle on top of the cabinet"
+     },
+     "init_idx": 13
+    },
+    "wd034-last": {
+     "target": "put the wine bottle on the rack",
+     "options": {
+      "A": "Put the wine bottle on the rack",
+      "B": "Put the bowl on top of the cabinet",
+      "C": "Put the wine bottle on top of the cabinet",
+      "D": "Open the middle drawer of the cabinet"
+     },
+     "init_idx": 2
+    }
+   }
+  },
+  {
+   "sid": "wd035",
+   "spans": [
+    {
+     "task": 12,
+     "episode": 534,
+     "start": 0,
+     "end": 188
+    },
+    {
+     "task": 13,
+     "episode": 491,
+     "start": 188,
+     "end": 284
+    },
+    {
+     "task": 17,
+     "episode": 565,
+     "start": 284,
+     "end": 376
+    }
+   ],
+   "targets": {
+    "wd035-present": {
+     "target": "put the cream cheese in the bowl",
+     "options": {
+      "A": "Put the wine bottle on top of the cabinet",
+      "B": "Put the cream cheese in the bowl",
+      "C": "Put the bowl on the plate",
+      "D": "Push the plate to the front of the stove"
+     },
+     "init_idx": 45
+    },
+    "wd035-first": {
+     "target": "open the top drawer and put the bowl inside",
+     "options": {
+      "A": "Open the top drawer and put the bowl inside",
+      "B": "Put the bowl on the stove",
+      "C": "Put the cream cheese in the bowl",
+      "D": "Turn on the stove"
+     },
+     "init_idx": 17
+    },
+    "wd035-last": {
+     "target": "put the bowl on the stove",
+     "options": {
+      "A": "Put the cream cheese in the bowl",
+      "B": "Open the top drawer and put the bowl inside",
+      "C": "Put the bowl on the plate",
+      "D": "Put the bowl on the stove"
+     },
+     "init_idx": 15
+    }
+   }
+  },
+  {
+   "sid": "wd036",
+   "spans": [
+    {
+     "task": 13,
+     "episode": 760,
+     "start": 0,
+     "end": 110
+    },
+    {
+     "task": 14,
+     "episode": 592,
+     "start": 110,
+     "end": 210
+    },
+    {
+     "task": 10,
+     "episode": 621,
+     "start": 210,
+     "end": 302
+    }
+   ],
+   "targets": {
+    "wd036-present": {
+     "target": "put the cream cheese in the bowl",
+     "options": {
+      "A": "Push the plate to the front of the stove",
+      "B": "Put the wine bottle on the rack",
+      "C": "Turn on the stove",
+      "D": "Put the cream cheese in the bowl"
+     },
+     "init_idx": 14
+    },
+    "wd036-first": {
+     "target": "put the cream cheese in the bowl",
+     "options": {
+      "A": "Put the wine bottle on top of the cabinet",
+      "B": "Put the bowl on top of the cabinet",
+      "C": "Put the cream cheese in the bowl",
+      "D": "Put the bowl on the plate"
+     },
+     "init_idx": 43
+    },
+    "wd036-last": {
+     "target": "put the bowl on the plate",
+     "options": {
+      "A": "Put the cream cheese in the bowl",
+      "B": "Put the bowl on the plate",
+      "C": "Put the wine bottle on top of the cabinet",
+      "D": "Push the plate to the front of the stove"
+     },
+     "init_idx": 8
+    }
+   }
+  },
+  {
+   "sid": "wd037",
+   "spans": [
+    {
+     "task": 10,
+     "episode": 582,
+     "start": 0,
+     "end": 80
+    },
+    {
+     "task": 18,
+     "episode": 731,
+     "start": 80,
+     "end": 192
+    },
+    {
+     "task": 15,
+     "episode": 400,
+     "start": 192,
+     "end": 330
+    }
+   ],
+   "targets": {
+    "wd037-present": {
+     "target": "put the bowl on the plate",
+     "options": {
+      "A": "Put the wine bottle on top of the cabinet",
+      "B": "Open the top drawer and put the bowl inside",
+      "C": "Put the bowl on the stove",
+      "D": "Put the bowl on the plate"
+     },
+     "init_idx": 49
+    },
+    "wd037-first": {
+     "target": "put the bowl on the plate",
+     "options": {
+      "A": "Put the bowl on top of the cabinet",
+      "B": "Open the top drawer and put the bowl inside",
+      "C": "Put the bowl on the plate",
+      "D": "Push the plate to the front of the stove"
+     },
+     "init_idx": 22
+    },
+    "wd037-last": {
+     "target": "push the plate to the front of the stove",
+     "options": {
+      "A": "Put the wine bottle on the rack",
+      "B": "Put the bowl on the plate",
+      "C": "Put the bowl on top of the cabinet",
+      "D": "Push the plate to the front of the stove"
+     },
+     "init_idx": 31
+    }
+   }
+  },
+  {
+   "sid": "wd038",
+   "spans": [
+    {
+     "task": 17,
+     "episode": 550,
+     "start": 0,
+     "end": 99
+    },
+    {
+     "task": 14,
+     "episode": 635,
+     "start": 99,
+     "end": 219
+    },
+    {
+     "task": 10,
+     "episode": 727,
+     "start": 219,
+     "end": 306
+    }
+   ],
+   "targets": {
+    "wd038-present": {
+     "target": "put the bowl on the stove",
+     "options": {
+      "A": "Put the bowl on top of the cabinet",
+      "B": "Put the bowl on the stove",
+      "C": "Open the middle drawer of the cabinet",
+      "D": "Push the plate to the front of the stove"
+     },
+     "init_idx": 16
+    },
+    "wd038-first": {
+     "target": "put the bowl on the stove",
+     "options": {
+      "A": "Put the bowl on the stove",
+      "B": "Put the bowl on the plate",
+      "C": "Put the bowl on top of the cabinet",
+      "D": "Put the wine bottle on top of the cabinet"
+     },
+     "init_idx": 24
+    },
+    "wd038-last": {
+     "target": "put the bowl on the plate",
+     "options": {
+      "A": "Put the bowl on the stove",
+      "B": "Put the bowl on the plate",
+      "C": "Put the wine bottle on the rack",
+      "D": "Put the wine bottle on top of the cabinet"
+     },
+     "init_idx": 21
+    }
+   }
+  },
+  {
+   "sid": "wd039",
+   "spans": [
+    {
+     "task": 17,
+     "episode": 616,
+     "start": 0,
+     "end": 96
+    },
+    {
+     "task": 13,
+     "episode": 508,
+     "start": 96,
+     "end": 199
+    },
+    {
+     "task": 14,
+     "episode": 482,
+     "start": 199,
+     "end": 291
+    }
+   ],
+   "targets": {
+    "wd039-present": {
+     "target": "put the bowl on the stove",
+     "options": {
+      "A": "Open the top drawer and put the bowl inside",
+      "B": "Put the bowl on top of the cabinet",
+      "C": "Turn on the stove",
+      "D": "Put the bowl on the stove"
+     },
+     "init_idx": 22
+    },
+    "wd039-first": {
+     "target": "put the bowl on the stove",
+     "options": {
+      "A": "Put the cream cheese in the bowl",
+      "B": "Put the wine bottle on top of the cabinet",
+      "C": "Put the bowl on top of the cabinet",
+      "D": "Put the bowl on the stove"
+     },
+     "init_idx": 2
+    },
+    "wd039-last": {
+     "target": "put the wine bottle on top of the cabinet",
+     "options": {
+      "A": "Put the bowl on the stove",
+      "B": "Put the bowl on top of the cabinet",
+      "C": "Put the wine bottle on top of the cabinet",
+      "D": "Put the cream cheese in the bowl"
+     },
+     "init_idx": 22
+    }
+   }
+  },
+  {
+   "sid": "wd040",
+   "spans": [
+    {
+     "task": 16,
+     "episode": 617,
+     "start": 0,
+     "end": 96
+    },
+    {
+     "task": 12,
+     "episode": 711,
+     "start": 96,
+     "end": 347
+    },
+    {
+     "task": 13,
+     "episode": 492,
+     "start": 347,
+     "end": 433
+    }
+   ],
+   "targets": {
+    "wd040-present": {
+     "target": "open the top drawer and put the bowl inside",
+     "options": {
+      "A": "Put the wine bottle on the rack",
+      "B": "Open the top drawer and put the bowl inside",
+      "C": "Put the wine bottle on top of the cabinet",
+      "D": "Open the middle drawer of the cabinet"
+     },
+     "init_idx": 26
+    },
+    "wd040-first": {
+     "target": "turn on the stove",
+     "options": {
+      "A": "Put the cream cheese in the bowl",
+      "B": "Open the middle drawer of the cabinet",
+      "C": "Open the top drawer and put the bowl inside",
+      "D": "Turn on the stove"
+     },
+     "init_idx": 26
+    },
+    "wd040-last": {
+     "target": "put the cream cheese in the bowl",
+     "options": {
+      "A": "Put the bowl on the plate",
+      "B": "Put the cream cheese in the bowl",
+      "C": "Turn on the stove",
+      "D": "Open the top drawer and put the bowl inside"
+     },
+     "init_idx": 5
+    }
+   }
+  },
+  {
+   "sid": "wd041",
+   "spans": [
+    {
+     "task": 15,
+     "episode": 593,
+     "start": 0,
+     "end": 167
+    },
+    {
+     "task": 13,
+     "episode": 391,
+     "start": 167,
+     "end": 302
+    },
+    {
+     "task": 12,
+     "episode": 494,
+     "start": 302,
+     "end": 501
+    }
+   ],
+   "targets": {
+    "wd041-present": {
+     "target": "open the top drawer and put the bowl inside",
+     "options": {
+      "A": "Put the bowl on the stove",
+      "B": "Open the top drawer and put the bowl inside",
+      "C": "Put the bowl on top of the cabinet",
+      "D": "Open the middle drawer of the cabinet"
+     },
+     "init_idx": 27
+    },
+    "wd041-first": {
+     "target": "push the plate to the front of the stove",
+     "options": {
+      "A": "Put the bowl on top of the cabinet",
+      "B": "Push the plate to the front of the stove",
+      "C": "Open the top drawer and put the bowl inside",
+      "D": "Put the cream cheese in the bowl"
+     },
+     "init_idx": 16
+    },
+    "wd041-last": {
+     "target": "open the top drawer and put the bowl inside",
+     "options": {
+      "A": "Push the plate to the front of the stove",
+      "B": "Put the bowl on the plate",
+      "C": "Put the cream cheese in the bowl",
+      "D": "Open the top drawer and put the bowl inside"
+     },
+     "init_idx": 22
+    }
+   }
+  },
+  {
+   "sid": "wd042",
+   "spans": [
+    {
+     "task": 14,
+     "episode": 475,
+     "start": 0,
+     "end": 92
+    },
+    {
+     "task": 12,
+     "episode": 762,
+     "start": 92,
+     "end": 294
+    },
+    {
+     "task": 17,
+     "episode": 616,
+     "start": 294,
+     "end": 390
+    }
+   ],
+   "targets": {
+    "wd042-present": {
+     "target": "put the wine bottle on top of the cabinet",
+     "options": {
+      "A": "Put the wine bottle on top of the cabinet",
+      "B": "Put the cream cheese in the bowl",
+      "C": "Put the bowl on top of the cabinet",
+      "D": "Push the plate to the front of the stove"
+     },
+     "init_idx": 0
+    },
+    "wd042-first": {
+     "target": "put the wine bottle on top of the cabinet",
+     "options": {
+      "A": "Open the top drawer and put the bowl inside",
+      "B": "Put the bowl on the stove",
+      "C": "Put the wine bottle on top of the cabinet",
+      "D": "Turn on the stove"
+     },
+     "init_idx": 43
+    },
+    "wd042-last": {
+     "target": "put the bowl on the stove",
+     "options": {
+      "A": "Push the plate to the front of the stove",
+      "B": "Open the top drawer and put the bowl inside",
+      "C": "Put the wine bottle on top of the cabinet",
+      "D": "Put the bowl on the stove"
+     },
+     "init_idx": 31
+    }
+   }
+  },
+  {
+   "sid": "wd043",
+   "spans": [
+    {
+     "task": 10,
+     "episode": 803,
+     "start": 0,
+     "end": 97
+    },
+    {
+     "task": 19,
+     "episode": 410,
+     "start": 97,
+     "end": 228
+    },
+    {
+     "task": 14,
+     "episode": 476,
+     "start": 228,
+     "end": 325
+    }
+   ],
+   "targets": {
+    "wd043-present": {
+     "target": "put the wine bottle on top of the cabinet",
+     "options": {
+      "A": "Put the wine bottle on top of the cabinet",
+      "B": "Put the cream cheese in the bowl",
+      "C": "Turn on the stove",
+      "D": "Put the bowl on the stove"
+     },
+     "init_idx": 24
+    },
+    "wd043-first": {
+     "target": "put the bowl on the plate",
+     "options": {
+      "A": "Put the wine bottle on the rack",
+      "B": "Put the wine bottle on top of the cabinet",
+      "C": "Put the bowl on the plate",
+      "D": "Open the middle drawer of the cabinet"
+     },
+     "init_idx": 10
+    },
+    "wd043-last": {
+     "target": "put the wine bottle on top of the cabinet",
+     "options": {
+      "A": "Put the bowl on the plate",
+      "B": "Put the bowl on top of the cabinet",
+      "C": "Open the middle drawer of the cabinet",
+      "D": "Put the wine bottle on top of the cabinet"
+     },
+     "init_idx": 36
+    }
+   }
+  },
+  {
+   "sid": "wd044",
+   "spans": [
+    {
+     "task": 12,
+     "episode": 560,
+     "start": 0,
+     "end": 184
+    },
+    {
+     "task": 15,
+     "episode": 647,
+     "start": 184,
+     "end": 318
+    },
+    {
+     "task": 18,
+     "episode": 630,
+     "start": 318,
+     "end": 417
+    }
+   ],
+   "targets": {
+    "wd044-present": {
+     "target": "push the plate to the front of the stove",
+     "options": {
+      "A": "Open the middle drawer of the cabinet",
+      "B": "Put the wine bottle on top of the cabinet",
+      "C": "Push the plate to the front of the stove",
+      "D": "Turn on the stove"
+     },
+     "init_idx": 9
+    },
+    "wd044-first": {
+     "target": "open the top drawer and put the bowl inside",
+     "options": {
+      "A": "Put the wine bottle on the rack",
+      "B": "Push the plate to the front of the stove",
+      "C": "Open the top drawer and put the bowl inside",
+      "D": "Put the bowl on top of the cabinet"
+     },
+     "init_idx": 42
+    },
+    "wd044-last": {
+     "target": "put the bowl on top of the cabinet",
+     "options": {
+      "A": "Open the top drawer and put the bowl inside",
+      "B": "Put the bowl on top of the cabinet",
+      "C": "Push the plate to the front of the stove",
+      "D": "Put the bowl on the plate"
+     },
+     "init_idx": 33
+    }
+   }
+  },
+  {
+   "sid": "wd045",
+   "spans": [
+    {
+     "task": 12,
+     "episode": 462,
+     "start": 0,
+     "end": 199
+    },
+    {
+     "task": 11,
+     "episode": 739,
+     "start": 199,
+     "end": 354
+    },
+    {
+     "task": 19,
+     "episode": 780,
+     "start": 354,
+     "end": 475
+    }
+   ],
+   "targets": {
+    "wd045-present": {
+     "target": "open the middle drawer of the cabinet",
+     "options": {
+      "A": "Open the middle drawer of the cabinet",
+      "B": "Put the bowl on the stove",
+      "C": "Turn on the stove",
+      "D": "Push the plate to the front of the stove"
+     },
+     "init_idx": 0
+    },
+    "wd045-first": {
+     "target": "open the top drawer and put the bowl inside",
+     "options": {
+      "A": "Put the wine bottle on top of the cabinet",
+      "B": "Open the top drawer and put the bowl inside",
+      "C": "Open the middle drawer of the cabinet",
+      "D": "Put the wine bottle on the rack"
+     },
+     "init_idx": 45
+    },
+    "wd045-last": {
+     "target": "open the middle drawer of the cabinet",
+     "options": {
+      "A": "Put the wine bottle on the rack",
+      "B": "Put the bowl on top of the cabinet",
+      "C": "Open the top drawer and put the bowl inside",
+      "D": "Open the middle drawer of the cabinet"
+     },
+     "init_idx": 42
+    }
+   }
+  },
+  {
+   "sid": "wd046",
+   "spans": [
+    {
+     "task": 19,
+     "episode": 678,
+     "start": 0,
+     "end": 116
+    },
+    {
+     "task": 16,
+     "episode": 406,
+     "start": 116,
+     "end": 200
+    },
+    {
+     "task": 15,
+     "episode": 744,
+     "start": 200,
+     "end": 346
+    }
+   ],
+   "targets": {
+    "wd046-present": {
+     "target": "push the plate to the front of the stove",
+     "options": {
+      "A": "Put the wine bottle on top of the cabinet",
+      "B": "Push the plate to the front of the stove",
+      "C": "Put the bowl on the plate",
+      "D": "Put the wine bottle on the rack"
+     },
+     "init_idx": 43
+    },
+    "wd046-first": {
+     "target": "open the middle drawer of the cabinet",
+     "options": {
+      "A": "Turn on the stove",
+      "B": "Push the plate to the front of the stove",
+      "C": "Open the middle drawer of the cabinet",
+      "D": "Put the bowl on the stove"
+     },
+     "init_idx": 36
+    },
+    "wd046-last": {
+     "target": "push the plate to the front of the stove",
+     "options": {
+      "A": "Turn on the stove",
+      "B": "Open the middle drawer of the cabinet",
+      "C": "Push the plate to the front of the stove",
+      "D": "Put the wine bottle on the rack"
+     },
+     "init_idx": 15
+    }
+   }
+  },
+  {
+   "sid": "wd047",
+   "spans": [
+    {
+     "task": 17,
+     "episode": 544,
+     "start": 0,
+     "end": 102
+    },
+    {
+     "task": 18,
+     "episode": 501,
+     "start": 102,
+     "end": 198
+    },
+    {
+     "task": 11,
+     "episode": 675,
+     "start": 198,
+     "end": 414
+    }
+   ],
+   "targets": {
+    "wd047-present": {
+     "target": "put the bowl on the stove",
+     "options": {
+      "A": "Put the bowl on the stove",
+      "B": "Open the middle drawer of the cabinet",
+      "C": "Put the wine bottle on top of the cabinet",
+      "D": "Turn on the stove"
+     },
+     "init_idx": 48
+    },
+    "wd047-first": {
+     "target": "put the bowl on the stove",
+     "options": {
+      "A": "Put the bowl on the plate",
+      "B": "Put the wine bottle on the rack",
+      "C": "Put the bowl on the stove",
+      "D": "Put the bowl on top of the cabinet"
+     },
+     "init_idx": 0
+    },
+    "wd047-last": {
+     "target": "put the wine bottle on the rack",
+     "options": {
+      "A": "Put the wine bottle on the rack",
+      "B": "Put the bowl on the stove",
+      "C": "Put the bowl on top of the cabinet",
+      "D": "Open the middle drawer of the cabinet"
+     },
+     "init_idx": 49
+    }
+   }
+  },
+  {
+   "sid": "wd048",
+   "spans": [
+    {
+     "task": 16,
+     "episode": 575,
+     "start": 0,
+     "end": 77
+    },
+    {
+     "task": 10,
+     "episode": 679,
+     "start": 77,
+     "end": 173
+    },
+    {
+     "task": 17,
+     "episode": 495,
+     "start": 173,
+     "end": 265
+    }
+   ],
+   "targets": {
+    "wd048-present": {
+     "target": "put the bowl on the stove",
+     "options": {
+      "A": "Open the middle drawer of the cabinet",
+      "B": "Put the cream cheese in the bowl",
+      "C": "Put the bowl on top of the cabinet",
+      "D": "Put the bowl on the stove"
+     },
+     "init_idx": 33
+    },
+    "wd048-first": {
+     "target": "turn on the stove",
+     "options": {
+      "A": "Put the wine bottle on the rack",
+      "B": "Turn on the stove",
+      "C": "Put the bowl on the plate",
+      "D": "Put the bowl on the stove"
+     },
+     "init_idx": 4
+    },
+    "wd048-last": {
+     "target": "put the bowl on the stove",
+     "options": {
+      "A": "Put the bowl on the plate",
+      "B": "Turn on the stove",
+      "C": "Put the bowl on the stove",
+      "D": "Put the bowl on top of the cabinet"
+     },
+     "init_idx": 1
+    }
+   }
+  },
+  {
+   "sid": "wd049",
+   "spans": [
+    {
+     "task": 15,
+     "episode": 606,
+     "start": 0,
+     "end": 126
+    },
+    {
+     "task": 16,
+     "episode": 609,
+     "start": 126,
+     "end": 216
+    },
+    {
+     "task": 12,
+     "episode": 489,
+     "start": 216,
+     "end": 411
+    }
+   ],
+   "targets": {
+    "wd049-present": {
+     "target": "open the top drawer and put the bowl inside",
+     "options": {
+      "A": "Put the wine bottle on the rack",
+      "B": "Put the wine bottle on top of the cabinet",
+      "C": "Put the cream cheese in the bowl",
+      "D": "Open the top drawer and put the bowl inside"
+     },
+     "init_idx": 8
+    },
+    "wd049-first": {
+     "target": "push the plate to the front of the stove",
+     "options": {
+      "A": "Put the bowl on top of the cabinet",
+      "B": "Open the top drawer and put the bowl inside",
+      "C": "Turn on the stove",
+      "D": "Push the plate to the front of the stove"
+     },
+     "init_idx": 11
+    },
+    "wd049-last": {
+     "target": "open the top drawer and put the bowl inside",
+     "options": {
+      "A": "Push the plate to the front of the stove",
+      "B": "Open the top drawer and put the bowl inside",
+      "C": "Put the bowl on the plate",
+      "D": "Turn on the stove"
+     },
+     "init_idx": 16
+    }
+   }
+  },
+  {
+   "sid": "wd050",
+   "spans": [
+    {
+     "task": 15,
+     "episode": 761,
+     "start": 0,
+     "end": 175
+    },
+    {
+     "task": 14,
+     "episode": 430,
+     "start": 175,
+     "end": 274
+    },
+    {
+     "task": 18,
+     "episode": 674,
+     "start": 274,
+     "end": 370
+    }
+   ],
+   "targets": {
+    "wd050-present": {
+     "target": "put the bowl on top of the cabinet",
+     "options": {
+      "A": "Turn on the stove",
+      "B": "Put the bowl on top of the cabinet",
+      "C": "Put the bowl on the plate",
+      "D": "Put the wine bottle on the rack"
+     },
+     "init_idx": 48
+    },
+    "wd050-first": {
+     "target": "push the plate to the front of the stove",
+     "options": {
+      "A": "Put the bowl on top of the cabinet",
+      "B": "Push the plate to the front of the stove",
+      "C": "Put the wine bottle on top of the cabinet",
+      "D": "Put the wine bottle on the rack"
+     },
+     "init_idx": 29
+    },
+    "wd050-last": {
+     "target": "put the bowl on top of the cabinet",
+     "options": {
+      "A": "Put the wine bottle on top of the cabinet",
+      "B": "Put the bowl on top of the cabinet",
+      "C": "Put the bowl on the stove",
+      "D": "Push the plate to the front of the stove"
+     },
+     "init_idx": 34
+    }
+   }
+  },
+  {
+   "sid": "wd051",
+   "spans": [
+    {
+     "task": 11,
+     "episode": 380,
+     "start": 0,
+     "end": 155
+    },
+    {
+     "task": 18,
+     "episode": 452,
+     "start": 155,
+     "end": 248
+    },
+    {
+     "task": 15,
+     "episode": 461,
+     "start": 248,
+     "end": 377
+    }
+   ],
+   "targets": {
+    "wd051-present": {
+     "target": "put the bowl on top of the cabinet",
+     "options": {
+      "A": "Put the bowl on top of the cabinet",
+      "B": "Put the cream cheese in the bowl",
+      "C": "Turn on the stove",
+      "D": "Open the middle drawer of the cabinet"
+     },
+     "init_idx": 32
+    },
+    "wd051-first": {
+     "target": "put the wine bottle on the rack",
+     "options": {
+      "A": "Push the plate to the front of the stove",
+      "B": "Open the top drawer and put the bowl inside",
+      "C": "Put the wine bottle on the rack",
+      "D": "Put the bowl on top of the cabinet"
+     },
+     "init_idx": 46
+    },
+    "wd051-last": {
+     "target": "push the plate to the front of the stove",
+     "options": {
+      "A": "Put the bowl on top of the cabinet",
+      "B": "Put the cream cheese in the bowl",
+      "C": "Push the plate to the front of the stove",
+      "D": "Put the wine bottle on the rack"
+     },
+     "init_idx": 41
+    }
+   }
+  },
+  {
+   "sid": "wd052",
+   "spans": [
+    {
+     "task": 10,
+     "episode": 431,
+     "start": 0,
+     "end": 106
+    },
+    {
+     "task": 14,
+     "episode": 656,
+     "start": 106,
+     "end": 211
+    },
+    {
+     "task": 16,
+     "episode": 800,
+     "start": 211,
+     "end": 290
+    }
+   ],
+   "targets": {
+    "wd052-present": {
+     "target": "turn on the stove",
+     "options": {
+      "A": "Put the cream cheese in the bowl",
+      "B": "Open the top drawer and put the bowl inside",
+      "C": "Turn on the stove",
+      "D": "Put the wine bottle on the rack"
+     },
+     "init_idx": 22
+    },
+    "wd052-first": {
+     "target": "put the bowl on the plate",
+     "options": {
+      "A": "Put the wine bottle on top of the cabinet",
+      "B": "Put the bowl on the plate",
+      "C": "Turn on the stove",
+      "D": "Put the bowl on the stove"
+     },
+     "init_idx": 1
+    },
+    "wd052-last": {
+     "target": "turn on the stove",
+     "options": {
+      "A": "Put the bowl on the plate",
+      "B": "Put the wine bottle on top of the cabinet",
+      "C": "Turn on the stove",
+      "D": "Open the top drawer and put the bowl inside"
+     },
+     "init_idx": 6
+    }
+   }
+  },
+  {
+   "sid": "wd053",
+   "spans": [
+    {
+     "task": 11,
+     "episode": 381,
+     "start": 0,
+     "end": 150
+    },
+    {
+     "task": 10,
+     "episode": 483,
+     "start": 150,
+     "end": 239
+    },
+    {
+     "task": 15,
+     "episode": 733,
+     "start": 239,
+     "end": 402
+    }
+   ],
+   "targets": {
+    "wd053-present": {
+     "target": "push the plate to the front of the stove",
+     "options": {
+      "A": "Push the plate to the front of the stove",
+      "B": "Open the top drawer and put the bowl inside",
+      "C": "Put the bowl on top of the cabinet",
+      "D": "Open the middle drawer of the cabinet"
+     },
+     "init_idx": 30
+    },
+    "wd053-first": {
+     "target": "put the wine bottle on the rack",
+     "options": {
+      "A": "Push the plate to the front of the stove",
+      "B": "Put the wine bottle on the rack",
+      "C": "Put the bowl on the plate",
+      "D": "Put the bowl on the stove"
+     },
+     "init_idx": 41
+    },
+    "wd053-last": {
+     "target": "push the plate to the front of the stove",
+     "options": {
+      "A": "Put the wine bottle on top of the cabinet",
+      "B": "Put the wine bottle on the rack",
+      "C": "Push the plate to the front of the stove",
+      "D": "Put the bowl on the plate"
+     },
+     "init_idx": 2
+    }
+   }
+  },
+  {
+   "sid": "wd054",
+   "spans": [
+    {
+     "task": 12,
+     "episode": 387,
+     "start": 0,
+     "end": 270
+    },
+    {
+     "task": 18,
+     "episode": 398,
+     "start": 270,
+     "end": 370
+    },
+    {
+     "task": 14,
+     "episode": 543,
+     "start": 370,
+     "end": 493
+    }
+   ],
+   "targets": {
+    "wd054-present": {
+     "target": "put the bowl on top of the cabinet",
+     "options": {
+      "A": "Open the middle drawer of the cabinet",
+      "B": "Turn on the stove",
+      "C": "Put the bowl on top of the cabinet",
+      "D": "Put the wine bottle on the rack"
+     },
+     "init_idx": 40
+    },
+    "wd054-first": {
+     "target": "open the top drawer and put the bowl inside",
+     "options": {
+      "A": "Open the top drawer and put the bowl inside",
+      "B": "Put the bowl on top of the cabinet",
+      "C": "Put the wine bottle on top of the cabinet",
+      "D": "Put the bowl on the plate"
+     },
+     "init_idx": 2
+    },
+    "wd054-last": {
+     "target": "put the wine bottle on top of the cabinet",
+     "options": {
+      "A": "Put the bowl on the stove",
+      "B": "Put the wine bottle on top of the cabinet",
+      "C": "Open the top drawer and put the bowl inside",
+      "D": "Put the bowl on top of the cabinet"
+     },
+     "init_idx": 15
+    }
+   }
+  },
+  {
+   "sid": "wd055",
+   "spans": [
+    {
+     "task": 15,
+     "episode": 744,
+     "start": 0,
+     "end": 146
+    },
+    {
+     "task": 13,
+     "episode": 714,
+     "start": 146,
+     "end": 259
+    },
+    {
+     "task": 12,
+     "episode": 627,
+     "start": 259,
+     "end": 443
+    }
+   ],
+   "targets": {
+    "wd055-present": {
+     "target": "open the top drawer and put the bowl inside",
+     "options": {
+      "A": "Put the wine bottle on the rack",
+      "B": "Turn on the stove",
+      "C": "Put the bowl on the stove",
+      "D": "Open the top drawer and put the bowl inside"
+     },
+     "init_idx": 43
+    },
+    "wd055-first": {
+     "target": "push the plate to the front of the stove",
+     "options": {
+      "A": "Put the cream cheese in the bowl",
+      "B": "Open the top drawer and put the bowl inside",
+      "C": "Put the wine bottle on the rack",
+      "D": "Push the plate to the front of the stove"
+     },
+     "init_idx": 32
+    },
+    "wd055-last": {
+     "target": "open the top drawer and put the bowl inside",
+     "options": {
+      "A": "Push the plate to the front of the stove",
+      "B": "Put the bowl on the plate",
+      "C": "Put the cream cheese in the bowl",
+      "D": "Open the top drawer and put the bowl inside"
+     },
+     "init_idx": 49
+    }
+   }
+  },
+  {
+   "sid": "wd056",
+   "spans": [
+    {
+     "task": 12,
+     "episode": 701,
+     "start": 0,
+     "end": 198
+    },
+    {
+     "task": 16,
+     "episode": 613,
+     "start": 198,
+     "end": 288
+    },
+    {
+     "task": 10,
+     "episode": 679,
+     "start": 288,
+     "end": 384
+    }
+   ],
+   "targets": {
+    "wd056-present": {
+     "target": "put the bowl on the plate",
+     "options": {
+      "A": "Put the bowl on top of the cabinet",
+      "B": "Put the bowl on the plate",
+      "C": "Put the cream cheese in the bowl",
+      "D": "Put the wine bottle on top of the cabinet"
+     },
+     "init_idx": 34
+    },
+    "wd056-first": {
+     "target": "open the top drawer and put the bowl inside",
+     "options": {
+      "A": "Open the top drawer and put the bowl inside",
+      "B": "Put the bowl on the plate",
+      "C": "Turn on the stove",
+      "D": "Put the cream cheese in the bowl"
+     },
+     "init_idx": 6
+    },
+    "wd056-last": {
+     "target": "put the bowl on the plate",
+     "options": {
+      "A": "Open the top drawer and put the bowl inside",
+      "B": "Put the bowl on the plate",
+      "C": "Turn on the stove",
+      "D": "Put the cream cheese in the bowl"
+     },
+     "init_idx": 25
+    }
+   }
+  },
+  {
+   "sid": "wd057",
+   "spans": [
+    {
+     "task": 13,
+     "episode": 777,
+     "start": 0,
+     "end": 95
+    },
+    {
+     "task": 17,
+     "episode": 415,
+     "start": 95,
+     "end": 189
+    },
+    {
+     "task": 16,
+     "episode": 520,
+     "start": 189,
+     "end": 268
+    }
+   ],
+   "targets": {
+    "wd057-present": {
+     "target": "put the bowl on the stove",
+     "options": {
+      "A": "Open the middle drawer of the cabinet",
+      "B": "Push the plate to the front of the stove",
+      "C": "Open the top drawer and put the bowl inside",
+      "D": "Put the bowl on the stove"
+     },
+     "init_idx": 15
+    },
+    "wd057-first": {
+     "target": "put the cream cheese in the bowl",
+     "options": {
+      "A": "Push the plate to the front of the stove",
+      "B": "Put the cream cheese in the bowl",
+      "C": "Turn on the stove",
+      "D": "Put the bowl on the stove"
+     },
+     "init_idx": 34
+    },
+    "wd057-last": {
+     "target": "turn on the stove",
+     "options": {
+      "A": "Put the bowl on the stove",
+      "B": "Put the cream cheese in the bowl",
+      "C": "Turn on the stove",
+      "D": "Put the bowl on top of the cabinet"
+     },
+     "init_idx": 46
+    }
+   }
+  },
+  {
+   "sid": "wd058",
+   "spans": [
+    {
+     "task": 16,
+     "episode": 774,
+     "start": 0,
+     "end": 95
+    },
+    {
+     "task": 19,
+     "episode": 678,
+     "start": 95,
+     "end": 211
+    },
+    {
+     "task": 11,
+     "episode": 683,
+     "start": 211,
+     "end": 369
+    }
+   ],
+   "targets": {
+    "wd058-present": {
+     "target": "turn on the stove",
+     "options": {
+      "A": "Put the cream cheese in the bowl",
+      "B": "Open the top drawer and put the bowl inside",
+      "C": "Turn on the stove",
+      "D": "Put the wine bottle on top of the cabinet"
+     },
+     "init_idx": 48
+    },
+    "wd058-first": {
+     "target": "turn on the stove",
+     "options": {
+      "A": "Turn on the stove",
+      "B": "Put the cream cheese in the bowl",
+      "C": "Put the wine bottle on the rack",
+      "D": "Open the middle drawer of the cabinet"
+     },
+     "init_idx": 49
+    },
+    "wd058-last": {
+     "target": "put the wine bottle on the rack",
+     "options": {
+      "A": "Open the top drawer and put the bowl inside",
+      "B": "Open the middle drawer of the cabinet",
+      "C": "Put the wine bottle on the rack",
+      "D": "Turn on the stove"
+     },
+     "init_idx": 18
+    }
+   }
+  },
+  {
+   "sid": "wd059",
+   "spans": [
+    {
+     "task": 16,
+     "episode": 700,
+     "start": 0,
+     "end": 91
+    },
+    {
+     "task": 10,
+     "episode": 621,
+     "start": 91,
+     "end": 183
+    },
+    {
+     "task": 14,
+     "episode": 396,
+     "start": 183,
+     "end": 296
+    }
+   ],
+   "targets": {
+    "wd059-present": {
+     "target": "put the wine bottle on top of the cabinet",
+     "options": {
+      "A": "Put the cream cheese in the bowl",
+      "B": "Put the wine bottle on top of the cabinet",
+      "C": "Open the middle drawer of the cabinet",
+      "D": "Push the plate to the front of the stove"
+     },
+     "init_idx": 8
+    },
+    "wd059-first": {
+     "target": "turn on the stove",
+     "options": {
+      "A": "Open the top drawer and put the bowl inside",
+      "B": "Put the wine bottle on top of the cabinet",
+      "C": "Put the bowl on the plate",
+      "D": "Turn on the stove"
+     },
+     "init_idx": 29
+    },
+    "wd059-last": {
+     "target": "put the wine bottle on top of the cabinet",
+     "options": {
+      "A": "Turn on the stove",
+      "B": "Put the wine bottle on top of the cabinet",
+      "C": "Put the bowl on the plate",
+      "D": "Open the middle drawer of the cabinet"
+     },
+     "init_idx": 10
+    }
+   }
+  },
+  {
+   "sid": "wd060",
+   "spans": [
+    {
+     "task": 12,
+     "episode": 534,
+     "start": 0,
+     "end": 188
+    },
+    {
+     "task": 13,
+     "episode": 391,
+     "start": 188,
+     "end": 323
+    },
+    {
+     "task": 19,
+     "episode": 722,
+     "start": 323,
+     "end": 451
+    }
+   ],
+   "targets": {
+    "wd060-present": {
+     "target": "open the top drawer and put the bowl inside",
+     "options": {
+      "A": "Open the top drawer and put the bowl inside",
+      "B": "Put the bowl on top of the cabinet",
+      "C": "Put the wine bottle on top of the cabinet",
+      "D": "Push the plate to the front of the stove"
+     },
+     "init_idx": 43
+    },
+    "wd060-first": {
+     "target": "open the top drawer and put the bowl inside",
+     "options": {
+      "A": "Put the bowl on top of the cabinet",
+      "B": "Put the cream cheese in the bowl",
+      "C": "Open the top drawer and put the bowl inside",
+      "D": "Open the middle drawer of the cabinet"
+     },
+     "init_idx": 40
+    },
+    "wd060-last": {
+     "target": "open the middle drawer of the cabinet",
+     "options": {
+      "A": "Push the plate to the front of the stove",
+      "B": "Put the cream cheese in the bowl",
+      "C": "Open the middle drawer of the cabinet",
+      "D": "Open the top drawer and put the bowl inside"
+     },
+     "init_idx": 22
+    }
+   }
+  },
+  {
+   "sid": "wd061",
+   "spans": [
+    {
+     "task": 16,
+     "episode": 609,
+     "start": 0,
+     "end": 90
+    },
+    {
+     "task": 17,
+     "episode": 641,
+     "start": 90,
+     "end": 209
+    },
+    {
+     "task": 14,
+     "episode": 419,
+     "start": 209,
+     "end": 308
+    }
+   ],
+   "targets": {
+    "wd061-present": {
+     "target": "put the wine bottle on top of the cabinet",
+     "options": {
+      "A": "Put the wine bottle on the rack",
+      "B": "Put the bowl on the plate",
+      "C": "Open the middle drawer of the cabinet",
+      "D": "Put the wine bottle on top of the cabinet"
+     },
+     "init_idx": 38
+    },
+    "wd061-first": {
+     "target": "turn on the stove",
+     "options": {
+      "A": "Put the wine bottle on top of the cabinet",
+      "B": "Turn on the stove",
+      "C": "Put the bowl on top of the cabinet",
+      "D": "Put the bowl on the stove"
+     },
+     "init_idx": 2
+    },
+    "wd061-last": {
+     "target": "put the wine bottle on top of the cabinet",
+     "options": {
+      "A": "Put the bowl on the stove",
+      "B": "Put the wine bottle on top of the cabinet",
+      "C": "Turn on the stove",
+      "D": "Open the top drawer and put the bowl inside"
+     },
+     "init_idx": 43
+    }
+   }
+  },
+  {
+   "sid": "wd062",
+   "spans": [
+    {
+     "task": 17,
+     "episode": 764,
+     "start": 0,
+     "end": 101
+    },
+    {
+     "task": 15,
+     "episode": 778,
+     "start": 101,
+     "end": 255
+    },
+    {
+     "task": 14,
+     "episode": 470,
+     "start": 255,
+     "end": 362
+    }
+   ],
+   "targets": {
+    "wd062-present": {
+     "target": "put the bowl on the stove",
+     "options": {
+      "A": "Put the bowl on the plate",
+      "B": "Open the middle drawer of the cabinet",
+      "C": "Put the bowl on the stove",
+      "D": "Turn on the stove"
+     },
+     "init_idx": 33
+    },
+    "wd062-first": {
+     "target": "put the bowl on the stove",
+     "options": {
+      "A": "Push the plate to the front of the stove",
+      "B": "Put the bowl on the stove",
+      "C": "Put the wine bottle on top of the cabinet",
+      "D": "Put the cream cheese in the bowl"
+     },
+     "init_idx": 37
+    },
+    "wd062-last": {
+     "target": "put the wine bottle on top of the cabinet",
+     "options": {
+      "A": "Put the bowl on the stove",
+      "B": "Put the wine bottle on top of the cabinet",
+      "C": "Push the plate to the front of the stove",
+      "D": "Put the wine bottle on the rack"
+     },
+     "init_idx": 24
+    }
+   }
+  },
+  {
+   "sid": "wd063",
+   "spans": [
+    {
+     "task": 11,
+     "episode": 539,
+     "start": 0,
+     "end": 179
+    },
+    {
+     "task": 16,
+     "episode": 654,
+     "start": 179,
+     "end": 258
+    },
+    {
+     "task": 15,
+     "episode": 761,
+     "start": 258,
+     "end": 433
+    }
+   ],
+   "targets": {
+    "wd063-present": {
+     "target": "put the wine bottle on the rack",
+     "options": {
+      "A": "Put the wine bottle on the rack",
+      "B": "Put the wine bottle on top of the cabinet",
+      "C": "Put the bowl on the plate",
+      "D": "Put the bowl on the stove"
+     },
+     "init_idx": 35
+    },
+    "wd063-first": {
+     "target": "put the wine bottle on the rack",
+     "options": {
+      "A": "Turn on the stove",
+      "B": "Put the cream cheese in the bowl",
+      "C": "Put the wine bottle on the rack",
+      "D": "Push the plate to the front of the stove"
+     },
+     "init_idx": 10
+    },
+    "wd063-last": {
+     "target": "push the plate to the front of the stove",
+     "options": {
+      "A": "Put the wine bottle on the rack",
+      "B": "Turn on the stove",
+      "C": "Put the wine bottle on top of the cabinet",
+      "D": "Push the plate to the front of the stove"
+     },
+     "init_idx": 25
+    }
+   }
+  },
+  {
+   "sid": "wd064",
+   "spans": [
+    {
+     "task": 19,
+     "episode": 547,
+     "start": 0,
+     "end": 136
+    },
+    {
+     "task": 16,
+     "episode": 628,
+     "start": 136,
+     "end": 228
+    },
+    {
+     "task": 11,
+     "episode": 539,
+     "start": 228,
+     "end": 407
+    }
+   ],
+   "targets": {
+    "wd064-present": {
+     "target": "open the middle drawer of the cabinet",
+     "options": {
+      "A": "Put the cream cheese in the bowl",
+      "B": "Open the top drawer and put the bowl inside",
+      "C": "Put the bowl on top of the cabinet",
+      "D": "Open the middle drawer of the cabinet"
+     },
+     "init_idx": 42
+    },
+    "wd064-first": {
+     "target": "open the middle drawer of the cabinet",
+     "options": {
+      "A": "Put the bowl on the plate",
+      "B": "Put the wine bottle on the rack",
+      "C": "Turn on the stove",
+      "D": "Open the middle drawer of the cabinet"
+     },
+     "init_idx": 45
+    },
+    "wd064-last": {
+     "target": "put the wine bottle on the rack",
+     "options": {
+      "A": "Push the plate to the front of the stove",
+      "B": "Put the wine bottle on the rack",
+      "C": "Open the middle drawer of the cabinet",
+      "D": "Turn on the stove"
+     },
+     "init_idx": 43
+    }
+   }
+  },
+  {
+   "sid": "wd065",
+   "spans": [
+    {
+     "task": 10,
+     "episode": 642,
+     "start": 0,
+     "end": 90
+    },
+    {
+     "task": 13,
+     "episode": 587,
+     "start": 90,
+     "end": 185
+    },
+    {
+     "task": 18,
+     "episode": 597,
+     "start": 185,
+     "end": 275
+    }
+   ],
+   "targets": {
+    "wd065-present": {
+     "target": "put the bowl on the plate",
+     "options": {
+      "A": "Put the wine bottle on the rack",
+      "B": "Put the wine bottle on top of the cabinet",
+      "C": "Put the bowl on the plate",
+      "D": "Push the plate to the front of the stove"
+     },
+     "init_idx": 19
+    },
+    "wd065-first": {
+     "target": "put the bowl on the plate",
+     "options": {
+      "A": "Put the bowl on the stove",
+      "B": "Put the bowl on the plate",
+      "C": "Put the bowl on top of the cabinet",
+      "D": "Put the cream cheese in the bowl"
+     },
+     "init_idx": 14
+    },
+    "wd065-last": {
+     "target": "put the bowl on top of the cabinet",
+     "options": {
+      "A": "Put the bowl on top of the cabinet",
+      "B": "Put the cream cheese in the bowl",
+      "C": "Put the bowl on the plate",
+      "D": "Put the bowl on the stove"
+     },
+     "init_idx": 18
+    }
+   }
+  },
+  {
+   "sid": "wd066",
+   "spans": [
+    {
+     "task": 16,
+     "episode": 605,
+     "start": 0,
+     "end": 93
+    },
+    {
+     "task": 12,
+     "episode": 624,
+     "start": 93,
+     "end": 276
+    },
+    {
+     "task": 11,
+     "episode": 739,
+     "start": 276,
+     "end": 431
+    }
+   ],
+   "targets": {
+    "wd066-present": {
+     "target": "open the top drawer and put the bowl inside",
+     "options": {
+      "A": "Open the top drawer and put the bowl inside",
+      "B": "Put the wine bottle on top of the cabinet",
+      "C": "Put the cream cheese in the bowl",
+      "D": "Put the bowl on top of the cabinet"
+     },
+     "init_idx": 22
+    },
+    "wd066-first": {
+     "target": "turn on the stove",
+     "options": {
+      "A": "Open the middle drawer of the cabinet",
+      "B": "Open the top drawer and put the bowl inside",
+      "C": "Put the wine bottle on the rack",
+      "D": "Turn on the stove"
+     },
+     "init_idx": 7
+    },
+    "wd066-last": {
+     "target": "put the wine bottle on the rack",
+     "options": {
+      "A": "Put the wine bottle on top of the cabinet",
+      "B": "Put the wine bottle on the rack",
+      "C": "Turn on the stove",
+      "D": "Open the top drawer and put the bowl inside"
+     },
+     "init_idx": 21
+    }
+   }
+  },
+  {
+   "sid": "wd067",
+   "spans": [
+    {
+     "task": 17,
+     "episode": 786,
+     "start": 0,
+     "end": 114
+    },
+    {
+     "task": 13,
+     "episode": 650,
+     "start": 114,
+     "end": 261
+    },
+    {
+     "task": 11,
+     "episode": 652,
+     "start": 261,
+     "end": 438
+    }
+   ],
+   "targets": {
+    "wd067-present": {
+     "target": "put the cream cheese in the bowl",
+     "options": {
+      "A": "Put the cream cheese in the bowl",
+      "B": "Open the middle drawer of the cabinet",
+      "C": "Push the plate to the front of the stove",
+      "D": "Turn on the stove"
+     },
+     "init_idx": 32
+    },
+    "wd067-first": {
+     "target": "put the bowl on the stove",
+     "options": {
+      "A": "Put the wine bottle on the rack",
+      "B": "Put the bowl on the stove",
+      "C": "Open the top drawer and put the bowl inside",
+      "D": "Put the cream cheese in the bowl"
+     },
+     "init_idx": 5
+    },
+    "wd067-last": {
+     "target": "put the wine bottle on the rack",
+     "options": {
+      "A": "Put the bowl on the stove",
+      "B": "Put the wine bottle on the rack",
+      "C": "Push the plate to the front of the stove",
+      "D": "Put the cream cheese in the bowl"
+     },
+     "init_idx": 36
+    }
+   }
+  },
+  {
+   "sid": "wd068",
+   "spans": [
+    {
+     "task": 10,
+     "episode": 522,
+     "start": 0,
+     "end": 84
+    },
+    {
+     "task": 16,
+     "episode": 486,
+     "start": 84,
+     "end": 171
+    },
+    {
+     "task": 11,
+     "episode": 595,
+     "start": 171,
+     "end": 341
+    }
+   ],
+   "targets": {
+    "wd068-present": {
+     "target": "put the bowl on the plate",
+     "options": {
+      "A": "Open the top drawer and put the bowl inside",
+      "B": "Put the cream cheese in the bowl",
+      "C": "Put the wine bottle on top of the cabinet",
+      "D": "Put the bowl on the plate"
+     },
+     "init_idx": 0
+    },
+    "wd068-first": {
+     "target": "put the bowl on the plate",
+     "options": {
+      "A": "Put the wine bottle on the rack",
+      "B": "Put the cream cheese in the bowl",
+      "C": "Turn on the stove",
+      "D": "Put the bowl on the plate"
+     },
+     "init_idx": 5
+    },
+    "wd068-last": {
+     "target": "put the wine bottle on the rack",
+     "options": {
+      "A": "Open the middle drawer of the cabinet",
+      "B": "Turn on the stove",
+      "C": "Put the bowl on the plate",
+      "D": "Put the wine bottle on the rack"
+     },
+     "init_idx": 4
+    }
+   }
+  },
+  {
+   "sid": "wd069",
+   "spans": [
+    {
+     "task": 18,
+     "episode": 570,
+     "start": 0,
+     "end": 98
+    },
+    {
+     "task": 12,
+     "episode": 701,
+     "start": 98,
+     "end": 296
+    },
+    {
+     "task": 13,
+     "episode": 650,
+     "start": 296,
+     "end": 443
+    }
+   ],
+   "targets": {
+    "wd069-present": {
+     "target": "open the top drawer and put the bowl inside",
+     "options": {
+      "A": "Put the bowl on the plate",
+      "B": "Open the top drawer and put the bowl inside",
+      "C": "Push the plate to the front of the stove",
+      "D": "Open the middle drawer of the cabinet"
+     },
+     "init_idx": 39
+    },
+    "wd069-first": {
+     "target": "put the bowl on top of the cabinet",
+     "options": {
+      "A": "Put the bowl on top of the cabinet",
+      "B": "Put the cream cheese in the bowl",
+      "C": "Turn on the stove",
+      "D": "Open the top drawer and put the bowl inside"
+     },
+     "init_idx": 21
+    },
+    "wd069-last": {
+     "target": "put the cream cheese in the bowl",
+     "options": {
+      "A": "Put the bowl on top of the cabinet",
+      "B": "Turn on the stove",
+      "C": "Open the top drawer and put the bowl inside",
+      "D": "Put the cream cheese in the bowl"
+     },
+     "init_idx": 45
+    }
+   }
+  },
+  {
+   "sid": "wd070",
+   "spans": [
+    {
+     "task": 11,
+     "episode": 485,
+     "start": 0,
+     "end": 199
+    },
+    {
+     "task": 14,
+     "episode": 668,
+     "start": 199,
+     "end": 306
+    },
+    {
+     "task": 10,
+     "episode": 749,
+     "start": 306,
+     "end": 389
+    }
+   ],
+   "targets": {
+    "wd070-present": {
+     "target": "put the wine bottle on the rack",
+     "options": {
+      "A": "Put the bowl on the stove",
+      "B": "Turn on the stove",
+      "C": "Put the wine bottle on the rack",
+      "D": "Put the cream cheese in the bowl"
+     },
+     "init_idx": 32
+    },
+    "wd070-first": {
+     "target": "put the wine bottle on the rack",
+     "options": {
+      "A": "Put the bowl on the plate",
+      "B": "Put the wine bottle on top of the cabinet",
+      "C": "Put the wine bottle on the rack",
+      "D": "Put the bowl on top of the cabinet"
+     },
+     "init_idx": 30
+    },
+    "wd070-last": {
+     "target": "put the bowl on the plate",
+     "options": {
+      "A": "Put the bowl on the stove",
+      "B": "Put the wine bottle on the rack",
+      "C": "Put the bowl on the plate",
+      "D": "Put the wine bottle on top of the cabinet"
+     },
+     "init_idx": 16
+    }
+   }
+  },
+  {
+   "sid": "wd071",
+   "spans": [
+    {
+     "task": 16,
+     "episode": 499,
+     "start": 0,
+     "end": 93
+    },
+    {
+     "task": 11,
+     "episode": 683,
+     "start": 93,
+     "end": 251
+    },
+    {
+     "task": 15,
+     "episode": 593,
+     "start": 251,
+     "end": 418
+    }
+   ],
+   "targets": {
+    "wd071-present": {
+     "target": "put the wine bottle on the rack",
+     "options": {
+      "A": "Put the wine bottle on top of the cabinet",
+      "B": "Put the wine bottle on the rack",
+      "C": "Open the middle drawer of the cabinet",
+      "D": "Put the bowl on the plate"
+     },
+     "init_idx": 35
+    },
+    "wd071-first": {
+     "target": "turn on the stove",
+     "options": {
+      "A": "Put the wine bottle on the rack",
+      "B": "Push the plate to the front of the stove",
+      "C": "Turn on the stove",
+      "D": "Open the top drawer and put the bowl inside"
+     },
+     "init_idx": 30
+    },
+    "wd071-last": {
+     "target": "push the plate to the front of the stove",
+     "options": {
+      "A": "Push the plate to the front of the stove",
+      "B": "Turn on the stove",
+      "C": "Put the wine bottle on the rack",
+      "D": "Open the top drawer and put the bowl inside"
+     },
+     "init_idx": 41
+    }
+   }
+  },
+  {
+   "sid": "wd072",
+   "spans": [
+    {
+     "task": 17,
+     "episode": 544,
+     "start": 0,
+     "end": 102
+    },
+    {
+     "task": 12,
+     "episode": 576,
+     "start": 102,
+     "end": 272
+    },
+    {
+     "task": 11,
+     "episode": 757,
+     "start": 272,
+     "end": 420
+    }
+   ],
+   "targets": {
+    "wd072-present": {
+     "target": "put the wine bottle on the rack",
+     "options": {
+      "A": "Put the bowl on the plate",
+      "B": "Put the wine bottle on the rack",
+      "C": "Open the middle drawer of the cabinet",
+      "D": "Put the bowl on top of the cabinet"
+     },
+     "init_idx": 21
+    },
+    "wd072-first": {
+     "target": "put the bowl on the stove",
+     "options": {
+      "A": "Put the bowl on the stove",
+      "B": "Put the wine bottle on the rack",
+      "C": "Push the plate to the front of the stove",
+      "D": "Open the top drawer and put the bowl inside"
+     },
+     "init_idx": 12
+    },
+    "wd072-last": {
+     "target": "put the wine bottle on the rack",
+     "options": {
+      "A": "Put the bowl on the stove",
+      "B": "Put the wine bottle on the rack",
+      "C": "Put the bowl on the plate",
+      "D": "Open the top drawer and put the bowl inside"
+     },
+     "init_idx": 46
+    }
+   }
+  },
+  {
+   "sid": "wd073",
+   "spans": [
+    {
+     "task": 15,
+     "episode": 478,
+     "start": 0,
+     "end": 136
+    },
+    {
+     "task": 12,
+     "episode": 758,
+     "start": 136,
+     "end": 345
+    },
+    {
+     "task": 16,
+     "episode": 746,
+     "start": 345,
+     "end": 434
+    }
+   ],
+   "targets": {
+    "wd073-present": {
+     "target": "turn on the stove",
+     "options": {
+      "A": "Put the bowl on the stove",
+      "B": "Put the wine bottle on the rack",
+      "C": "Put the wine bottle on top of the cabinet",
+      "D": "Turn on the stove"
+     },
+     "init_idx": 38
+    },
+    "wd073-first": {
+     "target": "push the plate to the front of the stove",
+     "options": {
+      "A": "Turn on the stove",
+      "B": "Open the top drawer and put the bowl inside",
+      "C": "Put the bowl on the plate",
+      "D": "Push the plate to the front of the stove"
+     },
+     "init_idx": 15
+    },
+    "wd073-last": {
+     "target": "turn on the stove",
+     "options": {
+      "A": "Put the bowl on top of the cabinet",
+      "B": "Open the top drawer and put the bowl inside",
+      "C": "Push the plate to the front of the stove",
+      "D": "Turn on the stove"
+     },
+     "init_idx": 41
+    }
+   }
+  },
+  {
+   "sid": "wd074",
+   "spans": [
+    {
+     "task": 14,
+     "episode": 735,
+     "start": 0,
+     "end": 116
+    },
+    {
+     "task": 15,
+     "episode": 553,
+     "start": 116,
+     "end": 260
+    },
+    {
+     "task": 17,
+     "episode": 524,
+     "start": 260,
+     "end": 362
+    }
+   ],
+   "targets": {
+    "wd074-present": {
+     "target": "push the plate to the front of the stove",
+     "options": {
+      "A": "Push the plate to the front of the stove",
+      "B": "Open the top drawer and put the bowl inside",
+      "C": "Turn on the stove",
+      "D": "Put the cream cheese in the bowl"
+     },
+     "init_idx": 29
+    },
+    "wd074-first": {
+     "target": "put the wine bottle on top of the cabinet",
+     "options": {
+      "A": "Put the bowl on the stove",
+      "B": "Push the plate to the front of the stove",
+      "C": "Put the wine bottle on the rack",
+      "D": "Put the wine bottle on top of the cabinet"
+     },
+     "init_idx": 29
+    },
+    "wd074-last": {
+     "target": "put the bowl on the stove",
+     "options": {
+      "A": "Push the plate to the front of the stove",
+      "B": "Put the wine bottle on top of the cabinet",
+      "C": "Put the bowl on top of the cabinet",
+      "D": "Put the bowl on the stove"
+     },
+     "init_idx": 13
+    }
+   }
+  },
+  {
+   "sid": "wd075",
+   "spans": [
+    {
+     "task": 11,
+     "episode": 773,
+     "start": 0,
+     "end": 153
+    },
+    {
+     "task": 16,
+     "episode": 487,
+     "start": 153,
+     "end": 241
+    },
+    {
+     "task": 18,
+     "episode": 745,
+     "start": 241,
+     "end": 346
+    }
+   ],
+   "targets": {
+    "wd075-present": {
+     "target": "put the wine bottle on the rack",
+     "options": {
+      "A": "Put the wine bottle on the rack",
+      "B": "Open the top drawer and put the bowl inside",
+      "C": "Put the bowl on the stove",
+      "D": "Push the plate to the front of the stove"
+     },
+     "init_idx": 34
+    },
+    "wd075-first": {
+     "target": "put the wine bottle on the rack",
+     "options": {
+      "A": "Turn on the stove",
+      "B": "Put the bowl on top of the cabinet",
+      "C": "Put the wine bottle on the rack",
+      "D": "Push the plate to the front of the stove"
+     },
+     "init_idx": 26
+    },
+    "wd075-last": {
+     "target": "put the bowl on top of the cabinet",
+     "options": {
+      "A": "Turn on the stove",
+      "B": "Put the wine bottle on the rack",
+      "C": "Put the bowl on the plate",
+      "D": "Put the bowl on top of the cabinet"
+     },
+     "init_idx": 37
+    }
+   }
+  },
+  {
+   "sid": "wd076",
+   "spans": [
+    {
+     "task": 18,
+     "episode": 681,
+     "start": 0,
+     "end": 91
+    },
+    {
+     "task": 15,
+     "episode": 603,
+     "start": 91,
+     "end": 279
+    },
+    {
+     "task": 12,
+     "episode": 462,
+     "start": 279,
+     "end": 478
+    }
+   ],
+   "targets": {
+    "wd076-present": {
+     "target": "open the top drawer and put the bowl inside",
+     "options": {
+      "A": "Open the top drawer and put the bowl inside",
+      "B": "Put the cream cheese in the bowl",
+      "C": "Put the wine bottle on top of the cabinet",
+      "D": "Put the wine bottle on the rack"
+     },
+     "init_idx": 14
+    },
+    "wd076-first": {
+     "target": "put the bowl on top of the cabinet",
+     "options": {
+      "A": "Put the bowl on top of the cabinet",
+      "B": "Push the plate to the front of the stove",
+      "C": "Put the bowl on the plate",
+      "D": "Open the top drawer and put the bowl inside"
+     },
+     "init_idx": 4
+    },
+    "wd076-last": {
+     "target": "open the top drawer and put the bowl inside",
+     "options": {
+      "A": "Push the plate to the front of the stove",
+      "B": "Open the top drawer and put the bowl inside",
+      "C": "Put the bowl on top of the cabinet",
+      "D": "Put the cream cheese in the bowl"
+     },
+     "init_idx": 7
+    }
+   }
+  },
+  {
+   "sid": "wd077",
+   "spans": [
+    {
+     "task": 16,
+     "episode": 390,
+     "start": 0,
+     "end": 81
+    },
+    {
+     "task": 12,
+     "episode": 462,
+     "start": 81,
+     "end": 280
+    },
+    {
+     "task": 18,
+     "episode": 794,
+     "start": 280,
+     "end": 388
+    }
+   ],
+   "targets": {
+    "wd077-present": {
+     "target": "open the top drawer and put the bowl inside",
+     "options": {
+      "A": "Put the cream cheese in the bowl",
+      "B": "Open the top drawer and put the bowl inside",
+      "C": "Put the wine bottle on the rack",
+      "D": "Put the bowl on the plate"
+     },
+     "init_idx": 22
+    },
+    "wd077-first": {
+     "target": "turn on the stove",
+     "options": {
+      "A": "Push the plate to the front of the stove",
+      "B": "Turn on the stove",
+      "C": "Open the top drawer and put the bowl inside",
+      "D": "Put the bowl on top of the cabinet"
+     },
+     "init_idx": 21
+    },
+    "wd077-last": {
+     "target": "put the bowl on top of the cabinet",
+     "options": {
+      "A": "Put the wine bottle on top of the cabinet",
+      "B": "Turn on the stove",
+      "C": "Open the top drawer and put the bowl inside",
+      "D": "Put the bowl on top of the cabinet"
+     },
+     "init_idx": 21
+    }
+   }
+  },
+  {
+   "sid": "wd078",
+   "spans": [
+    {
+     "task": 12,
+     "episode": 790,
+     "start": 0,
+     "end": 187
+    },
+    {
+     "task": 15,
+     "episode": 744,
+     "start": 187,
+     "end": 333
+    },
+    {
+     "task": 11,
+     "episode": 408,
+     "start": 333,
+     "end": 517
+    }
+   ],
+   "targets": {
+    "wd078-present": {
+     "target": "push the plate to the front of the stove",
+     "options": {
+      "A": "Put the bowl on the stove",
+      "B": "Open the middle drawer of the cabinet",
+      "C": "Put the bowl on the plate",
+      "D": "Push the plate to the front of the stove"
+     },
+     "init_idx": 31
+    },
+    "wd078-first": {
+     "target": "open the top drawer and put the bowl inside",
+     "options": {
+      "A": "Push the plate to the front of the stove",
+      "B": "Put the wine bottle on top of the cabinet",
+      "C": "Put the wine bottle on the rack",
+      "D": "Open the top drawer and put the bowl inside"
+     },
+     "init_idx": 11
+    },
+    "wd078-last": {
+     "target": "put the wine bottle on the rack",
+     "options": {
+      "A": "Push the plate to the front of the stove",
+      "B": "Put the wine bottle on the rack",
+      "C": "Open the top drawer and put the bowl inside",
+      "D": "Put the cream cheese in the bowl"
+     },
+     "init_idx": 17
+    }
+   }
+  },
+  {
+   "sid": "wd079",
+   "spans": [
+    {
+     "task": 15,
+     "episode": 584,
+     "start": 0,
+     "end": 155
+    },
+    {
+     "task": 18,
+     "episode": 681,
+     "start": 155,
+     "end": 246
+    },
+    {
+     "task": 13,
+     "episode": 600,
+     "start": 246,
+     "end": 348
+    }
+   ],
+   "targets": {
+    "wd079-present": {
+     "target": "push the plate to the front of the stove",
+     "options": {
+      "A": "Put the bowl on the plate",
+      "B": "Open the top drawer and put the bowl inside",
+      "C": "Turn on the stove",
+      "D": "Push the plate to the front of the stove"
+     },
+     "init_idx": 19
+    },
+    "wd079-first": {
+     "target": "push the plate to the front of the stove",
+     "options": {
+      "A": "Put the bowl on top of the cabinet",
+      "B": "Put the bowl on the plate",
+      "C": "Put the cream cheese in the bowl",
+      "D": "Push the plate to the front of the stove"
+     },
+     "init_idx": 10
+    },
+    "wd079-last": {
+     "target": "put the cream cheese in the bowl",
+     "options": {
+      "A": "Turn on the stove",
+      "B": "Put the cream cheese in the bowl",
+      "C": "Put the bowl on top of the cabinet",
+      "D": "Push the plate to the front of the stove"
+     },
+     "init_idx": 26
+    }
+   }
+  }
+ ],
+ "tasks": {
+  "10": "put the bowl on the plate",
+  "11": "put the wine bottle on the rack",
+  "12": "open the top drawer and put the bowl inside",
+  "13": "put the cream cheese in the bowl",
+  "14": "put the wine bottle on top of the cabinet",
+  "15": "push the plate to the front of the stove",
+  "16": "turn on the stove",
+  "17": "put the bowl on the stove",
+  "18": "put the bowl on top of the cabinet",
+  "19": "open the middle drawer of the cabinet"
+ }
+}

@@ -14,8 +14,11 @@ import glob, json, os, random
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 R = os.path.join(HERE, "..", "..", "..", "..", "results", "revision", "C")
-WD = os.environ.get("WD_ROOT", os.path.expanduser("~/libero_watchdo"))
-MODELS = {"Qwen2.5-VL": "wd_qwen25vl", "LLaVA-Video": "wd_llava"}
+V = os.environ.get("WD_VERSION", "v2")   # v1: ~/libero_watchdo, runs wd_*; v2: ~/libero_watchdo2, runs wd2_*
+WD = os.path.expanduser({"v1": "~/libero_watchdo", "v2": "~/libero_watchdo2"}[V])
+TAG = {"v1": "wd", "v2": "wd2"}[V]
+MODELS = {"Qwen2.5-VL": f"{TAG}_qwen25vl", "LLaVA-Video": f"{TAG}_llava"}
+OUT = os.path.join(R, "vla", V)          # choices.jsonl, jobs.jsonl; rollouts are shared in vla/rollouts
 TOTAL = 240
 
 
@@ -62,12 +65,12 @@ def main():
         choices.append(dict(model="-", arm="oracle", uid=u, pred=None, command=t["target"], target=t["target"], init_idx=t["init_idx"]))
         choices.append(dict(model="-", arm="random", uid=u, pred=rand[u], command=t["options"][rand[u]], target=t["target"],
                             init_idx=t["init_idx"]))
-    os.makedirs(os.path.join(R, "vla"), exist_ok=True)
-    with open(os.path.join(R, "vla", "choices.jsonl"), "w") as f:
+    os.makedirs(OUT, exist_ok=True)
+    with open(os.path.join(OUT, "choices.jsonl"), "w") as f:
         for c in choices:
             f.write(json.dumps(c) + "\n")
     jobs = {f'{c["target"]}|{c["command"]}|{c["init_idx"]}': c for c in choices if c["command"]}
-    with open(os.path.join(R, "vla", "jobs.jsonl"), "w") as f:
+    with open(os.path.join(OUT, "jobs.jsonl"), "w") as f:
         for k in sorted(jobs):
             c = jobs[k]; f.write(json.dumps(dict(target=c["target"], command=c["command"], init_idx=c["init_idx"])) + "\n")
     arms = sorted({(c["model"], c["arm"]) for c in choices})
