@@ -1,0 +1,25 @@
+model,pair,diff,lo,hi
+Qwen2.5-VL,full_n64 - oval_n64,-1.667,-5.417,1.667
+Qwen2.5-VL,quest_n64 - full_n64,1.250,-2.500,5.000
+Qwen2.5-VL,quest_n64 - oval_n64,-0.417,-3.750,2.917
+Qwen2.5-VL,freekv_n64 - full_n64,2.083,-2.500,6.667
+Qwen2.5-VL,freekv_n64 - oval_n64,0.417,-3.750,4.167
+Qwen2.5-VL,rekv - full_n64,-1.250,-6.250,3.750
+Qwen2.5-VL,rekv - oval_n64,-2.917,-7.500,1.667
+Qwen2.5-VL,infinipot_2k - full_n64,-2.917,-8.333,2.500
+Qwen2.5-VL,infinipot_2k - oval_n64,-4.583,-10.833,1.250
+Qwen2.5-VL,snapkv_n64 - full_n64,-2.917,-7.500,1.667
+Qwen2.5-VL,snapkv_n64 - oval_n64,-4.583,-9.583,0.000
+Qwen2.5-VL,oval_n64 - full_n64,1.667,-1.667,5.417
+LLaVA-Video,full_n64 - oval_n64,1.250,-2.083,5.000
+LLaVA-Video,quest_n64 - full_n64,2.500,-0.833,6.250
+LLaVA-Video,quest_n64 - oval_n64,3.750,-0.417,8.333
+LLaVA-Video,freekv_n64 - full_n64,0.417,-3.333,4.167
+LLaVA-Video,freekv_n64 - oval_n64,1.667,-2.083,5.417
+LLaVA-Video,rekv - full_n64,-7.917,-11.667,-4.167
+LLaVA-Video,rekv - oval_n64,-6.667,-10.417,-2.917
+LLaVA-Video,infinipot_2k - full_n64,-7.917,-11.667,-4.167
+LLaVA-Video,infinipot_2k - oval_n64,-6.667,-10.833,-2.500
+LLaVA-Video,snapkv_n64 - full_n64,-2.083,-6.250,2.083
+LLaVA-Video,snapkv_n64 - oval_n64,-0.833,-5.000,3.333
+LLaVA-Video,oval_n64 - full_n64,-1.250,-5.000,2.083

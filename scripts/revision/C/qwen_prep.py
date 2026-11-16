@@ -50,23 +50,32 @@ def video_path(vid, src):
     return os.path.join(os.environ.get("LVB_ROOT", os.path.expanduser("~/lvbench")), "videos", vid + ".mp4")
 
 
-def frame_dir(vid, src):
-    base = ROOT if src == "videomme" else os.environ.get("LVB_ROOT", os.path.expanduser("~/lvbench"))
-    return os.path.join(base, "frames_qwen", f"{vid}_n{N}")
+def _base(src):
+    # QWEN_CACHE_ROOT (optional): put frames_qwen/ and qwen_emb/ elsewhere, e.g. the 128-frame
+    # iso-memory runs keep them in /dev/shm and delete them once consumed (disk is full).
+    if os.environ.get("QWEN_CACHE_ROOT"):
+        return os.environ["QWEN_CACHE_ROOT"]
+    return ROOT if src == "videomme" else os.environ.get("LVB_ROOT", os.path.expanduser("~/lvbench"))
+
+
+def frame_dir(vid, src, n=N):
+    return os.path.join(_base(src), "frames_qwen", f"{vid}_n{n}")
 
 
 def emb_path(vid, src, frames=N, vz=0.0):
-    base = ROOT if src == "videomme" else os.environ.get("LVB_ROOT", os.path.expanduser("~/lvbench"))
+    base = _base(src)
     name = vid + ("" if frames == N else f"_n{frames}") + (f"_vz{round(vz * 100)}" if vz else "")
     return os.path.join(base, "qwen_emb", name + ".pt")
 
 
-def extract(vid, src):
-    """64 frames, qwen_vl_utils-style resize, PNG cache. Returns (uint8 T,C,H,W tensor, meta)."""
+def extract(vid, src, n=N):
+    """n (default 64) frames, qwen_vl_utils-style resize, PNG cache. Returns (uint8 T,C,H,W tensor, meta).
+    n = 128 (iso-memory runs) samples np.linspace(0, T-1, 128) directly, not a superset of the 64."""
     import decord
     from torchvision.transforms import InterpolationMode
     from torchvision.transforms import functional as TF
-    d = frame_dir(vid, src)
+    N = n                                   # local: every N below is this cache's frame count
+    d = frame_dir(vid, src, n)
     if not os.path.exists(os.path.join(d, "meta.json")):
         vr = decord.VideoReader(video_path(vid, src), ctx=decord.cpu(0), num_threads=4)
         total, fps = len(vr), vr.get_avg_fps()
@@ -116,13 +125,32 @@ def processor_inputs(proc, fr, meta, text=None, add_generation_prompt=True):
     return prompt, inp
 
 
+MAX_T = 32   # temporal groups per vision-encoder call (= the 64-frame videos, which run in one call)
+
+
+def visual_chunked(visual, pv, thw, fn):
+    """fn(visual, pv, thw) -> tuple of per-token tensors (t-major), run on <= MAX_T temporal groups at a
+    time. Exact up to kernel shapes: every vision block attends only within a temporal group (window
+    blocks within windows, full blocks within cu_seqlens = one group), the vision rotary embedding
+    depends on (h, w) only, and patches/merged tokens are stored t-major. Needed at 128 frames, where
+    HF 4.51's SDPA vision path materialises a dense mask over all patches of the video (OOM)."""
+    t, h, w = (int(x) for x in thw[0])
+    if t <= MAX_T:
+        return fn(visual, pv, thw)
+    outs = []
+    for a in range(0, t, MAX_T):
+        b = min(t, a + MAX_T)
+        outs.append(fn(visual, pv[a * h * w:b * h * w], torch.tensor([[b - a, h, w]], device=thw.device, dtype=thw.dtype)))
+    return tuple(torch.cat(x, 0) for x in zip(*outs))
+
+
 @torch.no_grad()
 def prep(vid, src, proc, model, frames=N, vz=0.0):
     out = emb_path(vid, src, frames, vz)
     if os.path.exists(out):
         return "cached"
-    fr, meta, fh = extract(vid, src)
-    if frames != N:          # N/2 (Tab. 5 row 2): every other cached frame; fps metadata scaled to match
+    fr, meta, fh = extract(vid, src, max(frames, N))
+    if frames < N:          # N/2 (Tab. 5 row 2): every other cached frame; fps metadata scaled to match
         step = N // frames
         assert N % frames == 0
         fr = fr[::step]
@@ -140,9 +168,9 @@ def prep(vid, src, proc, model, frames=N, vz=0.0):
     emb = model.model.embed_tokens(ids)
     if vz:                                  # C3 VisionZip (scripts/revision/C/visionzip.py)
         import visionzip as VZ
-        vis, vz_score, vz_key = VZ.qwen_visual_with_scores(model.visual, pv, thw)
+        vis, vz_score, vz_key = visual_chunked(model.visual, pv, thw, VZ.qwen_visual_with_scores)
     else:
-        vis = model.visual(pv, grid_thw=thw)
+        vis, = visual_chunked(model.visual, pv, thw, lambda m, p, g: (m(p, grid_thw=g),))
     mask = ids[0] == model.config.video_token_id
     assert int(mask.sum()) == vis.shape[0], (int(mask.sum()), vis.shape)
     emb[0, mask] = vis.to(emb.dtype)
@@ -186,7 +214,7 @@ if __name__ == "__main__":
         from concurrent.futures import ProcessPoolExecutor
         def _one(v):
             try:
-                extract(v, a.src); return v, "ok"
+                extract(v, a.src, max(a.frames, N)); return v, "ok"
             except Exception as e:
                 return v, f"ERR {e!r}"
         with ProcessPoolExecutor(a.frames_only) as ex:

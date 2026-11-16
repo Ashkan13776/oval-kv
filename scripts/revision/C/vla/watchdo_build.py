@@ -3,8 +3,14 @@
 Memory phase: a session video of K = 6 DISTINCT LIBERO-Goal tasks (one random demonstration each, from
 lerobot/libero; all 10 Goal tasks share one kitchen scene), played back to back (H.264, 10 fps).
 Instruction (one per question): repeat a task from the video, identified only by its position in the history:
-  first   repeat the task performed first          last    ... performed last
+  first   repeat the task performed first          last    ... performed last   (wrong options: other session
+          tasks; when K < 4, topped up with tasks not in the session)
   after   repeat the task performed right after X  before  ... right before X     (X named by its instruction)
+  present repeat one of the tasks performed (correct = a random session task; the 3 other options are Goal tasks
+          that are NOT in the session)
+v1 (WD_ROOT=~/libero_watchdo): K = 6, types first/last/after/before -- FullKV recall was near chance (31-35%),
+so the closed-loop runs could not separate methods. v2 (WD_ROOT=~/libero_watchdo2): K = 3 (about 21 of the 64
+frames per task), types first/last/present.
 The planner (Qwen2.5-VL / LLaVA-Video, cached query-agnostically under each KV method) picks the command from
 4 options (the correct task + 3 other session tasks, never X); OpenVLA then executes the chosen command in the
 LIBERO simulator from initial state `init_idx` of the TARGET task, and success is the simulator's goal check
@@ -13,7 +19,8 @@ of the target task (watchdo_rollout.py).
 Output in LVBench format (LVB_ROOT=$WD_ROOT) so every LVBench runner works unchanged:
   $WD_ROOT/videos/<sid>.mp4, video_info.meta.jsonl, sessions.json (episode spans, targets, init states).
 
-    python scripts/revision/C/vla/watchdo_build.py --sessions 60
+    python scripts/revision/C/vla/watchdo_build.py --sessions 60                      # v1
+    WD_ROOT=~/libero_watchdo2 python ... --sessions 80 --k 3 --types first,last,present   # v2
 """
 import argparse, json, os, random, sys
 
@@ -32,6 +39,7 @@ def main():
     ap.add_argument("--sessions", type=int, default=60)
     ap.add_argument("--k", type=int, default=6)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--types", default="first,last,after,before")
     a = ap.parse_args()
     rng = random.Random(a.seed)
     e, names = LR.episodes()
@@ -62,13 +70,28 @@ def main():
             targets[uid] = dict(target=N(correct), options=dict(zip("ABCD", [l[4:] for l in o.split("\n")])),
                                 init_idx=rng.randrange(N_INIT))
 
-        add("first", "Now repeat the task the robot performed first.", tasks[0], rng.sample(tasks[1:], 3))
-        add("last", "Now repeat the task the robot performed last.", tasks[-1], rng.sample(tasks[:-1], 3))
-        i = rng.randrange(a.k - 1)
-        add("after", f'Now repeat the task the robot performed right after the task "{N(tasks[i])}".', tasks[i + 1],
+        T = a.types.split(",")
+
+        def fill(others):
+            """3 wrong options: other session tasks first; with K < 4, topped up with tasks not in the session."""
+            w = rng.sample(others, min(3, len(others)))
+            return w + rng.sample([t for t in GOAL if t not in tasks], 3 - len(w))
+
+        if "present" in T:
+            x = rng.choice(tasks)
+            add("present", "Now repeat one of the tasks the robot performed in the video.", x,
+                rng.sample([t for t in GOAL if t not in tasks], 3))
+        if "first" in T:
+          add("first", "Now repeat the task the robot performed first.", tasks[0], fill(tasks[1:]))
+        if "last" in T:
+          add("last", "Now repeat the task the robot performed last.", tasks[-1], fill(tasks[:-1]))
+        if "after" in T:
+          i = rng.randrange(a.k - 1)
+          add("after", f'Now repeat the task the robot performed right after the task "{N(tasks[i])}".', tasks[i + 1],
             rng.sample([t for j, t in enumerate(tasks) if j not in (i, i + 1)], 3))
-        i = rng.randrange(1, a.k)
-        add("before", f'Now repeat the task the robot performed right before the task "{N(tasks[i])}".', tasks[i - 1],
+        if "before" in T:
+          i = rng.randrange(1, a.k)
+          add("before", f'Now repeat the task the robot performed right before the task "{N(tasks[i])}".', tasks[i - 1],
             rng.sample([t for j, t in enumerate(tasks) if j not in (i, i - 1)], 3))
         meta.append(dict(key=sid, type="libero_watchdo", qa=qa, video_info=dict(duration_minutes=cur / 600, frames=cur, fps=10)))
         sessions.append(dict(sid=sid, spans=spans, targets=targets))

@@ -5,7 +5,7 @@ policy ceiling) and random (no memory). Statistics as the video tables: cluster 
 (10,000 draws, seed 0); paired 95% CIs vs FullKV (N) and vs OVAL on the same instructions. An arm with a
 missing rollout is reported as incomplete ("--"), never filled.
 
-    python scripts/revision/C/vla/watchdo_table.py -> results/revision/C/vla/watchdo_{table.md,table.csv,pairs.csv}
+    python scripts/revision/C/vla/watchdo_table.py -> results/revision/C/vla/$WD_VERSION/watchdo_{table.md,table.csv,pairs.csv}
 """
 import csv, glob, json, os, sys
 from collections import defaultdict
@@ -15,6 +15,7 @@ sys.path.insert(0, os.path.join(HERE, ".."))
 from summarize_c import boot
 
 R = os.path.join(HERE, "..", "..", "..", "..", "results", "revision", "C", "vla")
+V = os.environ.get("WD_VERSION", "v2")
 ARMS = ["full_n64", "quest_n64", "freekv_n64", "rekv", "infinipot_2k", "snapkv_n64", "oval_n64"]
 LAB = {"full_n64": "FullKV (N)", "quest_n64": "Quest", "freekv_n64": "FreeKV", "rekv": "ReKV", "infinipot_2k": "InfiniPot-V 2k",
        "snapkv_n64": "SnapKV (upper bound)", "oval_n64": "OVAL", "oracle": "Oracle command", "random": "Random command"}
@@ -27,7 +28,7 @@ def main():
             if l.endswith("\n"):
                 r = json.loads(l); roll[r["key"]] = r["success"]
     ch = defaultdict(dict)
-    for l in open(os.path.join(R, "choices.jsonl")):
+    for l in open(os.path.join(R, V, "choices.jsonl")):
         c = json.loads(l); ch[c["model"], c["arm"]][c["uid"]] = c
     def score(c):
         """(recall, success) for one choice; None if its rollout has not run."""
@@ -65,10 +66,10 @@ def main():
         md.append(f"| {m} | {LAB[a]} | {len(s)} | {f(cell['recall'])} | {f(cell['success'])} | "
                   + " | ".join(f"{diffs[r][0]:+.2f}{sig(diffs[r])}" if r in diffs else "" for r in ("full_n64", "oval_n64")) + " |")
         rows.append([m, a, len(s), *(f"{x:.3f}" for x in cell["recall"]), *(f"{x:.3f}" for x in cell["success"])])
-    open(os.path.join(R, "watchdo_table.md"), "w").write("\n".join(md) + "\n")
-    with open(os.path.join(R, "watchdo_table.csv"), "w", newline="") as fh:
+    open(os.path.join(R, V, "watchdo_table.md"), "w").write("\n".join(md) + "\n")
+    with open(os.path.join(R, V, "watchdo_table.csv"), "w", newline="") as fh:
         w = csv.writer(fh); w.writerow(["model", "arm", "n", "recall", "rlo", "rhi", "success", "slo", "shi"]); w.writerows(rows)
-    with open(os.path.join(R, "watchdo_pairs.csv"), "w", newline="") as fh:
+    with open(os.path.join(R, V, "watchdo_pairs.csv"), "w", newline="") as fh:
         w = csv.writer(fh); w.writerow(["model", "pair", "diff", "lo", "hi"]); w.writerows(pairs)
     print("\n".join(md)); print(len(roll), "rollouts")
 
