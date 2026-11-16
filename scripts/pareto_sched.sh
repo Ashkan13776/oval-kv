@@ -11,19 +11,19 @@
 # without a lock will hand the same cell to two GPUs, which has already
 # happened once on this project.
 #
-# The paths below are those of the machine the Pareto cells ran on (machine C).
+# FREEKV_DIR, LOG and QFILE default to the layout setup.sh creates.
 set -u
 KV_ROOT="${KV_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
-cd /home/shahbaa/kv-compression/vendor/FreeKV/accuracy || exit 1
+cd "${FREEKV_DIR:-$KV_ROOT/third_party/FreeKV}/accuracy" || exit 1
 export PATH=$HOME/miniconda3/envs/freekv/bin:$PATH
 export HF_HOME=$HOME/.cache/huggingface
 export PYTHONUNBUFFERED=1 OVAL_QUANT=0 KVC_MAX_TOKENS=32768
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 PY=$HOME/miniconda3/envs/freekv/bin/python
-LOG=/home/shahbaa/kv-compression/logs
+LOG=${LOG:-$KV_ROOT/logs}; mkdir -p "$LOG"
 OUT="${PARETO_CELLS:-$KV_ROOT/results/pareto_cells}"   # raw Pareto cells: see docs/pareto-baselines.md
 M=ds-r1-qwen-7b; D=MATH50
-Q=${QFILE:-/home/shahbaa/kv-compression/scratchpad/pareto_jobs.txt}
+Q=${QFILE:-$LOG/pareto_jobs.txt}
 LK="$Q.lock"
 SLOTS_PER_GPU=${SLOTS_PER_GPU:-2}
 GPUS=${GPUS:-"0 1 2 3"}
