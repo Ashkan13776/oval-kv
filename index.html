@@ -8,7 +8,7 @@
   <meta property="og:title" content="OVAL: Output-Aware Local Page Bases for KV Cache Compression" />
   <meta property="og:description" content="Page retrieval whose index is also the storage: 53-66% of the full KV cache, on par with FullKV and exact-page retrieval." />
   <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://ashkan-shahbazi.com/oval-kv/assets/teaser.png" />
+  <meta property="og:image" content="http://ashkan-shahbazi.com/oval-kv/assets/teaser.png" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧭</text></svg>" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -19,6 +19,13 @@
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]});"></script>
 
+  <script>
+    try {
+      var t = localStorage.getItem('theme');
+      if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+    } catch (e) {}
+  </script>
+
   <style>
     :root {
       color-scheme: light;
@@ -28,124 +35,172 @@
       --muted: #586272;
       --faint: #8a93a1;
       --rule: #dce1e7;
-      --accent: #b45309;      /* OVAL orange, as in the paper figures */
-      --accent-soft: #fbefe3;
-      --wine: #8e2c43;
-      --steel: #2c6a8a;
+      --grid: #e9edf1;
+      --accent: #c2410c;       /* OVAL */
+      --accent-soft: #fbeee4;
+      --steel: #2c6a8a;        /* FullKV / reference */
       --steel-soft: #e5eff5;
+      --neutral: #9aa3af;      /* other methods */
       --serif: "Newsreader", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
       --sans: "Instrument Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
-      --page: 980px;
+      --page: 1000px;
       --gutter: clamp(16px, 4vw, 40px);
     }
     @media (prefers-color-scheme: dark) {
       :root:not([data-theme="light"]) {
         color-scheme: dark;
         --paper: #11151b; --surface: #171c24; --ink: #e6e9ee; --muted: #a0a9b6;
-        --faint: #6f7987; --rule: #29303b; --accent: #f0a35e; --accent-soft: #2b2016;
-        --wine: #e78ea3; --steel: #80b8d5; --steel-soft: #16252e;
+        --faint: #6f7987; --rule: #29303b; --grid: #222833;
+        --accent: #f0a35e; --accent-soft: #2b2016; --steel: #80b8d5; --steel-soft: #16252e; --neutral: #6f7987;
       }
     }
     :root[data-theme="dark"] {
       color-scheme: dark;
       --paper: #11151b; --surface: #171c24; --ink: #e6e9ee; --muted: #a0a9b6;
-      --faint: #6f7987; --rule: #29303b; --accent: #f0a35e; --accent-soft: #2b2016;
-      --wine: #e78ea3; --steel: #80b8d5; --steel-soft: #16252e;
+      --faint: #6f7987; --rule: #29303b; --grid: #222833;
+      --accent: #f0a35e; --accent-soft: #2b2016; --steel: #80b8d5; --steel-soft: #16252e; --neutral: #6f7987;
     }
     * { box-sizing: border-box; }
-    html { -webkit-text-size-adjust: 100%; }
-    body {
-      margin: 0; background: var(--paper); color: var(--ink);
-      font: 17px/1.6 var(--serif); overflow-x: hidden;
-    }
+    html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font: 17px/1.6 var(--serif); overflow-x: hidden; }
     a { color: var(--steel); text-decoration-thickness: 1px; text-underline-offset: 2px; }
     .wrap { max-width: var(--page); margin: 0 auto; padding: 0 var(--gutter); }
-    header.hero { padding: 56px 0 28px; text-align: center; }
-    .hero h1 {
-      font-weight: 500; font-size: clamp(30px, 5vw, 46px); line-height: 1.15; margin: 0 0 6px;
-      letter-spacing: -0.01em;
+
+    /* nav */
+    nav.top {
+      position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--paper) 88%, transparent);
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom: 1px solid var(--rule);
     }
+    nav.top .wrap { display: flex; align-items: center; gap: 4px; height: 48px; overflow-x: auto; scrollbar-width: none; }
+    nav.top .wrap::-webkit-scrollbar { display: none; }
+    nav.top .brand { font: 600 15px/1 var(--sans); color: var(--accent); text-decoration: none; margin-right: 10px; }
+    nav.top a.l { font: 500 14px/1 var(--sans); color: var(--muted); text-decoration: none; padding: 8px 10px; border-radius: 8px; white-space: nowrap; }
+    nav.top a.l:hover, nav.top a.l.on { color: var(--ink); background: var(--surface); }
+    .theme-toggle { margin-left: auto; flex: none; background: var(--surface); border: 1px solid var(--rule); color: var(--muted); border-radius: 999px; padding: 6px 12px; font: 500 13px/1 var(--sans); cursor: pointer; }
+
+    header.hero { padding: 52px 0 24px; text-align: center; }
+    .hero h1 { font-weight: 500; font-size: clamp(30px, 5vw, 46px); line-height: 1.15; margin: 0 0 18px; letter-spacing: -0.01em; }
     .hero h1 .name { color: var(--accent); }
-    .hero .sub { font-size: clamp(18px, 2.6vw, 23px); color: var(--muted); margin: 0 0 22px; }
     .authors { font: 500 17px/1.5 var(--sans); margin: 0; }
     .authors a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--rule); }
     .affil { font: 15px/1.5 var(--sans); color: var(--muted); margin: 2px 0 22px; }
     .buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
-    .btn {
-      display: inline-flex; align-items: center; gap: 8px; padding: 9px 18px; border-radius: 999px;
-      font: 500 15px/1 var(--sans); text-decoration: none; background: var(--ink); color: var(--paper);
-      border: 1px solid var(--ink);
-    }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 18px; border-radius: 999px; font: 500 15px/1 var(--sans); text-decoration: none; background: var(--ink); color: var(--paper); border: 1px solid var(--ink); }
     .btn.ghost { background: transparent; color: var(--ink); border-color: var(--rule); }
-    .btn[aria-disabled="true"] { opacity: .55; pointer-events: none; }
     .btn svg { width: 16px; height: 16px; fill: currentColor; }
 
-    section { padding: 26px 0; }
-    h2 {
-      font: 600 13px/1 var(--sans); letter-spacing: .12em; text-transform: uppercase;
-      color: var(--faint); margin: 0 0 14px;
-    }
-    h3 { font-weight: 500; font-size: 22px; margin: 26px 0 8px; }
+    section { padding: 30px 0; scroll-margin-top: 56px; }
+    h2 { font: 600 13px/1 var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--faint); margin: 0 0 14px; }
+    h3 { font-weight: 500; font-size: 24px; line-height: 1.25; margin: 0 0 8px; }
     p { margin: 0 0 14px; }
     .lead { font-size: 20px; line-height: 1.55; }
-    .card {
-      background: var(--surface); border: 1px solid var(--rule); border-radius: 14px;
-      padding: clamp(14px, 3vw, 24px);
-    }
+    .muted { color: var(--muted); }
+    .card { background: var(--surface); border: 1px solid var(--rule); border-radius: 14px; padding: clamp(14px, 3vw, 24px); }
+    .card + .card { margin-top: 16px; }
     figure { margin: 0; }
     figure img { width: 100%; height: auto; display: block; border-radius: 8px; background: #fff; }
-    figcaption { font: 14px/1.5 var(--sans); color: var(--muted); margin-top: 10px; }
+    figcaption, .cap { font: 14px/1.5 var(--sans); color: var(--muted); margin-top: 10px; }
 
-    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: 6px 0 0; padding: 0; list-style: none; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: 18px 0 0; padding: 0; list-style: none; }
     .stats li { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 16px 18px; }
-    .stats .num { display: block; font: 500 34px/1.1 var(--serif); color: var(--accent); }
+    .stats .num { display: block; font: 500 34px/1.1 var(--serif); color: var(--accent); font-variant-numeric: tabular-nums; }
     .stats .what { font: 14.5px/1.45 var(--sans); color: var(--muted); }
 
-    .steps { counter-reset: s; list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
-    .steps li { counter-increment: s; position: relative; padding-left: 40px; }
-    .steps li::before {
-      content: counter(s); position: absolute; left: 0; top: 2px; width: 26px; height: 26px; border-radius: 50%;
-      background: var(--accent-soft); color: var(--accent); font: 600 14px/26px var(--sans); text-align: center;
-    }
-    .eq { overflow-x: auto; padding: 4px 0; }
+    /* pipeline stepper */
+    .stepper { display: grid; grid-template-columns: 220px 1fr; gap: 20px; }
+    @media (max-width: 720px) { .stepper { grid-template-columns: 1fr; } }
+    .steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+    @media (max-width: 720px) { .steps { flex-direction: row; overflow-x: auto; } }
+    .steps button { width: 100%; text-align: left; background: transparent; border: 1px solid transparent; border-radius: 10px; padding: 10px 12px; font: 500 15px/1.3 var(--sans); color: var(--muted); cursor: pointer; display: flex; gap: 10px; align-items: center; white-space: nowrap; }
+    .steps button .n { flex: none; width: 24px; height: 24px; border-radius: 50%; background: var(--grid); color: var(--muted); font: 600 13px/24px var(--sans); text-align: center; }
+    .steps button[aria-selected="true"] { background: var(--accent-soft); color: var(--ink); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+    .steps button[aria-selected="true"] .n { background: var(--accent); color: var(--surface); }
+    .step-body h4 { font: 600 17px/1.3 var(--sans); margin: 0 0 8px; }
+    .step-body p { font-size: 16.5px; }
+    .eq { overflow-x: auto; overflow-y: hidden; padding: 2px 0; }
+
+    /* controls */
+    .controls { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; margin-bottom: 14px; }
+    .seg { display: inline-flex; background: var(--paper); border: 1px solid var(--rule); border-radius: 999px; padding: 3px; flex-wrap: wrap; }
+    .seg button { border: 0; background: transparent; color: var(--muted); font: 500 13.5px/1 var(--sans); padding: 7px 12px; border-radius: 999px; cursor: pointer; }
+    .seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+    label.ctl { font: 500 13.5px/1.2 var(--sans); color: var(--muted); display: inline-flex; gap: 10px; align-items: center; }
+    label.ctl output { color: var(--ink); font-variant-numeric: tabular-nums; min-width: 3.5ch; }
+    input[type=range] { accent-color: var(--accent); width: 160px; }
+    select { font: 500 13.5px/1 var(--sans); color: var(--ink); background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 6px 8px; }
+    .linkbtn { border: 1px solid var(--rule); background: var(--surface); color: var(--muted); font: 500 13px/1 var(--sans); padding: 7px 12px; border-radius: 999px; cursor: pointer; }
+
+    /* charts */
+    .chart { position: relative; width: 100%; }
+    .chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+    .chart text { font-family: var(--sans); fill: var(--muted); font-size: 12px; }
+    .chart .lbl { fill: var(--ink); font-size: 12.5px; }
+    .chart .axis line, .chart .axis path { stroke: var(--rule); }
+    .chart .gridline { stroke: var(--grid); }
+    .tip { position: absolute; pointer-events: none; background: var(--ink); color: var(--paper); font: 13px/1.4 var(--sans); padding: 7px 10px; border-radius: 8px; white-space: nowrap; transform: translate(-50%, calc(-100% - 12px)); opacity: 0; transition: opacity .1s; z-index: 5; }
+    .tip.on { opacity: 1; }
+    .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font: 13px/1.3 var(--sans); color: var(--muted); margin: 4px 0 8px; }
+    .legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .sw { width: 11px; height: 11px; border-radius: 50%; display: inline-block; }
+    .sw.line { width: 18px; height: 0; border-top: 2px dashed var(--steel); border-radius: 0; }
+
+    .two { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    @media (max-width: 760px) { .two { grid-template-columns: 1fr; } }
+    .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 12px; }
+    @media (max-width: 560px) { .tiles { grid-template-columns: 1fr; } }
+    .tile { border: 1px solid var(--rule); border-radius: 12px; padding: 12px 14px; }
+    .tile .k { font: 500 12.5px/1.2 var(--sans); color: var(--muted); }
+    .tile .v { font: 500 28px/1.2 var(--serif); font-variant-numeric: tabular-nums; }
+    .tile.ours .v { color: var(--accent); }
+    .membar { height: 14px; border-radius: 4px; background: var(--grid); position: relative; overflow: hidden; margin: 6px 0 2px; }
+    .membar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; transition: width .25s; }
 
     .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-    table { border-collapse: collapse; width: 100%; font: 14.5px/1.4 var(--sans); font-variant-numeric: tabular-nums; }
+    table { border-collapse: collapse; width: 100%; font: 14px/1.4 var(--sans); font-variant-numeric: tabular-nums; }
     th, td { padding: 7px 10px; text-align: right; border-bottom: 1px solid var(--rule); white-space: nowrap; }
     th:first-child, td:first-child { text-align: left; }
     thead th { color: var(--muted); font-weight: 500; }
     tr.ours td { background: var(--accent-soft); font-weight: 600; }
     tr.ref td { color: var(--muted); }
-    td.best { font-weight: 700; }
+    details.tbl { margin-top: 10px; font: 14px/1.4 var(--sans); }
+    details.tbl summary { cursor: pointer; color: var(--muted); }
     .note { font: 13.5px/1.5 var(--sans); color: var(--faint); margin-top: 8px; }
-    .two { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-    @media (max-width: 760px) { .two { grid-template-columns: 1fr; } }
 
-    pre.bib {
-      background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 16px;
-      overflow-x: auto; font: 13.5px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; margin: 0;
-    }
-    .copy { float: right; font: 500 13px/1 var(--sans); background: none; border: 1px solid var(--rule); color: var(--muted); border-radius: 999px; padding: 6px 12px; cursor: pointer; }
+    pre.bib { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 16px; overflow-x: auto; font: 13.5px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; margin: 0; }
+    .copy { position: absolute; top: 10px; right: 10px; font: 500 13px/1 var(--sans); background: var(--surface); border: 1px solid var(--rule); color: var(--muted); border-radius: 999px; padding: 6px 12px; cursor: pointer; }
     footer { padding: 30px 0 50px; font: 14px/1.5 var(--sans); color: var(--faint); text-align: center; }
-    .theme-toggle { position: fixed; top: 14px; right: 14px; background: var(--surface); border: 1px solid var(--rule); color: var(--muted); border-radius: 999px; padding: 6px 12px; font: 500 13px/1 var(--sans); cursor: pointer; }
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; } html { scroll-behavior: auto; } }
   </style>
 </head>
 <body>
-  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode">Theme</button>
+  <nav class="top" aria-label="Sections">
+    <div class="wrap">
+      <a class="brand" href="#top">OVAL</a>
+      <a class="l" href="#idea">Idea</a>
+      <a class="l" href="#how">How it works</a>
+      <a class="l" href="#playground">Playground</a>
+      <a class="l" href="#memory">Memory</a>
+      <a class="l" href="#results">Results</a>
+      <a class="l" href="#bibtex">BibTeX</a>
+      <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode">Theme</button>
+    </div>
+  </nav>
 
-  <header class="hero">
+  <header class="hero" id="top">
     <div class="wrap">
       <h1><span class="name">OVAL</span>: Output-Aware Local Page Bases<br />for KV Cache Compression</h1>
       <p class="authors">
-        <a href="https://ashkan-shahbazi.com/">Ashkan Shahbazi</a>,&nbsp;
-        Chayne Thrash,&nbsp;
-        Soheil Kolouri
+        <a href="http://ashkan-shahbazi.com/">Ashkan Shahbazi</a>,&nbsp; Chayne Thrash,&nbsp; Soheil Kolouri
       </p>
       <p class="affil">Vanderbilt University</p>
       <div class="buttons">
-        <a class="btn" href="#" aria-disabled="true" id="paper-link">
+        <a class="btn" href="https://arxiv.org/abs/2610.06686">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h9l5 5v15H6zm8 1.5V8h4.5zM8 12h8v1.5H8zm0 3h8v1.5H8zm0 3h5v1.5H8z"/></svg>
-          Paper (arXiv, soon)
+          arXiv
+        </a>
+        <a class="btn" href="https://arxiv.org/pdf/2610.06686">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16l-5-5h3V4h4v7h3zm-7 2h14v2H5z"/></svg>
+          PDF
         </a>
         <a class="btn" href="https://github.com/Ashkan13776/oval-kv">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.37-3.87-1.37-.53-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.71 1.26 3.37.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.69 5.39-5.25 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z"/></svg>
@@ -160,13 +215,13 @@
     <section>
       <figure class="card">
         <img src="assets/teaser.png" alt="Left: page retrieval stores exact pages plus a key summary, while OVAL stores each page as an output-aware key basis and a value basis, scores pages from the key basis and rebuilds the selected ones. Right: OVAL on a cached LIBERO robot episode, selecting mostly the frames of the task that was asked about." />
-        <figcaption><strong>(a)</strong> Page retrieval (e.g. Quest, FreeKV) stores every exact page plus a key summary and loads the top-scoring pages. OVAL stores each page as two low-rank bases: an output-aware key basis, which is also the retrieval index, and a PCA value basis. The selected pages are rebuilt from the bases. <strong>(b)</strong> OVAL on a cached LIBERO robot episode: asked about the first task, it selects mostly that task's frames, and OpenVLA executes the answer successfully.</figcaption>
+        <figcaption><strong>(a)</strong> Page retrieval (e.g. Quest, FreeKV) stores every exact page plus a key summary and loads the top-scoring pages. OVAL stores each page as two low-rank bases: an output-aware key basis, which is also the retrieval index, and a PCA value basis. <strong>(b)</strong> OVAL on a cached LIBERO robot episode: asked about the first task, it selects mostly that task's frames, and OpenVLA executes the answer successfully.</figcaption>
       </figure>
     </section>
 
-    <section>
-      <h2>TL;DR</h2>
-      <p class="lead">Page-retrieval sparse attention reads only a few KV pages per step, but still stores every page exactly, plus a digest. OVAL makes the digest <em>be</em> the page: each page is kept only as low-rank bases that both score it and rebuild it, so retrieval shrinks the cache instead of growing it.</p>
+    <section id="idea">
+      <h2>The idea in one paragraph</h2>
+      <p class="lead">Page-retrieval sparse attention reads only a few KV pages per step, but it still stores every page exactly, plus a digest for scoring. OVAL asks: <em>can the index itself be the storage?</em> It keeps each page only as low-rank bases that both score the page and rebuild it, so retrieval shrinks the cache instead of growing it.</p>
       <ul class="stats">
         <li><span class="num">53&ndash;66%</span><span class="what">of the full KV cache stored, versus 101&ndash;103% for page-retrieval baselines</span></li>
         <li><span class="num">8 / 9</span><span class="what">long-reasoning settings where OVAL is best or tied-best in avg@8 at the same attended budget</span></li>
@@ -175,93 +230,154 @@
       </ul>
     </section>
 
-    <section>
-      <h2>Abstract</h2>
-      <p>Long-context decoding, whether over long reasoning traces, long videos, or robot episodes, is increasingly limited by the memory of the key-value (KV) cache. Page-retrieval sparse attention makes each decoding step cheaper by attending only to the top-scoring KV pages. However, it still stores every page exactly, and adds a small digest per page for scoring, so the cache ends up slightly <em>larger</em> than the full cache.</p>
-      <p>We propose OVAL, which stores each page as a pair of output-aware low-rank bases that act as both the retrieval index and the storage. A key basis scores the page and rebuilds its keys when the page is selected, and a PCA basis rebuilds its values. The exact pages can then be dropped, and nothing extra is added to the cache.</p>
-      <p>The key idea is that the key basis should be output-aware. A low-rank error in the keys perturbs the attention output at first order, but perturbs the page mass that retrieval ranks only at second order in expectation. OVAL therefore builds the key basis from a mix of key geometry (key PCA) and the attention-output error, with a per-head mixing weight set in closed form.</p>
-      <p>At the same attended budget, OVAL is best or tied-best in eight of nine long-reasoning settings. It matches FullKV on MATH500 with 66% of its memory, is 1.25 points above the best baseline on AIME24 with 56%, and is on par with FullKV on LongBench v2. On Video-MME and LVBench, it is within 0.32 points of exact-page retrieval at the same read, while storing 53% of the full cache instead of 103%. Its savings also stack with quantization and token pruning: with 4-bit bases, it is within 0.25 points of FullKV at 41% of its memory.</p>
-    </section>
-
-    <section>
+    <section id="how">
       <h2>How it works</h2>
-      <div class="card">
-        <ol class="steps">
-          <li><strong>Build the bases once per page.</strong> When a page of \(m\) tokens is complete, OVAL centers its keys \(X\) and values \(Y\), and keeps a rank-\(r\) key basis and a rank-\(r_v\) PCA value basis. The exact keys and values are dropped.</li>
-          <li><strong>Make the key basis output-aware.</strong> The key basis spans the top-\(r\) eigenvectors of a mix of key energy and attention-output error, where \(G_h\) is the head's output projection metric:
-            <div class="eq">$$M_\eta=(1-\eta)\,\frac{X^\top X}{\operatorname{tr}(X^\top X)}+\eta\,\frac{X^\top Y G_h Y^\top X}{\operatorname{tr}(X^\top Y G_h Y^\top X)}.$$</div>
-            \(\eta=0\) is page-local key PCA; \(\eta=1\) keeps the directions that move the output most.</li>
-          <li><strong>Set \(\eta\) per head in closed form.</strong> Measure each head's output error at \(\eta=0\) and \(\eta=1\) on a few unlabeled calibration traces, and take the minimizer of the interpolated quadratic. No sweep and no labels; decode cost is unchanged.</li>
-          <li><strong>Score, select, rebuild.</strong> At each step, a page's score is the log attention mass of its reconstructed keys, at \(O(dr+mr)\) per page. Only the top \(n_p\) pages are rebuilt and attended, together with exact sink and recent tokens.</li>
+      <div class="card stepper">
+        <ol class="steps" role="tablist" aria-label="OVAL pipeline">
+          <li><button role="tab" aria-selected="true" data-step="0"><span class="n">1</span>Store</button></li>
+          <li><button role="tab" aria-selected="false" data-step="1"><span class="n">2</span>Why output-aware</button></li>
+          <li><button role="tab" aria-selected="false" data-step="2"><span class="n">3</span>Mix the two errors</button></li>
+          <li><button role="tab" aria-selected="false" data-step="3"><span class="n">4</span>Pick &eta; per head</button></li>
+          <li><button role="tab" aria-selected="false" data-step="4"><span class="n">5</span>Score &amp; rebuild</button></li>
         </ol>
+        <div class="step-body" role="tabpanel" aria-live="polite">
+          <div data-panel="0">
+            <h4>Store each page as two low-rank bases</h4>
+            <p>When a page of \(m\) tokens is complete, OVAL centers its keys \(X\) and values \(Y\) and keeps a rank-\(r\) key basis \((\mu_P, B_P, C_P)\) and a rank-\(r_v\) PCA value basis \((\nu_P, D_P, T_P)\). The exact keys and values are dropped. At our ranks (\(m=32\), \(r=8\), \(r_v=16\), \(d=128\)), the two bases take half the memory of the exact page.</p>
+          </div>
+          <div data-panel="1" hidden>
+            <h4>Retrieval and attention care about different errors</h4>
+            <p>A low-rank key basis perturbs the within-page logits by \(e_B(q)\). Near uniform within-page attention, the two quantities we care about react very differently:</p>
+            <div class="eq">$$\underbrace{f(z)-f(\widehat z_B)\approx\tfrac1m\,Y^\top e_B(q)}_{\text{output: first order}}\qquad \underbrace{\ell_P-\widehat\ell_P\approx\tfrac1{2m}\lVert e_B(q)\rVert^2}_{\text{page mass: second order}}$$</div>
+            <p>So a basis that only preserves keys can rank pages well and still rebuild them poorly. To serve as storage, the basis has to see the values.</p>
+          </div>
+          <div data-panel="2" hidden>
+            <h4>Mix key energy and output error</h4>
+            <p>Both errors are quadratic risks in the basis, so OVAL mixes them, each normalized by its total energy (\(G_h\) is the head's output-projection metric):</p>
+            <div class="eq">$$M_\eta=(1-\eta)\,\frac{X^\top X}{\operatorname{tr}(X^\top X)}+\eta\,\frac{X^\top Y G_h Y^\top X}{\operatorname{tr}(X^\top Y G_h Y^\top X)}$$</div>
+            <p>By Ky Fan, the best basis spans the top-\(r\) eigenvectors of \(M_\eta\). \(\eta=0\) is page-local key PCA; \(\eta=1\) keeps the directions that move the output most. Try it in the <a href="#playground">playground</a> below.</p>
+          </div>
+          <div data-panel="3" hidden>
+            <h4>A closed-form rule for &eta;, per head</h4>
+            <p>Run a few unlabeled calibration traces at \(\eta=0\) and \(\eta=1\), record each head's residual-stream output errors \(\Delta^{(0)}, \Delta^{(1)}\), and interpolate. With \(a=\sum\lVert\Delta^{(0)}\rVert^2\), \(b=\sum\lVert\Delta^{(1)}\rVert^2\), \(c=\sum\langle\Delta^{(0)},\Delta^{(1)}\rangle\):</p>
+            <div class="eq">$$\eta_h=\operatorname{clip}_{[0,1]}\!\left(\frac{a-c}{a+b-2c}\right)$$</div>
+            <p>No sweep and no labels. Since \(\eta\) only enters the basis construction, decode cost is unchanged.</p>
+          </div>
+          <div data-panel="4" hidden>
+            <h4>Score from the basis, rebuild only what is selected</h4>
+            <p>Each page is scored by the log attention mass of its reconstructed keys, at \(O(dr+mr)\) per page instead of \(O(md)\):</p>
+            <div class="eq">$$s_i(P)=\frac{\mu_P^\top q_i}{\sqrt d}+\operatorname{LSE}\!\Big(\frac{C_P(B_P^\top q_i)}{\sqrt d}\Big)$$</div>
+            <p>Each KV head keeps the top \(n_p\) pages, rebuilds their keys and values from the bases, and attends over them together with exact sink and recent tokens.</p>
+          </div>
+        </div>
       </div>
     </section>
 
-    <section>
+    <section id="playground">
+      <h2>Playground: one toy page</h2>
+      <h3>Watch the basis turn toward the output</h3>
+      <p class="muted">A page of 12 tokens with 2-D keys and scalar values, compressed to a rank-1 key basis. Most key energy lies along one direction, but the values change along the other. Move &eta; and see which direction the basis keeps, and what that does to the attention output and the page mass that retrieval ranks. Everything is computed live in your browser over 400 random queries.</p>
+      <div class="card">
+        <div class="controls">
+          <label class="ctl">&eta; <input type="range" id="pg-eta" min="0" max="1" step="0.01" value="0" /> <output id="pg-eta-out">0.00</output></label>
+          <label class="ctl">query scale <input type="range" id="pg-scale" min="0.3" max="3" step="0.05" value="1" /> <output id="pg-scale-out">1.00</output></label>
+          <button class="linkbtn" id="pg-rule" type="button">Jump to closed-form &eta;</button>
+          <button class="linkbtn" id="pg-new" type="button">New page</button>
+        </div>
+        <div class="two">
+          <div>
+            <div class="legend"><span><i class="sw" style="background:var(--accent)"></i>key basis direction</span><span><i class="sw" style="background:var(--neutral)"></i>key PCA (&eta; = 0)</span><span>dot shade = value</span></div>
+            <div class="chart" id="pg-keys"></div>
+          </div>
+          <div>
+            <div class="legend"><span><i class="sw" style="background:var(--accent)"></i>output error</span><span><i class="sw" style="background:var(--steel)"></i>page-mass error</span></div>
+            <div class="chart" id="pg-curve"></div>
+          </div>
+        </div>
+        <p class="cap" id="pg-readout"></p>
+      </div>
+    </section>
+
+    <section id="memory">
+      <h2>Memory calculator</h2>
+      <h3>How much cache does OVAL keep?</h3>
+      <p class="muted">Per page and KV head, a rank-\(r\) basis with its coefficients costs \((dr+mr+d)\cdot 2\) bytes in FP16, against \(md\cdot 2\) bytes for exact keys or values. Pick a model and a context length.</p>
+      <div class="card">
+        <div class="controls">
+          <label class="ctl">Model
+            <select id="mc-model">
+              <option value="28,4">Qwen2.5-7B / R1-Distill Qwen-7B</option>
+              <option value="32,8">Llama-3.1-8B / R1-Distill Llama-8B</option>
+              <option value="48,8">Qwen2.5-14B / R1-Distill Qwen-14B</option>
+            </select>
+          </label>
+          <label class="ctl">context <input type="range" id="mc-ctx" min="12" max="17" step="1" value="15" /> <output id="mc-ctx-out">32K</output></label>
+          <label class="ctl">key rank \(r\)
+            <select id="mc-r"><option>4</option><option selected>8</option><option>16</option></select>
+          </label>
+          <label class="ctl">value rank \(r_v\)
+            <select id="mc-rv"><option>4</option><option>8</option><option selected>16</option></select>
+          </label>
+        </div>
+        <div class="tiles">
+          <div class="tile"><div class="k">FullKV (FP16)</div><div class="v" id="mc-full">&ndash;</div>
+            <div class="membar"><i id="mc-full-bar" style="background:var(--steel);width:100%"></i></div></div>
+          <div class="tile ours"><div class="k">OVAL bases (FP16)</div><div class="v" id="mc-oval">&ndash;</div>
+            <div class="membar"><i id="mc-oval-bar" style="background:var(--accent)"></i></div></div>
+          <div class="tile"><div class="k">Share of FullKV</div><div class="v" id="mc-share">&ndash;</div>
+            <div class="note" id="mc-split" style="margin:4px 0 0"></div></div>
+        </div>
+        <p class="note">Per sequence, 32-token pages, \(d=128\). This counts only the paged cache: the paper's measured 53&ndash;66% also includes the exact sink and recent windows. Quantizing the bases multiplies the savings (see results).</p>
+      </div>
+    </section>
+
+    <section id="results">
       <h2>Results</h2>
 
       <h3>Long reasoning</h3>
-      <p>DeepSeek-R1-Distill models on MATH500, AIME24 and GPQA, in FreeKV's exact setting and harness (avg@8, %, mean of the three tasks). Baselines and FullKV are as reported by FreeKV.</p>
-      <div class="card table-scroll">
-        <table>
-          <thead><tr><th>Model</th><th>FullKV</th><th>Razor</th><th>RaaS</th><th>Quest</th><th>ArkVale</th><th>ShadowKV</th><th>InfiniGen</th><th>FreeKV</th><th>OVAL</th></tr></thead>
-          <tbody>
-            <tr><td>R1-Distill Llama-8B</td><td>51.36</td><td>41.58</td><td>44.08</td><td>47.81</td><td>49.64</td><td>44.33</td><td>46.61</td><td>51.83</td><td class="best">52.92</td></tr>
-            <tr><td>R1-Distill Qwen-7B</td><td>54.72</td><td>44.89</td><td>47.72</td><td>51.42</td><td>50.14</td><td>47.33</td><td>49.61</td><td class="best">54.14</td><td>53.06</td></tr>
-            <tr><td>R1-Distill Qwen-14B</td><td>63.25</td><td>43.58</td><td>52.58</td><td>58.94</td><td>60.42</td><td>58.00</td><td>55.00</td><td>62.56</td><td class="best">64.06</td></tr>
-          </tbody>
-        </table>
-        <p class="note">Bold: best among the compressed methods (FullKV not ranked). Per-task numbers, pass@8 and standard errors are in the paper.</p>
+      <p class="muted">DeepSeek-R1-Distill models in FreeKV's exact setting and harness, at the same attended budget. Baselines and FullKV as reported by FreeKV.</p>
+      <div class="card">
+        <div class="controls">
+          <div class="seg" id="rs-model" role="group" aria-label="Model">
+            <button aria-pressed="true" data-v="llama8">Llama-8B</button><button aria-pressed="false" data-v="qwen7">Qwen-7B</button><button aria-pressed="false" data-v="qwen14">Qwen-14B</button>
+          </div>
+          <div class="seg" id="rs-task" role="group" aria-label="Task">
+            <button aria-pressed="false" data-v="0">MATH500</button><button aria-pressed="false" data-v="1">AIME24</button><button aria-pressed="false" data-v="2">GPQA</button><button aria-pressed="true" data-v="3">Average</button>
+          </div>
+        </div>
+        <div class="legend"><span><i class="sw" style="background:var(--accent)"></i>OVAL (&plusmn; SE, 8 seeds)</span><span><i class="sw" style="background:var(--neutral)"></i>baselines</span><span><i class="sw line"></i>FullKV</span></div>
+        <div class="chart" id="rs-chart"></div>
+        <p class="cap">avg@8 (%). OVAL is best or tied-best in 8 of the 9 model&ndash;task cells; its one miss is Qwen-7B on AIME24, which rises to 55.42 with rank-16 keys.</p>
       </div>
 
-      <h3>Accuracy versus memory, and decode latency</h3>
-      <figure class="card">
-        <img src="assets/efficiency.png" alt="Three panels: accuracy versus retained KV memory on AIME24, mean decode latency, and per-token latency along a 16K-token generation." loading="lazy" />
-        <figcaption><strong>(a)</strong> AIME24 with R1-Distill Qwen-14B: OVAL stores 56% of FullKV's memory and is 1.25 points above FreeKV; with KIVI-style quantization, OVAL variants form the Pareto front. <strong>(b, c)</strong> Decode latency on a 16K-token generation in FreeKV's engine: 40 and 47 ms per token on Qwen-7B and Llama-8B, within 12% of FreeKV (36 and 42 ms) and 1.8&times; and 3.0&times; faster than ArkVale.</figcaption>
-      </figure>
-
-      <h3>Long context</h3>
-      <div class="card table-scroll">
-        <table>
-          <thead><tr><th>Model</th><th>FullKV</th><th>Quest</th><th>ShadowKV</th><th>FreeKV</th><th>OVAL</th></tr></thead>
-          <tbody>
-            <tr><td>Llama-3.1-8B Instruct</td><td>29.22</td><td>28.43</td><td>25.45</td><td>29.22</td><td class="best">30.02</td></tr>
-            <tr><td>Qwen2.5-7B Instruct</td><td>27.44</td><td>27.63</td><td>25.84</td><td>26.84</td><td class="best">29.82</td></tr>
-            <tr><td>Qwen2.5-14B Instruct</td><td>33.40</td><td>33.80</td><td>34.79</td><td>34.19</td><td class="best">34.99</td></tr>
-          </tbody>
-        </table>
-        <p class="note">LongBench v2 overall accuracy (%, 64K context, single run). All seven baselines and LongGenBench results are in the paper.</p>
+      <div class="card">
+        <figure>
+          <img src="assets/efficiency.png" alt="Three panels: accuracy versus retained KV memory on AIME24, mean decode latency, and per-token latency along a 16K-token generation." loading="lazy" />
+          <figcaption><strong>(a)</strong> AIME24 with R1-Distill Qwen-14B: OVAL stores 56% of FullKV's memory and is 1.25 points above FreeKV; with KIVI-style quantization, OVAL variants form the Pareto front. <strong>(b, c)</strong> Decode latency on a 16K-token generation in FreeKV's engine: 40 and 47 ms per token on Qwen-7B and Llama-8B, within 12% of FreeKV (36 and 42 ms) and 1.8&times; and 3.0&times; faster than ArkVale.</figcaption>
+        </figure>
       </div>
 
-      <h3>Video and robot episodes</h3>
-      <p>64-frame videos (about 13K visual tokens) are cached before the question. Quest, FreeKV and OVAL all read 2048 tokens per step, but OVAL attends rebuilt pages and stores about half as much.</p>
-      <div class="card table-scroll">
-        <table>
-          <thead>
-            <tr><th rowspan="2">Method</th><th rowspan="2">Stored</th><th colspan="2" style="text-align:center">Video-MME</th><th colspan="2" style="text-align:center">LVBench</th><th colspan="2" style="text-align:center">Watch-and-Do</th></tr>
-            <tr><th>Qwen2.5-VL</th><th>LLaVA-Video</th><th>Qwen2.5-VL</th><th>LLaVA-Video</th><th>Qwen2.5-VL</th><th>LLaVA-Video</th></tr>
-          </thead>
-          <tbody>
-            <tr class="ref"><td>FullKV</td><td>100%</td><td>63.70</td><td>62.89</td><td>41.25</td><td>41.64</td><td>40.83</td><td>32.08</td></tr>
-            <tr><td>InfiniPot-V</td><td>16&ndash;20%</td><td>58.63</td><td>58.56</td><td>36.60</td><td>38.99</td><td>37.92</td><td>24.17</td></tr>
-            <tr><td>ReKV</td><td>100%</td><td>59.85</td><td>59.70</td><td>37.38</td><td>39.70</td><td>39.58</td><td>24.17</td></tr>
-            <tr><td>Quest</td><td>103%</td><td>63.04</td><td>61.81</td><td>38.99</td><td>41.32</td><td>42.08</td><td>34.58</td></tr>
-            <tr><td>FreeKV</td><td>103%</td><td>62.52</td><td>61.44</td><td>38.48</td><td>42.16</td><td>42.92</td><td>32.50</td></tr>
-            <tr class="ours"><td>OVAL</td><td>53%</td><td>61.93</td><td>61.37</td><td>39.70</td><td>40.87</td><td>42.50</td><td>30.83</td></tr>
-          </tbody>
-        </table>
-        <p class="note">Accuracy (%) on Video-MME and LVBench and OpenVLA task success (%) on LIBERO Watch-and-Do. Stored: share of FullKV's KV cache. On average OVAL is within 0.32 and 0.18 points of Quest and FreeKV, and both paired intervals contain zero.</p>
+      <h3 style="margin-top:32px">Video understanding</h3>
+      <p class="muted">64-frame videos (about 13K visual tokens) cached before the question. Hover a point for details.</p>
+      <div class="card">
+        <div class="controls">
+          <div class="seg" id="vd-bench" role="group" aria-label="Benchmark">
+            <button aria-pressed="true" data-v="vmme">Video-MME</button><button aria-pressed="false" data-v="lvb">LVBench</button>
+          </div>
+          <div class="seg" id="vd-model" role="group" aria-label="Model">
+            <button aria-pressed="true" data-v="0">Qwen2.5-VL</button><button aria-pressed="false" data-v="1">LLaVA-Video</button>
+          </div>
+        </div>
+        <div class="legend"><span><i class="sw" style="background:var(--accent)"></i>OVAL</span><span><i class="sw" style="background:var(--neutral)"></i>reads &asymp;2K tokens / step</span><span><i class="sw" style="border:2px solid var(--neutral);background:transparent"></i>prunes tokens (reads all it stores)</span><span><i class="sw" style="background:var(--steel)"></i>FullKV</span></div>
+        <div class="chart" id="vd-chart"></div>
+        <p class="cap">Quest, FreeKV and OVAL read the same 2048 tokens per step; OVAL stores about half as much and is within 0.32 and 0.18 points of them on average (both paired intervals contain zero). Pruning methods sit lower on storage but read everything they keep, 3.4&times; more per step.</p>
       </div>
-      <figure class="card" style="margin-top:16px">
-        <img src="assets/vision_pareto.png" alt="Accuracy versus stored KV cache on Video-MME, LVBench and Watch-and-Do for both video LLMs." loading="lazy" />
-        <figcaption>Accuracy versus stored KV cache. Among methods that read about 2K tokens per step, OVAL is the only one below full storage within 1.8 points of FullKV.</figcaption>
-      </figure>
 
-      <h3>Composes with quantization</h3>
+      <h3 style="margin-top:32px">Composes with quantization</h3>
       <div class="two">
         <div class="card table-scroll">
           <table>
-            <thead><tr><th>MATH500, Qwen-7B</th><th>Memory (KiB)</th><th>avg@8</th></tr></thead>
+            <thead><tr><th>MATH500, Qwen-7B</th><th>KiB</th><th>avg@8</th></tr></thead>
             <tbody>
               <tr class="ref"><td>FullKV</td><td>1873</td><td>71.75</td></tr>
               <tr><td>FreeKV, FP16</td><td>1923</td><td>70.00</td></tr>
@@ -272,9 +388,9 @@
             </tbody>
           </table>
         </div>
-        <div class="card table-scroll">
+        <div class="card table-scroll" style="margin-top:0">
           <table>
-            <thead><tr><th>AIME24, Qwen-14B</th><th>Memory (KiB)</th><th>avg@8</th></tr></thead>
+            <thead><tr><th>AIME24, Qwen-14B</th><th>KiB</th><th>avg@8</th></tr></thead>
             <tbody>
               <tr class="ref"><td>FullKV</td><td>5050</td><td>66.25</td></tr>
               <tr><td>FreeKV, FP16</td><td>5200</td><td>64.17</td></tr>
@@ -286,50 +402,383 @@
           </table>
         </div>
       </div>
-      <p class="note">Stored KiB per KV head and layer, with KIVI-style quantization of OVAL's bases and coefficients. Quantization lowers the bits per element and OVAL the elements per page, so the savings multiply.</p>
+      <p class="note">Stored KiB per KV head and layer, KIVI-style quantization of OVAL's bases and coefficients. Quantization lowers the bits per element and OVAL the elements per page, so the savings multiply.</p>
+
+      <h3 style="margin-top:32px">Long context</h3>
+      <div class="card table-scroll">
+        <table>
+          <thead><tr><th>LongBench v2, overall</th><th>FullKV</th><th>Quest</th><th>ShadowKV</th><th>FreeKV</th><th>OVAL</th></tr></thead>
+          <tbody>
+            <tr><td>Llama-3.1-8B Instruct</td><td>29.22</td><td>28.43</td><td>25.45</td><td>29.22</td><td><strong>30.02</strong></td></tr>
+            <tr><td>Qwen2.5-7B Instruct</td><td>27.44</td><td>27.63</td><td>25.84</td><td>26.84</td><td><strong>29.82</strong></td></tr>
+            <tr><td>Qwen2.5-14B Instruct</td><td>33.40</td><td>33.80</td><td>34.79</td><td>34.19</td><td><strong>34.99</strong></td></tr>
+          </tbody>
+        </table>
+        <p class="note">Accuracy (%, 64K context, single run). All seven baselines and the LongGenBench results are in the paper.</p>
+      </div>
     </section>
 
     <section id="bibtex">
       <h2>BibTeX</h2>
+      <div style="position:relative">
       <button class="copy" type="button" id="copy-bib">Copy</button>
       <pre class="bib" id="bib">@article{shahbazi2026oval,
   title   = {{OVAL}: Output-Aware Local Page Bases for {KV} Cache Compression},
   author  = {Shahbazi, Ashkan and Thrash, Chayne and Kolouri, Soheil},
-  journal = {arXiv preprint},
+  journal = {arXiv preprint arXiv:2610.06686},
   year    = {2026}
 }</pre>
+      </div>
     </section>
   </main>
 
   <footer>
     <div class="wrap">
-      <a href="https://ashkan-shahbazi.com/">Ashkan Shahbazi</a> &middot; MINT Lab, Vanderbilt University &middot;
+      <a href="http://ashkan-shahbazi.com/">Ashkan Shahbazi</a> &middot; MINT Lab, Vanderbilt University &middot;
       <a href="https://github.com/Ashkan13776/oval-kv">github.com/Ashkan13776/oval-kv</a>
     </div>
   </footer>
 
+  <div class="tip" id="tip"></div>
+
   <script>
-    (function () {
-      var root = document.documentElement;
-      try {
-        var t = localStorage.getItem('theme');
-        if (t === 'light' || t === 'dark') root.setAttribute('data-theme', t);
-      } catch (e) {}
-      document.getElementById('theme-toggle').addEventListener('click', function () {
-        var dark = root.getAttribute('data-theme') === 'dark' ||
-          (!root.getAttribute('data-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
-        var next = dark ? 'light' : 'dark';
-        root.setAttribute('data-theme', next);
-        try { localStorage.setItem('theme', next); } catch (e) {}
+  (function () {
+    'use strict';
+    var root = document.documentElement;
+    var NS = 'http://www.w3.org/2000/svg';
+    function css(v) { return getComputedStyle(root).getPropertyValue(v).trim(); }
+    function el(tag, attrs, parent, text) {
+      var e = document.createElementNS(NS, tag);
+      for (var k in attrs) if (attrs[k] != null) e.setAttribute(k, attrs[k]);
+      if (text != null) e.textContent = text;
+      if (parent) parent.appendChild(e);
+      return e;
+    }
+    function svg(container, w, h) {
+      container.innerHTML = '';
+      return el('svg', { viewBox: '0 0 ' + w + ' ' + h, role: 'img' }, container);
+    }
+    var tip = document.getElementById('tip');
+    function showTip(container, x, y, html, w) {
+      var r = container.getBoundingClientRect(), s = r.width / w;
+      tip.innerHTML = html;
+      tip.style.left = (r.left + window.scrollX + x * s) + 'px';
+      tip.style.top = (r.top + window.scrollY + y * s) + 'px';
+      tip.classList.add('on');
+    }
+    function hideTip() { tip.classList.remove('on'); }
+    function segGroup(id, onChange) {
+      var g = document.getElementById(id);
+      g.addEventListener('click', function (ev) {
+        var b = ev.target.closest('button'); if (!b) return;
+        g.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+        onChange(b.getAttribute('data-v'));
       });
-      document.getElementById('copy-bib').addEventListener('click', function () {
-        var btn = this;
-        navigator.clipboard.writeText(document.getElementById('bib').textContent).then(function () {
-          btn.textContent = 'Copied';
-          setTimeout(function () { btn.textContent = 'Copy'; }, 1500);
+      return function () { return g.querySelector('[aria-pressed="true"]').getAttribute('data-v'); };
+    }
+
+    /* ---------- theme ---------- */
+    var redraws = [];
+    document.getElementById('theme-toggle').addEventListener('click', function () {
+      var dark = root.getAttribute('data-theme') === 'dark' ||
+        (!root.getAttribute('data-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      var next = dark ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      try { localStorage.setItem('theme', next); } catch (e) {}
+      redraws.forEach(function (f) { f(); });
+    });
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () { redraws.forEach(function (f) { f(); }); });
+
+    /* ---------- nav highlight ---------- */
+    var navLinks = document.querySelectorAll('nav.top a.l');
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        if (e.isIntersecting) navLinks.forEach(function (a) { a.classList.toggle('on', a.getAttribute('href') === '#' + e.target.id); });
+      });
+    }, { rootMargin: '-45% 0px -50% 0px' });
+    ['idea', 'how', 'playground', 'memory', 'results', 'bibtex'].forEach(function (id) { io.observe(document.getElementById(id)); });
+
+    /* ---------- stepper ---------- */
+    var stepBtns = document.querySelectorAll('.steps button');
+    stepBtns.forEach(function (b) {
+      b.addEventListener('click', function () {
+        var i = b.getAttribute('data-step');
+        stepBtns.forEach(function (x) { x.setAttribute('aria-selected', x === b ? 'true' : 'false'); });
+        document.querySelectorAll('[data-panel]').forEach(function (p) { p.hidden = p.getAttribute('data-panel') !== i; });
+      });
+    });
+
+    /* ---------- playground ---------- */
+    var seed = 7;
+    function rand() { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }
+    function gauss() { var u = rand() || 1e-9, v = rand(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+    var M = 12, NQ = 400, page, queries;
+    function newPage() {
+      // keys: large spread along a tilted "energy" axis, small spread along the value axis
+      var th = (rand() - 0.5) * 0.8, ex = [Math.cos(th), Math.sin(th)], ey = [-ex[1], ex[0]];
+      var keys = [], vals = [];
+      for (var t = 0; t < M; t++) {
+        var a = gauss() * 2.2, b = gauss() * 0.75;
+        keys.push([a * ex[0] + b * ey[0], a * ex[1] + b * ey[1]]);
+        vals.push(1.6 * b + 0.25 * gauss());
+      }
+      var mk = [0, 0], mv = 0;
+      keys.forEach(function (k) { mk[0] += k[0] / M; mk[1] += k[1] / M; });
+      vals.forEach(function (v) { mv += v / M; });
+      page = { X: keys.map(function (k) { return [k[0] - mk[0], k[1] - mk[1]]; }), Y: vals.map(function (v) { return v - mv; }) };
+      queries = [];
+      for (var i = 0; i < NQ; i++) queries.push([gauss(), gauss()]);
+    }
+    function basisDir(eta) {
+      var X = page.X, Y = page.Y, K = [[0, 0], [0, 0]], u = [0, 0];
+      X.forEach(function (x, t) {
+        K[0][0] += x[0] * x[0]; K[0][1] += x[0] * x[1]; K[1][1] += x[1] * x[1];
+        u[0] += x[0] * Y[t]; u[1] += x[1] * Y[t];
+      });
+      K[1][0] = K[0][1];
+      var O = [[u[0] * u[0], u[0] * u[1]], [u[0] * u[1], u[1] * u[1]]];
+      var tk = K[0][0] + K[1][1], to = O[0][0] + O[1][1] || 1e-12;
+      var a = (1 - eta) * K[0][0] / tk + eta * O[0][0] / to,
+          b = (1 - eta) * K[0][1] / tk + eta * O[0][1] / to,
+          d = (1 - eta) * K[1][1] / tk + eta * O[1][1] / to;
+      var lam = (a + d) / 2 + Math.sqrt(((a - d) / 2) * ((a - d) / 2) + b * b);
+      var v = Math.abs(b) > 1e-12 ? [b, lam - a] : (a >= d ? [1, 0] : [0, 1]);
+      var n = Math.hypot(v[0], v[1]); return [v[0] / n, v[1] / n];
+    }
+    function errors(eta, scale) {
+      var B = basisDir(eta), X = page.X, Y = page.Y, so = 0, sm = 0, deltas = [];
+      for (var i = 0; i < NQ; i++) {
+        var q = [queries[i][0] * scale, queries[i][1] * scale];
+        var z = [], zh = [], mz = -1e9, mh = -1e9;
+        for (var t = 0; t < M; t++) {
+          var zt = X[t][0] * q[0] + X[t][1] * q[1];
+          var p = X[t][0] * B[0] + X[t][1] * B[1];
+          var zht = p * (B[0] * q[0] + B[1] * q[1]);
+          z.push(zt); zh.push(zht); if (zt > mz) mz = zt; if (zht > mh) mh = zht;
+        }
+        var s = 0, sh = 0, o = 0, oh = 0;
+        for (t = 0; t < M; t++) { var e1 = Math.exp(z[t] - mz), e2 = Math.exp(zh[t] - mh); s += e1; sh += e2; o += e1 * Y[t]; oh += e2 * Y[t]; }
+        var dOut = o / s - oh / sh, dMass = (mz + Math.log(s)) - (mh + Math.log(sh));
+        so += dOut * dOut; sm += dMass * dMass; deltas.push(dOut);
+      }
+      return { out: so / NQ, mass: sm / NQ, B: B, deltas: deltas };
+    }
+    var etaIn = document.getElementById('pg-eta'), scaleIn = document.getElementById('pg-scale');
+    var curve, ruleEta;
+    function computeCurve() {
+      var sc = +scaleIn.value, pts = [];
+      for (var i = 0; i <= 40; i++) { var e = i / 40, r = errors(e, sc); pts.push({ eta: e, out: r.out, mass: r.mass }); }
+      var o0 = pts[0].out || 1e-12, m0 = pts[0].mass || 1e-12;
+      pts.forEach(function (p) { p.outN = p.out / o0; p.massN = p.mass / m0; });
+      var d0 = errors(0, sc).deltas, d1 = errors(1, sc).deltas, a = 0, b = 0, c = 0;
+      for (i = 0; i < NQ; i++) { a += d0[i] * d0[i]; b += d1[i] * d1[i]; c += d0[i] * d1[i]; }
+      var den = a + b - 2 * c; ruleEta = den > 1e-12 ? Math.min(1, Math.max(0, (a - c) / den)) : 0;
+      curve = pts;
+    }
+    function drawKeys() {
+      var W = 420, H = 320, c = document.getElementById('pg-keys'), s = svg(c, W, H);
+      var cx = W / 2, cy = H / 2, k = 34, eta = +etaIn.value;
+      el('line', { x1: 20, y1: cy, x2: W - 20, y2: cy, class: 'gridline' }, s);
+      el('line', { x1: cx, y1: 16, x2: cx, y2: H - 16, class: 'gridline' }, s);
+      var B0 = basisDir(0), B = basisDir(eta), L = 150;
+      el('line', { x1: cx - B0[0] * L, y1: cy + B0[1] * L, x2: cx + B0[0] * L, y2: cy - B0[1] * L, stroke: css('--neutral'), 'stroke-width': 2, 'stroke-dasharray': '5 4', 'stroke-linecap': 'round' }, s);
+      el('line', { x1: cx - B[0] * L, y1: cy + B[1] * L, x2: cx + B[0] * L, y2: cy - B[1] * L, stroke: css('--accent'), 'stroke-width': 3, 'stroke-linecap': 'round' }, s);
+      var vmax = Math.max.apply(null, page.Y.map(Math.abs)) || 1;
+      page.X.forEach(function (x, t) {
+        var px = cx + x[0] * k, py = cy - x[1] * k;
+        // projection onto the basis (what the stored keys become)
+        var p = x[0] * B[0] + x[1] * B[1], qx = cx + p * B[0] * k, qy = cy - p * B[1] * k;
+        el('line', { x1: px, y1: py, x2: qx, y2: qy, stroke: css('--rule'), 'stroke-width': 1 }, s);
+        var f = (page.Y[t] / vmax + 1) / 2; // 0..1
+        var g = el('circle', { cx: px, cy: py, r: 6.5, fill: 'color-mix(in srgb, ' + css('--steel') + ' ' + Math.round(15 + 85 * f) + '%, ' + css('--surface') + ')', stroke: css('--surface'), 'stroke-width': 2 }, s);
+        var hit = el('circle', { cx: px, cy: py, r: 12, fill: 'transparent' }, s);
+        hit.addEventListener('mouseenter', function () { showTip(c, px, py, 'token ' + (t + 1) + ' &middot; value ' + page.Y[t].toFixed(2), W); });
+        hit.addEventListener('mouseleave', hideTip);
+      });
+      el('text', { x: 20, y: H - 6 }, s, 'thin lines: each key projected onto the basis');
+    }
+    function drawCurve() {
+      var W = 420, H = 320, ml = 40, mr = 16, mt = 14, mb = 40, c = document.getElementById('pg-curve'), s = svg(c, W, H);
+      var all = []; curve.forEach(function (p) { all.push(p.outN, p.massN); });
+      var lmin = Math.log10(Math.min(0.5, Math.min.apply(null, all) * 0.8)), lmax = Math.log10(Math.max(2, Math.max.apply(null, all) * 1.25));
+      function X(e) { return ml + e * (W - ml - mr); }
+      function Y(v) { return mt + (1 - (Math.log10(v) - lmin) / (lmax - lmin)) * (H - mt - mb); }
+      [0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100].forEach(function (g) {
+        var lg = Math.log10(g); if (lg < lmin || lg > lmax) return;
+        el('line', { x1: ml, x2: W - mr, y1: Y(g), y2: Y(g), class: 'gridline', stroke: g === 1 ? css('--faint') : null }, s);
+        el('text', { x: ml - 6, y: Y(g) + 4, 'text-anchor': 'end' }, s, '\u00d7' + g);
+      });
+      [0, 0.25, 0.5, 0.75, 1].forEach(function (e) { el('text', { x: X(e), y: H - mb + 18, 'text-anchor': 'middle' }, s, e); });
+      el('text', { x: (ml + W - mr) / 2, y: H - 4, 'text-anchor': 'middle' }, s, '\u03b7');
+      el('text', { x: ml, y: mt - 2 }, s, 'error relative to key PCA (\u03b7 = 0), log scale');
+      function path(key, color) {
+        var d = curve.map(function (p, i) { return (i ? 'L' : 'M') + X(p.eta).toFixed(1) + ',' + Y(p[key]).toFixed(1); }).join('');
+        el('path', { d: d, fill: 'none', stroke: color, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, s);
+      }
+      path('massN', css('--steel')); path('outN', css('--accent'));
+      el('line', { x1: X(ruleEta), x2: X(ruleEta), y1: mt, y2: H - mb, stroke: css('--faint'), 'stroke-dasharray': '3 4' }, s);
+      el('text', { x: X(ruleEta) + (ruleEta > 0.7 ? -4 : 4), y: mt + 12, 'text-anchor': ruleEta > 0.7 ? 'end' : 'start' }, s, 'closed-form \u03b7 = ' + ruleEta.toFixed(2));
+      var eta = +etaIn.value, i = Math.round(eta * 40), p = curve[i];
+      el('line', { x1: X(eta), x2: X(eta), y1: mt, y2: H - mb, stroke: css('--ink'), 'stroke-width': 1 }, s);
+      el('circle', { cx: X(eta), cy: Y(p.outN), r: 5, fill: css('--accent'), stroke: css('--surface'), 'stroke-width': 2 }, s);
+      el('circle', { cx: X(eta), cy: Y(p.massN), r: 5, fill: css('--steel'), stroke: css('--surface'), 'stroke-width': 2 }, s);
+      var ov = el('rect', { x: ml, y: mt, width: W - ml - mr, height: H - mt - mb, fill: 'transparent', style: 'cursor:crosshair' }, s);
+      ov.addEventListener('mousemove', function (ev) {
+        var r = c.getBoundingClientRect(), x = (ev.clientX - r.left) * W / r.width;
+        var e = Math.min(1, Math.max(0, (x - ml) / (W - ml - mr))), q = curve[Math.round(e * 40)];
+        showTip(c, X(q.eta), Y(Math.max(q.outN, q.massN)), '\u03b7 = ' + q.eta.toFixed(2) + '<br>output error \u00d7' + q.outN.toFixed(2) + '<br>page-mass error \u00d7' + q.massN.toFixed(2), W);
+      });
+      ov.addEventListener('mouseleave', hideTip);
+      ov.addEventListener('click', function (ev) {
+        var r = c.getBoundingClientRect(), x = (ev.clientX - r.left) * W / r.width;
+        etaIn.value = Math.min(1, Math.max(0, (x - ml) / (W - ml - mr))).toFixed(2); updatePG(false);
+      });
+    }
+    function updatePG(recompute) {
+      document.getElementById('pg-eta-out').textContent = (+etaIn.value).toFixed(2);
+      document.getElementById('pg-scale-out').textContent = (+scaleIn.value).toFixed(2);
+      if (recompute) computeCurve();
+      drawKeys(); drawCurve();
+      var p = curve[Math.round(+etaIn.value * 40)];
+      document.getElementById('pg-readout').textContent =
+        'At \u03b7 = ' + (+etaIn.value).toFixed(2) + ', the attention-output error is ' + (100 * (1 - p.outN)).toFixed(0).replace('-0', '0') +
+        '% ' + (p.outN <= 1 ? 'lower' : 'higher') + ' than with key PCA, and the page-mass error is \u00d7' + p.massN.toFixed(2) +
+        '. The closed-form rule, fitted only from the errors at \u03b7 = 0 and \u03b7 = 1, is marked on the right.';
+    }
+    etaIn.addEventListener('input', function () { updatePG(false); });
+    scaleIn.addEventListener('input', function () { updatePG(true); });
+    document.getElementById('pg-new').addEventListener('click', function () { newPage(); updatePG(true); });
+    document.getElementById('pg-rule').addEventListener('click', function () { etaIn.value = ruleEta.toFixed(2); updatePG(false); });
+    newPage(); computeCurve(); updatePG(false);
+    redraws.push(function () { updatePG(false); });
+
+    /* ---------- memory calculator ---------- */
+    function fmtBytes(b) { return b >= 1073741824 ? (b / 1073741824).toFixed(2) + ' GB' : (b / 1048576).toFixed(0) + ' MB'; }
+    function updateMem() {
+      var parts = document.getElementById('mc-model').value.split(','), Lr = +parts[0], H = +parts[1];
+      var T = Math.pow(2, +document.getElementById('mc-ctx').value), m = 32, d = 128;
+      var r = +document.getElementById('mc-r').value, rv = +document.getElementById('mc-rv').value;
+      var pages = Math.ceil(T / m), unit = Lr * H * pages;
+      var full = unit * 2 * m * d * 2, kb = (d * r + m * r + d) * 2, vb = (d * rv + m * rv + d) * 2, oval = unit * (kb + vb);
+      document.getElementById('mc-ctx-out').textContent = (T / 1024) + 'K';
+      document.getElementById('mc-full').textContent = fmtBytes(full);
+      document.getElementById('mc-oval').textContent = fmtBytes(oval);
+      var sh = oval / full;
+      document.getElementById('mc-share').textContent = (100 * sh).toFixed(0) + '%';
+      document.getElementById('mc-oval-bar').style.width = Math.min(100, 100 * sh) + '%';
+      document.getElementById('mc-split').textContent = 'keys ' + (100 * kb / (m * d * 2)).toFixed(0) + '% of exact keys, values ' + (100 * vb / (m * d * 2)).toFixed(0) + '% of exact values';
+    }
+    ['mc-model', 'mc-ctx', 'mc-r', 'mc-rv'].forEach(function (id) { document.getElementById(id).addEventListener('input', updateMem); });
+    updateMem();
+
+    /* ---------- reasoning chart ---------- */
+    var METHODS = ['RazorAttention', 'RaaS', 'Quest', 'ArkVale', 'ShadowKV', 'InfiniGen', 'FreeKV', 'OVAL'];
+    var RS = { // [MATH500, AIME24, GPQA, Average]; each: [FullKV, ...methods]
+      llama8: { name: 'R1-Distill Llama-8B', se: [0.8, 1.4, 1.1, 0.5], d: [
+        [67.25, 60.50, 62.50, 62.00, 62.50, 60.25, 66.50, 66.75, 67.25],
+        [47.08, 30.00, 36.25, 44.17, 46.67, 36.50, 45.83, 47.50, 47.50],
+        [39.75, 34.25, 33.50, 37.25, 39.75, 36.25, 27.50, 41.25, 44.00],
+        [51.36, 41.58, 44.08, 47.81, 49.64, 44.33, 46.61, 51.83, 52.92]] },
+      qwen7: { name: 'R1-Distill Qwen-7B', se: [0.5, 1.3, 1.2, 0.6], d: [
+        [71.75, 66.75, 67.00, 68.00, 68.25, 64.75, 70.00, 70.00, 71.75],
+        [56.66, 35.42, 42.92, 47.50, 47.92, 43.75, 43.34, 52.92, 47.92],
+        [35.75, 32.50, 33.25, 38.75, 34.25, 33.50, 35.50, 39.50, 39.50],
+        [54.72, 44.89, 47.72, 51.42, 50.14, 47.33, 49.61, 54.14, 53.06]] },
+      qwen14: { name: 'R1-Distill Qwen-14B', se: [0.7, 1.1, 0.9, 0.5], d: [
+        [70.25, 59.75, 64.75, 67.25, 66.25, 65.00, 67.00, 67.50, 69.25],
+        [66.25, 32.50, 48.75, 58.33, 61.25, 57.25, 60.00, 64.17, 65.42],
+        [53.25, 38.50, 44.25, 51.25, 53.75, 51.75, 38.00, 56.00, 57.50],
+        [63.25, 43.58, 52.58, 58.94, 60.42, 58.00, 55.00, 62.56, 64.06]] }
+    };
+    var TASKS = ['MATH500', 'AIME24', 'GPQA', 'Average'];
+    var rsModel = segGroup('rs-model', drawRS), rsTask = segGroup('rs-task', drawRS);
+    function drawRS() {
+      var m = RS[rsModel()], ti = +rsTask(), row = m.d[ti], full = row[0], se = m.se[ti];
+      var W = 760, rowH = 30, mt = 26, mb = 34, ml = 120, mr = 70, H = mt + mb + rowH * METHODS.length;
+      var c = document.getElementById('rs-chart'), s = svg(c, W, H);
+      var vals = row.slice(1), lo = Math.floor((Math.min.apply(null, vals) - 3) / 5) * 5, hi = Math.ceil((Math.max.apply(null, row) + se + 2) / 5) * 5;
+      function X(v) { return ml + (v - lo) / (hi - lo) * (W - ml - mr); }
+      for (var g = lo; g <= hi; g += 5) {
+        el('line', { x1: X(g), x2: X(g), y1: mt, y2: H - mb, class: 'gridline' }, s);
+        el('text', { x: X(g), y: H - mb + 18, 'text-anchor': 'middle' }, s, g);
+      }
+      el('text', { x: W - mr, y: H - 4, 'text-anchor': 'end' }, s, 'avg@8 (%)');
+      el('line', { x1: X(full), x2: X(full), y1: mt - 6, y2: H - mb, stroke: css('--steel'), 'stroke-width': 2, 'stroke-dasharray': '5 4' }, s);
+      el('text', { x: X(full), y: mt - 12, 'text-anchor': 'middle', class: 'lbl' }, s, 'FullKV ' + full.toFixed(2));
+      var bestBase = Math.max.apply(null, vals.slice(0, -1));
+      METHODS.forEach(function (name, i) {
+        var v = vals[i], y = mt + rowH * i + rowH / 2, ours = name === 'OVAL';
+        el('text', { x: ml - 10, y: y + 4, 'text-anchor': 'end', class: ours ? 'lbl' : '', 'font-weight': ours ? 600 : 400 }, s, name);
+        el('line', { x1: X(lo), x2: X(v), y1: y, y2: y, stroke: css('--grid'), 'stroke-width': 2 }, s);
+        if (ours) {
+          el('line', { x1: X(v - se), x2: X(v + se), y1: y, y2: y, stroke: css('--accent'), 'stroke-width': 2 }, s);
+          el('line', { x1: X(v - se), x2: X(v - se), y1: y - 5, y2: y + 5, stroke: css('--accent'), 'stroke-width': 2 }, s);
+          el('line', { x1: X(v + se), x2: X(v + se), y1: y - 5, y2: y + 5, stroke: css('--accent'), 'stroke-width': 2 }, s);
+        }
+        el('circle', { cx: X(v), cy: y, r: ours ? 7 : 5.5, fill: ours ? css('--accent') : css('--neutral'), stroke: css('--surface'), 'stroke-width': 2 }, s);
+        if (ours || v === bestBase) el('text', { x: X(v + (ours ? se : 0)) + 10, y: y + 4, class: 'lbl' }, s, v.toFixed(2));
+        var hit = el('rect', { x: 0, y: y - rowH / 2, width: W, height: rowH, fill: 'transparent' }, s);
+        hit.addEventListener('mouseenter', function () {
+          showTip(c, X(v), y - 6, '<strong>' + name + '</strong> &middot; ' + TASKS[ti] + '<br>' + v.toFixed(2) + (ours ? ' &plusmn; ' + se : '') + ' avg@8 &middot; ' + (v - full >= 0 ? '+' : '') + (v - full).toFixed(2) + ' vs FullKV', W);
         });
+        hit.addEventListener('mouseleave', hideTip);
       });
-    })();
+    }
+    drawRS(); redraws.push(drawRS);
+
+    /* ---------- video chart ---------- */
+    // [name, group, stored Q, stored L, read Q, read L, vmme Q, vmme L, lvb Q, lvb L]
+    var VD = [
+      ['FullKV', 'full', 100, 100, 101.0, 104.8, 63.70, 62.89, 41.25, 41.64],
+      ['FullKV (N/2 frames)', 'prune', 50.5, 50.6, 51.0, 53.0, 61.67, 60.85, 38.41, 39.38],
+      ['VisionZip 50%', 'prune', 50.5, 52.3, 51.0, 54.8, 62.93, 63.44, 39.90, 41.51],
+      ['InfiniPot-V 50%', 'prune', 50.5, 52.3, 51.0, 54.8, 62.78, 62.07, 40.41, 41.64],
+      ['VisionZip 25%', 'prune', 25.7, 28.5, 26.0, 29.8, 61.78, 61.11, 38.48, 40.35],
+      ['InfiniPot-V', 'read2k', 16.4, 19.5, 16.6, 20.5, 58.63, 58.56, 36.60, 38.99],
+      ['ReKV', 'read2k', 100.1, 100.2, 14.8, 15.0, 59.85, 59.70, 37.38, 39.70],
+      ['Quest', 'read2k', 103.0, 103.0, 15.6, 15.2, 63.04, 61.81, 38.99, 41.32],
+      ['FreeKV', 'read2k', 103.0, 103.0, 15.6, 15.2, 62.52, 61.44, 38.48, 42.16],
+      ['OVAL', 'ours', 53.1, 53.0, 15.6, 15.2, 61.93, 61.37, 39.70, 40.87]
+    ];
+    var vdBench = segGroup('vd-bench', drawVD), vdModel = segGroup('vd-model', drawVD);
+    function drawVD() {
+      var b = vdBench(), mi = +vdModel(), col = (b === 'vmme' ? 6 : 8) + mi;
+      var W = 760, H = 380, ml = 50, mr = 24, mt = 16, mb = 44;
+      var c = document.getElementById('vd-chart'), s = svg(c, W, H);
+      var ys = VD.map(function (r) { return r[col]; }), ylo = Math.floor(Math.min.apply(null, ys) - 1), yhi = Math.ceil(Math.max.apply(null, ys) + 1);
+      function X(v) { return ml + v / 110 * (W - ml - mr); }
+      function Y(v) { return mt + (1 - (v - ylo) / (yhi - ylo)) * (H - mt - mb); }
+      for (var g = 0; g <= 100; g += 25) { el('line', { x1: X(g), x2: X(g), y1: mt, y2: H - mb, class: 'gridline' }, s); el('text', { x: X(g), y: H - mb + 18, 'text-anchor': 'middle' }, s, g + '%'); }
+      for (g = ylo; g <= yhi; g += (yhi - ylo > 6 ? 2 : 1)) { el('line', { x1: ml, x2: W - mr, y1: Y(g), y2: Y(g), class: 'gridline' }, s); el('text', { x: ml - 8, y: Y(g) + 4, 'text-anchor': 'end' }, s, g); }
+      el('text', { x: (ml + W - mr) / 2, y: H - 6, 'text-anchor': 'middle' }, s, 'stored KV cache (share of FullKV)');
+      el('text', { x: ml, y: mt - 4 }, s, 'accuracy (%)');
+      var labelled = { 'OVAL': 1, 'Quest': 1, 'FreeKV': 1, 'FullKV': 1, 'InfiniPot-V': 1, 'ReKV': 1 };
+      var order = VD.slice().sort(function (a, b2) { return (a[1] === 'ours') - (b2[1] === 'ours'); });
+      order.forEach(function (r) {
+        var x = X(r[2 + mi]), y = Y(r[col]), grp = r[1], col2 = grp === 'ours' ? css('--accent') : grp === 'full' ? css('--steel') : css('--neutral');
+        var hollow = grp === 'prune';
+        el('circle', { cx: x, cy: y, r: grp === 'ours' ? 8 : 6, fill: hollow ? css('--surface') : col2, stroke: hollow ? col2 : css('--surface'), 'stroke-width': hollow ? 2 : 2 }, s);
+        if (labelled[r[0]]) {
+          var dy = r[0] === 'FreeKV' ? 16 : (r[0] === 'Quest' ? -10 : -12), anchor = x > W - 120 ? 'end' : 'start', dx = anchor === 'end' ? -10 : 10;
+          el('text', { x: x + dx, y: y + dy + 4, 'text-anchor': anchor, class: 'lbl', 'font-weight': r[0] === 'OVAL' ? 600 : 400 }, s, r[0]);
+        }
+        var hit = el('circle', { cx: x, cy: y, r: 14, fill: 'transparent' }, s);
+        hit.addEventListener('mouseenter', function () {
+          showTip(c, x, y, '<strong>' + r[0] + '</strong><br>accuracy ' + r[col].toFixed(2) + '%<br>stored ' + r[2 + mi] + '% &middot; read ' + r[4 + mi] + '% per step', W);
+        });
+        hit.addEventListener('mouseleave', hideTip);
+      });
+    }
+    drawVD(); redraws.push(drawVD);
+
+    /* ---------- bibtex ---------- */
+    document.getElementById('copy-bib').addEventListener('click', function () {
+      var btn = this;
+      navigator.clipboard.writeText(document.getElementById('bib').textContent).then(function () {
+        btn.textContent = 'Copied'; setTimeout(function () { btn.textContent = 'Copy'; }, 1500);
+      });
+    });
+  })();
   </script>
 </body>
 </html>
