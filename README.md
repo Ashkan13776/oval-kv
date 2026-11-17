@@ -2,7 +2,7 @@
 
 **Ashkan Shahbazi, Chayne Thrash, Soheil Kolouri** · Vanderbilt University
 
-[Project page](https://ashkan-shahbazi.com/oval-kv/) · Paper: arXiv (2026)
+[Project page](http://ashkan-shahbazi.com/oval-kv/) · [Paper (arXiv:2610.06686)](https://arxiv.org/abs/2610.06686)
 
 Page-retrieval sparse attention (Quest, ArkVale, FreeKV, ...) reads only the
 top-scoring KV pages at each decoding step, but it still stores every page
@@ -199,7 +199,7 @@ and 47 ms per token on Qwen-7B and Llama-8B, 11% and 12% above FreeKV (36 and
 @article{shahbazi2026oval,
   title   = {{OVAL}: Output-Aware Local Page Bases for {KV} Cache Compression},
   author  = {Shahbazi, Ashkan and Thrash, Chayne and Kolouri, Soheil},
-  journal = {arXiv preprint},
+  journal = {arXiv preprint arXiv:2610.06686},
   year    = {2026}
 }
 ```
