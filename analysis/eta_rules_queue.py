@@ -5,7 +5,7 @@ identified by the content hash the harness puts in the output filename
 (`_etab<hash>`, see oval/page_basis.py::eta_table_hash).
 
 A seed is queued only if its .jsonl holds fewer records than the dataset has
-problems (the same per-seed completeness rule as scripts/oval_reasoning_sweep.sh),
+problems (the same per-seed completeness rule as experiments/reasoning/oval_reasoning_sweep.sh),
 so the builder is safe to re-run at any time. Order: datasets in the given
 order (MATH50 first: cheapest), then models, then seeds.
 

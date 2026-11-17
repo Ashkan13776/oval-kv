@@ -1,4 +1,4 @@
-"""Decode latency of eta rule 1 vs the other arms (scripts/latency_rule1.sh).
+"""Decode latency of eta rule 1 vs the other arms (experiments/latency/latency_rule1.sh).
 
 Reads results/eta_rules/latency/<model>_<arm>[_g<N>].json (per-step decode
 times of the timed round, written by FreeKV's source/pred.py --tbt_out) and
@@ -50,7 +50,7 @@ ap.add_argument("--dir", default=str(ROOT / "results/eta_rules/latency"))
 ap.add_argument("--suffix", default="", help="e.g. _g256 for a short MAX_GEN run")
 ap.add_argument("--smooth", type=int, default=256)
 ap.add_argument("--probs", type=int, nargs="+", default=[0, 8, 1],
-                help="AIME24 problems of the bottom row (scripts/latency_oracle_r1.sh)")
+                help="AIME24 problems of the bottom row (experiments/latency/latency_oracle_r1.sh)")
 ap.add_argument("--find_task", default="AIME24", help="task of the timed eta* search (time_rule1_find.py)")
 ap.add_argument("--out", default=str(ROOT / "results/eta_rules/figures/latency_rule1"))
 A = ap.parse_args()
@@ -139,7 +139,7 @@ ax1.legend(loc="center right", bbox_to_anchor=(1.0, 0.6), frameon=False); ax1.gr
 
 
 # ---- bottom row: OVAL oracle vs OVAL rule 1 on example sequences, per model
-# (scripts/latency_oracle_r1.sh). Every run stops at its natural EOS. Oracle =
+# (experiments/latency/latency_oracle_r1.sh). Every run stops at its natural EOS. Oracle =
 # sweep the 5 grid etas {0, .25, .5, .75, 1} on the sequence, i.e. 5 decodes;
 # eta does not change the per-step cost, so it is 5 x the measured eta=0
 # decode over the same number of steps as rule 1's sequence (an eta=0 run that

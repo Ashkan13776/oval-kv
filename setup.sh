@@ -92,6 +92,6 @@ Done. Next:
   export KV_ROOT="$KV_ROOT"
   export KV_PY=\$(which python)          # a torch>=2.8 / CUDA 12.8 env
   ./scripts/build_freekv.sh              # builds FreeKV's CUDA extension
-  ./scripts/ib_freekv.sh                 # InfiniteBench: FreeKV vs OVAL
+  ./experiments/long_context/ib_freekv.sh                 # InfiniteBench: FreeKV vs OVAL
   python analysis/all_tables.py          # score everything found on disk
 MSG

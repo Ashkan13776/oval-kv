@@ -10,7 +10,7 @@ problems on the difference. A gap is only real if the CI excludes 0.
 """
 import json, glob, os, re, sys
 import numpy as np
-D = os.environ.get("PARETO_CELLS", "results/pareto_cells")   # raw Pareto cells: see docs/pareto-baselines.md
+D = os.environ.get("PARETO_CELLS", "results/pareto_cells")   # raw Pareto cells: see docs/accuracy-vs-memory.md
 M, DS = "ds-r1-qwen-7b", "MATH50"
 PAT = r"\\boxed{((?:[^{}]|\{[^{}]*\})*)}"
 SPEC = {

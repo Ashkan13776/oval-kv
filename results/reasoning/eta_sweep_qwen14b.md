@@ -6,7 +6,7 @@ keys with the record, so the summary IS the key store rather than an addition
 to it. No dense control: the hand-off doc takes FullKV from the paper's column.
 
 Run on machine C (2 x RTX PRO 6000 Blackwell 97GB) via
-`scripts/supervise_sweep.sh`.
+`experiments/reasoning/supervise_sweep.sh`.
 
 | dataset | arm | k | avg@k | pass@k |
 |---|---|---|---|---|

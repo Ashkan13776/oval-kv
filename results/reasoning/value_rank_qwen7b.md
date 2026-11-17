@@ -7,9 +7,9 @@ page values (`--oval_vrank R --vbasis pca`), R in {32, 16, 8, 4, 1}. Sink and
 recent tokens exact. Protocol otherwise identical to every OVAL compression cell (B=2048,
 sink/recent 512, page 32, avgSM, spec_ret 2 / 0.9, T=0.6, top-p 0.95,
 max_gen 16384, bf16 records, seeds 42-49). Method and derivation:
-[`docs/3-value-compression.md`](../../docs/3-value-compression.md).
+[`docs/value-basis.md`](../../docs/value-basis.md).
 
-Reproduce: `scripts/value_rank_sweep.sh`; table: `python analysis/value_rank_table.py`.
+Reproduce: `experiments/ablations/value_rank_sweep.sh`; table: `python analysis/value_rank_table.py`.
 
 ```
 ds-r1-qwen-7b: keys rank 8 (scoring + reconstruction), values plain PCA; k = complete seeds

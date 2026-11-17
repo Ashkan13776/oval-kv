@@ -27,4 +27,4 @@ The best shared eta differs per task (0.75, 0.75, 0.25) and the spread
 within a task (2.5-7.5 points) is of the size of the per-seed noise. With
 qwen-14b (best 0.25, 1.0, 0.0; `eta_sweep_qwen14b.md`) this is the evidence
 that one global eta is not the right object, which motivated choosing eta
-per (layer, KV head) (`docs/4-per-head-eta.md`).
+per (layer, KV head) (`docs/eta-rule.md`).

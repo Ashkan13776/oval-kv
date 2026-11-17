@@ -30,7 +30,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from matplotlib.lines import Line2D
 
-D = os.environ.get("PARETO_CELLS", "results/pareto_cells") + "/ds-r1-qwen-7b"   # raw Pareto cells: see docs/pareto-baselines.md
+D = os.environ.get("PARETO_CELLS", "results/pareto_cells") + "/ds-r1-qwen-7b"   # raw Pareto cells: see docs/accuracy-vs-memory.md
 PAT = r"\\boxed{((?:[^{}]|\{[^{}]*\})*)}"
 
 # ---------------------------------------------------------------- memory model

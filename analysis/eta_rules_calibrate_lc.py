@@ -1,5 +1,5 @@
 """Rule-1 calibration for LONG CONTEXT (LongBench v2, LongGenBench), per (model,
-benchmark), per (layer, KV head). Piece 6: docs/6-long-context.md.
+benchmark), per (layer, KV head). Piece 6: docs/long-context.md.
 
 The measurement core is the reasoning calibration's, imported unchanged from
 analysis/eta_rules_calibrate.py (window_stats, Acc, rule1 via oval/eta_rules.py,

@@ -2,7 +2,7 @@
 
 Raw generations are not committed (293 MB for LongGenBench alone); this
 regenerates results/*_accuracy/oval_eta_sweep.json from a FreeKV checkout that
-has been run per scripts/.  LongBench v2 replicates their result.py exactly;
+has been run per experiments/.  LongBench v2 replicates their result.py exactly;
 LongGenBench reuses their parse_blocks / calculate_completion_rate, scoring the
 LAST 400 records because their append_to_json_file accumulates across runs.
 """

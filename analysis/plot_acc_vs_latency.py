@@ -5,7 +5,7 @@ The question: if OVAL is a little slower, is it a little stronger?
 Both axes are measured in OUR harness for the same model, Llama-3.1-8B:
 
   x = decode latency, ms/token, from the Fig-6 long-input scenario
-      (32K prompt / 512 generated, B=2048, batch 1)   results/fig6_latency/*.log
+      (32K prompt / 512 generated, B=2048, batch 1)   results/latency/fig6/*.log
   y = InfiniteBench accuracy, official scorers, 10 tasks
       $FREEKV_DIR/accuracy/eval/InfiniteBench/
 
@@ -15,7 +15,7 @@ in. Arms with only one coordinate are reported as such rather than guessed at.
 
 kv_retrieval is EXCLUDED from the mean: FullKV scores 0.0 on it with degenerate
 output on this model, so the task has no headroom and cannot rank selection
-quality (archive/locks_reproduction/finding-kv-retr.md).
+quality.
 """
 import glob
 import json
@@ -33,7 +33,7 @@ from paths import ROOT, FREEKV, use_infinitebench_scorers
 use_infinitebench_scorers()
 from compute_scores import get_score_one  # noqa: E402
 
-FIG6 = ROOT / "results/fig6_latency"
+FIG6 = ROOT / "results/latency/fig6"
 # Two roots: runs predating the --out_root_dir fix landed in
 # results/, later ones in res/. Scan both or half the arms vanish.
 from paths import IB_DIRS as IB_ROOTS

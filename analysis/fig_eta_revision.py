@@ -1,7 +1,7 @@
 """Block A5 figures for the supplementary (no GPU). Each figure: vector PDF + the CSV behind it.
 
 All figures are in the OVAL setting (rank-8 keys, rank-16 values) once
-results/revision/A/grid_vr16/ exists; until then F2/F3 fall back to value rank 8
+results/ablations/A/grid_vr16/ exists; until then F2/F3 fall back to value rank 8
 and say so in the axis title.
 
 F1  eta_h per (layer, KV head) for every model x task: one figure, rows = models,
@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "results/revision/A/figures"; OUT.mkdir(parents=True, exist_ok=True)
+OUT = ROOT / "results/ablations/A/figures"; OUT.mkdir(parents=True, exist_ok=True)
 TASKS = ["MATH50", "AIME24", "GPQA50c"]
 MODELS = ["ds-r1-qwen-7b", "ds-r1-llama-8b", "ds-r1-qwen-14b"]
 NICE = {"ds-r1-qwen-7b": "R1-Distill Qwen-7B", "ds-r1-llama-8b": "R1-Distill Llama-8B",
@@ -48,7 +48,7 @@ plt.rcParams.update({
 
 def stats_path(m, t):
     """Prefer the OVAL-setting grid (rank-8 keys, rank-16 values) when it exists."""
-    g = ROOT / f"results/revision/A/grid_vr16/{m}_{t}.json"
+    g = ROOT / f"results/ablations/A/grid_vr16/{m}_{t}.json"
     if g.exists():
         st = json.load(open(g))
         if len(st["grid"]) == 21 and "regret" in st:
@@ -58,7 +58,7 @@ def stats_path(m, t):
 
 def deployed_tables():
     found = {}
-    for d in [ROOT / "results/eta_rules/vr16/tables", ROOT / "results/revision/A/calib_vr16/tables"]:
+    for d in [ROOT / "results/eta_rules/vr16/tables", ROOT / "results/ablations/A/calib_vr16/tables"]:
         if d.exists():
             for f in sorted(d.glob("*_r1.json")):
                 t = json.load(open(f)); found[(t["model"], t["task"])] = (np.array(t["eta"]), t["hash"])

@@ -7,7 +7,7 @@ additionally replaces the keys themselves with its record.
 """
 import json, glob, os, re, sys
 import numpy as np
-D = os.environ.get("PARETO_CELLS", "results/pareto_cells") + "/ds-r1-qwen-7b"   # raw Pareto cells: see docs/pareto-baselines.md
+D = os.environ.get("PARETO_CELLS", "results/pareto_cells") + "/ds-r1-qwen-7b"   # raw Pareto cells: see docs/accuracy-vs-memory.md
 PAT = r"\\boxed{((?:[^{}]|\{[^{}]*\})*)}"
 d, m, NP = 128, 32, 110
 B_K = d * m * 2            # exact keys per page

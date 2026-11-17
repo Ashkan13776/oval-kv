@@ -31,7 +31,7 @@ FK = FREEKV / "accuracy"
 from paths import IB_DIRS  # noqa: F811
 LB2_DIR = FK / "eval/LongBench2/results"
 SWEEP = ROOT / "results/sweep"
-FIG6 = ROOT / "results/fig6_latency"
+FIG6 = ROOT / "results/latency/fig6"
 
 IB_TASKS = [
     ("passkey", "passkey"), ("num-str", "number_string"),

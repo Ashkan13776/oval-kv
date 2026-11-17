@@ -1,7 +1,7 @@
 # Running the long-reasoning OVAL sweep on a second machine
 
 > **Historical.** This describes the keys-only eta-grid sweep. For the current
-> run (full pipeline) follow [5-full-pipeline.md](../5-full-pipeline.md); the
+> run (full pipeline) follow [long-reasoning.md](../long-reasoning.md); the
 > split-by-model rules below still apply.
 
 This splits the sweep by MODEL. Each model writes to its own directory under
@@ -74,7 +74,7 @@ export KV_PY=$(which python)          # a torch/CUDA env; see requirements.txt
                                       # installs the OVAL modules
 ./scripts/build_freekv.sh             # builds the CUDA extension
 
-MODEL=ds-r1-llama-8b ./scripts/oval_reasoning_sweep.sh
+MODEL=ds-r1-llama-8b ./experiments/reasoning/oval_reasoning_sweep.sh
 ```
 
 ## Machine C -- ds-r1-qwen-14b
@@ -82,7 +82,7 @@ MODEL=ds-r1-llama-8b ./scripts/oval_reasoning_sweep.sh
 Same command, different model:
 
 ```bash
-MODEL=ds-r1-qwen-14b ./scripts/oval_reasoning_sweep.sh
+MODEL=ds-r1-qwen-14b ./experiments/reasoning/oval_reasoning_sweep.sh
 ```
 
 **Run ONE cell per GPU at 14B, even if a second GPU is free.** Three cells
@@ -91,7 +91,7 @@ them while two 37GB cells were generating 16K-token traces at the same time.
 Re-run sequentially, all three finished first try with exit 0. Use `GPUS="0"`.
 Running two-up costs ~2.5% of cells and the sweep does NOT retry them -- it
 builds its queue once at startup, so a crash leaves that row at k=7 until a
-later launch picks it up. `scripts/finish_stuck_cells.sh` cleans them up.
+later launch picks it up; re-launching the sweep fills the missing seeds.
 
 **The 14B needs >=40GB per GPU.** Measured footprint on machine A was ~37GB
 per cell: ~28GB weights in bfloat16, ~6GB KV at the realised sequence length,
@@ -103,8 +103,8 @@ MATH50 finishes roughly twice as fast as the other two datasets, so if you
 want a complete dataset early, run it first:
 
 ```bash
-MODEL=ds-r1-qwen-14b DATASETS=MATH50 ./scripts/oval_reasoning_sweep.sh
-MODEL=ds-r1-qwen-14b ./scripts/oval_reasoning_sweep.sh           # the rest
+MODEL=ds-r1-qwen-14b DATASETS=MATH50 ./experiments/reasoning/oval_reasoning_sweep.sh
+MODEL=ds-r1-qwen-14b ./experiments/reasoning/oval_reasoning_sweep.sh           # the rest
 ```
 
 The second call skips everything the first finished.
@@ -117,15 +117,15 @@ Narrow any axis; the script skips whatever is already complete:
 # only the PUBLISHED eta* per cell. Cheapest useful run (24 cells),
 # but note it inherits the eta* we are trying to re-derive -- see the last
 # section. llama-8b: 0.25 / 0.5 / 0.75.  qwen-14b: 0.5 / 0.25 / 0.5.
-MODEL=ds-r1-llama-8b         DATASETS=MATH50  ETAS=0.25 ./scripts/oval_reasoning_sweep.sh
-MODEL=ds-r1-llama-8b         DATASETS=AIME24  ETAS=0.5  ./scripts/oval_reasoning_sweep.sh
-MODEL=ds-r1-llama-8b         DATASETS=GPQA50c ETAS=0.75 ./scripts/oval_reasoning_sweep.sh
+MODEL=ds-r1-llama-8b         DATASETS=MATH50  ETAS=0.25 ./experiments/reasoning/oval_reasoning_sweep.sh
+MODEL=ds-r1-llama-8b         DATASETS=AIME24  ETAS=0.5  ./experiments/reasoning/oval_reasoning_sweep.sh
+MODEL=ds-r1-llama-8b         DATASETS=GPQA50c ETAS=0.75 ./experiments/reasoning/oval_reasoning_sweep.sh
 
 # fewer seeds (k is however many you run)
-MODEL=<your model> SEEDS="42 43 44 45" ./scripts/oval_reasoning_sweep.sh
+MODEL=<your model> SEEDS="42 43 44 45" ./experiments/reasoning/oval_reasoning_sweep.sh
 
 # fewer GPUs
-MODEL=<your model> GPUS="0 1" ./scripts/oval_reasoning_sweep.sh
+MODEL=<your model> GPUS="0 1" ./experiments/reasoning/oval_reasoning_sweep.sh
 ```
 
 ## Things that will bite

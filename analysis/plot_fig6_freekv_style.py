@@ -15,7 +15,7 @@ Style is matched to exp_fig/efficiency.pdf, not approximated:
   * bold-italic NN.NNx speedup annotation with a double-headed arrow spanning
     ArkVale -> best method, as in theirs
 
-Data comes from results/fig6_latency/*.log (Avg TBT per decode step). Their
+Data comes from results/latency/fig6/*.log (Avg TBT per decode step). Their
 y-axis is total latency in seconds, so TBT is multiplied by the scenario's
 generated-token count: 512 for long-input, 16384 for long-generation.
 """
@@ -31,7 +31,7 @@ from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 
 from paths import ROOT
-FIG6 = os.path.join(str(ROOT), "results/fig6_latency")
+FIG6 = os.path.join(str(ROOT), "results/latency/fig6")
 OUT = os.path.join(FIG6, "fig6_freekv_style")
 
 # sampled from their efficiency.pdf

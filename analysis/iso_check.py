@@ -8,7 +8,7 @@ the page keys are replaced by their reconstruction (values exact, page-local sof
 basis is the optimum of the hybrid risk under the true query second moment, so err_iso / err_wht >= 1
 (up to estimation noise) and its size is the cost of assuming isotropy.
 
-usage: python iso_check.py --capdir ~/oval-kv/logs/eta_rules/capture --model ds-r1-qwen-7b --task MATH50
+usage: python iso_check.py --capdir $KV_ROOT/logs/eta_rules/capture --model ds-r1-qwen-7b --task MATH50
 """
 import argparse, glob, json, math, os, re
 import torch

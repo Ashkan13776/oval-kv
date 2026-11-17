@@ -37,7 +37,7 @@ eta is **per task**, at the value requested for this run:
 | AIME24 | 1.0 |
 | GPQA50c | 0.25 |
 
-Driver: `scripts/oval_recon_rank_sweep.sh` (`SCORE_RANK`, `RECON_RANKS`,
+Driver: `experiments/ablations/oval_recon_rank_sweep.sh` (`SCORE_RANK`, `RECON_RANKS`,
 `ETAMAP`). 120 cells, 132h on 4 x A6000.
 
 Two notes on the sweep itself. **rank 32 is clamped to `page_size-1` = 31**,
@@ -94,7 +94,7 @@ near it on AIME24.
 `max(8, r)`, so ranks 1, 4 and 8 occupy *identical* bytes (2816 B/page/kv head
 in bf16) and rank 16 costs more. Lowering the reconstruction rank buys no
 memory at all here -- only accuracy loss. The memory-saving configurations are
-the diagonal (r, r), which `scripts/oval_key_rank_grid.sh` covers.
+the diagonal (r, r), which `experiments/ablations/oval_key_rank_grid.sh` covers.
 
 **eta differs per task**, so absolute accuracy is not comparable across the
 three columns. The within-task rank curves are the result.
