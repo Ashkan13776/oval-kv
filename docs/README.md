@@ -1,53 +1,21 @@
-# OVAL documentation
+# Documentation
 
-OVAL is one method. It keeps a rank-r record of every KV page and uses it in
-four complementary ways, each tested on its own before they are combined:
+Notes that go deeper than the paper, by topic.
 
-```
- 1. retrieval          2. key compression      3. value compression     4. per-head eta
- score pages with   ->  rebuild the selected -> rebuild the selected -> choose eta per
- rank-8 key records     pages' keys from the    pages' values from      (layer, KV head)
-                        same records            rank-16 PCA records     with rule 1
-                                         \___________________________________/
-                                                          |
-                                      5. full pipeline: all four together
-```
+| doc | paper section | what |
+|---|---|---|
+| [retrieval.md](retrieval.md) | Sec. 3.1 | scoring pages with the rank-8 key basis (`--page_rep oval --oval_rank 8 --eta E`) |
+| [key-reconstruction.md](key-reconstruction.md) | Sec. 3.2 | rebuilding the selected pages' keys from the same basis (`--oval_recon`) |
+| [value-basis.md](value-basis.md) | Sec. 3.3 | rank-16 PCA value basis (`--oval_vrank 16 --vbasis pca`) |
+| [eta-rule.md](eta-rule.md) | Sec. 3.4 | the closed-form per-head eta rule and its calibration (`--eta_table`) |
+| [long-reasoning.md](long-reasoning.md) | Sec. 4.2 | the full pipeline on long reasoning, step by step |
+| [long-context.md](long-context.md) | Sec. 4.3 | the full pipeline on LongBench v2 and LongGenBench |
+| [accuracy-vs-memory.md](accuracy-vs-memory.md) | Fig. 2a, App. | the matched-budget comparison and the memory model |
+| [value-codec.md](value-codec.md) | App. | bytes of the value basis |
+| [harness/freekv-port.md](harness/freekv-port.md) | | how OVAL is built into the FreeKV harness |
+| [harness/speculative-retrieval.md](harness/speculative-retrieval.md) | | FreeKV's speculative retrieval, used by every reasoning cell |
+| [harness/parallel-runs.md](harness/parallel-runs.md) | | splitting a sweep across machines |
 
-| # | piece | doc | harness flags | state |
-|---|---|---|---|---|
-| 1 | retrieval | [1-retrieval.md](1-retrieval.md) | `--method spec_ret --page_rep oval --oval_rank 8 --eta E` | done: eta sweeps on 3 models, LongBench v2 / LongGenBench / InfiniteBench, latency, Pareto |
-| 2 | key compression | [2-key-compression.md](2-key-compression.md) | `--oval_recon` (`--oval_recon_rank R`) | done: rank 8 = exact keys (k = 8, qwen-7b) |
-| 3 | value compression | [3-value-compression.md](3-value-compression.md) | `--oval_vrank R --vbasis pca` | done: rank 16 and 8 = lossless (k = 8, qwen-7b) |
-| 4 | per-head eta | [4-per-head-eta.md](4-per-head-eta.md) | `--eta_table <json>` | done at value rank 8 (qwen-7b, llama-8b): rule 1 >= the hand-picked eta |
-| 5 | **full pipeline** | [5-full-pipeline.md](5-full-pipeline.md) | all of the above, values rank 16 | **to run** on long reasoning (one agent per model) |
-| 6 | long context | [6-long-context.md](6-long-context.md) | all of the above on LongBench v2 and LongGenBench (7B, 8B, 14B): keys rank 16, values rank 32, rule-1 eta per (model, benchmark) | done: [table](../results/long_context/table_kr16_vr32.md), at or near the paper's FreeKV / eta* columns |
-
-**Agents start at [agents/README.md](agents/README.md)**: survey the repo, confirm the
-configuration with the user, then run. One brief per agent.
-
-## Supporting docs
-
-| doc | what |
-|---|---|
-| [harness/freekv-port.md](harness/freekv-port.md) | how OVAL is built into the FreeKV harness |
-| [harness/speculative-retrieval.md](harness/speculative-retrieval.md) | FreeKV's spec_ret, used by every reasoning cell |
-| [harness/parallel-runs.md](harness/parallel-runs.md) | splitting a sweep across machines by model |
-| [pareto-baselines.md](pareto-baselines.md) | the 26-arm matched-budget comparison on MATH50 and the memory definition |
-
-## Where things are
-
-| | |
-|---|---|
-| `oval/` | the method (`page_basis.py`: records, scoring, value records, per-head eta tables; `eta_rules.py`: rule 1) |
-| `patches/freekv.patch` | our changes to the FreeKV harness, applied by `setup.sh` |
-| `scripts/` | experiment drivers, mapped to the pieces in [scripts/README.md](../scripts/README.md) |
-| `analysis/` | scoring, tables, figures (same map) |
-| `results/reasoning/` | every long-reasoning cell, with a guide to the filename tags ([README](../results/reasoning/README.md)) |
-| `results/eta_rules/` | rule-1 calibration stats, eta tables, figures, latency |
-| `archive/` | finished side studies kept for provenance: [eta rules 2-6](../archive/eta_rules_r2_r6/README.md), the [LOCKS reproduction notes](../archive/locks_reproduction/README.md) |
-
-## Terminology
-
-"OVAL" names the whole method; "OVAL key / value compression" or
-"reconstruction" names pieces 2 and 3. There is no separate "codec" method
-(an earlier name; any remaining occurrence is a mistake to fix).
+Video and robot experiments are documented in their drivers' docstrings
+([`experiments/video/`](../experiments/video), [`experiments/robot/`](../experiments/robot))
+and in [`results/video/REPORT_C.md`](../results/video/REPORT_C.md).

@@ -1,17 +1,19 @@
 # Results
 
-| folder / file | piece | what |
+Raw outputs behind the paper. Every scorer reads these files directly, so the
+tables are always recomputed from the per-question predictions.
+
+| folder | paper | what |
 |---|---|---|
-| [`reasoning/`](reasoning/README.md) | 1-5 | every long-reasoning cell (MATH50, AIME24, GPQA50c; R1-Qwen-7B, R1-Llama-8B, R1-Qwen-14B), with a guide to the filename tags and per-experiment summaries |
-| [`eta_rules/`](../docs/4-per-head-eta.md) | 4 | rule 1: calibration stats, per-head eta tables (`tables/`, values rank 8; `vr16/` for the full pipeline), `table.md`, figures, latency |
-| `fig6_latency/`, `lb2_latency/` | 1 | unedited stdout of the decode-latency runs |
-| `figures/` | 1 | the Pareto figure (`pareto_math50_b2048.*`) |
-| `paper_tables.md`, `all_tables.txt` | 1 | the numbers as reported in the paper; every completed run scored from disk (`analysis/all_tables.py`) |
+| [`reasoning/`](reasoning/README.md) | Tab. 1, Tab. 4, Fig. 2a | every long-reasoning cell, with a guide to the filename tags |
+| `long_context/` | Tab. 2 | LongBench v2 / LongGenBench predictions and per-head eta tables |
+| `eta_rules/` | Sec. 3.4, App. | rule-1 calibration statistics, per-head eta tables (`vr16/` is the paper setting), figures, latency |
+| `video/` | Tab. 3, Fig. 1b, Fig. 3, App. | Video-MME / LVBench / LIBERO runs (`runs/`), Watch-and-Do (`vla/`), tables, figures, LaTeX; `llava_runs/` and `llava_analysis/` hold the LLaVA-Video Video-MME runs and selection analyses; [REPORT_C.md](video/REPORT_C.md) |
+| `ablations/` | Tab. 4, App. | rule variants (A3), disjoint calibration (A1, A2), compression-only arm (B), equal-bytes study; [REPORT.md](ablations/REPORT.md) |
+| `latency/` | Fig. 2b,c | unedited stdout of the decode-latency runs (`fig6/`, `lb2/`) |
+| `figures/` | | figures produced by `analysis/` |
+| `paper_tables.md`, `all_tables.txt` | | earlier retrieval-only tables (exact keys and values) |
 
-Rules 2-6 for per-head eta are in `archive/eta_rules_r2_r6/`.
-
-The latency log **bodies** were produced before the method was renamed to
-OVAL, so their banners read `[locks] page_rep=locks ...`. That is the old
-spelling of today's `--page_rep oval`; the logs are left byte-for-byte as
-emitted rather than rewritten after the fact. File names use the current arm
-names (`oval0`, `oval50`, `oval100` for eta = 0, 0.5, 1.0).
+The latency log bodies predate the method's current name, so their banners
+read `[locks] page_rep=locks ...`, the old spelling of `--page_rep oval`. The
+logs are kept byte-for-byte as emitted.
