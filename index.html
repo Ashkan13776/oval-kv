@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>OVAL: Output-Aware Local Page Bases</title>
+  <meta name="description" content="OVAL stores each KV cache page only as output-aware low-rank bases that serve as both the retrieval index and the storage, so page retrieval shrinks the cache instead of growing it." />
+  <meta property="og:title" content="OVAL: Output-Aware Local Page Bases for KV Cache Compression" />
+  <meta property="og:description" content="Page retrieval whose index is also the storage: 53-66% of the full KV cache, on par with FullKV and exact-page retrieval." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://ashkan-shahbazi.com/oval-kv/assets/teaser.png" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧭</text></svg>" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]});"></script>
+
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f4f6f8;
+      --surface: #ffffff;
+      --ink: #18202c;
+      --muted: #586272;
+      --faint: #8a93a1;
+      --rule: #dce1e7;
+      --accent: #b45309;      /* OVAL orange, as in the paper figures */
+      --accent-soft: #fbefe3;
+      --wine: #8e2c43;
+      --steel: #2c6a8a;
+      --steel-soft: #e5eff5;
+      --serif: "Newsreader", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+      --sans: "Instrument Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+      --page: 980px;
+      --gutter: clamp(16px, 4vw, 40px);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        color-scheme: dark;
+        --paper: #11151b; --surface: #171c24; --ink: #e6e9ee; --muted: #a0a9b6;
+        --faint: #6f7987; --rule: #29303b; --accent: #f0a35e; --accent-soft: #2b2016;
+        --wine: #e78ea3; --steel: #80b8d5; --steel-soft: #16252e;
+      }
+    }
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --paper: #11151b; --surface: #171c24; --ink: #e6e9ee; --muted: #a0a9b6;
+      --faint: #6f7987; --rule: #29303b; --accent: #f0a35e; --accent-soft: #2b2016;
+      --wine: #e78ea3; --steel: #80b8d5; --steel-soft: #16252e;
+    }
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0; background: var(--paper); color: var(--ink);
+      font: 17px/1.6 var(--serif); overflow-x: hidden;
+    }
+    a { color: var(--steel); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+    .wrap { max-width: var(--page); margin: 0 auto; padding: 0 var(--gutter); }
+    header.hero { padding: 56px 0 28px; text-align: center; }
+    .hero h1 {
+      font-weight: 500; font-size: clamp(30px, 5vw, 46px); line-height: 1.15; margin: 0 0 6px;
+      letter-spacing: -0.01em;
+    }
+    .hero h1 .name { color: var(--accent); }
+    .hero .sub { font-size: clamp(18px, 2.6vw, 23px); color: var(--muted); margin: 0 0 22px; }
+    .authors { font: 500 17px/1.5 var(--sans); margin: 0; }
+    .authors a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--rule); }
+    .affil { font: 15px/1.5 var(--sans); color: var(--muted); margin: 2px 0 22px; }
+    .buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px; padding: 9px 18px; border-radius: 999px;
+      font: 500 15px/1 var(--sans); text-decoration: none; background: var(--ink); color: var(--paper);
+      border: 1px solid var(--ink);
+    }
+    .btn.ghost { background: transparent; color: var(--ink); border-color: var(--rule); }
+    .btn[aria-disabled="true"] { opacity: .55; pointer-events: none; }
+    .btn svg { width: 16px; height: 16px; fill: currentColor; }
+
+    section { padding: 26px 0; }
+    h2 {
+      font: 600 13px/1 var(--sans); letter-spacing: .12em; text-transform: uppercase;
+      color: var(--faint); margin: 0 0 14px;
+    }
+    h3 { font-weight: 500; font-size: 22px; margin: 26px 0 8px; }
+    p { margin: 0 0 14px; }
+    .lead { font-size: 20px; line-height: 1.55; }
+    .card {
+      background: var(--surface); border: 1px solid var(--rule); border-radius: 14px;
+      padding: clamp(14px, 3vw, 24px);
+    }
+    figure { margin: 0; }
+    figure img { width: 100%; height: auto; display: block; border-radius: 8px; background: #fff; }
+    figcaption { font: 14px/1.5 var(--sans); color: var(--muted); margin-top: 10px; }
+
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: 6px 0 0; padding: 0; list-style: none; }
+    .stats li { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 16px 18px; }
+    .stats .num { display: block; font: 500 34px/1.1 var(--serif); color: var(--accent); }
+    .stats .what { font: 14.5px/1.45 var(--sans); color: var(--muted); }
+
+    .steps { counter-reset: s; list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+    .steps li { counter-increment: s; position: relative; padding-left: 40px; }
+    .steps li::before {
+      content: counter(s); position: absolute; left: 0; top: 2px; width: 26px; height: 26px; border-radius: 50%;
+      background: var(--accent-soft); color: var(--accent); font: 600 14px/26px var(--sans); text-align: center;
+    }
+    .eq { overflow-x: auto; padding: 4px 0; }
+
+    .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    table { border-collapse: collapse; width: 100%; font: 14.5px/1.4 var(--sans); font-variant-numeric: tabular-nums; }
+    th, td { padding: 7px 10px; text-align: right; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+    th:first-child, td:first-child { text-align: left; }
+    thead th { color: var(--muted); font-weight: 500; }
+    tr.ours td { background: var(--accent-soft); font-weight: 600; }
+    tr.ref td { color: var(--muted); }
+    td.best { font-weight: 700; }
+    .note { font: 13.5px/1.5 var(--sans); color: var(--faint); margin-top: 8px; }
+    .two { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    @media (max-width: 760px) { .two { grid-template-columns: 1fr; } }
+
+    pre.bib {
+      background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 16px;
+      overflow-x: auto; font: 13.5px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; margin: 0;
+    }
+    .copy { float: right; font: 500 13px/1 var(--sans); background: none; border: 1px solid var(--rule); color: var(--muted); border-radius: 999px; padding: 6px 12px; cursor: pointer; }
+    footer { padding: 30px 0 50px; font: 14px/1.5 var(--sans); color: var(--faint); text-align: center; }
+    .theme-toggle { position: fixed; top: 14px; right: 14px; background: var(--surface); border: 1px solid var(--rule); color: var(--muted); border-radius: 999px; padding: 6px 12px; font: 500 13px/1 var(--sans); cursor: pointer; }
+  </style>
+</head>
+<body>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode">Theme</button>
+
+  <header class="hero">
+    <div class="wrap">
+      <h1><span class="name">OVAL</span>: Output-Aware Local Page Bases<br />for KV Cache Compression</h1>
+      <p class="authors">
+        <a href="https://ashkan-shahbazi.com/">Ashkan Shahbazi</a>,&nbsp;
+        Chayne Thrash,&nbsp;
+        Soheil Kolouri
+      </p>
+      <p class="affil">Vanderbilt University</p>
+      <div class="buttons">
+        <a class="btn" href="#" aria-disabled="true" id="paper-link">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h9l5 5v15H6zm8 1.5V8h4.5zM8 12h8v1.5H8zm0 3h8v1.5H8zm0 3h5v1.5H8z"/></svg>
+          Paper (arXiv, soon)
+        </a>
+        <a class="btn" href="https://github.com/Ashkan13776/oval-kv">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.37-3.87-1.37-.53-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.71 1.26 3.37.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.69 5.39-5.25 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z"/></svg>
+          Code
+        </a>
+        <a class="btn ghost" href="#bibtex">BibTeX</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section>
+      <figure class="card">
+        <img src="assets/teaser.png" alt="Left: page retrieval stores exact pages plus a key summary, while OVAL stores each page as an output-aware key basis and a value basis, scores pages from the key basis and rebuilds the selected ones. Right: OVAL on a cached LIBERO robot episode, selecting mostly the frames of the task that was asked about." />
+        <figcaption><strong>(a)</strong> Page retrieval (e.g. Quest, FreeKV) stores every exact page plus a key summary and loads the top-scoring pages. OVAL stores each page as two low-rank bases: an output-aware key basis, which is also the retrieval index, and a PCA value basis. The selected pages are rebuilt from the bases. <strong>(b)</strong> OVAL on a cached LIBERO robot episode: asked about the first task, it selects mostly that task's frames, and OpenVLA executes the answer successfully.</figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2>TL;DR</h2>
+      <p class="lead">Page-retrieval sparse attention reads only a few KV pages per step, but still stores every page exactly, plus a digest. OVAL makes the digest <em>be</em> the page: each page is kept only as low-rank bases that both score it and rebuild it, so retrieval shrinks the cache instead of growing it.</p>
+      <ul class="stats">
+        <li><span class="num">53&ndash;66%</span><span class="what">of the full KV cache stored, versus 101&ndash;103% for page-retrieval baselines</span></li>
+        <li><span class="num">8 / 9</span><span class="what">long-reasoning settings where OVAL is best or tied-best in avg@8 at the same attended budget</span></li>
+        <li><span class="num">0.25</span><span class="what">points from FullKV on MATH500 with 4-bit bases, at 41% of its memory</span></li>
+        <li><span class="num">&le;0.32</span><span class="what">points from exact-page retrieval on Video-MME and LVBench, storing 53% instead of 103%</span></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Abstract</h2>
+      <p>Long-context decoding, whether over long reasoning traces, long videos, or robot episodes, is increasingly limited by the memory of the key-value (KV) cache. Page-retrieval sparse attention makes each decoding step cheaper by attending only to the top-scoring KV pages. However, it still stores every page exactly, and adds a small digest per page for scoring, so the cache ends up slightly <em>larger</em> than the full cache.</p>
+      <p>We propose OVAL, which stores each page as a pair of output-aware low-rank bases that act as both the retrieval index and the storage. A key basis scores the page and rebuilds its keys when the page is selected, and a PCA basis rebuilds its values. The exact pages can then be dropped, and nothing extra is added to the cache.</p>
+      <p>The key idea is that the key basis should be output-aware. A low-rank error in the keys perturbs the attention output at first order, but perturbs the page mass that retrieval ranks only at second order in expectation. OVAL therefore builds the key basis from a mix of key geometry (key PCA) and the attention-output error, with a per-head mixing weight set in closed form.</p>
+      <p>At the same attended budget, OVAL is best or tied-best in eight of nine long-reasoning settings. It matches FullKV on MATH500 with 66% of its memory, is 1.25 points above the best baseline on AIME24 with 56%, and is on par with FullKV on LongBench v2. On Video-MME and LVBench, it is within 0.32 points of exact-page retrieval at the same read, while storing 53% of the full cache instead of 103%. Its savings also stack with quantization and token pruning: with 4-bit bases, it is within 0.25 points of FullKV at 41% of its memory.</p>
+    </section>
+
+    <section>
+      <h2>How it works</h2>
+      <div class="card">
+        <ol class="steps">
+          <li><strong>Build the bases once per page.</strong> When a page of \(m\) tokens is complete, OVAL centers its keys \(X\) and values \(Y\), and keeps a rank-\(r\) key basis and a rank-\(r_v\) PCA value basis. The exact keys and values are dropped.</li>
+          <li><strong>Make the key basis output-aware.</strong> The key basis spans the top-\(r\) eigenvectors of a mix of key energy and attention-output error, where \(G_h\) is the head's output projection metric:
+            <div class="eq">$$M_\eta=(1-\eta)\,\frac{X^\top X}{\operatorname{tr}(X^\top X)}+\eta\,\frac{X^\top Y G_h Y^\top X}{\operatorname{tr}(X^\top Y G_h Y^\top X)}.$$</div>
+            \(\eta=0\) is page-local key PCA; \(\eta=1\) keeps the directions that move the output most.</li>
+          <li><strong>Set \(\eta\) per head in closed form.</strong> Measure each head's output error at \(\eta=0\) and \(\eta=1\) on a few unlabeled calibration traces, and take the minimizer of the interpolated quadratic. No sweep and no labels; decode cost is unchanged.</li>
+          <li><strong>Score, select, rebuild.</strong> At each step, a page's score is the log attention mass of its reconstructed keys, at \(O(dr+mr)\) per page. Only the top \(n_p\) pages are rebuilt and attended, together with exact sink and recent tokens.</li>
+        </ol>
+      </div>
+    </section>
+
+    <section>
+      <h2>Results</h2>
+
+      <h3>Long reasoning</h3>
+      <p>DeepSeek-R1-Distill models on MATH500, AIME24 and GPQA, in FreeKV's exact setting and harness (avg@8, %, mean of the three tasks). Baselines and FullKV are as reported by FreeKV.</p>
+      <div class="card table-scroll">
+        <table>
+          <thead><tr><th>Model</th><th>FullKV</th><th>Razor</th><th>RaaS</th><th>Quest</th><th>ArkVale</th><th>ShadowKV</th><th>InfiniGen</th><th>FreeKV</th><th>OVAL</th></tr></thead>
+          <tbody>
+            <tr><td>R1-Distill Llama-8B</td><td>51.36</td><td>41.58</td><td>44.08</td><td>47.81</td><td>49.64</td><td>44.33</td><td>46.61</td><td>51.83</td><td class="best">52.92</td></tr>
+            <tr><td>R1-Distill Qwen-7B</td><td>54.72</td><td>44.89</td><td>47.72</td><td>51.42</td><td>50.14</td><td>47.33</td><td>49.61</td><td class="best">54.14</td><td>53.06</td></tr>
+            <tr><td>R1-Distill Qwen-14B</td><td>63.25</td><td>43.58</td><td>52.58</td><td>58.94</td><td>60.42</td><td>58.00</td><td>55.00</td><td>62.56</td><td class="best">64.06</td></tr>
+          </tbody>
+        </table>
+        <p class="note">Bold: best among the compressed methods (FullKV not ranked). Per-task numbers, pass@8 and standard errors are in the paper.</p>
+      </div>
+
+      <h3>Accuracy versus memory, and decode latency</h3>
+      <figure class="card">
+        <img src="assets/efficiency.png" alt="Three panels: accuracy versus retained KV memory on AIME24, mean decode latency, and per-token latency along a 16K-token generation." loading="lazy" />
+        <figcaption><strong>(a)</strong> AIME24 with R1-Distill Qwen-14B: OVAL stores 56% of FullKV's memory and is 1.25 points above FreeKV; with KIVI-style quantization, OVAL variants form the Pareto front. <strong>(b, c)</strong> Decode latency on a 16K-token generation in FreeKV's engine: 40 and 47 ms per token on Qwen-7B and Llama-8B, within 12% of FreeKV (36 and 42 ms) and 1.8&times; and 3.0&times; faster than ArkVale.</figcaption>
+      </figure>
+
+      <h3>Long context</h3>
+      <div class="card table-scroll">
+        <table>
+          <thead><tr><th>Model</th><th>FullKV</th><th>Quest</th><th>ShadowKV</th><th>FreeKV</th><th>OVAL</th></tr></thead>
+          <tbody>
+            <tr><td>Llama-3.1-8B Instruct</td><td>29.22</td><td>28.43</td><td>25.45</td><td>29.22</td><td class="best">30.02</td></tr>
+            <tr><td>Qwen2.5-7B Instruct</td><td>27.44</td><td>27.63</td><td>25.84</td><td>26.84</td><td class="best">29.82</td></tr>
+            <tr><td>Qwen2.5-14B Instruct</td><td>33.40</td><td>33.80</td><td>34.79</td><td>34.19</td><td class="best">34.99</td></tr>
+          </tbody>
+        </table>
+        <p class="note">LongBench v2 overall accuracy (%, 64K context, single run). All seven baselines and LongGenBench results are in the paper.</p>
+      </div>
+
+      <h3>Video and robot episodes</h3>
+      <p>64-frame videos (about 13K visual tokens) are cached before the question. Quest, FreeKV and OVAL all read 2048 tokens per step, but OVAL attends rebuilt pages and stores about half as much.</p>
+      <div class="card table-scroll">
+        <table>
+          <thead>
+            <tr><th rowspan="2">Method</th><th rowspan="2">Stored</th><th colspan="2" style="text-align:center">Video-MME</th><th colspan="2" style="text-align:center">LVBench</th><th colspan="2" style="text-align:center">Watch-and-Do</th></tr>
+            <tr><th>Qwen2.5-VL</th><th>LLaVA-Video</th><th>Qwen2.5-VL</th><th>LLaVA-Video</th><th>Qwen2.5-VL</th><th>LLaVA-Video</th></tr>
+          </thead>
+          <tbody>
+            <tr class="ref"><td>FullKV</td><td>100%</td><td>63.70</td><td>62.89</td><td>41.25</td><td>41.64</td><td>40.83</td><td>32.08</td></tr>
+            <tr><td>InfiniPot-V</td><td>16&ndash;20%</td><td>58.63</td><td>58.56</td><td>36.60</td><td>38.99</td><td>37.92</td><td>24.17</td></tr>
+            <tr><td>ReKV</td><td>100%</td><td>59.85</td><td>59.70</td><td>37.38</td><td>39.70</td><td>39.58</td><td>24.17</td></tr>
+            <tr><td>Quest</td><td>103%</td><td>63.04</td><td>61.81</td><td>38.99</td><td>41.32</td><td>42.08</td><td>34.58</td></tr>
+            <tr><td>FreeKV</td><td>103%</td><td>62.52</td><td>61.44</td><td>38.48</td><td>42.16</td><td>42.92</td><td>32.50</td></tr>
+            <tr class="ours"><td>OVAL</td><td>53%</td><td>61.93</td><td>61.37</td><td>39.70</td><td>40.87</td><td>42.50</td><td>30.83</td></tr>
+          </tbody>
+        </table>
+        <p class="note">Accuracy (%) on Video-MME and LVBench and OpenVLA task success (%) on LIBERO Watch-and-Do. Stored: share of FullKV's KV cache. On average OVAL is within 0.32 and 0.18 points of Quest and FreeKV, and both paired intervals contain zero.</p>
+      </div>
+      <figure class="card" style="margin-top:16px">
+        <img src="assets/vision_pareto.png" alt="Accuracy versus stored KV cache on Video-MME, LVBench and Watch-and-Do for both video LLMs." loading="lazy" />
+        <figcaption>Accuracy versus stored KV cache. Among methods that read about 2K tokens per step, OVAL is the only one below full storage within 1.8 points of FullKV.</figcaption>
+      </figure>
+
+      <h3>Composes with quantization</h3>
+      <div class="two">
+        <div class="card table-scroll">
+          <table>
+            <thead><tr><th>MATH500, Qwen-7B</th><th>Memory (KiB)</th><th>avg@8</th></tr></thead>
+            <tbody>
+              <tr class="ref"><td>FullKV</td><td>1873</td><td>71.75</td></tr>
+              <tr><td>FreeKV, FP16</td><td>1923</td><td>70.00</td></tr>
+              <tr><td>FreeKV, 4-bit</td><td>988</td><td>69.25</td></tr>
+              <tr class="ours"><td>OVAL, FP16</td><td>1237</td><td>71.75</td></tr>
+              <tr class="ours"><td>OVAL, 4-bit</td><td>776</td><td>71.50</td></tr>
+              <tr class="ours"><td>OVAL, 2-bit</td><td>691</td><td>70.75</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card table-scroll">
+          <table>
+            <thead><tr><th>AIME24, Qwen-14B</th><th>Memory (KiB)</th><th>avg@8</th></tr></thead>
+            <tbody>
+              <tr class="ref"><td>FullKV</td><td>5050</td><td>66.25</td></tr>
+              <tr><td>FreeKV, FP16</td><td>5200</td><td>64.17</td></tr>
+              <tr><td>FreeKV, 4-bit</td><td>2087</td><td>63.75</td></tr>
+              <tr class="ours"><td>OVAL, FP16</td><td>2830</td><td>65.42</td></tr>
+              <tr class="ours"><td>OVAL, 4-bit</td><td>1361</td><td>65.00</td></tr>
+              <tr class="ours"><td>OVAL, 2-bit</td><td>1090</td><td>64.58</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <p class="note">Stored KiB per KV head and layer, with KIVI-style quantization of OVAL's bases and coefficients. Quantization lowers the bits per element and OVAL the elements per page, so the savings multiply.</p>
+    </section>
+
+    <section id="bibtex">
+      <h2>BibTeX</h2>
+      <button class="copy" type="button" id="copy-bib">Copy</button>
+      <pre class="bib" id="bib">@article{shahbazi2026oval,
+  title   = {{OVAL}: Output-Aware Local Page Bases for {KV} Cache Compression},
+  author  = {Shahbazi, Ashkan and Thrash, Chayne and Kolouri, Soheil},
+  journal = {arXiv preprint},
+  year    = {2026}
+}</pre>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <a href="https://ashkan-shahbazi.com/">Ashkan Shahbazi</a> &middot; MINT Lab, Vanderbilt University &middot;
+      <a href="https://github.com/Ashkan13776/oval-kv">github.com/Ashkan13776/oval-kv</a>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      var root = document.documentElement;
+      try {
+        var t = localStorage.getItem('theme');
+        if (t === 'light' || t === 'dark') root.setAttribute('data-theme', t);
+      } catch (e) {}
+      document.getElementById('theme-toggle').addEventListener('click', function () {
+        var dark = root.getAttribute('data-theme') === 'dark' ||
+          (!root.getAttribute('data-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        var next = dark ? 'light' : 'dark';
+        root.setAttribute('data-theme', next);
+        try { localStorage.setItem('theme', next); } catch (e) {}
+      });
+      document.getElementById('copy-bib').addEventListener('click', function () {
+        var btn = this;
+        navigator.clipboard.writeText(document.getElementById('bib').textContent).then(function () {
+          btn.textContent = 'Copied';
+          setTimeout(function () { btn.textContent = 'Copy'; }, 1500);
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
